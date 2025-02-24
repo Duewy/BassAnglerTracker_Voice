@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">BassAnglerTracker</string>
+    <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and Ozs)</string>
+    <string name="addCatchBtn">Add a Catch</string>
+    <string name="timer_place_holder">Time Remaining</string>
+    <string name="tournament_activity_description">enter the weights of the catch and the app suggests the fish to cull and gives the total weight</string>
+    <string name="total_value">Total Weight</string>
+    <string name="save_catch">Save_Catch</string>
+    <string name="canam_Image">Canadian American Flag Image</string>
+    <string name="goto_Tournament_description">Goto_To_Tournament</string>
+    <string name="goto_DayCatch_description">Goto_To_DayCatch</string>
+    <string name="goto_SetUp_description">Goto_To_Set_Up</string>
+    <string name="setup_Events_page">Set_Up_the_days_Event</string>
+    <string name="goto_Catch_page">Enter_Catch_Page</string>
+    <string name="todays_Fishing_Log">Todays_Fishing_Log</string>
+    <string name="type_of_Day">Fun Day or Tournament</string>
+    <string name="days_End_time">End Time</string>
+    <string name="fun_Day">Fun Day</string>
+    <string name="tournament_Day">Tournament</string>
+    <string name="lbl_Type_of_Fishing_Day">Type of Fishing Day</string>
+    <string name="txtType_of_Measurement">Type of Measurement Units</string>
+
+    //species
+    <string-array name="species_list">
+        <item>Large Mouth</item>
+        <item>Small Mouth</item>
+        <item>Crappie</item>
+        <item>Pike</item>
+        <item>Perch</item>
+        <item>Walleye</item>
+        <item>Catfish</item>
+        <item>Panfish</item>
+    </string-array>
+
+    //species
+    <string-array name="dec_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+     </string-array>
+
+</resources>

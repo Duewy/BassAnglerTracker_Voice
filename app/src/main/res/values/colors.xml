@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="red">#FF0000</color>
+    <color name="lime">#00FF00</color>
+    <color name="blue">#0000FF</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="cyan_aqua">#00FFFF</color>
+    <color name="magenta_fuchsia">#FF00FF</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="grey">#808080</color>
+    <color name="maroon">#800000</color>
+    <color name="olive">#808000</color>
+    <color name="green">#008000</color>
+    <color name="purple">#800080</color>
+    <color name="teal">#008080</color>
+    <color name="navy">#000080</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+
+    <color name="primary">#0000CD</color>
+    <color name="primary_variant">#6A5ACD</color>
+    <color name="secondary">#4169E1</color>
+    <color name="secondary_variant">#41B4E1</color>
+
+            <!-- SoftLock Culling Clip Colors -->
+    <color name="clip_red">#D50019</color>
+    <color name="clip_yellow">#FEFE20</color>
+    <color name="clip_green">#00800D</color>
+    <color name="clip_blue">#00007F</color>
+    <color name="clip_white">#FDFDFD</color>
+    <color name="clip_orange">#FE671E</color>
+
+                     <!-- SoftLock Label colors-->
+    <color name="softlock_blue">#00007E</color>
+    <color name="softlock_green">#21CF33</color>
+    <!-- Logging Page colors-->
+    <color name="Log_red">#80D50019</color>
+    <color name="Log_yellow">#80FEFE20</color>
+    <color name="Log_green">#8000800D</color>
+    <color name="Log_blue">#8000007F</color>
+    <color name="Log_white">#85FDFDFD</color>
+    <color name="Log_orange">#80FE671E</color>
+
+</resources>

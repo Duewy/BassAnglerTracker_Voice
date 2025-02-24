@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#801976D2"
+    android:contentDescription="@string/tournament_activity_description"
+    tools:context="">
+
+    <ImageView
+        android:id="@+id/can_amIMG"
+        android:layout_width="97dp"
+        android:layout_height="81dp"
+        android:layout_marginTop="73dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/canam_Image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/menuBtn"
+        app:layout_constraintTop_toBottomOf="@+id/tableLayout"
+        app:srcCompat="@drawable/can_am_flag" />
+
+
+    <Button
+        android:id="@+id/btnSetUpTourney"
+        android:layout_width="184dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="16dp"
+        android:text="Go_To_SetUp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.572"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnSelectFishingEvent"
+        android:layout_width="222dp"
+        android:layout_height="75dp"
+        android:background="@color/softlock_blue"
+        android:gravity="center"
+        android:shadowColor="#8FC16D"
+        android:text="@string/addCatchBtn"
+        android:textColor="@color/clip_white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/btnSetUpTourney"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.207"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <TextClock
+        android:id="@+id/timeRemainingClock"
+        android:layout_width="131dp"
+        android:layout_height="81dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="28dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/timer_place_holder" />
+
+    <TextView
+        android:id="@+id/totalRealWeight"
+        android:layout_width="90dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="84dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:hint="15  Lbs"
+        android:textAlignment="gravity"
+        android:textColor="@color/black"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.42"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/totalDecWeight"
+        android:layout_width="90dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="84dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:hint=" 14 oz"
+        android:textAlignment="gravity"
+        android:textColor="@color/black"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/alarmTxtBox"
+        android:layout_width="53dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="350dp"
+        android:layout_marginTop="95dp"
+        android:layout_marginBottom="525dp"
+        android:background="#80C5D2E8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.195" />
+
+    <TextView
+        android:id="@+id/firstRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="200dp"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/secondRealWeight"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/secondRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/thirdRealWeight"
+        app:layout_constraintTop_toBottomOf="@+id/firstRealWeight" />
+
+    <TextView
+        android:id="@+id/thirdRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/fourthRealWeight"
+        app:layout_constraintTop_toBottomOf="@+id/secondRealWeight" />
+
+    <TextView
+        android:id="@+id/fourthRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/fifthRealWeight"
+        app:layout_constraintTop_toBottomOf="@+id/thirdRealWeight" />
+
+    <TextView
+        android:id="@+id/fifthRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/sixthRealWeight"
+        app:layout_constraintTop_toBottomOf="@+id/fourthRealWeight" />
+
+    <TextView
+        android:id="@+id/sixthRealWeight"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10px"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/fifthDecWeight"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fifthRealWeight" />
+
+    <TextView
+        android:id="@+id/firstDecWeight"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="200dp"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/secDecWeight"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/firstDecWeight" />
+
+    <TextView
+        android:id="@+id/thirdDecWeight"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/secDecWeight" />
+
+    <TextView
+        android:id="@+id/fourthDecWeight"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/thirdDecWeight" />
+
+    <TextView
+        android:id="@+id/fifthDecWeight"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10px"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fourthDecWeight" />
+
+    <TextView
+        android:id="@+id/sixthDecWeight"
+        android:layout_width="162dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="#80E89642"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fifthDecWeight" />
+
+    <TextView
+        android:id="@+id/total_weightView"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="@string/total_value"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tableLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tableLayout" />
+
+    <TableLayout
+        android:id="@+id/tableLayout"
+        android:layout_width="409dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="2dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/totalRealWeight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sixthDecWeight"
+        app:layout_constraintVertical_bias="0.491" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="400dp"
+        android:layout_height="110dp"
+        android:layout_marginStart="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/voice_controlled_culling_words" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
