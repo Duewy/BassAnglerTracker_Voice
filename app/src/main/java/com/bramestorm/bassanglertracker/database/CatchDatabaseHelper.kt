@@ -11,7 +11,7 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     companion object {
         private const val DATABASE_NAME = "catch_database.db"
-        private const val DATABASE_VERSION = 5 // 🔺 Incremented version to trigger schema update
+        private const val DATABASE_VERSION = 4 // 🔺 Incremented version to trigger schema update
         private const val TABLE_NAME = "catches"
         private const val COLUMN_ID = "id"
         private const val COLUMN_DATE_TIME = "date_time"
@@ -32,19 +32,19 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     override fun onCreate(db: SQLiteDatabase) {
         val createCatchesTable = """
-        CREATE TABLE $TABLE_NAME (
-            $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            $COLUMN_DATE_TIME TEXT NOT NULL,
-            $COLUMN_SPECIES TEXT NOT NULL,
-            $COLUMN_WEIGHT_LBS INTEGER,
-            $COLUMN_WEIGHT_OZ INTEGER,
-            $COLUMN_WEIGHT_DECIMAL REAL,
-            $COLUMN_LENGTH_A8TH INTEGER,
-            $COLUMN_LENGTH_INCHES INTEGER,
-            $COLUMN_LENGTH_DECIMAL REAL,
-            $COLUMN_CATCH_TYPE TEXT NOT NULL,
-            $COLUMN_MARKER_TYPE TEXT DEFAULT 'Unknown'  -- ✅ Fix: Ensures column always exists
-        )
+            CREATE TABLE $TABLE_NAME (
+        $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        $COLUMN_DATE_TIME TEXT NOT NULL,
+        $COLUMN_SPECIES TEXT NOT NULL,
+        $COLUMN_WEIGHT_LBS INTEGER,
+        $COLUMN_WEIGHT_OZ INTEGER,
+        $COLUMN_WEIGHT_DECIMAL REAL,
+        $COLUMN_LENGTH_A8TH INTEGER,
+        $COLUMN_LENGTH_INCHES INTEGER,
+        $COLUMN_LENGTH_DECIMAL REAL,
+        $COLUMN_CATCH_TYPE TEXT NOT NULL, -- Catch type column
+        $COLUMN_MARKER_TYPE TEXT  
+    )
         """.trimIndent()
         db.execSQL(createCatchesTable)
 
@@ -69,6 +69,7 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                 db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_A8TH INTEGER DEFAULT 0")
                 db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_INCHES INTEGER DEFAULT 0")
                 db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_DECIMAL REAL DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_CATCH_TYPE TEXT NOT NULL DEFAULT 'weight';")
                 db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_MARKER_TYPE TEXT DEFAULT 'Unknown'")
 
             } catch (e: Exception) {

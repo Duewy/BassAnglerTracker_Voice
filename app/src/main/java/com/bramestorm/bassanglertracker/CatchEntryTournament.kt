@@ -1,5 +1,6 @@
 package com.bramestorm.bassanglertracker
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -9,10 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CatchEntryTournament : AppCompatActivity() {
 
     private lateinit var btnTournamentCatch: Button
+    private lateinit var btnMenu:Button
     private lateinit var listViewTournamentCatches: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
 
@@ -30,6 +35,7 @@ class CatchEntryTournament : AppCompatActivity() {
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         listViewTournamentCatches = findViewById(R.id.listViewTournamentCatches)
+        btnMenu = findViewById((R.id.btnMenu))
 
         // Retrieve intent data safely
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
@@ -51,6 +57,12 @@ class CatchEntryTournament : AppCompatActivity() {
         // Show popup for weight entry when button is clicked
         btnTournamentCatch.setOnClickListener {
             showWeightPopup()
+        }
+
+        // Button to navigate back to the SetUp page
+        btnMenu.setOnClickListener {
+            val intent = Intent(this, SetUpActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -137,9 +149,8 @@ class CatchEntryTournament : AppCompatActivity() {
         listViewTournamentCatches.adapter = adapter
     }
 
-    private fun getCurrentDateTime(): String {
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        return current.format(formatter)
+    fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return sdf.format(Date())
     }
 }

@@ -105,28 +105,35 @@ class SetUpActivity : AppCompatActivity() {
         // ✅ Select Fishing Event (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
 
-            startActivity(Intent(this, CatchEntryTournament::class.java))
-
-            if (!isTournamentSelected) {
-                Toast.makeText(this, "Please select Tournament Mode first!", Toast.LENGTH_SHORT)
-                    .show()
-
+            // Determine next activity based on selections
+            val nextActivity = when {
+                isWeightSelected && isImperialSelected && isFunDaySelected -> CatchEntryLbsOzs::class.java
+                isWeightSelected && !isImperialSelected && isFunDaySelected -> CatchEntryKgs::class.java
+                !isWeightSelected && isImperialSelected && isFunDaySelected -> CatchEntryInches::class.java
+                !isWeightSelected && !isImperialSelected && isFunDaySelected -> CatchEntryMetric::class.java
+                else -> CatchEntryTournament::class.java // Default to Tournament Mode
             }
 
+            // If it's Tournament Mode, attach extra data
+            if (!isFunDaySelected) {
+                val numberOfCatches = if (tglCullingValue.isChecked) 5 else 4
+                val typeOfMarkers = if (tglColorLetter.isChecked) "Color" else "Number"
+                val selectedSpecies = spinnerTournamentSpecies.selectedItem?.toString() ?: "Unknown"
 
-            val numberOfCatches = if (tglCullingValue.isChecked) 5 else 4
-            val typeOfMarkers = if (tglColorLetter.isChecked) "Color" else "Number"
-            val selectedSpecies = spinnerTournamentSpecies.selectedItem?.toString() ?: "Unknown"
-
-            val intent = Intent(this, CatchEntryTournament::class.java).apply {
-                putExtra("NUMBER_OF_CATCHES", numberOfCatches)
-                putExtra("Color_Numbers", typeOfMarkers)
-                putExtra("TOURNAMENT_SPECIES", selectedSpecies)
-                putExtra("unitType", if (isWeightSelected) "weight" else "length")
-                putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
+                val intent = Intent(this, CatchEntryTournament::class.java).apply {
+                    putExtra("NUMBER_OF_CATCHES", numberOfCatches)
+                    putExtra("Color_Numbers", typeOfMarkers)
+                    putExtra("TOURNAMENT_SPECIES", selectedSpecies)
+                    putExtra("unitType", if (isWeightSelected) "weight" else "length")
+                    putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
+                }
+                startActivity(intent)
+            } else {
+                // Regular Fun Day Mode
+                startActivity(Intent(this, nextActivity))
             }
-            startActivity(intent)
         }
+
 
     }
 
