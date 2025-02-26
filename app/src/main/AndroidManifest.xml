@@ -28,6 +28,8 @@
         <activity android:name=".CatchEntryKgs"/>
         <activity android:name=".CatchEntryInches"/>
         <activity android:name=".CatchEntryMetric"/>
+        <activity android:name=".CatchEntryTournament"/>
+
 
     </application>
 

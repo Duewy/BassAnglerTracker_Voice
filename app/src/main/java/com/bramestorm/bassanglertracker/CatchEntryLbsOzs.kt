@@ -16,13 +16,19 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     private lateinit var ozSpinner: Spinner
     private lateinit var saveButton: Button
     private lateinit var listView: ListView
-    private lateinit var catchAdapter: ArrayAdapter<String>
+    private lateinit var catchAdapter: CatchItemAdapter
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_lbs_ozs)
+
+        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp3)
+        openSetUpActivity.setOnClickListener {
+            val intent = Intent(this,SetUpActivity::class.java)
+            startActivity(intent)
+        }
 
         speciesSpinner = findViewById(R.id.speciesSpinner)
         lbsSpinner = findViewById(R.id.lbsSpinner)
@@ -32,63 +38,72 @@ class CatchEntryLbsOzs : AppCompatActivity() {
 
         dbHelper = CatchDatabaseHelper(this)
 
-        catchAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchList.map { it.toString() })
+        // Use the custom adapter that directly references catchList.
+        catchAdapter = CatchItemAdapter(this, catchList)
         listView.adapter = catchAdapter
 
         loadCatches()
 
-        // Inches Spinner (Example: 1-50 inches)
+        // Setup spinner for pounds (0 to 50)
         val lbsList = (0..50).toList()
         val lbsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lbsList)
         lbsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         lbsSpinner.adapter = lbsAdapter
 
-// 8th Increments Spinner (0 to 7 for 1/8th increments)
-        val decList = (0..7).toList()
-        val decAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, decList)
-        decAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        ozSpinner.adapter = decAdapter
+        // Setup spinner for ounces (0 to 15)
+        val ozList = (0..15).toList()
+        val ozAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ozList)
+        ozAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        ozSpinner.adapter = ozAdapter
 
         saveButton.setOnClickListener {
-            val species = speciesSpinner.selectedItem.toString()
-            val weightLbs = lbsSpinner.selectedItem.toString().toInt()
-            val weightOz = ozSpinner.selectedItem.toString().toInt()
-            val weightDecimal = (weightLbs.toFloat() + (weightOz / 16f)) // ✅ Now everything is Float
-            val dateTime = getCurrentTimestamp()
+            try {
+                val species = speciesSpinner.selectedItem.toString()
+                val weightLbs = lbsSpinner.selectedItem.toString().toInt()
+                val weightOz = ozSpinner.selectedItem.toString().toInt()
+                val weightDecimal = weightLbs.toFloat() + (weightOz / 16f)
+                val dateTime = getCurrentTimestamp()
 
-            val newCatch = CatchItem(0, dateTime, species, weightLbs, weightOz, weightDecimal.toFloat())
-            dbHelper.insertCatch(dateTime, species, weightLbs, weightOz, weightDecimal.toFloat())
+                val newCatch = CatchItem(
+                    id = 0,
+                    dateTime = dateTime,
+                    species = species,
+                    weightLbs = weightLbs,
+                    weightOz = weightOz,
+                    weightDecimal = weightDecimal,
+                    lengthA8th = null,
+                    lengthInches = null,
+                    lengthDecimal = null,
+                    catchType = "weight_imperial"
+                )
+                dbHelper.insertCatch(newCatch)
+                // Add the new catch to our list
+                catchList.add(0, newCatch)
+                catchAdapter.notifyDataSetChanged()
+                Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
 
-            catchList.add(0, newCatch)
-            catchAdapter.notifyDataSetChanged()
-
-            Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
-
-            speciesSpinner.setSelection(0)
-            lbsSpinner.setSelection(0)
-            ozSpinner.setSelection(0)
+            // **** Reset Spinners to 0  *******************
+                speciesSpinner.setSelection(0)
+                lbsSpinner.setSelection(0)
+                ozSpinner.setSelection(0)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
+            }
         }
 
         listView.setOnItemClickListener { _, _, position, _ ->
             val selectedCatch = catchList[position]
             showEditDeleteDialog(selectedCatch)
         }
-
-        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp3)
-        openSetUpActivity.setOnClickListener {
-            val intent = Intent(this,SetUpActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     private fun loadCatches() {
         catchList.clear()
-        val fetchedCatches = dbHelper.getAllCatches()
-
+        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "weight_imperial" }
         if (fetchedCatches.isEmpty()) {
             Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
         }
-
         catchList.addAll(fetchedCatches)
         catchAdapter.notifyDataSetChanged()
     }

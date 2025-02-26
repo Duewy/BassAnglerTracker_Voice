@@ -18,7 +18,7 @@
         android:layout_marginTop="39dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log Inches"
+        android:text="Inches fishing log "
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -59,7 +59,7 @@
         android:id="@+id/inchesSpinner"
         android:layout_width="80dp"
         android:layout_height="50dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="15dp"
         app:layout_constraintStart_toEndOf="@id/lengthLabel"
         app:layout_constraintTop_toTopOf="@id/lengthLabel" />
 
@@ -67,7 +67,7 @@
         android:id="@+id/inchesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Inches"
+        android:text="8th Inch"
         android:textSize="16sp"
         app:layout_constraintTop_toTopOf="@id/inchesSpinner"
         app:layout_constraintStart_toEndOf="@id/inchesSpinner"
@@ -76,22 +76,12 @@
     <!-- 8th Inch Spinner -->
 
     <Spinner
-        android:id="@+id/a8thSpinner"
+        android:id="@+id/eightSpinner"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="10dp"
         app:layout_constraintStart_toEndOf="@id/inchesText"
         app:layout_constraintTop_toTopOf="@id/inchesSpinner" />
-
-    <TextView
-        android:id="@+id/a8thSpinner8thText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="8ths"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="@id/a8thSpinner"
-        app:layout_constraintStart_toEndOf="@id/a8thSpinner"
-        android:layout_marginStart="8dp"/>
 
     <!-- Species Spinner -->
     <Spinner

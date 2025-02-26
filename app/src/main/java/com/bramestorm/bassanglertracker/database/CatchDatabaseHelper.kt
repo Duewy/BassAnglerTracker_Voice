@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.database
 
 import android.content.ContentValues
+import android.util.Log
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -10,43 +11,85 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     companion object {
         private const val DATABASE_NAME = "catch_database.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 5 // 🔺 Incremented version to trigger schema update
         private const val TABLE_NAME = "catches"
         private const val COLUMN_ID = "id"
         private const val COLUMN_DATE_TIME = "date_time"
         private const val COLUMN_SPECIES = "species"
+        // Weight fields
         private const val COLUMN_WEIGHT_LBS = "weight_lbs"
         private const val COLUMN_WEIGHT_OZ = "weight_oz"
-        // Use REAL to store the decimal weight properly
-        private const val COLUMN_WEIGHT_DECIMAL = "weight"
+        private const val COLUMN_WEIGHT_DECIMAL = "weight_decimal"
+        // Length fields
+        private const val COLUMN_LENGTH_A8TH = "length_a8th"
+        private const val COLUMN_LENGTH_INCHES = "length_inches"
+        private const val COLUMN_LENGTH_DECIMAL = "length_decimal"
+        // Type indicator ("weight" or "length")
+        private const val COLUMN_CATCH_TYPE = "catch_type"
+        private const val COLUMN_MARKER_TYPE = "marker_type" // ✅ Stores Bass type
+
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        val createTableQuery = """
-            CREATE TABLE $TABLE_NAME (
-                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_DATE_TIME TEXT NOT NULL,
-                $COLUMN_SPECIES TEXT NOT NULL,
-                $COLUMN_WEIGHT_LBS INTEGER NOT NULL,
-                $COLUMN_WEIGHT_OZ INTEGER NOT NULL,
-                $COLUMN_WEIGHT_DECIMAL REAL NOT NULL
-            )
+        val createCatchesTable = """
+        CREATE TABLE $TABLE_NAME (
+            $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            $COLUMN_DATE_TIME TEXT NOT NULL,
+            $COLUMN_SPECIES TEXT NOT NULL,
+            $COLUMN_WEIGHT_LBS INTEGER,
+            $COLUMN_WEIGHT_OZ INTEGER,
+            $COLUMN_WEIGHT_DECIMAL REAL,
+            $COLUMN_LENGTH_A8TH INTEGER,
+            $COLUMN_LENGTH_INCHES INTEGER,
+            $COLUMN_LENGTH_DECIMAL REAL,
+            $COLUMN_CATCH_TYPE TEXT NOT NULL,
+            $COLUMN_MARKER_TYPE TEXT DEFAULT 'Unknown'  -- ✅ Fix: Ensures column always exists
+        )
         """.trimIndent()
-        db.execSQL(createTableQuery)
+        db.execSQL(createCatchesTable)
+
+        val createTournamentTable = """
+        CREATE TABLE IF NOT EXISTS tournament_catches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            marker_type TEXT NOT NULL,
+            catch_limit INTEGER NOT NULL,
+            unit_system TEXT NOT NULL,
+            culling_enabled INTEGER NOT NULL
+        )
+        """.trimIndent()
+        db.execSQL(createTournamentTable) // ✅ Fixed: Ensures tournament table exists
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
-        onCreate(db)
+        if (oldVersion < 4) {  // 🔺 Only update if upgrading from an older version
+            try {
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_WEIGHT_LBS INTEGER DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_WEIGHT_OZ INTEGER DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_WEIGHT_DECIMAL REAL DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_A8TH INTEGER DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_INCHES INTEGER DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_LENGTH_DECIMAL REAL DEFAULT 0")
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_MARKER_TYPE TEXT DEFAULT 'Unknown'")
+
+            } catch (e: Exception) {
+                Log.e("CatchDatabaseHelper", "Error upgrading database: ${e.message}")
+            }
+        }
     }
 
-    fun insertCatch(dateTime: String, species: String, weightLbs: Int, weightOz: Int, weightDecimal: Float) {
+
+    fun insertCatch(catch: CatchItem) {
         val values = ContentValues().apply {
-            put(COLUMN_DATE_TIME, dateTime)
-            put(COLUMN_SPECIES, species)
-            put(COLUMN_WEIGHT_LBS, weightLbs)
-            put(COLUMN_WEIGHT_OZ, weightOz)
-            put(COLUMN_WEIGHT_DECIMAL, weightDecimal)
+            put(COLUMN_DATE_TIME, catch.dateTime)
+            put(COLUMN_SPECIES, catch.species)
+            put(COLUMN_WEIGHT_LBS, catch.weightLbs)
+            put(COLUMN_WEIGHT_OZ, catch.weightOz)
+            put(COLUMN_WEIGHT_DECIMAL, catch.weightDecimal)
+            put(COLUMN_LENGTH_A8TH, catch.lengthA8th)
+            put(COLUMN_LENGTH_INCHES, catch.lengthInches)
+            put(COLUMN_LENGTH_DECIMAL, catch.lengthDecimal)
+            put(COLUMN_CATCH_TYPE, catch.catchType)
+            put(COLUMN_MARKER_TYPE, catch.markerType) // ✅ Store markerType
         }
         writableDatabase.insert(TABLE_NAME, null, values)
     }
@@ -63,7 +106,27 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
             val weightLbs = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_WEIGHT_LBS))
             val weightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_WEIGHT_OZ))
             val weightDecimal = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_WEIGHT_DECIMAL))
-            catches.add(CatchItem(id, dateTime, species, weightLbs, weightOz, weightDecimal))
+            val lengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LENGTH_A8TH))
+            val lengthInches = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LENGTH_INCHES))
+            val lengthDecimal = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_LENGTH_DECIMAL))
+            val catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE))
+            val markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)) ?: "Unknown"
+
+            catches.add(
+                CatchItem(
+                    id = id,
+                    dateTime = dateTime,
+                    species = species,
+                    weightLbs = weightLbs,
+                    weightOz = weightOz,
+                    weightDecimal = weightDecimal,
+                    lengthA8th = lengthA8th,
+                    lengthInches = lengthInches,
+                    lengthDecimal = lengthDecimal,
+                    catchType = catchType,
+                    markerType = markerType // ✅ Now markerType is properly retrieved
+                )
+            )
         }
         cursor.close()
         db.close()
@@ -74,5 +137,18 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         val db = writableDatabase
         db.delete(TABLE_NAME, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
+    }
+
+    fun insertTournamentCatch(markerType: String, catchLimit: Int, unitSystem: String, isCullingEnabled: Boolean): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_MARKER_TYPE, markerType) // ✅ Save Bass type (Large or Small Mouth)
+            put("catch_limit", catchLimit)
+            put("unit_system", unitSystem)
+            put("culling_enabled", if (isCullingEnabled) 1 else 0)
+        }
+        val result = db.insert("tournament_catches", null, values)
+        db.close()
+        return result != -1L
     }
 }

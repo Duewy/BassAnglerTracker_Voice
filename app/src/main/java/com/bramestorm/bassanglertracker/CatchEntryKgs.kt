@@ -3,129 +3,160 @@ package com.bramestorm.bassanglertracker
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.bramestorm.bassanglertracker.database.CatchDatabaseHelperKgs
+import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CatchEntryKgs : AppCompatActivity() {
 
     private lateinit var speciesSpinner: Spinner
-    private lateinit var kgSpinner: Spinner
-    private lateinit var decimalSpinner: Spinner
+    private lateinit var weightKgSpinner: Spinner      // Whole kg (0–9)
+    private lateinit var tenthSpinner: Spinner           // Tenths (0–9)
+    private lateinit var hundredthSpinner: Spinner       // Hundredths (0–9)
     private lateinit var saveButton: Button
     private lateinit var listView: ListView
-    private lateinit var dbHelper: CatchDatabaseHelperKgs
-    private lateinit var catchAdapter: ArrayAdapter<String>
+    private lateinit var setUpButton: Button
 
-    private val catchList = mutableListOf<CatchItemKgs>()  // Uses CatchItemKgs for KG entries
+    // Using a custom adapter that directly uses a mutable list of CatchItem objects.
+    private lateinit var catchAdapter: CatchItemAdapter
+    private val catchList = mutableListOf<CatchItem>()
+
+    private lateinit var dbHelper: CatchDatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Make sure the layout file name is exactly as used in your project.
         setContentView(R.layout.activity_catch_entry_kgs)
 
+        // Initialize views
         speciesSpinner = findViewById(R.id.speciesSpinner)
-        kgSpinner = findViewById(R.id.kgSpinner)
-        decimalSpinner = findViewById(R.id.decimalSpinner)
+        weightKgSpinner = findViewById(R.id.weightKgSpinner)
+        tenthSpinner = findViewById(R.id.decimalSpinner)
+        hundredthSpinner = findViewById(R.id.hundredthSpinner)
         saveButton = findViewById(R.id.saveCatchButton)
         listView = findViewById(R.id.simpleListView)
+        setUpButton = findViewById(R.id.btnSetUp3)
 
-        dbHelper = CatchDatabaseHelperKgs(this)
+        dbHelper = CatchDatabaseHelper(this)
 
-        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp3)
-        openSetUpActivity.setOnClickListener {
-            val intent = Intent(this,SetUpActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Populate Species Spinner
-        val speciesList = arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
-        val speciesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
+        // Set up species spinner using an array resource
+        val speciesAdapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.species_list, // Ensure this array resource exists in res/values/arrays.xml
+            android.R.layout.simple_spinner_item
+        )
         speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         speciesSpinner.adapter = speciesAdapter
 
-        // Populate KG Spinner (0-50 kg)
-        val kgList = (0..50).toList()
+        // Optional: add an onItemSelectedListener for debugging species selection
+        speciesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                Log.d("CatchEntryKgs", "Species selected: ${speciesSpinner.selectedItem}")
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Set up spinners for weight
+        val kgList = (0..9).toList()
         val kgAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, kgList)
         kgAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        kgSpinner.adapter = kgAdapter
+        weightKgSpinner.adapter = kgAdapter
 
-        // Populate Decimal Spinner (0.00 to 0.99)
-        val decimalList = (0..99).map { String.format(".%02d", it) } // Creates .00 to .99
-        val decimalAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, decimalList)
-        decimalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        decimalSpinner.adapter = decimalAdapter
+        val tenthList = (0..9).toList()
+        val tenthAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tenthList)
+        tenthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        tenthSpinner.adapter = tenthAdapter
 
-        // Setup ListView Adapter
-        catchAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchList.map { it.toString() })
+        val hundredthList = (0..9).toList()
+        val hundredthAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hundredthList)
+        hundredthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        hundredthSpinner.adapter = hundredthAdapter
+
+        // Use the custom adapter for the ListView that directly uses our mutable catchList.
+        catchAdapter = CatchItemAdapter(this, catchList)
         listView.adapter = catchAdapter
 
         loadCatches()
 
         saveButton.setOnClickListener {
-            saveCatch()
+            try {
+                val species = speciesSpinner.selectedItem.toString()
+                val wholeKg = weightKgSpinner.selectedItem.toString().toInt()
+                val tenth = tenthSpinner.selectedItem.toString().toInt()
+                val hundredth = hundredthSpinner.selectedItem.toString().toInt()
+                // Calculate final weight, e.g., 3 + 0.7 + 0.08 = 3.78 kg
+                val weightKg = wholeKg.toFloat() + (tenth / 10f) + (hundredth / 100f)
+                val dateTime = getCurrentTimestamp()
+
+                val newCatch = CatchItem(
+                    id = 0,
+                    dateTime = dateTime,
+                    species = species,
+                    weightLbs = null,
+                    weightOz = null,
+                    weightDecimal = weightKg,
+                    lengthA8th = null,
+                    lengthInches = null,
+                    lengthDecimal = null,
+                    catchType = "weight_metric"
+                )
+                dbHelper.insertCatch(newCatch)
+                catchList.add(0, newCatch)
+                catchAdapter.notifyDataSetChanged()
+
+                Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
+
+                // Reset spinners to first item (index 0)
+                speciesSpinner.setSelection(0)
+                weightKgSpinner.setSelection(0)
+                tenthSpinner.setSelection(0)
+                hundredthSpinner.setSelection(0)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
+            }
         }
 
         listView.setOnItemClickListener { _, _, position, _ ->
-            val selectedCatch = catchList[position]
-            showDeleteDialog(selectedCatch)
+            showEditDeleteDialog(catchList[position])
+        }
+
+        setUpButton.setOnClickListener {
+            startActivity(Intent(this, SetUpActivity::class.java))
         }
     }
 
     private fun loadCatches() {
         catchList.clear()
-        val todayDate = getCurrentDateOnly()
-        val fetchedCatches = dbHelper.getAllCatches().filter { it.dateTime.startsWith(todayDate) }
-
-        catchList.addAll(fetchedCatches)
-        catchAdapter.clear()
-        catchAdapter.addAll(fetchedCatches.map { "${it.species} - ${it.weightKgs} kg - ${it.dateTime}" })
-        catchAdapter.notifyDataSetChanged()
-    }
-
-    private fun saveCatch() {
-        val species = speciesSpinner.selectedItem?.toString() ?: ""
-        val weightKg = kgSpinner.selectedItem?.toString()?.toIntOrNull() ?: 0
-        val weightDecimal = decimalSpinner.selectedItem?.toString()?.replace(".", "")?.toFloatOrNull()?.div(100) ?: 0f
-        val weightTotal = weightKg + weightDecimal
-        val dateTime = getCurrentTimestamp()
-
-        if (species.isEmpty() || weightTotal == 0f) {
-            Toast.makeText(this, "Please enter a valid species and weight!", Toast.LENGTH_SHORT).show()
-            return
+        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "weight_metric" }
+        if (fetchedCatches.isEmpty()) {
+            Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
         }
-
-        dbHelper.insertCatch(dateTime, species, weightTotal.toDouble())
-        catchList.add(0, CatchItemKgs(0, dateTime, species, weightTotal.toDouble()))
+        catchList.addAll(fetchedCatches)
         catchAdapter.notifyDataSetChanged()
-
-        Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
-        speciesSpinner.setSelection(0)
-        kgSpinner.setSelection(0)
-        decimalSpinner.setSelection(0)
     }
 
-    private fun showDeleteDialog(catchItem: CatchItemKgs) {
+    private fun showEditDeleteDialog(catchItem: CatchItem) {
         AlertDialog.Builder(this)
-            .setTitle("Delete Catch")
-            .setMessage("Are you sure you want to delete this entry?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle("Edit or Delete")
+            .setMessage("Do you want to edit or delete this entry?")
+            .setPositiveButton("Edit") { _, _ ->
+                Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Delete") { _, _ ->
                 dbHelper.deleteCatch(catchItem.id)
                 loadCatches()
                 Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Cancel", null)
+            .setNeutralButton("Cancel", null)
             .show()
     }
 
     private fun getCurrentTimestamp(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        return sdf.format(Date())
-    }
-
-    private fun getCurrentDateOnly(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return sdf.format(Date())
     }
 }

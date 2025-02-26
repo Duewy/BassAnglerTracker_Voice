@@ -5,20 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#801976D2"
-    android:contentDescription="@string/tournament_activity_description"
-    tools:context="">
+    android:contentDescription="@string/tournament_activity_description">
 
-    <ImageView
-        android:id="@+id/can_amIMG"
-        android:layout_width="97dp"
-        android:layout_height="81dp"
-        android:layout_marginTop="73dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="16dp"
-        android:contentDescription="@string/canam_Image"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintWidth="wrap_content"
-        app:srcCompat="@drawable/can_am_flag" />
+
+
 
     <Button
         android:id="@+id/btnSetUp11"
@@ -32,7 +22,7 @@
         android:shadowColor="#8FC16D"
         android:text="@string/goto_SetUp_description"
         android:textColor="@color/clip_white"
-        android:textSize="20sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,11 +34,11 @@
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/vcc_app_icon" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/vcc_app_icon_lng" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

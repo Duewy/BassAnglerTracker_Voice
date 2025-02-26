@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:orientation="vertical"
+        android:background="@drawable/popup_background">
+
+        <TextView
+            android:id="@+id/txtWeightTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Fish Weight"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editWeightLbs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Lbs"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/editWeightOz"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Oz"
+                android:inputType="number" />
+        </LinearLayout>
+
+        <!-- Select Bass Type -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Large Mouth or Small Mouth Bass"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupBassType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioLargeMouth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Large Mouth"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/radioSmallMouth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Small Mouth" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnSaveWeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save" />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

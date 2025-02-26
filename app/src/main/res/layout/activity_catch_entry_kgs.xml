@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tensSpinner"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/Log_orange"
@@ -17,7 +17,7 @@
         android:layout_marginTop="39dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays_Fishing_Log_Kgs"
+        android:text="Kgs_Fishing_Log"
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -28,78 +28,88 @@
 
     <!-- btn Goto Set Up Page -->
 
-
-    <!-- Lbs Spinner -->
-
-
-    <!-- Species Spinner -->
     <Button
         android:id="@+id/btnSetUp3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
         android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/txtTodaysLog" />
 
-    <Spinner
-        android:id="@+id/speciesSpinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/saveCatchButton"
-        android:layout_marginStart="16dp" />
+
 
     <!-- Weight Label -->
 
-    <!-- KG Spinner -->
     <TextView
         android:id="@+id/weightLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="148dp"
-        android:text="Enter Weight:"
+        android:layout_marginTop="10dp"
+        android:text="Enter Weight: Kg, X.XX"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Spinner
-        android:id="@+id/kgSpinner"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@id/weightLabel"
-        app:layout_constraintTop_toTopOf="@id/weightLabel" />
-
-    <!-- Decimal Spinner -->
-    <TextView
-        android:id="@+id/kgText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
-        android:text="kg"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/kgSpinner"
-        app:layout_constraintTop_toTopOf="@id/kgSpinner" />
-
-    <Spinner
-        android:id="@+id/decimalSpinner"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        app:layout_constraintStart_toEndOf="@id/kgText"
-        app:layout_constraintTop_toTopOf="@id/kgSpinner" />
+        app:layout_constraintTop_toBottomOf="@+id/btnSetUp3"/>
 
     <TextView
         android:id="@+id/decimalText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=".00"
+        android:text="   dec"
         android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@id/weightLabel"
+        app:layout_constraintTop_toTopOf="@id/weightLabel" />
+
+      <!--KG  Spinner -->
+
+    <!-- tenth Spinner -->
+
+    <Spinner
+        android:id="@+id/weightKgSpinner"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/weightLabel"
+        app:layout_constraintTop_toBottomOf="@id/weightLabel" />
+
+    <Spinner
+        android:id="@+id/decimalSpinner"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toEndOf="@id/weightKgSpinner"
+        app:layout_constraintTop_toBottomOf="@id/weightLabel" />
+
+    <!-- Hundredth Spinner -->
+
+    <Spinner
+        android:id="@+id/hundredthSpinner"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
         app:layout_constraintStart_toEndOf="@id/decimalSpinner"
-        app:layout_constraintTop_toTopOf="@id/decimalSpinner" />
+        app:layout_constraintTop_toBottomOf="@id/weightLabel"
+        />
+
+
+
+    <!-- Species  Spinner -->
+
+    <Spinner
+        android:id="@+id/speciesSpinner"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="@color/clip_white"
+        android:entries="@array/species_list"
+        android:layout_marginStart="16dp"
+        android:spinnerMode="dropdown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveCatchButton" />
+
 
     <!-- Save Button -->
 
@@ -107,7 +117,7 @@
         android:id="@+id/saveCatchButton"
         android:layout_width="199dp"
         android:layout_height="53dp"
-        android:layout_marginTop="192dp"
+        android:layout_marginTop="200dp"
         android:text="@string/save_catch"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -122,9 +132,9 @@
         android:dividerHeight="1dp"
         android:scrollbars="vertical"
         android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@id/saveCatchButton"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/speciesSpinner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>                                            />
-
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
