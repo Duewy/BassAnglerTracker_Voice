@@ -7,6 +7,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatDialog
 
 class PopupWeightEntry(context: Context, private val onWeightEntered: (Int, Int, String) -> Unit) :
+
     AppCompatDialog(context) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +29,10 @@ class PopupWeightEntry(context: Context, private val onWeightEntered: (Int, Int,
                 return@setOnClickListener
             }
 
+            // ✅ Convert to total ounces for storage
+            val totalWeightOz = (weightLbs * 16) + weightOz
+
+
             if (weightLbs == 0 && weightOz == 0) {
                 Toast.makeText(context, "Enter a valid weight!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -39,8 +44,9 @@ class PopupWeightEntry(context: Context, private val onWeightEntered: (Int, Int,
                 else -> "Bass"
             }
 
-            // ✅ Send data back to the main activity
+            // ✅ Send weightLbs and weightOz separately
             onWeightEntered(weightLbs, weightOz, selectedBassType)
+
 
             dismiss()
         }

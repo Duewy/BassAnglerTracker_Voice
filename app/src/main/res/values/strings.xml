@@ -19,6 +19,7 @@
     <string name="tournament_Day">Tournament</string>
     <string name="lbl_Type_of_Fishing_Day">Type of Fishing Day</string>
     <string name="txtType_of_Measurement">Type of Measurement Units</string>
+    <string name="gps_usage_permission">Record GPS?</string>
 
     //species
     <string-array name="species_list">

@@ -29,7 +29,7 @@ class CatchEntryInches : AppCompatActivity() {
         speciesSpinner = findViewById(R.id.speciesSpinner)
         inchesSpinner = findViewById(R.id.inchesSpinner)
         eighthSpinner = findViewById(R.id.eightSpinner)
-         saveButton = findViewById(R.id.saveCatchButton)
+        saveButton = findViewById(R.id.saveCatchButton)
         listView = findViewById(R.id.simpleListView)
         setUpButton = findViewById(R.id.btnSetUpInches)
 
@@ -38,7 +38,7 @@ class CatchEntryInches : AppCompatActivity() {
         catchAdapter = CatchItemAdapter(this, catchList)
         listView.adapter = catchAdapter
 
-        // Load existing length (imperial) catches from the database
+        // Load existing catches
         loadCatches()
 
         // Setup spinner for inches (values 0 to 50)
@@ -59,24 +59,24 @@ class CatchEntryInches : AppCompatActivity() {
                 val species = speciesSpinner.selectedItem.toString()
                 val inches = inchesSpinner.selectedItem.toString().toInt()
                 val eighth = eighthSpinner.selectedItem.toString().toInt()
-                // Calculate the final length: inches plus fractional part (eighth/8)
-                val lengthDecimal = inches.toFloat() + (eighth / 8f)
+                val totalLength8ths = (inches * 8) + eighth // ✅ Store length as total 8ths
                 val dateTime = getCurrentTimestamp()
 
                 val newCatch = CatchItem(
                     id = 0,
                     dateTime = dateTime,
                     species = species,
-                    weightLbs = null,
-                    weightOz = null,
-                    weightDecimal = null,
-                    lengthA8th = eighth,
-                    lengthInches = inches,
-                    lengthDecimal = lengthDecimal,
-                    catchType = "lengthInches"
+                    totalWeightOz = null,
+                    totalLengthA8th = null,
+                    weightDecimalTenthKg = null,
+                    lengthDecimalTenthCm = null,
+                    catchType = "inches",
+                    markerType = "None",
+                    clipColor = "clip_grey"
                 )
 
-                // Insert the new catch into the database and update our list
+
+                // Insert the new catch into the database and update the list
                 dbHelper.insertCatch(newCatch)
                 catchList.add(0, newCatch)
                 catchAdapter.notifyDataSetChanged()
@@ -107,7 +107,7 @@ class CatchEntryInches : AppCompatActivity() {
 
     private fun loadCatches() {
         catchList.clear()
-        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "length_imperial" }
+        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "lengthInches" }
         if (fetchedCatches.isEmpty()) {
             Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
         }

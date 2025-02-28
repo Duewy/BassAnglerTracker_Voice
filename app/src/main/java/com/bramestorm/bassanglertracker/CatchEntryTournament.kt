@@ -2,17 +2,13 @@ package com.bramestorm.bassanglertracker
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.*
-import android.view.View
-import android.util.Log
-
 
 class CatchEntryTournament : AppCompatActivity() {
 
@@ -35,7 +31,6 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var totalRealWeight: TextView
     private lateinit var totalDecWeight: TextView
 
-    private lateinit var listViewTournamentCatches: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
 
     private var tournamentCatchLimit: Int = 4
@@ -63,16 +58,13 @@ class CatchEntryTournament : AppCompatActivity() {
         fifthDecWeight = findViewById(R.id.fifthDecWeight)
         sixthDecWeight = findViewById(R.id.sixthDecWeight)
 
-        totalRealWeight= findViewById(R.id.totalRealWeight)
-        totalDecWeight= findViewById(R.id.totalDecWeight)
+        totalRealWeight = findViewById(R.id.totalRealWeight)
+        totalDecWeight = findViewById(R.id.totalDecWeight)
 
-        // ✅ Now clear all TextViews
         clearTournamentTextViews()
 
-        // ✅ Initialize buttons and database
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
-        listViewTournamentCatches = findViewById(R.id.listViewTournamentCatches)
         btnMenu = findViewById(R.id.btnMenu)
 
         // ✅ Retrieve intent data safely
@@ -82,100 +74,55 @@ class CatchEntryTournament : AppCompatActivity() {
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
 
-        // ✅ Debugging: Show received values in Toast
-        Toast.makeText(
-            this,
-            "Catches: $tournamentCatchLimit, Species: $tournamentSpecies, Markers: $typeOfMarkers, Culling: $isCullingEnabled, Unit: $measurementSystem",
-            Toast.LENGTH_LONG
-        ).show()
-
-        // ✅ Load existing tournament catches
         updateTournamentList()
 
-        // ✅ Show popup for weight entry when button is clicked
         btnTournamentCatch.setOnClickListener {
             showWeightPopup()
         }
 
-        // ✅ Button to navigate back to the SetUp page
         btnMenu.setOnClickListener {
-            val intent = Intent(this, SetUpActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SetUpActivity::class.java))
         }
     }
 
-    // ✅ Clears all 12 weight TextViews and the TOTAL Weight
-    private fun clearTournamentTextViews() {
-        firstRealWeight.text = ""
-        secondRealWeight.text = ""
-        thirdRealWeight.text = ""
-        fourthRealWeight.text = ""
-        fifthRealWeight.text = ""
-        sixthRealWeight.text = ""
-
-        firstDecWeight.text = ""
-        secondDecWeight.text = ""
-        thirdDecWeight.text = ""
-        fourthDecWeight.text = ""
-        fifthDecWeight.text = ""
-        sixthDecWeight.text = ""
-
-        totalRealWeight.text= "0"
-        totalDecWeight.text= "0"
-    }
-
-    // ✅@@@@@@@@@@  Show the weight entry POPUP  @@@@@@@@@@@@@@@@@@@@@@@
-
     private fun showWeightPopup() {
         val popup = PopupWeightEntry(this) { weightLbs, weightOz, bassType ->
-            saveTournamentCatch(weightLbs, weightOz, bassType)
+            val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Convert to whole ounces
+            saveTournamentCatch(totalWeightOz, bassType)
         }
         popup.show()
     }
 
 
-    // ✅ Save tournament catch and update the list
-    private fun saveTournamentCatch(weightLbs: Int, weightOz: Int, bassType: String) {
+    private fun saveTournamentCatch(totalWeightOz: Int, bassType: String) {
+        val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
+
+        // Get the next color in sequence based on total stored catches
+        val existingCatches = dbHelper.getAllCatches().size
+        val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
+
         val catch = CatchItem(
-            id = 0, // Auto-increment ID
+            id = 0,
             dateTime = getCurrentDateTime(),
             species = tournamentSpecies,
-            weightLbs = weightLbs,
-            weightOz = weightOz,
-            weightDecimal = null,
-            lengthA8th = null,
-            lengthInches = null,
-            lengthDecimal = null,
+            totalWeightOz = totalWeightOz,
+            totalLengthA8th = null,
+            weightDecimalTenthKg = null,
+            lengthDecimalTenthCm = null,
             catchType = measurementSystem,
-            markerType = bassType
+            markerType = bassType,
+            clipColor = assignedColor
         )
 
         dbHelper.insertCatch(catch)
-
         Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
-
-        // ✅ Update the UI immediately
         updateTournamentList()
     }
 
 
-    // ✅ Update the tournament list and fill the text fields
-
-
     private fun updateTournamentList() {
         val allCatches = dbHelper.getAllCatches()
-
-        // ✅ Log if the database is retrieving anything
-        Log.d("TournamentDebug", "Total catches retrieved: ${allCatches.size}")
-
-        if (allCatches.isEmpty()) {
-            Log.d("TournamentDebug", "No catches found in the database!")
-            return  // Exit if no catches are found
-        }
-
-        val sortedCatches = allCatches.sortedByDescending {
-            (it.weightLbs ?: 0) * 16 + (it.weightOz ?: 0)
-        }
+        val sortedCatches = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
@@ -183,79 +130,105 @@ class CatchEntryTournament : AppCompatActivity() {
             sortedCatches
         }
 
-        // ✅ Log the catches retrieved from the database
-        for (catch in tournamentCatches) {
-            Log.d(
-                "TournamentDebug",
-                "Catch -> ${catch.weightLbs} lbs ${catch.weightOz} oz | Species: ${catch.species}"
-            )
-        }
+        val realWeights = listOf(
+            firstRealWeight, secondRealWeight, thirdRealWeight,
+            fourthRealWeight, fifthRealWeight, sixthRealWeight
+        )
 
-        // ✅ Populate the TextViews with the retrieved catches
-        val realWeights = listOf(firstRealWeight, secondRealWeight, thirdRealWeight,
-            fourthRealWeight, fifthRealWeight, sixthRealWeight)
-
-        val decWeights = listOf(firstDecWeight, secondDecWeight, thirdDecWeight,
-            fourthDecWeight, fifthDecWeight, sixthDecWeight)
+        val decWeights = listOf(
+            firstDecWeight, secondDecWeight, thirdDecWeight,
+            fourthDecWeight, fifthDecWeight, sixthDecWeight
+        )
 
         clearTournamentTextViews()
 
-        for (i in tournamentCatches.indices) {
-            realWeights[i].text = tournamentCatches[i].weightLbs.toString()
-            decWeights[i].text = tournamentCatches[i].weightOz.toString()
+        runOnUiThread {
+            for (i in tournamentCatches.indices) {
+                val totalWeightOz = tournamentCatches[i].totalWeightOz ?: 0
+                val weightLbs = totalWeightOz / 16
+                val weightOz = totalWeightOz % 16
+                val clipColorName = tournamentCatches[i].clipColor
 
-            // ✅ Log what is being updated in the UI
-            Log.d("TournamentDebug", "Updating TextView [$i]: ${tournamentCatches[i].weightLbs} lbs ${tournamentCatches[i].weightOz} oz")
+                // ✅ Debugging Log
+                println("DEBUG: Catch #$i -> Color: $clipColorName | Lbs: $weightLbs | Oz: $weightOz")
+
+                realWeights[i].text = weightLbs.toString()
+                decWeights[i].text = weightOz.toString()
+
+                // ✅ Apply color dynamically
+                val colorResId = resources.getIdentifier(clipColorName, "color", packageName)
+                if (colorResId != 0) {
+                    realWeights[i].setBackgroundResource(colorResId)
+                    decWeights[i].setBackgroundResource(colorResId)
+
+                    // ✅ Ensure text color is white for blue backgrounds
+                    if (clipColorName == "clip_blue") {
+                        realWeights[i].setTextColor(resources.getColor(R.color.clip_white, theme))
+                        decWeights[i].setTextColor(resources.getColor(R.color.clip_white, theme))
+                    } else {
+                        realWeights[i].setTextColor(resources.getColor(R.color.black, theme))
+                        decWeights[i].setTextColor(resources.getColor(R.color.black, theme))
+                    }
+                }
+
+                realWeights[i].invalidate()
+                decWeights[i].invalidate()
+            }
         }
 
-        // ✅ Update the total weight after populating individual weights
+
         updateTotalWeight(tournamentCatches)
-
-        // ✅ Adjust visibility for extra TextViews
         adjustTextViewVisibility()
+
+
+
+
     }
 
 
 
-    // **************** Update TOTAL WEIGHT  ************************
-private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
-    var totalLbs = 0
-    var totalOzs = 0
 
-    for (catch in tournamentCatches) {
-        totalLbs += catch.weightLbs ?: 0
-        totalOzs += catch.weightOz ?: 0
+
+    private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
+        val totalWeightOz = tournamentCatches.sumOf { it.totalWeightOz ?: 0 }
+        val totalLbs = totalWeightOz / 16
+        val totalOz = totalWeightOz % 16
+
+        // 🔍 Debugging Log
+        println("DEBUG: Total Weight -> Total OZ: $totalWeightOz | Lbs: $totalLbs | Oz: $totalOz")
+
+        totalRealWeight.text = totalLbs.toString()
+        totalDecWeight.text = totalOz.toString()
     }
 
-    // Convert excess ounces to pounds
-    totalLbs += totalOzs / 16
-    totalOzs %= 16
+    private fun clearTournamentTextViews() {
+        val textViews = listOf(
+            firstRealWeight, secondRealWeight, thirdRealWeight, fourthRealWeight,
+            fifthRealWeight, sixthRealWeight, firstDecWeight, secondDecWeight,
+            thirdDecWeight, fourthDecWeight, fifthDecWeight, sixthDecWeight
+        )
 
-    // Update total weight TextViews
-    totalRealWeight.text = totalLbs.toString()
-    totalDecWeight.text = totalOzs.toString()
-}
+        textViews.forEach { it.text = "" }
 
-    // `````````````````` ADJUST TEXTVIEW VISIBILITY `````````````````
+        totalRealWeight.text = "0"
+        totalDecWeight.text = "0"
+    }
+
+
     private fun adjustTextViewVisibility() {
         if (tournamentCatchLimit == 4) {
-            // 5th weight fields → Greyed out
             fifthRealWeight.alpha = 0.5f
             fifthDecWeight.alpha = 0.5f
             fifthRealWeight.isEnabled = false
             fifthDecWeight.isEnabled = false
-
-            // 6th weight fields → Invisible
             sixthRealWeight.visibility = View.INVISIBLE
             sixthDecWeight.visibility = View.INVISIBLE
         } else if (tournamentCatchLimit == 5) {
-            // 6th weight fields → Greyed out
             sixthRealWeight.alpha = 0.5f
             sixthDecWeight.alpha = 0.5f
             sixthRealWeight.isEnabled = false
             sixthDecWeight.isEnabled = false
         } else {
-            // All TextViews fully visible & enabled if limit is 6
             fifthRealWeight.alpha = 1.0f
             fifthDecWeight.alpha = 1.0f
             fifthRealWeight.isEnabled = true
@@ -269,12 +242,8 @@ private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
         }
     }
 
-//*************** Get Current TIME DATE  ***********************
-private fun getCurrentDateTime(): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-    return sdf.format(Date())
-}
-
-
-// ------------------------- END  ----------------------
+    private fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return sdf.format(Date())
+    }
 }

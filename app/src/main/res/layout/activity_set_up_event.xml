@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,27 +9,33 @@
     tools:context=".SetUpActivity">
 
     <!-- Header Images -->
-    <ImageView
-        android:id="@+id/imgVCC"
-        android:layout_width="391dp"
-        android:layout_height="70dp"
-        android:adjustViewBounds="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.9"
-        app:srcCompat="@drawable/voice_controlled_culling_words" />
-
-
-    <ImageView
-        android:id="@+id/imgSetUp"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:adjustViewBounds="true"
-        app:layout_constraintTop_toBottomOf="@id/imgVCC"
+    <LinearLayout
+        android:id="@+id/headerImagesLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/set_up_word_stoked" />
+        app:layout_constraintTop_toTopOf="parent">  <!-- ✅ Position at the top -->
+
+        <ImageView
+            android:id="@+id/imgVCC"
+            android:layout_width="90dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="5dp"
+            android:src="@drawable/voice_controlled_culling_words"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/imgSetUp"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+
+            android:layout_marginStart="20dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/set_up_word_stoked" />
+
+    </LinearLayout>
 
 
 
@@ -42,7 +47,7 @@
         android:padding="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imgSetUp">
+        app:layout_constraintTop_toBottomOf="@id/headerImagesLayout" >
 
         <!-- Measurement Type Header -->
         <TextView
@@ -80,17 +85,24 @@
         </LinearLayout>
 
         <!-- Type of Units Header -->
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
-            android:gravity="center"
-            android:text="Type of Units"
-            android:textSize="20sp"
-            android:textStyle="bold" />
 
         <!-- Imperial & Metric Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:gravity="center"
+                android:text="Type of Units"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -181,9 +193,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="Limit#    Colors/Letters"
+                android:textColor="@color/black"
                 android:textSize="26sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -201,11 +213,11 @@
                 android:layout_width="65dp"
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
-                android:visibility="invisible"
                 android:textOff="4"
                 android:textOn="5"
                 android:textSize="34sp"
                 android:textStyle="bold"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
@@ -216,23 +228,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
-                android:visibility="invisible"
                 android:textOff="Colors"
                 android:textOn="Letters"
                 android:textSize="34sp"
                 android:textStyle="bold"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
                 app:layout_constraintWidth="wrap_content" />
-
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="7dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -242,11 +253,28 @@
                 android:id="@+id/txtSpeciesSelector"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select Species"
+                android:text="Tournament Species"
                 android:textColor="@color/black"
                 android:textSize="26sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:layout_marginEnd="1dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="@color/black"
+                android:textSize="25dp"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" GPS"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginStart="20dp"/>
 
         </LinearLayout>
 
@@ -262,19 +290,33 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_marginStart="20dp"
+                android:entries="@array/species_list"
                 android:textSize="20sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textColor="@color/black"
+                android:textSize="26sp"
                 android:textStyle="bold"
-                android:entries="@array/species_list" />
+                android:layout_marginStart="10dp"/>
 
+            <ToggleButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOn="ON"
+                android:textOff="OFF"
+                android:textColor="@color/black"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp" />
 
 
         </LinearLayout>
 
 
     </LinearLayout>
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

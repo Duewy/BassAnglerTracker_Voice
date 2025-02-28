@@ -35,6 +35,7 @@
     <color name="clip_blue">#00007F</color>
     <color name="clip_white">#FDFDFD</color>
     <color name="clip_orange">#FE671E</color>
+    <color name="clip_grey">#817E7D</color>
 
                      <!-- SoftLock Label colors-->
     <color name="softlock_blue">#00007E</color>
