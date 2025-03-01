@@ -22,7 +22,6 @@
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/btnSetUpInches"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -32,12 +31,12 @@
         android:id="@+id/btnSetUpInches"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="2dp"
         android:layout_marginEnd="20dp"
         android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogInches" />
 
     <!-- Weight Label -->
 
@@ -46,28 +45,27 @@
         android:id="@+id/lengthLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="148dp"
+        android:layout_marginStart="15dp"
         android:text="Enter Inches:"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@id/btnSetUpInches" />
 
 
     <!-- Inch Spinner -->
     <Spinner
         android:id="@+id/inchesSpinner"
-        android:layout_width="80dp"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_marginStart="15dp"
-        app:layout_constraintStart_toEndOf="@id/lengthLabel"
-        app:layout_constraintTop_toTopOf="@id/lengthLabel" />
+        app:layout_constraintStart_toStartOf="@id/lengthLabel"
+        app:layout_constraintTop_toBottomOf="@id/lengthLabel" />
 
     <TextView
         android:id="@+id/inchesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="8th Inch"
+        android:text="X/8th"
         android:textSize="16sp"
         app:layout_constraintTop_toTopOf="@id/inchesSpinner"
         app:layout_constraintStart_toEndOf="@id/inchesSpinner"
@@ -77,7 +75,7 @@
 
     <Spinner
         android:id="@+id/eightSpinner"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_marginStart="10dp"
         app:layout_constraintStart_toEndOf="@id/inchesText"

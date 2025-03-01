@@ -67,7 +67,7 @@ class CatchEntryInches : AppCompatActivity() {
                     dateTime = dateTime,
                     species = species,
                     totalWeightOz = null,
-                    totalLengthA8th = null,
+                    totalLengthA8th = totalLength8ths,
                     weightDecimalTenthKg = null,
                     lengthDecimalTenthCm = null,
                     catchType = "inches",

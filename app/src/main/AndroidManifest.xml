@@ -30,6 +30,11 @@
         <activity android:name=".CatchEntryMetric"/>
         <activity android:name=".CatchEntryTournament"/>
 
+        <activity android:name=".PopupWeightEntry"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+
+
 
     </application>
 

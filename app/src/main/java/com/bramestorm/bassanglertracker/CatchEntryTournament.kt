@@ -1,5 +1,7 @@
 package com.bramestorm.bassanglertracker
 
+
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +9,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.PopupWeightEntry
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -46,6 +49,8 @@ class CatchEntryTournament : AppCompatActivity() {
     private var isCullingEnabled: Boolean = false
     private var typeOfMarkers: String = "Color"
     private var tournamentSpecies: String = "Unknown"
+    private val REQUEST_WEIGHT_ENTRY = 1001
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,40 +107,92 @@ class CatchEntryTournament : AppCompatActivity() {
     }
 
     private fun showWeightPopup() {
-        val popup = PopupWeightEntry(this) { weightLbs, weightOz, bassType ->
-            saveTournamentCatch(weightLbs, weightOz, bassType) // ✅ Remove extra calculation
-        }
-        popup.show()
+        val intent = Intent(this, PopupWeightEntry::class.java)
+        intent.putExtra("isTournament", true)
+        intent.putExtra("catchType", if (measurementSystem == "weight") "lbsOzs" else "kgs")
+        intent.putExtra("selectedSpecies", tournamentSpecies)
+        startActivityForResult(intent,REQUEST_WEIGHT_ENTRY)
     }
 
 
-    private fun saveTournamentCatch(weightLbs: Int, weightOz: Int, bassType: String) {
-        val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Convert ONLY here
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_WEIGHT_ENTRY && resultCode == Activity.RESULT_OK) {
+            val weightTotalOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
+            val weightTotalKgs = data?.getDoubleExtra("weightTotalKgs", 0.0) ?: 0.0
+            val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
+
+            if (measurementSystem == "weight") {
+                if (weightTotalOz > 0) {
+                    saveTournamentCatch(weightTotalOz, selectedSpecies)
+                } else {
+                    saveTournamentCatchKgs(weightTotalKgs, selectedSpecies)
+                }
+            }
+        }
+    }
+
+    private fun saveTournamentCatch(totalWeightOz: Int, species: String) {
+        val weightLbs = totalWeightOz / 16
+        val weightOz = totalWeightOz % 16
 
         val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
         val existingCatches = dbHelper.getAllCatches().size
         val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
 
-        Log.d("DEBUG", "Saving Catch -> Corrected Total Oz: $totalWeightOz | Species: $bassType")
+        Log.d("DEBUG", "Saving Catch -> Lbs: $weightLbs, Oz: $weightOz | Species: $species")
 
         val catch = CatchItem(
             id = 0,
             dateTime = getCurrentDateTime(),
-            species = bassType, // ✅ Store species letter
-            totalWeightOz = totalWeightOz,
+            species = species,
+            totalWeightOz = totalWeightOz,  // ✅ Now correctly storing total weight in ounces
             totalLengthA8th = null,
             weightDecimalTenthKg = null,
             lengthDecimalTenthCm = null,
-            catchType = measurementSystem,
-            markerType = bassType, // ✅ Store species initial
+            catchType = "lbsOzs",
+            markerType = species,
             clipColor = assignedColor
         )
 
         dbHelper.insertCatch(catch)
-        Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "$species Catch Saved!", Toast.LENGTH_SHORT).show()
         updateTournamentList()
     }
 
+
+
+    private fun saveTournamentCatchKgs(weightKgs: Double, species: String) {
+        val weightStoredKgs = (weightKgs * 100).toInt() // ✅ Store as an integer (hundredths of kgs)
+
+        val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
+        val existingCatches = dbHelper.getAllCatches().size
+        val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
+
+        Log.d("DEBUG", "Saving Catch -> Weight in Kgs: $weightKgs | Stored as: $weightStoredKgs | Species: $species")
+
+        val catch = CatchItem(
+            id = 0,
+            dateTime = getCurrentDateTime(),
+            species = species,
+            totalWeightOz = null,
+            weightDecimalTenthKg = weightStoredKgs.toInt(), // ✅ Store Kg weight
+            totalLengthA8th = null,
+            lengthDecimalTenthCm = null,
+            catchType = "kgs",
+            markerType = species,
+            clipColor = assignedColor
+        )
+
+        dbHelper.insertCatch(catch)
+        Toast.makeText(this, "$species Catch Saved!", Toast.LENGTH_SHORT).show()
+        updateTournamentList()
+
+        dbHelper.insertCatch(catch)
+        Toast.makeText(this, "$species Catch Saved!", Toast.LENGTH_SHORT).show()
+        updateTournamentList()
+    }
 
 
 

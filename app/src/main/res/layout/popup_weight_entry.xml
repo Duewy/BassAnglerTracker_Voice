@@ -3,29 +3,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:orientation="vertical"
         android:background="@drawable/popup_background">
 
+        <!-- Popup Title -->
         <TextView
-            android:id="@+id/txtWeightTitle"
+            android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enter Fish Weight"
+            android:text="Enter Catch Details"
             android:textSize="18sp"
             android:textStyle="bold" />
 
+        <!-- Species Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Species"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerSpecies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Weight Input (Lbs/Ozs) -->
         <LinearLayout
+            android:id="@+id/layoutWeightLbsOzs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <EditText
-                android:id="@+id/editWeightLbs"
+                android:id="@+id/edtWeightLbs"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -33,7 +49,7 @@
                 android:inputType="number" />
 
             <EditText
-                android:id="@+id/editWeightOz"
+                android:id="@+id/edtWeightOz"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -41,41 +57,51 @@
                 android:inputType="number" />
         </LinearLayout>
 
-        <!-- Select Bass Type -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" Large Mouth or Small Mouth Bass"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <RadioGroup
-            android:id="@+id/radioGroupBassType"
+        <!-- Weight Input (Kgs) -->
+        <EditText
+            android:id="@+id/edtWeightKgs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:hint="Weight in Kgs"
+            android:inputType="numberDecimal"
+            android:visibility="gone" />
 
-            <RadioButton
-                android:id="@+id/radioLargeMouth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Large Mouth"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/radioSmallMouth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Small Mouth" />
-        </RadioGroup>
-
-        <Button
-            android:id="@+id/btnSaveWeight"
-            android:layout_width="wrap_content"
+        <!-- Length Input (Inches) -->
+        <EditText
+            android:id="@+id/edtLengthInches"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save" />
+            android:hint="Length in Inches"
+            android:inputType="number"
+            android:visibility="gone" />
 
+        <!-- Length Input (CM) -->
+        <EditText
+            android:id="@+id/edtLengthCM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Length in CM"
+            android:inputType="numberDecimal"
+            android:visibility="gone" />
+
+        <!-- Save and Cancel Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnSaveWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save" />
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel" />
+        </LinearLayout>
     </LinearLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

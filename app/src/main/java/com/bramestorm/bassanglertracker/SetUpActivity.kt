@@ -51,6 +51,10 @@ class SetUpActivity : AppCompatActivity() {
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
 
+        tglCullingValue.visibility = View.INVISIBLE
+        tglColorLetter.visibility = View.INVISIBLE
+        spinnerTournamentSpecies.visibility =View.INVISIBLE
+
         // Toggle Weight Selection
         btnWeight.setOnClickListener {
             isWeightSelected = true
@@ -91,9 +95,11 @@ class SetUpActivity : AppCompatActivity() {
             isTournamentSelected = false
             btnFunDay.setBackgroundResource(R.color.white)
             btnTournament.setBackgroundResource(R.color.grey)
+            btnLength.visibility = View.VISIBLE
+            btnMetric.visibility=View.VISIBLE
             tglCullingValue.visibility = View.INVISIBLE
             tglColorLetter.visibility = View.INVISIBLE
-            tglGPS.visibility = View.INVISIBLE
+            spinnerTournamentSpecies.visibility =View.INVISIBLE
         }
 
         btnTournament.setOnClickListener {
@@ -101,9 +107,11 @@ class SetUpActivity : AppCompatActivity() {
             isFunDaySelected = false
             btnTournament.setBackgroundResource(R.color.white)
             btnFunDay.setBackgroundResource(R.color.grey)
+            btnLength.visibility = View.INVISIBLE       //take away measuring options for Tournament mode
+            btnMetric.visibility=View.INVISIBLE
             tglCullingValue.visibility = View.VISIBLE
             tglColorLetter.visibility = View.VISIBLE
-            tglGPS.visibility = View.VISIBLE
+            spinnerTournamentSpecies.visibility =View.VISIBLE
         }
 
         // ✅ Select Fishing Event (Fun Day or Tournament)
