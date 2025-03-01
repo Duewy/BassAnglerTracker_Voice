@@ -22,6 +22,7 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var spinnerTournamentSpecies: Spinner
     private lateinit var tglColorLetter: ToggleButton
     private lateinit var tglCullingValue: ToggleButton
+    private lateinit var tglGPS: ToggleButton
 
     private var isWeightSelected = true
     private var isLengthSelected = false
@@ -48,6 +49,7 @@ class SetUpActivity : AppCompatActivity() {
         tglCullingValue = findViewById(R.id.tglCullingValue)
         tglColorLetter = findViewById(R.id.tglColorLetter)
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
+        tglGPS = findViewById(R.id.tglGPS)
 
         // Toggle Weight Selection
         btnWeight.setOnClickListener {
@@ -91,6 +93,7 @@ class SetUpActivity : AppCompatActivity() {
             btnTournament.setBackgroundResource(R.color.grey)
             tglCullingValue.visibility = View.INVISIBLE
             tglColorLetter.visibility = View.INVISIBLE
+            tglGPS.visibility = View.INVISIBLE
         }
 
         btnTournament.setOnClickListener {
@@ -100,6 +103,7 @@ class SetUpActivity : AppCompatActivity() {
             btnFunDay.setBackgroundResource(R.color.grey)
             tglCullingValue.visibility = View.VISIBLE
             tglColorLetter.visibility = View.VISIBLE
+            tglGPS.visibility = View.VISIBLE
         }
 
         // ✅ Select Fishing Event (Fun Day or Tournament)

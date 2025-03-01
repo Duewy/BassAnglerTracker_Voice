@@ -41,10 +41,15 @@
     <color name="softlock_blue">#00007E</color>
     <color name="softlock_green">#21CF33</color>
     <!-- Logging Page colors-->
+
     <color name="Log_red">#80D50019</color>
+    <color name="Log_red_secondary">#80F10420</color>
     <color name="Log_yellow">#80FEFE20</color>
+    <color name="Log_yellow_secondary">#80DACF05</color>
     <color name="Log_green">#8000800D</color>
-    <color name="Log_blue">#8000007F</color>
+    <color name="Log_green_secondary">#806EA603</color>
+    <color name="Log_blue">#800505CC</color>
+    <color name="Log_blue_secondary">#6D03258A</color>
     <color name="Log_white">#85FDFDFD</color>
     <color name="Log_orange">#80FE671E</color>
 

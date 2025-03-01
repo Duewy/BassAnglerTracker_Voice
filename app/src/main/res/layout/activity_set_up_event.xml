@@ -56,6 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp"
             android:gravity="center"
+            android:textColor="@color/black"
             android:text="Type of Measuring"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -72,6 +73,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_yellow"
                 android:text="Weight"
                 android:textSize="18sp" />
 
@@ -80,6 +82,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_yellow_secondary"
                 android:text="Length"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -97,6 +100,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
+                android:textColor="@color/black"
                 android:gravity="center"
                 android:text="Type of Units"
                 android:textSize="20sp"
@@ -115,6 +119,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_green"
                 android:text="Imperial"
                 android:textSize="18sp" />
 
@@ -123,6 +128,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_green_secondary"
                 android:text="Metric"
                 android:textSize="18sp" />
 
@@ -141,6 +147,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_orange"
                 android:text="Fun Day"
                 android:textSize="18sp" />
 
@@ -149,6 +156,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/Log_red_secondary"
                 android:text="Tournament"
                 android:textSize="18sp" />
 
@@ -168,8 +176,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="@color/primary_variant"
                 android:text="Start Fishing Event"
-                android:textSize="18sp"
+                android:textSize="22sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnTournament" />
@@ -213,11 +222,12 @@
                 android:layout_width="65dp"
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
+                android:background="@color/Log_blue"
                 android:textOff="4"
                 android:textOn="5"
                 android:textSize="34sp"
                 android:textStyle="bold"
-                android:visibility="invisible"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
@@ -228,11 +238,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
+                android:background="@color/Log_blue_secondary"
                 android:textOff="Colors"
                 android:textOn="Letters"
                 android:textSize="34sp"
                 android:textStyle="bold"
-                android:visibility="invisible"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
@@ -244,7 +255,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="7dp"
-            android:gravity="center"
+            android:layout_marginStart="10dp"
+            android:gravity="left"
             android:orientation="horizontal">
 
             <!--CanAm Flag -->
@@ -253,11 +265,11 @@
                 android:id="@+id/txtSpeciesSelector"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:text="Tournament Species"
                 android:textColor="@color/black"
                 android:textSize="26sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="1dp"/>
+                android:textStyle="bold" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -282,35 +294,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:gravity="center"
+            android:gravity="left"
             android:orientation="horizontal">
 
             <Spinner
                 android:id="@+id/spinnerTournamentSpecies"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="40dp"
+                android:background="@color/Log_white"
                 android:entries="@array/species_list"
                 android:textSize="20sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="--"
+                android:text=" --   "
                 android:textColor="@color/black"
-                android:textSize="26sp"
+                android:textSize="40sp"
                 android:textStyle="bold"
                 android:layout_marginStart="10dp"/>
 
             <ToggleButton
+                android:id="@+id/tglGPS"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textOn="ON"
-                android:textOff="OFF"
+                android:layout_marginStart="20dp"
+                android:background="@color/secondary"
                 android:textColor="@color/black"
+                android:textOff="OFF"
+                android:textOn="ON"
                 android:textSize="26sp"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp" />
+                android:textStyle="bold" />
 
 
         </LinearLayout>

@@ -43,7 +43,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextClock
-        android:id="@+id/timeRemainingClock"
+        android:id="@+id/timeNOW"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintWidth_percent="0.4"
@@ -63,21 +63,20 @@
         android:id="@+id/alarmTxtBox"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.3"
-        app:layout_constraintHeight_percent="0.085"
-        android:layout_marginTop="5dp"
         android:background="#80C5D2E8"
         android:gravity="center"
         android:hint="@string/days_End_time"
-        android:text="15:00"
+        android:text="ALARM"
         android:textAllCaps="true"
         android:textColor="@color/clip_red"
-        android:textColorLink="@color/clip_red"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/btnStartFishing"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnStartFishing" />
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/btnStartFishing"
+        app:layout_constraintWidth_percent="0.3" />
+
 
     <TextView
         android:id="@+id/firstRealWeight"
@@ -95,13 +94,13 @@
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/secondRealWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="0.35"
         app:layout_constraintHeight_percent="0.085"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
@@ -129,7 +128,7 @@
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@+id/secondRealWeight"
         app:layout_constraintTop_toBottomOf="@+id/secondRealWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/fourthRealWeight"
@@ -146,7 +145,7 @@
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@+id/thirdRealWeight"
         app:layout_constraintTop_toBottomOf="@+id/thirdRealWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/fifthRealWeight"
@@ -163,7 +162,7 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/fourthRealWeight"
         app:layout_constraintTop_toBottomOf="@+id/fourthRealWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/sixthRealWeight"
@@ -180,39 +179,36 @@
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@id/fifthRealWeight"
         app:layout_constraintTop_toBottomOf="@+id/fifthRealWeight"
-        app:layout_constraintWidth_percent="0.4" />
-
+        app:layout_constraintWidth_percent="0.35" />
 
 
     <TextView
         android:id="@+id/firstDecWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="center_vertical"
         android:text="18 ozs"
-        android:textAlignment="gravity"
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toEndOf="@id/firstRealWeight"
         app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/secondDecWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="0.35"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="center_vertical"
         android:text="18 ozs"
-        android:textAlignment="gravity"
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
@@ -225,16 +221,15 @@
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="center_vertical"
+        android:textAlignment="center"
         android:text="18 ozs"
-        android:textAlignment="gravity"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@id/secondDecWeight"
         app:layout_constraintTop_toBottomOf="@+id/secondDecWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/fourthDecWeight"
@@ -242,16 +237,15 @@
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="left|center_vertical"
         android:text="18 ozs"
-        android:textAlignment="gravity"
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@id/thirdDecWeight"
         app:layout_constraintTop_toBottomOf="@+id/thirdDecWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/fifthDecWeight"
@@ -260,15 +254,14 @@
         app:layout_constraintHeight_percent="0.085"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="center_vertical"
+        android:textAlignment="center"
         android:text="18 ozs"
-        android:textAlignment="gravity"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@id/fourthDecWeight"
         app:layout_constraintTop_toBottomOf="@+id/fourthDecWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/sixthDecWeight"
@@ -276,16 +269,117 @@
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:gravity="center_vertical"
+        android:textAlignment="center"
         android:text="18 ozs"
-        android:textAlignment="gravity"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="@id/fifthDecWeight"
         app:layout_constraintTop_toBottomOf="@+id/fifthDecWeight"
-        app:layout_constraintWidth_percent="0.4" />
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/txtTypeLetter1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:background="@color/grey"
+        android:textAlignment="center"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishing"/>
+
+    <TextView
+        android:id="@+id/txtTypeLetter2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/secondDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/firstDecWeight"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetter3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/secondDecWeight"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetter4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:background="@color/grey"
+        android:textAlignment="center"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/thirdDecWeight" />
+
+    <TextView
+        android:id="@+id/txtTypeLetter5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/fourthDecWeight"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetter6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:background="@color/grey"
+        android:textAlignment="center"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintWidth_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
+        app:layout_constraintTop_toBottomOf="@id/fifthDecWeight" />
 
     <TableLayout
         android:id="@+id/tableLayout"
@@ -311,7 +405,8 @@
         android:layout_width="300dp"
         android:layout_height="30dp"
         android:gravity="center"
-        android:text="@string/total_value"
+        android:textColor="@color/black"
+        android:text="Weight Lbs/Ozs"
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textSize="20sp"
@@ -391,5 +486,8 @@
         android:layout_marginTop="1dp"
         app:layout_constraintStart_toStartOf="@id/btnMenu"
         app:layout_constraintTop_toBottomOf="@id/totalDecWeight"/>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

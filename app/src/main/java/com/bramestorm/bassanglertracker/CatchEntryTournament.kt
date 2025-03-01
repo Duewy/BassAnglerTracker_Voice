@@ -30,6 +30,14 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var sixthDecWeight: TextView
     private lateinit var totalRealWeight: TextView
     private lateinit var totalDecWeight: TextView
+    private lateinit var txtTypeLetter1: TextView
+    private lateinit var txtTypeLetter2: TextView
+    private lateinit var txtTypeLetter3: TextView
+    private lateinit var txtTypeLetter4: TextView
+    private lateinit var txtTypeLetter5: TextView
+    private lateinit var txtTypeLetter6: TextView
+
+
 
     private lateinit var dbHelper: CatchDatabaseHelper
 
@@ -38,6 +46,7 @@ class CatchEntryTournament : AppCompatActivity() {
     private var isCullingEnabled: Boolean = false
     private var typeOfMarkers: String = "Color"
     private var tournamentSpecies: String = "Unknown"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +69,13 @@ class CatchEntryTournament : AppCompatActivity() {
 
         totalRealWeight = findViewById(R.id.totalRealWeight)
         totalDecWeight = findViewById(R.id.totalDecWeight)
+
+        txtTypeLetter1 = findViewById(R.id.txtTypeLetter1)
+        txtTypeLetter2 = findViewById(R.id.txtTypeLetter2)
+        txtTypeLetter3 = findViewById(R.id.txtTypeLetter3)
+        txtTypeLetter4 = findViewById(R.id.txtTypeLetter4)
+        txtTypeLetter5 = findViewById(R.id.txtTypeLetter5)
+        txtTypeLetter6 = findViewById(R.id.txtTypeLetter6)
 
         clearTournamentTextViews()
 
@@ -87,30 +103,31 @@ class CatchEntryTournament : AppCompatActivity() {
 
     private fun showWeightPopup() {
         val popup = PopupWeightEntry(this) { weightLbs, weightOz, bassType ->
-            val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Convert to whole ounces
-            saveTournamentCatch(totalWeightOz, bassType)
+            saveTournamentCatch(weightLbs, weightOz, bassType) // ✅ Remove extra calculation
         }
         popup.show()
     }
 
 
-    private fun saveTournamentCatch(totalWeightOz: Int, bassType: String) {
-        val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
+    private fun saveTournamentCatch(weightLbs: Int, weightOz: Int, bassType: String) {
+        val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Convert ONLY here
 
-        // Get the next color in sequence based on total stored catches
+        val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
         val existingCatches = dbHelper.getAllCatches().size
         val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
+
+        Log.d("DEBUG", "Saving Catch -> Corrected Total Oz: $totalWeightOz | Species: $bassType")
 
         val catch = CatchItem(
             id = 0,
             dateTime = getCurrentDateTime(),
-            species = tournamentSpecies,
+            species = bassType, // ✅ Store species letter
             totalWeightOz = totalWeightOz,
             totalLengthA8th = null,
             weightDecimalTenthKg = null,
             lengthDecimalTenthCm = null,
             catchType = measurementSystem,
-            markerType = bassType,
+            markerType = bassType, // ✅ Store species initial
             clipColor = assignedColor
         )
 
@@ -118,6 +135,8 @@ class CatchEntryTournament : AppCompatActivity() {
         Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
         updateTournamentList()
     }
+
+
 
 
     private fun updateTournamentList() {
@@ -140,52 +159,54 @@ class CatchEntryTournament : AppCompatActivity() {
             fourthDecWeight, fifthDecWeight, sixthDecWeight
         )
 
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
         clearTournamentTextViews()
 
         runOnUiThread {
             for (i in tournamentCatches.indices) {
+                if (i >= 6) break // ✅ Prevent out-of-bounds errors
+
                 val totalWeightOz = tournamentCatches[i].totalWeightOz ?: 0
-                val weightLbs = totalWeightOz / 16
-                val weightOz = totalWeightOz % 16
+                val weightLbs = (totalWeightOz / 16)  // ✅ Ensure integer division
+                val weightOz = (totalWeightOz % 16)  // ✅ Extract remaining ounces
                 val clipColorName = tournamentCatches[i].clipColor
+                val speciesInitial = tournamentCatches[i].markerType ?: "?" // ✅ Get species letter
 
-                // ✅ Debugging Log
-                println("DEBUG: Catch #$i -> Color: $clipColorName | Lbs: $weightLbs | Oz: $weightOz")
+                // ✅ Debugging Log: Confirm correct weight separation
+                Log.d("DEBUG", "Updating UI -> Stored Oz: $totalWeightOz | Calculated Lbs: $weightLbs | Oz: $weightOz | Letter: $speciesInitial")
 
-                realWeights[i].text = weightLbs.toString()
-                decWeights[i].text = weightOz.toString()
+                // ✅ Update UI
+                realWeights[i].text = "$weightLbs Lbs" // ✅ Ensure correct lbs value
+                decWeights[i].text = "$weightOz oz"    // ✅ Ensure correct oz value
+                typeLetters[i].text = speciesInitial   // ✅ Assign species letter
 
                 // ✅ Apply color dynamically
                 val colorResId = resources.getIdentifier(clipColorName, "color", packageName)
                 if (colorResId != 0) {
                     realWeights[i].setBackgroundResource(colorResId)
                     decWeights[i].setBackgroundResource(colorResId)
+                    typeLetters[i].setBackgroundResource(colorResId)
 
-                    // ✅ Ensure text color is white for blue backgrounds
-                    if (clipColorName == "clip_blue") {
-                        realWeights[i].setTextColor(resources.getColor(R.color.clip_white, theme))
-                        decWeights[i].setTextColor(resources.getColor(R.color.clip_white, theme))
-                    } else {
-                        realWeights[i].setTextColor(resources.getColor(R.color.black, theme))
-                        decWeights[i].setTextColor(resources.getColor(R.color.black, theme))
-                    }
+                    // ✅ Ensure text is visible on different backgrounds
+                    val textColor = if (clipColorName == "clip_blue") R.color.clip_white else R.color.black
+                    realWeights[i].setTextColor(resources.getColor(textColor, theme))
+                    decWeights[i].setTextColor(resources.getColor(textColor, theme))
+                    typeLetters[i].setTextColor(resources.getColor(textColor, theme))
                 }
 
                 realWeights[i].invalidate()
                 decWeights[i].invalidate()
+                typeLetters[i].invalidate()
             }
         }
 
-
         updateTotalWeight(tournamentCatches)
         adjustTextViewVisibility()
-
-
-
-
     }
-
-
 
 
 
@@ -196,6 +217,8 @@ class CatchEntryTournament : AppCompatActivity() {
 
         // 🔍 Debugging Log
         println("DEBUG: Total Weight -> Total OZ: $totalWeightOz | Lbs: $totalLbs | Oz: $totalOz")
+        // ✅ Debugging Log: Check stored weight before inserting
+        Log.d("DEBUG", "Saving Catch -> Total Weight in Oz: $totalWeightOz ")
 
         totalRealWeight.text = totalLbs.toString()
         totalDecWeight.text = totalOz.toString()
