@@ -21,6 +21,12 @@
     <string name="txtType_of_Measurement">Type of Measurement Units</string>
     <string name="gps_usage_permission">Record GPS?</string>
 
+
+        <string name="title_weight_lbs_oz">Enter Weight (Lbs/Oz)</string>
+        <string name="title_weight_kgs">Enter Weight (Kgs and Grams)</string>
+
+
+
     //species
     <string-array name="species_list">
         <item>Large Mouth</item>

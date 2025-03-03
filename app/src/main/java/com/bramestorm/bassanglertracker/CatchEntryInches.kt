@@ -67,12 +67,12 @@ class CatchEntryInches : AppCompatActivity() {
                     dateTime = dateTime,
                     species = species,
                     totalWeightOz = null,
+                    totalWeightHundredthKg = null,
                     totalLengthA8th = totalLength8ths,
-                    weightDecimalTenthKg = null,
                     lengthDecimalTenthCm = null,
                     catchType = "inches",
-                    markerType = "None",
-                    clipColor = "clip_grey"
+                    markerType = null,
+                    clipColor = null
                 )
 
 

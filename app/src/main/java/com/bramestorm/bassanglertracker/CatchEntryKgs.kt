@@ -73,7 +73,10 @@ class CatchEntryKgs : AppCompatActivity() {
                 val wholeKg = weightKgSpinner.selectedItem.toString().toInt()
                 val tenth = tenthSpinner.selectedItem.toString().toInt()
                 val hundredth = hundredthSpinner.selectedItem.toString().toInt()
-                val totalWeightHg = (wholeKg * 100) + (tenth * 10) + hundredth // ✅ Store weight in hundredths of kg
+                val totalWeightHundredthKg = (wholeKg * 100) + (tenth * 10) + hundredth
+                val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
+                val existingCatches = dbHelper.getCatchCount()
+                val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
                 val dateTime = getCurrentTimestamp()
 
                 val newCatch = CatchItem(
@@ -82,9 +85,10 @@ class CatchEntryKgs : AppCompatActivity() {
                     species = species,
                     totalWeightOz = null,
                     totalLengthA8th = null,
-                    weightDecimalTenthKg = null,  // ✅ Fix: Add null for metric weight
+                    totalWeightHundredthKg = totalWeightHundredthKg,
                     lengthDecimalTenthCm = null,
-                    catchType = "weight_imperial"
+                    clipColor = null,
+                    catchType = "kgs"
                 )
 
 
@@ -116,7 +120,8 @@ class CatchEntryKgs : AppCompatActivity() {
 
     private fun loadCatches() {
         catchList.clear()
-        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "weight_metric" }
+        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "kgs" }
+
         if (fetchedCatches.isEmpty()) {
             Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
         }

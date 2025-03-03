@@ -22,22 +22,31 @@
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/btnSetUp3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- btn btnAddCatch by Goto Popup Page -->
+
+    <Button
+        android:id="@+id/btnAddCatch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/addCatchBtn"
+        app:layout_constraintEnd_toStartOf="@+id/btnSetUp3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtTodaysLog" />
 
                 <!-- btn Goto Set Up Page -->
     <Button
         android:id="@+id/btnSetUp3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
         android:layout_marginEnd="20dp"
         android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:layout_editor_absoluteY="84dp" />
 
     <!-- Weight Label -->
 
@@ -133,6 +142,8 @@
         app:layout_constraintTop_toBottomOf="@id/saveCatchButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

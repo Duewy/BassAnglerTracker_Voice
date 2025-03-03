@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bramestorm.bassanglertracker">
 
+    
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,9 +32,14 @@
         <activity android:name=".CatchEntryInches"/>
         <activity android:name=".CatchEntryMetric"/>
         <activity android:name=".CatchEntryTournament"/>
-
+        <activity android:name=".CatchEntryTournamentKgs"/>
+        <activity android:name=".PopupWeightEntryKgs"/>
         <activity android:name=".PopupWeightEntry"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity
+            android:name=".PopUpAlarm"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
+        </activity>
 
 
 

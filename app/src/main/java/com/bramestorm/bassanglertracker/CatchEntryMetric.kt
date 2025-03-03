@@ -64,10 +64,13 @@ class CatchEntryMetric : AppCompatActivity() {
                     species = species,
                     totalWeightOz = null,
                     totalLengthA8th = null,
-                    weightDecimalTenthKg = null,
+                    totalWeightHundredthKg = null,
                     lengthDecimalTenthCm = totalCmTenth, // ✅ Store metric length in tenths
-                    catchType = "length_metric"
+                    catchType = "length_metric",
+                    markerType = null,
+                    clipColor = null
                 )
+
                 dbHelper.insertCatch(newCatch)
                 catchList.add(0, newCatch)
                 catchAdapter.notifyDataSetChanged()

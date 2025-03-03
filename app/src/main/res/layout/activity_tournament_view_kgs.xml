@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#801976D2"
-    tools:context=".CatchEntryTournament">
+    android:background="@color/clip_green"
+    tools:context=".CatchEntryTournamentKgs">
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.4"
-        app:layout_constraintHeight_percent="0.085"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="100dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.085"
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.4"
         app:srcCompat="@drawable/voice_controlled_culling_words" />
 
     <Button
-        android:id="@+id/btnStartFishing"
+        android:id="@+id/btnKgsStartFishing"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="10px"
@@ -34,13 +35,32 @@
         android:textColor="@color/clip_white"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.09"
+        app:layout_constraintHorizontal_bias="0.17"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
         app:layout_constraintWidth_percent="0.55" />
 
-    <Button
-        android:id="@+id/btnAlarm"
+    <TextClock
+        android:id="@+id/timeNOW"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.4"
+        tools:text="@string/timer_place_holder" />
+
+
+    <TextView
+        android:id="@+id/alarmTxtBox"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#80C5D2E8"
@@ -51,246 +71,230 @@
         android:textColor="@color/clip_red"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btnStartFishing"
+        app:layout_constraintBottom_toBottomOf="@id/btnKgsStartFishing"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/btnStartFishing"
-        app:layout_constraintWidth_percent="0.3"/>
-
-    <TextClock
-        android:id="@+id/timeNOW"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.4"
-        app:layout_constraintHeight_percent="0.085"
-        android:layout_marginTop="5dp"
-        android:background="@color/clip_white"
-        android:gravity="center"
-        android:textSize="34sp"
-        android:textStyle="bold"
-        android:layout_marginStart="28dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/timer_place_holder" />
+        app:layout_constraintStart_toEndOf="@id/btnKgsStartFishing"
+        app:layout_constraintWidth_percent="0.3" />
 
 
     <TextView
-        android:id="@+id/firstRealWeight"
+        android:id="@+id/firstKgWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="4dp"
         android:background="@color/grey"
         android:gravity="center"
-        android:text="3 Lbs"
+        android:text="3 KG"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
+        app:layout_constraintTop_toBottomOf="@id/btnKgsStartFishing"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/secondRealWeight"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.35"
-        app:layout_constraintHeight_percent="0.085"
-        android:layout_marginTop="5dp"
-        android:background="@color/grey"
-        android:gravity="center"
-        android:text="3 Lbs"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="45sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/firstRealWeight"
-        app:layout_constraintTop_toBottomOf="@+id/firstRealWeight" />
-
-    <TextView
-        android:id="@+id/thirdRealWeight"
+        android:id="@+id/secondKgWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
         android:gravity="center"
-        android:text="3 Lbs"
+        android:text="3 KG"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@+id/secondRealWeight"
-        app:layout_constraintTop_toBottomOf="@+id/secondRealWeight"
+        app:layout_constraintStart_toStartOf="@+id/firstKgWeight"
+        app:layout_constraintTop_toBottomOf="@+id/firstKgWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/fourthRealWeight"
+        android:id="@+id/thirdKgWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
         android:gravity="center"
-        android:text="3 Lbs"
+        android:text="3 KG"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@+id/thirdRealWeight"
-        app:layout_constraintTop_toBottomOf="@+id/thirdRealWeight"
+        app:layout_constraintStart_toStartOf="@+id/secondKgWeight"
+        app:layout_constraintTop_toBottomOf="@+id/secondKgWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/fifthRealWeight"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="5dp"
-        app:layout_constraintHeight_percent="0.085"
-        android:background="@color/grey"
-        android:gravity="center"
-        android:text="3 Lbs"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="45sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/fourthRealWeight"
-        app:layout_constraintTop_toBottomOf="@+id/fourthRealWeight"
-        app:layout_constraintWidth_percent="0.35" />
-
-    <TextView
-        android:id="@+id/sixthRealWeight"
+        android:id="@+id/fourthKgWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
         android:gravity="center"
-        android:text="3 Lbs"
+        android:text="3 KG"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@id/fifthRealWeight"
-        app:layout_constraintTop_toBottomOf="@+id/fifthRealWeight"
+        app:layout_constraintStart_toStartOf="@+id/thirdKgWeight"
+        app:layout_constraintTop_toBottomOf="@+id/thirdKgWeight"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/fifthKgWeight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 KG"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@+id/fourthKgWeight"
+        app:layout_constraintTop_toBottomOf="@+id/fourthKgWeight"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/sixthKgWeight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 KG"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/fifthKgWeight"
+        app:layout_constraintTop_toBottomOf="@+id/fifthKgWeight"
         app:layout_constraintWidth_percent="0.35" />
 
 
     <TextView
-        android:id="@+id/firstDecWeight"
+        android:id="@+id/firstGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:text="18 ozs"
+        android:text="18 Grams"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/firstRealWeight"
-        app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
+        app:layout_constraintStart_toEndOf="@id/firstKgWeight"
+        app:layout_constraintTop_toBottomOf="@id/btnKgsStartFishing"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/secondDecWeight"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintWidth_percent="0.35"
-        android:layout_marginTop="5dp"
-        android:background="@color/grey"
-        android:text="18 ozs"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="45sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@+id/firstDecWeight"  />
-
-    <TextView
-        android:id="@+id/thirdDecWeight"
+        android:id="@+id/secondGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
+        android:text="18 Grams"
         android:textAlignment="center"
-        android:text="18 ozs"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@id/secondDecWeight"
-        app:layout_constraintTop_toBottomOf="@+id/secondDecWeight"
+        app:layout_constraintStart_toStartOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@+id/firstGramWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/fourthDecWeight"
+        android:id="@+id/thirdGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:text="18 ozs"
+        android:text="18 Grams"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@id/thirdDecWeight"
-        app:layout_constraintTop_toBottomOf="@+id/thirdDecWeight"
+        app:layout_constraintStart_toStartOf="@id/secondGramWeight"
+        app:layout_constraintTop_toBottomOf="@+id/secondGramWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/fifthDecWeight"
+        android:id="@+id/fourthGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.085"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
+        android:text="18 Grams"
         android:textAlignment="center"
-        android:text="18 ozs"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@id/fourthDecWeight"
-        app:layout_constraintTop_toBottomOf="@+id/fourthDecWeight"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/thirdGramWeight"
+        app:layout_constraintTop_toBottomOf="@+id/thirdGramWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
-        android:id="@+id/sixthDecWeight"
+        android:id="@+id/fifthGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
+        android:text="18 Grams"
         android:textAlignment="center"
-        android:text="18 ozs"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="@id/fifthDecWeight"
-        app:layout_constraintTop_toBottomOf="@+id/fifthDecWeight"
+        app:layout_constraintStart_toStartOf="@id/fourthGramWeight"
+        app:layout_constraintTop_toBottomOf="@+id/fourthGramWeight"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/sixthGramWeight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 Grams"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/fifthGramWeight"
+        app:layout_constraintTop_toBottomOf="@+id/fifthGramWeight"
         app:layout_constraintWidth_percent="0.35" />
 
     <TextView
         android:id="@+id/txtTypeLetter1"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:textAlignment="center"
         android:text=""
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintWidth_percent="0.1"
-        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/btnStartFishing"/>
+        app:layout_constraintStart_toEndOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/btnKgsStartFishing"
+        app:layout_constraintWidth_percent="0.1" />
 
     <TextView
         android:id="@+id/txtTypeLetter2"
@@ -305,8 +309,8 @@
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/secondDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/firstDecWeight"
+        app:layout_constraintStart_toEndOf="@id/secondGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/firstGramWeight"
         app:layout_constraintWidth_percent="0.1" />
 
     <TextView
@@ -322,26 +326,26 @@
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/secondDecWeight"
+        app:layout_constraintStart_toEndOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/secondGramWeight"
         app:layout_constraintWidth_percent="0.1" />
 
     <TextView
         android:id="@+id/txtTypeLetter4"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:textAlignment="center"
         android:text=""
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintWidth_percent="0.1"
-        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/thirdDecWeight" />
+        app:layout_constraintStart_toEndOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/thirdGramWeight"
+        app:layout_constraintWidth_percent="0.1" />
 
     <TextView
         android:id="@+id/txtTypeLetter5"
@@ -356,26 +360,26 @@
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/fourthDecWeight"
+        app:layout_constraintStart_toEndOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/fourthGramWeight"
         app:layout_constraintWidth_percent="0.1" />
 
     <TextView
         android:id="@+id/txtTypeLetter6"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@color/grey"
-        android:textAlignment="center"
         android:text=""
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintWidth_percent="0.1"
-        app:layout_constraintStart_toEndOf="@id/firstDecWeight"
-        app:layout_constraintTop_toBottomOf="@id/fifthDecWeight" />
+        app:layout_constraintStart_toEndOf="@id/firstGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/fifthGramWeight"
+        app:layout_constraintWidth_percent="0.1" />
 
     <TableLayout
         android:id="@+id/tableLayout"
@@ -387,12 +391,12 @@
         android:layout_marginBottom="2dp"
         android:gravity="start"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/totalRealWeight"
+        app:layout_constraintBottom_toTopOf="@+id/totalKgWeight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.025"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sixthRealWeight"
+        app:layout_constraintTop_toBottomOf="@+id/sixthKgWeight"
         app:layout_constraintVertical_bias="0.50"
         app:layout_constraintWidth_percent="0.2" />
 
@@ -401,10 +405,10 @@
         android:layout_width="300dp"
         android:layout_height="30dp"
         android:gravity="center"
-        android:textColor="@color/black"
         android:text="Weight Lbs/Ozs"
         android:textAlignment="center"
         android:textAllCaps="true"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/tableLayout"
@@ -430,11 +434,9 @@
         app:layout_constraintWidth_percent="0.25" />
 
     <TextView
-        android:id="@+id/totalRealWeight"
+        android:id="@+id/totalKgWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintWidth_percent="0.2"
         android:layout_marginTop="5dp"
         android:background="@color/clip_white"
         android:gravity="center"
@@ -443,17 +445,17 @@
         android:textColor="@color/black"
         android:textSize="48sp"
         android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.1"
         app:layout_constraintStart_toEndOf="@id/btnMenu"
-        app:layout_constraintTop_toBottomOf="@id/tableLayout" />
+        app:layout_constraintTop_toBottomOf="@id/tableLayout"
+        app:layout_constraintWidth_percent="0.2" />
 
     <TextView
-        android:id="@+id/totalDecWeight"
+        android:id="@+id/totalGramWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintWidth_percent="0.2"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
         android:background="@color/clip_white"
         android:gravity="center"
         android:hint=" 14 oz"
@@ -461,22 +463,29 @@
         android:textColor="@color/black"
         android:textSize="48sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/totalRealWeight"
-        app:layout_constraintTop_toBottomOf="@id/tableLayout" />
+        app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/totalKgWeight"
+        app:layout_constraintTop_toBottomOf="@id/tableLayout"
+        app:layout_constraintWidth_percent="0.2" />
 
+    <ToggleButton
+        android:id="@+id/btnReSetData"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:text="Limit #"
+        app:layout_constraintHeight_percent="0.125"
+        app:layout_constraintStart_toEndOf="@id/totalGramWeight"
+        app:layout_constraintTop_toBottomOf="@id/tableLayout"
+        app:layout_constraintWidth_percent="0.2" />
 
-        <Button
-            android:id="@+id/btnResetCatch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:text="Reset-?"
-            android:background="@color/Log_orange"
-            app:layout_constraintStart_toEndOf="@id/btnMenu"
-            app:layout_constraintTop_toBottomOf="@id/btnMenu"/>
-
-
+    <ListView
+        android:id="@+id/listViewTournamentCatches"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        app:layout_constraintStart_toStartOf="@id/btnMenu"
+        app:layout_constraintTop_toBottomOf="@id/totalGramWeight" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

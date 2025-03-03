@@ -14,22 +14,30 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     private lateinit var speciesSpinner: Spinner
     private lateinit var lbsSpinner: Spinner
     private lateinit var ozSpinner: Spinner
+    private lateinit var addCatch: Button
     private lateinit var saveButton: Button
     private lateinit var listView: ListView
     private lateinit var catchAdapter: CatchItemAdapter
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
 
+    private var measurementSystem: String = "weight"
+    private var tournamentSpecies: String = "Unknown"
+    private val REQUEST_WEIGHT_ENTRY = 1001
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_lbs_ozs)
 
+
+        //########## GoTo SetUp Page  #######################
         val openSetUpActivity = findViewById<Button>(R.id.btnSetUp3)
         openSetUpActivity.setOnClickListener {
             val intent = Intent(this, SetUpActivity::class.java)
             startActivity(intent)
         }
 
+        addCatch = findViewById(R.id.btnAddCatch)
         speciesSpinner = findViewById(R.id.speciesSpinner)
         lbsSpinner = findViewById(R.id.lbsSpinner)
         ozSpinner = findViewById(R.id.ozSpinner)
@@ -53,6 +61,14 @@ class CatchEntryLbsOzs : AppCompatActivity() {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 
+    // !!!!!!!!!!!!!! Enter Weight PopUp !!!!!!!!!!!!!!!!!!!!!
+
+        addCatch.setOnClickListener{
+            showWeightPopup()
+        }
+
+
+
         saveButton.setOnClickListener {
             try {
                 val species = speciesSpinner.selectedItem.toString()
@@ -67,8 +83,8 @@ class CatchEntryLbsOzs : AppCompatActivity() {
                     species = species,
                     totalWeightOz = totalWeightOz,
                     totalLengthA8th = null,
-                    weightDecimalTenthKg = null,  // ✅ Fix: Add null for metric weight
                     lengthDecimalTenthCm = null,
+                    totalWeightHundredthKg = null,
                     catchType = "weight_imperial"
                 )
 
@@ -122,5 +138,50 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     private fun getCurrentTimestamp(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         return sdf.format(Date())
+    }
+
+    // !!!!!!!!!!!!!! OPENS - Enter Weight PopUp - !!!!!!!!!!!!!!!!!!!!!
+    private fun showWeightPopup() {
+        val intent = Intent(this, PopupWeightEntry::class.java)
+        intent.putExtra("isTournament", true)
+        intent.putExtra("catchType", if (measurementSystem == "weight") "lbsOzs" else "kgs")
+        intent.putExtra("tournamentSpecies", tournamentSpecies) // ✅ Match the key name expected in PopupWeightEntry
+
+
+        startActivityForResult(intent,REQUEST_WEIGHT_ENTRY)
+
+        try {
+            val species = speciesSpinner.selectedItem.toString()
+            val weightLbs = lbsSpinner.selectedItem.toString().toInt()
+            val weightOz = ozSpinner.selectedItem.toString().toInt()
+            val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Store weight as total ounces
+            val dateTime = getCurrentTimestamp()
+
+            val newCatch = CatchItem(
+                id = 0,
+                dateTime = dateTime,
+                species = species,
+                totalWeightOz = totalWeightOz,
+                totalLengthA8th = null,
+                totalWeightHundredthKg= null,
+                lengthDecimalTenthCm = null,
+                catchType = "weight_imperial",
+                markerType = null,
+                clipColor = null
+            )
+
+
+            dbHelper.insertCatch(newCatch)
+            catchList.add(0, newCatch)
+            catchAdapter.notifyDataSetChanged()
+            Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
+
+            speciesSpinner.setSelection(0)
+            lbsSpinner.setSelection(0)
+            ozSpinner.setSelection(0)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
     }
 }

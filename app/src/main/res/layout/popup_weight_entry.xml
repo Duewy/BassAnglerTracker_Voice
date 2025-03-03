@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp"
+        android:background="@drawable/popup_background"
         android:orientation="vertical"
-        android:background="@drawable/popup_background">
+        android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <!-- Popup Title -->
         <TextView
@@ -16,35 +20,49 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Enter Catch Details"
-            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <!-- Species Spinner -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:text="Select Species"
+            android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />
 
+
         <Spinner
-            android:id="@+id/spinnerSpecies"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:id="@+id/spinnerSpeciesPopUp"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:spinnerMode="dialog"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:background="@color/clip_white"
+            android:entries="@array/species_list" />
 
         <!-- Weight Input (Lbs/Ozs) -->
+
         <LinearLayout
             android:id="@+id/layoutWeightLbsOzs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <EditText
                 android:id="@+id/edtWeightLbs"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:textColor="@color/black"
                 android:hint="Lbs"
                 android:inputType="number" />
 
@@ -57,14 +75,35 @@
                 android:inputType="number" />
         </LinearLayout>
 
-        <!-- Weight Input (Kgs) -->
-        <EditText
-            android:id="@+id/edtWeightKgs"
+        <LinearLayout
+            android:id="@+id/layoutWeightKgs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Weight in Kgs"
-            android:inputType="numberDecimal"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <!-- Weight Input (Kgs) -->
+            <EditText
+                android:id="@+id/edtWeightKgs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Weight in Kgs"
+                android:inputType="numberDecimal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="." />
+
+            <EditText
+                android:id="@+id/edtWeightGrams"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Grams"
+                android:inputType="number" />
+
+        </LinearLayout>
 
         <!-- Length Input (Inches) -->
         <EditText
@@ -88,13 +127,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnSaveWeight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
                 android:text="Save" />
 
             <Button

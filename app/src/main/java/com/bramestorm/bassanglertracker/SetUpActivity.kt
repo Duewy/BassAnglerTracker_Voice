@@ -105,46 +105,49 @@ class SetUpActivity : AppCompatActivity() {
         btnTournament.setOnClickListener {
             isTournamentSelected = true
             isFunDaySelected = false
+            isLengthSelected = false
+            isWeightSelected = true
             btnTournament.setBackgroundResource(R.color.white)
             btnFunDay.setBackgroundResource(R.color.grey)
             btnLength.visibility = View.INVISIBLE       //take away measuring options for Tournament mode
-            btnMetric.visibility=View.INVISIBLE
             tglCullingValue.visibility = View.VISIBLE
             tglColorLetter.visibility = View.VISIBLE
             spinnerTournamentSpecies.visibility =View.VISIBLE
         }
 
-        // ✅ Select Fishing Event (Fun Day or Tournament)
+        /// ✅ Select Fishing Event (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
 
-            // Determine next activity based on selections
+            // Determine next activity for Fun Day mode
             val nextActivity = when {
                 isWeightSelected && isImperialSelected && isFunDaySelected -> CatchEntryLbsOzs::class.java
-                isWeightSelected && !isImperialSelected && isFunDaySelected -> CatchEntryKgs::class.java
-                !isWeightSelected && isImperialSelected && isFunDaySelected -> CatchEntryInches::class.java
-                !isWeightSelected && !isImperialSelected && isFunDaySelected -> CatchEntryMetric::class.java
-                else -> CatchEntryTournament::class.java // Default to Tournament Mode
+                isWeightSelected && isMetricSelected && isFunDaySelected -> CatchEntryKgs::class.java
+                isLengthSelected && isImperialSelected && isFunDaySelected -> CatchEntryInches::class.java
+                isLengthSelected && isMetricSelected && isFunDaySelected -> CatchEntryMetric::class.java
+                else -> null
             }
 
-            // If it's Tournament Mode, attach extra data
-            if (!isFunDaySelected) {
+            nextActivity?.let { startActivity(Intent(this, it)) }
+
+            // Tournament Mode (Imperial & Metric)
+            if (isTournamentSelected) {
                 val numberOfCatches = if (tglCullingValue.isChecked) 5 else 4
                 val typeOfMarkers = if (tglColorLetter.isChecked) "Color" else "Number"
                 val selectedSpecies = spinnerTournamentSpecies.selectedItem?.toString() ?: "Unknown"
+                val tournamentActivity = if (isImperialSelected) CatchEntryTournament::class.java else CatchEntryTournamentKgs::class.java
 
-                val intent = Intent(this, CatchEntryTournament::class.java).apply {
+                val intent = Intent(this, tournamentActivity).apply {
                     putExtra("NUMBER_OF_CATCHES", numberOfCatches)
                     putExtra("Color_Numbers", typeOfMarkers)
                     putExtra("TOURNAMENT_SPECIES", selectedSpecies)
                     putExtra("unitType", if (isWeightSelected) "weight" else "length")
                     putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                 }
+
                 startActivity(intent)
-            } else {
-                // Regular Fun Day Mode
-                startActivity(Intent(this, nextActivity))
             }
         }
+
 
 
     }

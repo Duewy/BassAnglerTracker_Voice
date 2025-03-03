@@ -22,7 +22,7 @@ class CatchItemAdapter(context: Context, private val catches: MutableList<CatchI
                     val totalOz = it.totalWeightOz ?: 0
                     "${it.species}: ${totalOz / 16} lbs, ${totalOz % 16} oz"
                 }
-                "weight_metric" -> "${it.species}: ${it.weightDecimalTenthKg?.div(10.0) ?: 0.0} kg"
+                "weight_metric" -> "${it.species}: ${it.totalWeightHundredthKg?.div(10.0) ?: 0.0} kg"
                 "length_imperial" -> {
                     val totalA8th = it.totalLengthA8th ?: 0
                     "${it.species}: ${totalA8th / 8} in ${totalA8th % 8}/8"
