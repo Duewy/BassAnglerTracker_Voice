@@ -42,6 +42,24 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView"
         app:layout_constraintWidth_percent="0.55" />
 
+    <Button
+        android:id="@+id/btnKgsAlarm"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80C5D2E8"
+        android:gravity="center"
+        android:hint="@string/days_End_time"
+        android:text="ALARM"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_red"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btnKgsStartFishing"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/btnKgsStartFishing"
+        app:layout_constraintWidth_percent="0.3"/>
+
     <TextClock
         android:id="@+id/timeNOW"
         android:layout_width="0dp"
@@ -57,25 +75,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.4"
         tools:text="@string/timer_place_holder" />
-
-
-    <TextView
-        android:id="@+id/alarmTxtBox"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#80C5D2E8"
-        android:gravity="center"
-        android:hint="@string/days_End_time"
-        android:text="ALARM"
-        android:textAllCaps="true"
-        android:textColor="@color/clip_red"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btnKgsStartFishing"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/btnKgsStartFishing"
-        app:layout_constraintWidth_percent="0.3" />
 
 
     <TextView
@@ -486,6 +485,8 @@
         android:layout_marginTop="1dp"
         app:layout_constraintStart_toStartOf="@id/btnMenu"
         app:layout_constraintTop_toBottomOf="@id/totalGramWeight" />
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

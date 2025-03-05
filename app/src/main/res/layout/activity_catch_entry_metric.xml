@@ -4,140 +4,73 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/softlock_green"
+    android:background="@color/clip_yellow"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CatchEntryMetric">
 
     <!-- Page Label -->
     <TextView
-        android:id="@+id/txtTodaysLogMetric"
+        android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="39dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="CMeter fishing log "
+        android:text="todays fishing log CM"
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/btnSetUpCM"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- btn Goto Set Up Page -->
     <Button
-        android:id="@+id/btnSetUpCM"
+        android:id="@+id/btnSetUp3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
         android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogMetric" />
-
-    <!-- Weight Label -->
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
 
     <TextView
-        android:id="@+id/lengthLabel"
+        android:id="@+id/txtAddCatch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Centimeters:"
-        android:gravity="top"
+        android:text="Add Catch:"
         android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btnSetUpCM" />
-
-    <TextView
-        android:id="@+id/decText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:text="XX.X"
-        android:textScaleX="1.75"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/lengthLabel"
-        app:layout_constraintTop_toTopOf="@id/lengthLabel" />
-
-    <!-- Centimeter Spinner -->
-
-
-    <Spinner
-        android:id="@+id/tensSpinner"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="@id/lengthLabel"
-        app:layout_constraintTop_toBottomOf="@id/lengthLabel" />
-
-    <Spinner
-        android:id="@+id/centimeterSpinner"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="20dp"
-        app:layout_constraintTop_toTopOf="@id/tensSpinner"
-        app:layout_constraintStart_toEndOf="@id/tensSpinner"
-        app:layout_constraintTop_toBottomOf="@id/lengthLabel" />
-
-    <TextView
-        android:id="@+id/decTxt"
-        android:layout_width="20dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text="'"
-        android:textSize="60sp"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toTopOf="@id/saveCatchButton"
-        app:layout_constraintStart_toEndOf="@id/centimeterSpinner" />
-    <!-- Decimal Spinner -->
-
-    <Spinner
-        android:id="@+id/decimalSpinner"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@id/decText"
-        app:layout_constraintTop_toTopOf="@id/tensSpinner"/>
-
-
-
-
-    <!-- Species Spinner -->
-    <Spinner
-        android:id="@+id/speciesSpinner"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:background="@color/clip_white"
-        android:entries="@array/species_list"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toStartOf="@id/saveCatchButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/centimeterSpinner" />
-
-
-    <!-- Save Button -->
+        app:layout_constraintStart_toStartOf="@id/txtTodaysLog"
+        app:layout_constraintTop_toBottomOf="@id/btnSetUp3"  />
+    <!-- btn btnAddCatch by Goto Popup Page -->
 
     <Button
-        android:id="@+id/saveCatchButton"
+        android:id="@+id/btnOpenCmLengthPopup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/addCatchBtn"
+        app:layout_constraintEnd_toStartOf="@+id/btnSetUp3"
+        app:layout_constraintHorizontal_bias="0.294"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtAddCatch" />
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/btnSaveCatch"
         android:layout_width="199dp"
         android:layout_height="53dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="5dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="15dp"
         android:text="@string/save_catch"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/centimeterSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/txtAddCatch"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
     <!-- List of Todays Catch -->
     <ListView
@@ -148,12 +81,9 @@
         android:dividerHeight="1dp"
         android:scrollbars="vertical"
         android:padding="8dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/speciesSpinner"
+        app:layout_constraintTop_toBottomOf="@id/btnSaveCatch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

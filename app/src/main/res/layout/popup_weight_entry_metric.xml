@@ -20,8 +20,10 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enter Weight ( Lbs , Ozs )"
-            android:textSize="18sp" />
+            android:text="Enter Weight (Centimeters)"
+            android:textSize="22sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"            />
 
         <!-- Species Spinner -->
         <TextView
@@ -29,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:text=" Select Species "
+            android:text="Select Species"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -52,19 +54,19 @@
             android:visibility="visible">
 
             <EditText
-                android:id="@+id/edtWeightLbs"
+                android:id="@+id/edtWeightCms"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="   Lbs"
+                android:hint="Cms"
                 android:inputType="number" />
 
             <EditText
-                android:id="@+id/edtWeightOzs"
+                android:id="@+id/edtWeightDec"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="      Ozs"
+                android:hint="Ozs"
                 android:inputType="number" />
 
         </LinearLayout>
@@ -76,14 +78,20 @@
             android:id="@+id/btnSaveWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Catch" />
+            android:text="Save Catch"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
         <!-- CANCEL btn  -->
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:text="Cancel"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

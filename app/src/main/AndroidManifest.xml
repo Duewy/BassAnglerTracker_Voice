@@ -27,21 +27,25 @@
         </activity>
 
         <activity android:name=".SetUpActivity"/>
+
         <activity android:name=".CatchEntryLbsOzs"/>
         <activity android:name=".CatchEntryKgs"/>
         <activity android:name=".CatchEntryInches"/>
         <activity android:name=".CatchEntryMetric"/>
+
         <activity android:name=".CatchEntryTournament"/>
         <activity android:name=".CatchEntryTournamentKgs"/>
+
+        <activity android:name=".PopupWeightEntryTourKgs"/>
+        <activity android:name=".PopupWeightEntryTourLbs"/>
+
         <activity android:name=".PopupWeightEntryKgs"/>
-        <activity android:name=".PopupWeightEntry"
+        <activity android:name=".PopupWeightEntryLbs"/>
+        <activity android:name=".PopupLengthEntryInches"/>
+        <activity android:name=".PopupLengthEntryMetric"/>
+
+        <activity android:name=".PopUpAlarm"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
-        <activity
-            android:name=".PopUpAlarm"
-            android:theme="@style/Theme.AppCompat.Light.Dialog">
-        </activity>
-
-
 
 
     </application>

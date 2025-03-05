@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.bramestorm.bassanglertracker.CatchItem
 import android.util.Log
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -53,26 +56,30 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
             db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO old_$TABLE_NAME")
 
             // Step 2: Create the new table with the correct schema
-            db.execSQL("""
+            db.execSQL(
+                """
             CREATE TABLE $TABLE_NAME (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date_time TEXT,
-                species TEXT,
+                date_time TEXT NOT NULL,
+                species TEXT NOT NULL,
                 total_weight_oz INTEGER,
                 total_length_8ths INTEGER,
                 total_weight_hundredth_kg INTEGER DEFAULT 0,  -- ✅ Ensure this column is included
                 total_length_tenths INTEGER,
-                catch_type TEXT,
+                catch_type TEXT NOT NULL,
                 marker_type TEXT,
                 clip_color TEXT
             )
-        """.trimIndent())
+        """.trimIndent()
+            )
 
             // Step 3: Copy data from the old table to the new table
-            db.execSQL("""
+            db.execSQL(
+                """
             INSERT INTO $TABLE_NAME (id, date_time, species, total_weight_oz, total_length_8ths, total_length_tenths, catch_type, marker_type, clip_color)
             SELECT id, date_time, species, total_weight_oz, total_length_8ths, total_length_tenths, catch_type, marker_type, clip_color FROM old_$TABLE_NAME
-        """.trimIndent())
+        """.trimIndent()
+            )
 
             // Step 4: Drop the old table
             db.execSQL("DROP TABLE old_$TABLE_NAME")
@@ -80,28 +87,38 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
     }
 
 
-
-
     fun insertCatch(catch: CatchItem): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put(COLUMN_DATE_TIME, catch.dateTime)
+            put(COLUMN_DATE_TIME, catch.dateTime) // ✅ Correctly maps dateTime -> date_time
             put(COLUMN_SPECIES, catch.species)
-            put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz ?: 0)
-            put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th ?: 0)
-            put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg ?: 0)
-            put(COLUMN_TOTAL_LENGTH_TENTHS, catch.lengthDecimalTenthCm ?: 0)
+            put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
+            put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th)
+            put(COLUMN_TOTAL_LENGTH_TENTHS, catch.lengthDecimalTenthCm)
+            put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
             put(COLUMN_CATCH_TYPE, catch.catchType)
             put(COLUMN_MARKER_TYPE, catch.markerType)
             put(COLUMN_CLIP_COLOR, catch.clipColor)
         }
-        return db.insert(TABLE_NAME, null, values) != -1L
+
+        val result = db.insert(TABLE_NAME, null, values)
+        db.close()
+
+        return result != -1L // ✅ Returns `true` if insert was successful
     }
+
+
 
     fun getAllCatches(): List<CatchItem> {
         val catches = mutableListOf<CatchItem>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME ORDER BY $COLUMN_DATE_TIME DESC", null)
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) // Get today's date
+        val cursor = db.rawQuery(
+            "SELECT * FROM catches WHERE date_time LIKE ? AND catchType = ? ORDER BY totalWeightOz DESC",
+            arrayOf("$todayDate%", "lbsOzs")
+        )
+
+
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
@@ -146,9 +163,60 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         return count
     }
 
+    fun getCatchesForToday(catchType: String, todayDate: String): List<CatchItem> {
+        val db = readableDatabase
+        val catchList = mutableListOf<CatchItem>()
+
+        val cursor = db.rawQuery(
+            "SELECT * FROM catches WHERE dateTime LIKE ? AND catchType = ? ORDER BY totalWeightOz DESC",
+            arrayOf("$todayDate%", catchType)
+        )
+
+        if (cursor.moveToFirst()) {
+            do {
+                val catch = CatchItem(
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                    dateTime = cursor.getString(cursor.getColumnIndexOrThrow("dateTime")),
+                    species = cursor.getString(cursor.getColumnIndexOrThrow("species")),
+                    totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow("totalWeightOz")),
+                    totalLengthA8th = null,
+                    lengthDecimalTenthCm = null,
+                    totalWeightHundredthKg = null,
+                    catchType = cursor.getString(cursor.getColumnIndexOrThrow("catchType")),
+                    markerType = cursor.getString(cursor.getColumnIndexOrThrow("markerType")),
+                    clipColor = null
+                )
+                catchList.add(catch)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return catchList
+    }
+
+
     fun deleteCatch(catchId: Int) {
         val db = writableDatabase
         db.delete(TABLE_NAME, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
     }
+
+    fun logAllTournamentCatches() {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM catches WHERE catchType = 'kgs'", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val species = cursor.getString(cursor.getColumnIndexOrThrow("species"))
+                val totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow("totalWeightHundredthKg"))
+
+                Log.d("TournamentKgsDebug", "DB Entry: ID=$id, Species=$species, Weight=${totalWeightHundredthKg} hundredth kg")
+            } while (cursor.moveToNext())
+        } else {
+            Log.e("TournamentKgsDebug", "Database is empty for Tournament Kgs!")
+        }
+
+        cursor.close()
+    }
+
 }

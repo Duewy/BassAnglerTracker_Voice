@@ -73,7 +73,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_yellow"
+                android:background="@color/softlock_green"
+                android:textColor="@color/black"
                 android:text="Weight"
                 android:textSize="18sp" />
 
@@ -82,7 +83,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_yellow_secondary"
+                android:textColor="@color/black"
+                android:background="@color/clip_yellow"
                 android:text="Length"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -119,7 +121,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_green"
+                android:background="@color/Log_blue_secondary"
+                android:textColor="@color/black"
                 android:text="Imperial"
                 android:textSize="18sp" />
 
@@ -128,7 +131,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_green_secondary"
+                android:background="@color/clip_green"
+                android:textColor="@color/black"
                 android:text="Metric"
                 android:textSize="18sp" />
 
@@ -147,7 +151,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_orange"
+                android:background="@color/clip_orange"
+                android:textColor="@color/black"
                 android:text="Fun Day"
                 android:textSize="18sp" />
 
@@ -156,7 +161,8 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_red_secondary"
+                android:background="@color/clip_red"
+                android:textColor="@color/black"
                 android:text="Tournament"
                 android:textSize="18sp" />
 
@@ -176,8 +182,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@color/primary_variant"
+                android:layout_marginBottom="10dp"
+                android:background="@color/purple_200"
                 android:text="Start Fishing Event"
+                android:textColor="@color/black"
                 android:textSize="22sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -223,6 +231,7 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
                 android:background="@color/Log_blue"
+                android:textColor="@color/black"
                 android:textOff="4"
                 android:textOn="5"
                 android:textSize="34sp"
@@ -239,6 +248,7 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
                 android:background="@color/Log_blue_secondary"
+                android:textColor="@color/black"
                 android:textOff="Colors"
                 android:textOn="Letters"
                 android:textSize="34sp"
@@ -304,7 +314,8 @@
                 android:layout_marginStart="40dp"
                 android:background="@color/Log_white"
                 android:entries="@array/species_list"
-                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textSize="24sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="wrap_content"

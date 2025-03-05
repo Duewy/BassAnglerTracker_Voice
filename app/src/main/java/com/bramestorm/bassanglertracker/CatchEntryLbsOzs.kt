@@ -1,6 +1,6 @@
 package com.bramestorm.bassanglertracker
 
-import android.app.AlertDialog
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -11,177 +11,106 @@ import java.util.*
 
 class CatchEntryLbsOzs : AppCompatActivity() {
 
-    private lateinit var speciesSpinner: Spinner
-    private lateinit var lbsSpinner: Spinner
-    private lateinit var ozSpinner: Spinner
-    private lateinit var addCatch: Button
-    private lateinit var saveButton: Button
-    private lateinit var listView: ListView
-    private lateinit var catchAdapter: CatchItemAdapter
-    private val catchList = mutableListOf<CatchItem>()
+    private lateinit var btnSetUp3: Button
+    private lateinit var btnSaveCatch: Button
+    private lateinit var btnOpenWeightPopup: Button
+    private lateinit var simpleListView: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
 
-    private var measurementSystem: String = "weight"
-    private var tournamentSpecies: String = "Unknown"
-    private val REQUEST_WEIGHT_ENTRY = 1001
+    private var selectedSpecies: String = "Large Mouth"
+    private var totalWeightOz: Int = 0
+
+    private val requestWeightEntry = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_lbs_ozs)
 
-
-        //########## GoTo SetUp Page  #######################
-        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp3)
-        openSetUpActivity.setOnClickListener {
-            val intent = Intent(this, SetUpActivity::class.java)
-            startActivity(intent)
-        }
-
-        addCatch = findViewById(R.id.btnAddCatch)
-        speciesSpinner = findViewById(R.id.speciesSpinner)
-        lbsSpinner = findViewById(R.id.lbsSpinner)
-        ozSpinner = findViewById(R.id.ozSpinner)
-        saveButton = findViewById(R.id.saveCatchButton)
-        listView = findViewById(R.id.simpleListView)
-
         dbHelper = CatchDatabaseHelper(this)
 
-        catchAdapter = CatchItemAdapter(this, catchList)
-        listView.adapter = catchAdapter
+        btnSetUp3 = findViewById(R.id.btnSetUp3)
+        btnSaveCatch = findViewById(R.id.btnSaveCatch)
+        btnOpenWeightPopup = findViewById(R.id.btnOpenWeightPopup)
+        simpleListView = findViewById(R.id.simpleListView)
 
-        loadCatches()
+        updateListView() // Load today's catches into ListView
 
-        val lbsList = (0..50).toList()
-        lbsSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lbsList).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        btnOpenWeightPopup.setOnClickListener {
+            openWeightPopup()
         }
 
-        val ozList = (0..15).toList()
-        ozSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ozList).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
-
-    // !!!!!!!!!!!!!! Enter Weight PopUp !!!!!!!!!!!!!!!!!!!!!
-
-        addCatch.setOnClickListener{
-            showWeightPopup()
-        }
-
-
-
-        saveButton.setOnClickListener {
-            try {
-                val species = speciesSpinner.selectedItem.toString()
-                val weightLbs = lbsSpinner.selectedItem.toString().toInt()
-                val weightOz = ozSpinner.selectedItem.toString().toInt()
-                val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Store weight as total ounces
-                val dateTime = getCurrentTimestamp()
-
-                val newCatch = CatchItem(
-                    id = 0,
-                    dateTime = dateTime,
-                    species = species,
-                    totalWeightOz = totalWeightOz,
-                    totalLengthA8th = null,
-                    lengthDecimalTenthCm = null,
-                    totalWeightHundredthKg = null,
-                    catchType = "weight_imperial"
-                )
-
-
-                dbHelper.insertCatch(newCatch)
-                catchList.add(0, newCatch)
-                catchAdapter.notifyDataSetChanged()
-                Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
-
-                speciesSpinner.setSelection(0)
-                lbsSpinner.setSelection(0)
-                ozSpinner.setSelection(0)
-            } catch (e: Exception) {
-                Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
+        btnSaveCatch.setOnClickListener {
+            if (totalWeightOz > 0) {
+                saveCatch()
+            } else {
+                Toast.makeText(this, "Enter a valid weight!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        listView.setOnItemClickListener { _, _, position, _ ->
-            val selectedCatch = catchList[position]
-            showEditDeleteDialog(selectedCatch)
+        btnSetUp3.setOnClickListener {
+            val intent2 = Intent(this, SetUpActivity::class.java)
+            startActivity(intent2)
         }
     }
 
-    private fun loadCatches() {
-        catchList.clear()
-        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "weight_imperial" }
-        if (fetchedCatches.isEmpty()) {
-            Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
+    private fun openWeightPopup() {
+        val intent = Intent(this, PopupWeightEntryLbs::class.java)
+        startActivityForResult(intent, requestWeightEntry)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == requestWeightEntry && resultCode == Activity.RESULT_OK) {
+            totalWeightOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
+            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
+
+            // Refresh ListView after adding a catch
+            loadCatchList()
+            Toast.makeText(this, "$selectedSpecies - ${totalWeightOz / 16} lbs ${totalWeightOz % 16} oz", Toast.LENGTH_SHORT).show()
         }
-        catchList.addAll(fetchedCatches)
-        catchAdapter.notifyDataSetChanged()
     }
 
-    private fun showEditDeleteDialog(catchItem: CatchItem) {
-        AlertDialog.Builder(this)
-            .setTitle("Edit or Delete")
-            .setMessage("Do you want to edit or delete this entry?")
-            .setPositiveButton("Edit") { _, _ ->
-                Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Delete") { _, _ ->
-                dbHelper.deleteCatch(catchItem.id)
-                loadCatches()
-                Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
-            }
-            .setNeutralButton("Cancel", null)
-            .show()
+    private fun loadCatchList() {
+        val databaseHelper = CatchDatabaseHelper(this)
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) // Get today's date
+        val todayCatches = databaseHelper.getCatchesForToday("lbsOzs", todayDate) // Fetch only today's catches
+        val catchDisplayList = todayCatches.map {
+            "${it.species} - ${it.totalWeightOz?.div(16)} lbs ${it.totalWeightOz?.rem(16)} oz"
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+        simpleListView.adapter = adapter
     }
 
-    private fun getCurrentTimestamp(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private fun saveCatch() {
+        val catch = CatchItem(
+            id = 0,
+            dateTime = getCurrentDateTime(),
+            species = selectedSpecies,
+            totalWeightOz = totalWeightOz,
+            totalLengthA8th = null,
+            lengthDecimalTenthCm = null,
+            totalWeightHundredthKg = null,
+            catchType = "lbsOzs",
+            markerType = selectedSpecies,
+            clipColor = null
+        )
+
+        dbHelper.insertCatch(catch)
+        Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+
+        totalWeightOz = 0
+        btnSaveCatch.isEnabled = false  // Prevent accidental resaves
+        updateListView()
+    }
+
+    private fun updateListView() {
+        loadCatchList() // Now only loads today's catches
+    }
+
+    private fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
-    }
-
-    // !!!!!!!!!!!!!! OPENS - Enter Weight PopUp - !!!!!!!!!!!!!!!!!!!!!
-    private fun showWeightPopup() {
-        val intent = Intent(this, PopupWeightEntry::class.java)
-        intent.putExtra("isTournament", true)
-        intent.putExtra("catchType", if (measurementSystem == "weight") "lbsOzs" else "kgs")
-        intent.putExtra("tournamentSpecies", tournamentSpecies) // ✅ Match the key name expected in PopupWeightEntry
-
-
-        startActivityForResult(intent,REQUEST_WEIGHT_ENTRY)
-
-        try {
-            val species = speciesSpinner.selectedItem.toString()
-            val weightLbs = lbsSpinner.selectedItem.toString().toInt()
-            val weightOz = ozSpinner.selectedItem.toString().toInt()
-            val totalWeightOz = (weightLbs * 16) + weightOz // ✅ Store weight as total ounces
-            val dateTime = getCurrentTimestamp()
-
-            val newCatch = CatchItem(
-                id = 0,
-                dateTime = dateTime,
-                species = species,
-                totalWeightOz = totalWeightOz,
-                totalLengthA8th = null,
-                totalWeightHundredthKg= null,
-                lengthDecimalTenthCm = null,
-                catchType = "weight_imperial",
-                markerType = null,
-                clipColor = null
-            )
-
-
-            dbHelper.insertCatch(newCatch)
-            catchList.add(0, newCatch)
-            catchAdapter.notifyDataSetChanged()
-            Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
-
-            speciesSpinner.setSelection(0)
-            lbsSpinner.setSelection(0)
-            ozSpinner.setSelection(0)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
     }
 }

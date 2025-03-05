@@ -1,6 +1,6 @@
 package com.bramestorm.bassanglertracker
 
-import android.app.AlertDialog
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -11,128 +11,102 @@ import java.util.*
 
 class CatchEntryInches : AppCompatActivity() {
 
-    private lateinit var speciesSpinner: Spinner
-    private lateinit var inchesSpinner: Spinner
-    private lateinit var eighthSpinner: Spinner
-    private lateinit var saveButton: Button
-    private lateinit var listView: ListView
-    private lateinit var setUpButton: Button
-    private lateinit var catchAdapter: CatchItemAdapter
-    private val catchList = mutableListOf<CatchItem>()
+    private lateinit var btnSetUp3: Button
+    private lateinit var btnSaveCatch: Button
+    private lateinit var btnOpenLengthPopup: Button
+    private lateinit var simpleListView: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
+
+    private var selectedSpecies: String = "Large Mouth"
+    private var totalLengthA8th: Int = 0
+
+    private val requestLengthEntry = 1002
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_inches)
 
-        // Initialize views
-        speciesSpinner = findViewById(R.id.speciesSpinner)
-        inchesSpinner = findViewById(R.id.inchesSpinner)
-        eighthSpinner = findViewById(R.id.eightSpinner)
-        saveButton = findViewById(R.id.saveCatchButton)
-        listView = findViewById(R.id.simpleListView)
-        setUpButton = findViewById(R.id.btnSetUpInches)
-
-        // Initialize database helper and custom adapter
         dbHelper = CatchDatabaseHelper(this)
-        catchAdapter = CatchItemAdapter(this, catchList)
-        listView.adapter = catchAdapter
 
-        // Load existing catches
-        loadCatches()
+        btnSetUp3 = findViewById(R.id.btnSetUp3)
+        btnSaveCatch = findViewById(R.id.btnSaveCatch)
+        btnOpenLengthPopup = findViewById(R.id.btnOpenLengthPopup)
+        simpleListView = findViewById(R.id.simpleListView)
 
-        // Setup spinner for inches (values 0 to 50)
-        val inchesList = (0..50).toList()
-        val inchesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, inchesList)
-        inchesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        inchesSpinner.adapter = inchesAdapter
+        updateListView()
 
-        // Setup spinner for 1/8 increments (values 0 to 7)
-        val eighthList = (0..7).toList()
-        val eighthAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, eighthList)
-        eighthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        eighthSpinner.adapter = eighthAdapter
+        btnOpenLengthPopup.setOnClickListener {
+            openLengthPopup()
+        }
 
-        // Save new catch when saveButton is clicked
-        saveButton.setOnClickListener {
-            try {
-                val species = speciesSpinner.selectedItem.toString()
-                val inches = inchesSpinner.selectedItem.toString().toInt()
-                val eighth = eighthSpinner.selectedItem.toString().toInt()
-                val totalLength8ths = (inches * 8) + eighth // ✅ Store length as total 8ths
-                val dateTime = getCurrentTimestamp()
-
-                val newCatch = CatchItem(
-                    id = 0,
-                    dateTime = dateTime,
-                    species = species,
-                    totalWeightOz = null,
-                    totalWeightHundredthKg = null,
-                    totalLengthA8th = totalLength8ths,
-                    lengthDecimalTenthCm = null,
-                    catchType = "inches",
-                    markerType = null,
-                    clipColor = null
-                )
-
-
-                // Insert the new catch into the database and update the list
-                dbHelper.insertCatch(newCatch)
-                catchList.add(0, newCatch)
-                catchAdapter.notifyDataSetChanged()
-                Toast.makeText(this, "Catch saved!", Toast.LENGTH_SHORT).show()
-
-                // Reset spinners to initial positions
-                speciesSpinner.setSelection(0)
-                inchesSpinner.setSelection(0)
-                eighthSpinner.setSelection(0)
-            } catch (e: Exception) {
-                Toast.makeText(this, "Error saving catch: ${e.message}", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
+        btnSaveCatch.setOnClickListener {
+            if (totalLengthA8th > 0) {
+                saveCatch()
+            } else {
+                Toast.makeText(this, "Enter a valid length!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // ListView item click for edit/delete (currently only delete)
-        listView.setOnItemClickListener { _, _, position, _ ->
-            val selectedCatch = catchList[position]
-            showEditDeleteDialog(selectedCatch)
-        }
-
-        // Button to navigate back to the SetUp page
-        setUpButton.setOnClickListener {
-            val intent = Intent(this, SetUpActivity::class.java)
-            startActivity(intent)
+        btnSetUp3.setOnClickListener {
+            val intent2 = Intent(this, SetUpActivity::class.java)
+            startActivity(intent2)
         }
     }
 
-    private fun loadCatches() {
-        catchList.clear()
-        val fetchedCatches = dbHelper.getAllCatches().filter { it.catchType == "lengthInches" }
-        if (fetchedCatches.isEmpty()) {
-            Toast.makeText(this, "No catches found", Toast.LENGTH_SHORT).show()
+    private fun openLengthPopup() {
+        val intent = Intent(this, PopupLengthEntryInches::class.java)
+        startActivityForResult(intent, requestLengthEntry)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == requestLengthEntry && resultCode == Activity.RESULT_OK) {
+            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: "Unknown"
+            totalLengthA8th = data?.getIntExtra("lengthTotalA8th", 0) ?: 0
+
+            val inches = totalLengthA8th / 8
+            val eighths = totalLengthA8th % 8
+            Toast.makeText(this, "$selectedSpecies - $inches" + "-${eighths}/8 inches", Toast.LENGTH_SHORT).show()
         }
-        catchList.addAll(fetchedCatches)
-        catchAdapter.notifyDataSetChanged()
     }
 
-    private fun showEditDeleteDialog(catchItem: CatchItem) {
-        AlertDialog.Builder(this)
-            .setTitle("Edit or Delete")
-            .setMessage("Do you want to edit or delete this entry?")
-            .setPositiveButton("Edit") { _, _ ->
-                Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Delete") { _, _ ->
-                dbHelper.deleteCatch(catchItem.id)
-                loadCatches()
-                Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
-            }
-            .setNeutralButton("Cancel", null)
-            .show()
+    private fun saveCatch() {
+        val catch = CatchItem(
+            id = 0,
+            dateTime = getCurrentDateTime(),
+            species = selectedSpecies,
+            totalWeightOz = null,
+            totalLengthA8th = totalLengthA8th,
+            lengthDecimalTenthCm = null,
+            totalWeightHundredthKg = null,
+            catchType = "inches",
+            markerType = selectedSpecies,
+            clipColor = null
+        )
+
+        dbHelper.insertCatch(catch)
+        Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+
+        totalLengthA8th = 0
+        updateListView()
     }
 
-    private fun getCurrentTimestamp(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private fun updateListView() {
+        val allCatches = dbHelper.getAllCatches().filter { it.catchType == "inches" }
+
+        val catchDisplayList = allCatches.map {
+            val inches = it.totalLengthA8th?.div(8) ?: 0
+            val eighths = it.totalLengthA8th?.rem(8) ?: 0
+            "${it.species} - $inches" + "-${eighths}/8 inches"
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+        simpleListView.adapter = adapter
+    }
+
+    private fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
     }
 }

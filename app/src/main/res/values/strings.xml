@@ -22,8 +22,8 @@
     <string name="gps_usage_permission">Record GPS?</string>
 
 
-        <string name="title_weight_lbs_oz">Enter Weight (Lbs/Oz)</string>
-        <string name="title_weight_kgs">Enter Weight (Kgs and Grams)</string>
+    <string name="title_weight_lbs_oz">Enter Weight (Lbs/Oz)</string>
+    <string name="title_weight_kgs">Enter Weight (Kgs and Grams)</string>
 
 
 
@@ -39,7 +39,7 @@
         <item>Panfish</item>
     </string-array>
 
-    //species
+    //dec_values
     <string-array name="dec_values">
         <item>0</item>
         <item>1</item>
