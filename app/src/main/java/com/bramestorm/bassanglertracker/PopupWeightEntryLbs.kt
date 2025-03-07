@@ -21,9 +21,6 @@ class PopupWeightEntryLbs : Activity() {
         val btnCancel: Button = findViewById(R.id.btnCancel)
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerSpeciesPopUp)
 
-        // Get tournament species from intent (default to Large Mouth if empty)
-        selectedSpecies = intent.getStringExtra("selectedSpecies") ?: "Large Mouth"
-
         // Load species list from strings.xml
         val speciesArray = resources.getStringArray(R.array.species_list)
 
@@ -32,10 +29,16 @@ class PopupWeightEntryLbs : Activity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = adapter
 
-        // Set the spinner selection to match the selected species
-        val speciesIndex = speciesArray.indexOf(selectedSpecies)
-        if (speciesIndex != -1) {
-            spinnerSpecies.setSelection(speciesIndex)
+// Update selectedSpecies when user picks an item
+        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                selectedSpecies = speciesArray[position] // Update selectedSpecies
+                Log.d("DB_DEBUG", "Species selected: $selectedSpecies") // Debugging log
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedSpecies = "" // Reset if nothing is selected
+            }
         }
 
         // Apply InputFilters to limit values
@@ -45,19 +48,18 @@ class PopupWeightEntryLbs : Activity() {
         // Save button functionality
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
-            val selectedSpeciesValue = spinnerSpecies.selectedItem.toString()
-            resultIntent.putExtra("selectedSpecies", selectedSpeciesValue)
 
             val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
             val weightOz = edtWeightOzs.text.toString().toIntOrNull() ?: 0
             val totalWeightOz = (weightLbs * 16) + weightOz
             resultIntent.putExtra("weightTotalOz", totalWeightOz)
+            resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            Log.d("PopupWeightEntryLbs", "Selected Species: $selectedSpeciesValue")
-            Log.d("PopupWeightEntryLbs", "Weight Entered: $weightLbs lbs, $weightOz oz ($totalWeightOz oz)")
+            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $totalWeightOz oz, Species: $selectedSpecies")
 
-            setResult(Activity.RESULT_OK, resultIntent)
-            finish()
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
+
         }
 
         // Cancel button functionality

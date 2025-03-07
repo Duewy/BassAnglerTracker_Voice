@@ -223,7 +223,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
 
         private fun logAllTournamentCatches() {
-            val allCatches = dbHelper.getAllCatches().filter { it.catchType == "tournamentkgs" }
+            val allCatches = dbHelper.getCatchesForToday(catchType = "totalWeightHundredthKg", todayDate = "dateToday")
             Log.d("TournamentKgsDebug", "Fetched ${allCatches.size} tournament catches from DB")
 
             allCatches.forEach {
@@ -233,7 +233,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
 
         private fun updateTournamentList() {
-        val allCatches = dbHelper.getAllCatches()
+            val allCatches = dbHelper.getCatchesForToday(catchType = "totalWeightHundredthKg", todayDate = "dateToday")
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {

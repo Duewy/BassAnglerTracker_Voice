@@ -181,7 +181,7 @@ class CatchEntryTournament : AppCompatActivity() {
         val colorList = listOf("clip_red", "clip_yellow", "clip_green", "clip_blue", "clip_white", "clip_orange")
 
         // Get the next color in sequence based on total stored catches
-        val existingCatches = dbHelper.getAllCatches().size
+        val existingCatches = dbHelper.getCatchesForToday("lbsOzs", todayDate = "todayDate").size
         val assignedColor = colorList[existingCatches % colorList.size] // Cycle through colors
         val speciesInitial = if (bassType == "Large Mouth") "L" else "Small Mouth"
         val weightLbs = totalWeightOz / 16
@@ -210,7 +210,7 @@ class CatchEntryTournament : AppCompatActivity() {
 //################## UPDATE TOURNAMENT LIST   ###################################
 
     private fun updateTournamentList() {
-        val allCatches = dbHelper.getAllCatches()
+        val allCatches = dbHelper.getCatchesForToday(catchType = "LbsOzs", todayDate = "dateToday")
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {

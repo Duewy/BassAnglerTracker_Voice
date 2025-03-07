@@ -25,18 +25,14 @@ class PopupLengthEntryMetric : Activity() {
             edtWeightGrams = findViewById(R.id.edtWeightDec)
             btnSaveWeight = findViewById(R.id.btnSaveWeight)
             btnCancel = findViewById(R.id.btnCancel)
-            txtPopupTitle = findViewById(R.id.txtPopupTitle)
 
             selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
-
-            txtPopupTitle.text = "Enter Weight (Kgs & Grams)"
 
             btnSaveWeight.setOnClickListener {
                 val resultIntent = Intent()
 
                 val weightKgs = edtWeightKgs.text.toString().toIntOrNull() ?: 0
                 val weightGrams = edtWeightGrams.text.toString().toIntOrNull() ?: 0
-
                 val totalWeightGrams = (weightKgs * 1000) + weightGrams // Convert to total grams
 
                 Log.d("PopupWeightEntryKgs", "Weight Entered: $weightKgs kgs, $weightGrams grams")

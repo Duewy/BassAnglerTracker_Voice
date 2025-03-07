@@ -6,11 +6,14 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.bramestorm.bassanglertracker.CatchItem
 import android.util.Log
+import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+
+class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 6) {
 
     companion object {
         private const val DATABASE_NAME = "catch_database.db"
@@ -26,9 +29,8 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         private const val COLUMN_CATCH_TYPE = "catch_type"
         private const val COLUMN_MARKER_TYPE = "marker_type"
         private const val COLUMN_CLIP_COLOR = "clip_color"
-
-
     }
+
 
     override fun onCreate(db: SQLiteDatabase) {
         val createCatchesTable = """
@@ -46,153 +48,101 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         )
     """.trimIndent()
         db.execSQL(createCatchesTable)
-    }
+    }// ````````````` END ON CREATE ``````````````````````````````
 
+    // ^^^^ just in case we need to upgrade SQL later.... ^^^^^^^^^^^^^^^^^^
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 6) {  // 🚨 Ensure this runs only if upgrading from an older version
+        Log.d("DB_DEBUG", "⚠️ Upgrading database from version $oldVersion to $newVersion...")
 
-            // Step 1: Rename the old table
-            db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO old_$TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME") // Drop old table
 
-            // Step 2: Create the new table with the correct schema
-            db.execSQL(
-                """
-            CREATE TABLE $TABLE_NAME (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date_time TEXT NOT NULL,
-                species TEXT NOT NULL,
-                total_weight_oz INTEGER,
-                total_length_8ths INTEGER,
-                total_weight_hundredth_kg INTEGER DEFAULT 0,  -- ✅ Ensure this column is included
-                total_length_tenths INTEGER,
-                catch_type TEXT NOT NULL,
-                marker_type TEXT,
-                clip_color TEXT
-            )
-        """.trimIndent()
-            )
-
-            // Step 3: Copy data from the old table to the new table
-            db.execSQL(
-                """
-            INSERT INTO $TABLE_NAME (id, date_time, species, total_weight_oz, total_length_8ths, total_length_tenths, catch_type, marker_type, clip_color)
-            SELECT id, date_time, species, total_weight_oz, total_length_8ths, total_length_tenths, catch_type, marker_type, clip_color FROM old_$TABLE_NAME
-        """.trimIndent()
-            )
-
-            // Step 4: Drop the old table
-            db.execSQL("DROP TABLE old_$TABLE_NAME")
-        }
+        onCreate(db) // Recreate the table
     }
 
+
+// **************** - INSERT CATCH -  *****************************************
 
     fun insertCatch(catch: CatchItem): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put(COLUMN_DATE_TIME, catch.dateTime) // ✅ Correctly maps dateTime -> date_time
+            put(COLUMN_DATE_TIME, catch.dateTime)
             put(COLUMN_SPECIES, catch.species)
-            put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
-            put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th)
-            put(COLUMN_TOTAL_LENGTH_TENTHS, catch.lengthDecimalTenthCm)
-            put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
+            put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz ?: 0)
+            put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th ?: 0)
+            put(COLUMN_TOTAL_LENGTH_TENTHS, catch.lengthDecimalTenthCm ?: 0)
+            put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg ?: 0)
             put(COLUMN_CATCH_TYPE, catch.catchType)
             put(COLUMN_MARKER_TYPE, catch.markerType)
             put(COLUMN_CLIP_COLOR, catch.clipColor)
         }
 
-        val result = db.insert(TABLE_NAME, null, values)
-        db.close()
+        val result = db.insert(TABLE_NAME, null, values)  // ✅ Correct insert
 
-        return result != -1L // ✅ Returns `true` if insert was successful
-    }
-
-
-
-    fun getAllCatches(): List<CatchItem> {
-        val catches = mutableListOf<CatchItem>()
-        val db = readableDatabase
-        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) // Get today's date
-        val cursor = db.rawQuery(
-            "SELECT * FROM catches WHERE date_time LIKE ? AND catchType = ? ORDER BY totalWeightOz DESC",
-            arrayOf("$todayDate%", "lbsOzs")
-        )
-
-
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
-            val dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME))
-            val species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES))
-            val totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ))
-            val totalLengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_8THS))
-            val totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG))
-            val lengthDecimalTenthCm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS))
-            val catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE))
-            val markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)) ?: "Unknown"
-            val clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR))
-
-            catches.add(
-                CatchItem(
-                    id = id,
-                    dateTime = dateTime,
-                    species = species,
-                    totalWeightOz = totalWeightOz,
-                    totalLengthA8th = totalLengthA8th,
-                    totalWeightHundredthKg = totalWeightHundredthKg,
-                    lengthDecimalTenthCm = lengthDecimalTenthCm,
-                    catchType = catchType,
-                    markerType = markerType,
-                    clipColor = clipColor
-                )
-            )
+        return if (result == -1L) {
+            Log.e("DB_DEBUG", "⚠️ Insert FAILED for catch: $values")
+            false
+        } else {
+            Log.d("DB_DEBUG", "✅ Insert SUCCESS for catch: $values")
+            true
         }
-        cursor.close()
-        db.close()
-        return catches
     }
 
-    fun getCatchCount(): Int {
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_NAME", null)
-        var count = 0
-        if (cursor.moveToFirst()) {
-            count = cursor.getInt(0) // ✅ Now correctly retrieves catch count
-        }
-        cursor.close()
-        return count
-    }
+
+//************ - GET ALL CATCHES FOR LIST VIEWS  *******************************
 
     fun getCatchesForToday(catchType: String, todayDate: String): List<CatchItem> {
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        Log.d("DB_DEBUG", "Fetching catches for today: $todayDate, catchType: $catchType")
+
 
         val cursor = db.rawQuery(
-            "SELECT * FROM catches WHERE dateTime LIKE ? AND catchType = ? ORDER BY totalWeightOz DESC",
-            arrayOf("$todayDate%", catchType)
+            "SELECT * FROM catches WHERE SUBSTR(date_time, 1, 10) = ? AND catch_type = ? ORDER BY total_weight_oz DESC",
+            arrayOf(todayDate, catchType)
         )
 
         if (cursor.moveToFirst()) {
             do {
                 val catch = CatchItem(
                     id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
-                    dateTime = cursor.getString(cursor.getColumnIndexOrThrow("dateTime")),
+                    dateTime = cursor.getString(cursor.getColumnIndexOrThrow("date_time")),
                     species = cursor.getString(cursor.getColumnIndexOrThrow("species")),
-                    totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow("totalWeightOz")),
-                    totalLengthA8th = null,
-                    lengthDecimalTenthCm = null,
-                    totalWeightHundredthKg = null,
-                    catchType = cursor.getString(cursor.getColumnIndexOrThrow("catchType")),
-                    markerType = cursor.getString(cursor.getColumnIndexOrThrow("markerType")),
-                    clipColor = null
+                    totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow("total_weight_oz")),
+                    totalLengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow("total_length_8ths")),
+                    lengthDecimalTenthCm = cursor.getInt(cursor.getColumnIndexOrThrow("total_length_tenths")),
+                    totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow("total_weight_hundredth_kg")),
+                    catchType = cursor.getString(cursor.getColumnIndexOrThrow("catch_type")),
+                    markerType = cursor.getString(cursor.getColumnIndexOrThrow("marker_type")),
+                    clipColor = cursor.getString(cursor.getColumnIndexOrThrow("clip_color"))
                 )
                 catchList.add(catch)
             } while (cursor.moveToNext())
+        } else {
+            Log.d("DB_DEBUG", "No data found for today: $todayDate")
         }
         cursor.close()
         return catchList
     }
+    // ______________ UPDATE CATCH _______________________________
 
+    fun updateCatch(catchId: Int, totalWeightOz: Int, species: String) {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put("total_weight_oz", totalWeightOz)
+        values.put("species", species) // Update species
+
+        Log.d("DB_DEBUG", "🔄 Updating ID=$catchId, New Weight=$totalWeightOz, New Species=$species")
+
+        db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
+        Log.d("DB_DEBUG", "✅ Rows updated: $catchId")
+        db.close()
+    }
+
+
+    //_______________ DELETE CATCH FROM DATA BASE  _______________________
 
     fun deleteCatch(catchId: Int) {
         val db = writableDatabase
@@ -200,23 +150,5 @@ class CatchDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         db.close()
     }
 
-    fun logAllTournamentCatches() {
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM catches WHERE catchType = 'kgs'", null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-                val species = cursor.getString(cursor.getColumnIndexOrThrow("species"))
-                val totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow("totalWeightHundredthKg"))
-
-                Log.d("TournamentKgsDebug", "DB Entry: ID=$id, Species=$species, Weight=${totalWeightHundredthKg} hundredth kg")
-            } while (cursor.moveToNext())
-        } else {
-            Log.e("TournamentKgsDebug", "Database is empty for Tournament Kgs!")
-        }
-
-        cursor.close()
-    }
-
 }
+ //!!!!!!!!!!!!!!!!!!! - END - !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

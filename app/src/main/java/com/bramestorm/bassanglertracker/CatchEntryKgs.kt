@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -16,6 +17,7 @@ class CatchEntryKgs : AppCompatActivity() {
     private lateinit var btnOpenWeightPopup: Button
     private lateinit var simpleListView: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
+    private var lastCatchCount = -1
 
     private var selectedSpecies: String = "Large Mouth"
     private var totalWeightHundredthKg: Int = 0
@@ -92,19 +94,36 @@ class CatchEntryKgs : AppCompatActivity() {
     }
 
     private fun updateListView() {
-        val allCatches = dbHelper.getAllCatches().filter { it.catchType == "kgs" }
+        Log.d("DB_DEBUG", "🔍 We are in updateListView.")
+        val databaseHelper = CatchDatabaseHelper(this)
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val todayCatches = databaseHelper.getCatchesForToday("lbsOzs", todayDate)
 
-        val catchDisplayList = allCatches.map {
-            val weightKg = it.totalWeightHundredthKg?.div(100.0) ?: 0.0
-            "${it.species} - $weightKg kg"
+        if (todayCatches.size == lastCatchCount) {
+            Log.d("DB_DEBUG", "ListView update skipped (no new catches).")
+            return
         }
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
-        simpleListView.adapter = adapter
+        lastCatchCount = todayCatches.size
+
+        val catchDisplayList = todayCatches.map {
+            val weightOz = it.totalWeightOz ?: 0
+            val pounds = weightOz / 16
+            val ounces = weightOz % 16
+
+            "${it.species} - $pounds lbs $ounces oz"
+        }
+
+        runOnUiThread {
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            simpleListView.adapter = adapter
+        }
     }
 
+    
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
+
     }
 }

@@ -1,8 +1,10 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -16,7 +18,7 @@ class CatchEntryMetric : AppCompatActivity() {
     private lateinit var btnOpenCmLengthPopup: Button
     private lateinit var simpleListView: ListView
     private lateinit var dbHelper: CatchDatabaseHelper
-
+    private var lastCatchCount = -1
     private var selectedSpecies: String = "Large Mouth"
     private var lengthDecimalTenthCm: Int = 0
 
@@ -91,14 +93,73 @@ class CatchEntryMetric : AppCompatActivity() {
     }
 
     private fun updateListView() {
-        val allCatches = dbHelper.getAllCatches().filter { it.catchType == "Cms" }
+        Log.d("DB_DEBUG", "🔍 We are in updateListView.")
+        val databaseHelper = CatchDatabaseHelper(this)
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val todayCatches = databaseHelper.getCatchesForToday("lbsOzs", todayDate)
 
-        val catchDisplayList = allCatches.map {
-            "${it.species} - ${it.lengthDecimalTenthCm?.div(10)}.${it.lengthDecimalTenthCm?.rem(10)} cm"
+        if (todayCatches.size == lastCatchCount) {
+            Log.d("DB_DEBUG", "ListView update skipped (no new catches).")
+            return
         }
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
-        simpleListView.adapter = adapter
+        lastCatchCount = todayCatches.size
+
+        val catchDisplayList = todayCatches.map {
+            val weightOz = it.totalWeightOz ?: 0
+            val pounds = weightOz / 16
+            val ounces = weightOz % 16
+
+            "${it.species} - $pounds lbs $ounces oz"
+        }
+
+        runOnUiThread {
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            simpleListView.adapter = adapter
+        }
+    }
+
+
+    private fun loadCatchList() {
+        Log.d("DB_DEBUG", "Loading today's catch list...")  // Debug log
+
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) // Get today's date
+        val todayCatches = dbHelper.getCatchesForToday("lbsOzs", todayDate) // ✅ Pass the required parameters
+
+        if (todayCatches.isEmpty()) {
+            Log.d("DB_DEBUG", "No catches found for today.")
+        } else {
+            Log.d("DB_DEBUG", "Today's catches: ${todayCatches.size}")
+        }
+
+        val catchDisplayList = todayCatches.map {
+            val weightOz = it.totalWeightOz ?: 0  // Ensure it is not null
+            val pounds = weightOz / 16
+            val ounces = weightOz % 16
+
+            "${it.species} - $pounds lbs $ounces oz"
+        }
+
+        runOnUiThread {
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            simpleListView.adapter = adapter
+        }
+    }
+
+    private fun showEditDeleteDialog(catchItem: CatchItem) {
+        AlertDialog.Builder(this)
+            .setTitle("Edit or Delete")
+            .setMessage("Do you want to edit or delete this entry?")
+            .setPositiveButton("Edit") { _, _ ->
+                Toast.makeText(this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Delete") { _, _ ->
+                dbHelper.deleteCatch(catchItem.id)
+                loadCatchList()
+                Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
     }
 
     private fun getCurrentDateTime(): String {
