@@ -22,27 +22,27 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnSetAlarm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="@color/primary"
-            android:padding="10dp"
-            android:text="Set Alarm"
-            android:textSize="24sp"
-            android:textColor="@color/white" />
-
-        <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/Log_blue_secondary"
             android:padding="10dp"
-            android:text="Cancel"
-            android:textSize="24sp"
+            android:text="@string/cancel"
             android:textColor="@color/black"
+            android:textSize="24sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnSetAlarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/primary"
+            android:padding="10dp"
+            android:text="@string/set_alarm"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
 
     </LinearLayout>
 

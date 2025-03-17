@@ -23,6 +23,7 @@
             android:layout_width="90dp"
             android:layout_height="70dp"
             android:layout_marginStart="5dp"
+            android:contentDescription="@string/app_image_description"
             android:src="@drawable/voice_controlled_culling_words"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -33,6 +34,7 @@
 
             android:layout_marginStart="20dp"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/gps_usage_permission"
             android:src="@drawable/set_up_word_stoked" />
 
     </LinearLayout>
@@ -74,8 +76,8 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/softlock_green"
-                android:textColor="@color/black"
                 android:text="Weight"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <Button
@@ -131,9 +133,9 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/clip_green"
-                android:textColor="@color/black"
+                android:background="@color/bright_green"
                 android:text="Metric"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -161,9 +163,9 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/clip_red"
-                android:textColor="@color/black"
+                android:background="@color/bright_red"
                 android:text="Tournament"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -183,7 +185,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="10dp"
-                android:background="@color/purple_200"
+                android:background="@color/magenta_fuchsia"
                 android:text="Start Fishing Event"
                 android:textColor="@color/black"
                 android:textSize="22sp"
@@ -285,7 +287,7 @@
                 android:layout_height="wrap_content"
                 android:text="-"
                 android:textColor="@color/black"
-                android:textSize="25dp"
+                android:textSize="25sp"
                 android:textStyle="bold"
                 android:layout_marginStart="5dp"/>
 
@@ -304,34 +306,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:gravity="left"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <Spinner
                 android:id="@+id/spinnerTournamentSpecies"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="40dp"
-                android:background="@color/Log_white"
+                android:layout_marginStart="10dp"
+                android:background="@color/clip_white"
                 android:entries="@array/species_list"
                 android:textColor="@color/black"
                 android:textSize="24sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" --   "
+                android:text=" -- "
                 android:textColor="@color/black"
                 android:textSize="40sp"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp"/>
+                android:textStyle="bold"  />
 
             <ToggleButton
                 android:id="@+id/tglGPS"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:background="@color/secondary"
+                android:background="@color/clip_orange"
+                android:contentDescription="@string/gps_info"
                 android:textColor="@color/black"
                 android:textOff="OFF"
                 android:textOn="ON"

@@ -5,15 +5,21 @@ coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinSymbolProcessingApi = "1.4.0-rc-dev-experimental-20200828"
 lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.10.0"
-composeBom = "2024.04.01"
+activityCompose = "1.10.1"
+composeBom = "2025.02.00"
+playServicesAuth = "21.3.0"
 roomCommon = "2.6.1"
 roomKtx = "2.6.1"
 appcompat = "1.7.0"
-constraintlayout = "2.2.0"
+constraintlayout = "2.2.1"
+playServicesLocation = "21.3.0"
+supportAnnotations = "28.0.0"
+material = "1.12.0"
 
 [libraries]
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -32,6 +38,11 @@ androidx-room-common = { group = "androidx.room", name = "room-common", version.
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+kotlin-symbol-processing-api = { module = "org.jetbrains.kotlin:kotlin-symbol-processing-api", version.ref = "kotlinSymbolProcessingApi" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+support-annotations = { group = "com.android.support", name = "support-annotations", version.ref = "supportAnnotations" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

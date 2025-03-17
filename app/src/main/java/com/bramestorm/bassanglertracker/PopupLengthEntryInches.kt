@@ -1,73 +1,80 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.util.Log
-import android.widget.Button
-import android.widget.Toast
-import android.widget.EditText
-import android.widget.TextView
+import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.os.Handler
-import android.os.Looper
-import android.os.Bundle
+import android.util.Log
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
 
 class PopupLengthEntryInches : Activity() {
 
-    private lateinit var edtWeightInches: EditText
-    private lateinit var edtWeight8ths: EditText
-    private lateinit var btnSaveWeight: Button
-    private lateinit var btnCancel: Button
     private var selectedSpecies: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.popup_weight_entry_inches) // NEW XML Layout
+        setContentView(R.layout.popup_length_entry_inches)
 
-        edtWeightInches = findViewById(R.id.edtWeightInches)
-        edtWeight8ths = findViewById(R.id.edtWeight8ths)
-        btnSaveWeight = findViewById(R.id.btnSaveWeight)
-        btnCancel = findViewById(R.id.btnCancel)
+        val edtLengthInches: EditText = findViewById(R.id.edtLengthInches)
+        val edtLength8ths: EditText = findViewById(R.id.edtLength8ths)
+        val btnSaveCatch: Button = findViewById(R.id.btnSaveCatch)
+        val btnCancel: Button = findViewById(R.id.btnCancel)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
+        // Load species list from strings.xml
+        val speciesArray = resources.getStringArray(R.array.species_list)
 
-        selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
+        // Set up the spinner with species list
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSpecies.adapter = adapter
 
-        // Apply InputFilters to enforce min and max values
-        edtWeightInches.filters = arrayOf(MinMaxInputFilter(this, 1,99)) // Inches: 1-99
-        edtWeight8ths.filters = arrayOf(MinMaxInputFilter(this, 0,7))    // 8ths: 0-7
+// Update selectedSpecies when user picks an item
+        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                selectedSpecies = speciesArray[position] // Update selectedSpecies
+                Log.d("DB_DEBUG", "Species selected: $selectedSpecies") // Debugging log
+            }
 
-        btnSaveWeight.setOnClickListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedSpecies = "" // Reset if nothing is selected
+            }
+        }
+
+        // `````````````` Apply InputFilters to limit values  ````````````````````
+        edtLengthInches.filters = arrayOf(MinMaxInputFilter(1, 99)) // Inches: 1-99
+        edtLength8ths.filters = arrayOf(MinMaxInputFilter(0, 7)) // 0-7 8ths
+
+        // ````````````````````` Save button functionality ````````````````````
+        btnSaveCatch.setOnClickListener {
             val resultIntent = Intent()
 
-            val weightInches = edtWeightInches.text.toString().toIntOrNull() ?: 0
-            val weight8ths = edtWeight8ths.text.toString().toIntOrNull() ?: 0
+            val lengthInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
+            val length8ths = edtLength8ths.text.toString().toIntOrNull() ?: 0
+            val lengthTotalInches = ((lengthInches * 8) + length8ths)
+            resultIntent.putExtra("lengthTotalInches", lengthTotalInches)
+            resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            val totalLength8ths = (weightInches * 8) + weight8ths // Convert to total 8ths
+            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $lengthTotalInches in 8th of Inches, Species: $selectedSpecies")
 
-            Log.d("PopupWeightEntryInches", "Length Entered: $weightInches Inches, $weight8ths 8ths")
-            Log.d("PopupWeightEntryInches", "Total Length in 8ths: $totalLength8ths") // Debugging Log
-
-            resultIntent.putExtra("lengthTotal8ths", totalLength8ths)
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
 
+        // ~~~~~~~~~~~~~~~~ Cancel button functionality  ~~~~~~~~~~~~~~~~~~~~~
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
     }
 
-    class MinMaxInputFilter(
-        private val context: Context,
-        private val min: Int,
-        private val max: Int
-    ) : InputFilter {
-
-        private val handler = Handler(Looper.getMainLooper()) // Ensure Toast runs on the UI thread
-
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
+    class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(
             source: CharSequence?,
             start: Int,
@@ -80,19 +87,11 @@ class PopupLengthEntryInches : Activity() {
                 val input = (dest.toString() + source.toString()).toInt()
                 if (input in min..max) {
                     return null // Accept input
-                } else {
-                    showToast("Value must be between $min and $max")
                 }
             } catch (e: NumberFormatException) {
-                showToast("Invalid input! Enter a number between $min and $max")
+                // Ignore invalid input
             }
-            return "" // Reject input
-        }
-
-        private fun showToast(message: String) {
-            handler.post {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            }
+            return "" // Reject input if out of range
         }
     }
 }

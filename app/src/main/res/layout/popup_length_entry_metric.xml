@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -21,22 +20,20 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/title_weight_lbs_oz"
+            android:text="@string/enter_weight_centimeters"
             android:textSize="25sp"
             android:layout_gravity="center"
             android:gravity="center"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:background="@color/clip_yellow"
-            android:layout_marginBottom="10dp"/>
+            android:background="@color/Log_blue_secondary"
+            android:layout_marginBottom="10dp"   />
 
         <!-- Species Spinner -->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:layout_gravity="center"
             android:gravity="center">
 
             <TextView
@@ -45,16 +42,15 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
-                android:layout_marginEnd="20dp"
-                android:gravity="left"
+                android:layout_marginEnd="5dp"
                 android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="19sp"
                 android:textStyle="bold" />
 
             <Spinner
-                android:id="@+id/spinnerSpeciesPopUp"
-                android:layout_width="wrap_content"
+                android:id="@+id/spinnerCmsSpeciesPopUp"
+                android:layout_width="175dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:dropDownSelector="@color/clip_yellow"
@@ -66,7 +62,6 @@
 
         </LinearLayout>
 
-        <!-- separation bar  -->
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
@@ -78,10 +73,11 @@
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enter_catch_lbs_and_ozs"
+            android:text="@string/enter_cm_and_mm"
             android:textColor="@color/black"
             android:gravity="center"
             android:layout_marginTop="10dp"/>
+        <!-- WEIGHT KGS GRAMS  -->
 
         <LinearLayout
             android:id="@+id/layoutWeightLbsOzs"
@@ -90,98 +86,55 @@
             android:orientation="horizontal"
             android:visibility="visible">
 
-            <!-- ENTER Lbs and Ozs  -->
             <EditText
-                android:id="@+id/edtWeightLbs"
+                android:id="@+id/edtLengthCms"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint=" -Lbs-  0 to 99Lbs"
+                android:hint="@string/cms_0_to_99"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"  />
 
             <EditText
-                android:id="@+id/edtWeightOzs"
+                android:id="@+id/edtLengthDecimal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="    -Ozs-  0 to 15Ozs"
+                android:hint="@string/_0_to_9_mm"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"  />
 
         </LinearLayout>
 
 
         <!-- SAVE CATCH  btn -->
 
-        <LinearLayout
+        <Button
+            android:id="@+id/btnSaveCatch"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <!-- Lbs and Ozs labels  -->
-            <TextView
-                android:id="@+id/textLbsLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Lbs"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/textOzsLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Ozs"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-        </LinearLayout>
-
-        <!-- SAVE btn  -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/Log_green_secondary"
-                android:text="Cancel"
-                android:layout_marginEnd="10dp"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/btnSaveWeight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/Log_green"
-                android:text="Save Catch"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:background="@color/Log_green"
+            android:text="@string/save_catch"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
 
         <!-- CANCEL btn  -->
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/Log_green_secondary"
+            android:text="@string/cancel"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

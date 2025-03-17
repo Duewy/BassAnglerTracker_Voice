@@ -47,12 +47,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
+}// ------------------- END ANDROID ----------------------------------
 
 dependencies {
 
-    implementation("androidx.activity:activity-ktx:1.9.0")
-    implementation("androidx.core:core-ktx:1.14.0")
+
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlin.symbol.processing.api)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,6 +67,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.auth)
+    implementation(libs.support.annotations)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,4 +79,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-}
+
+}// ------------------- END DEPENDENCIES ------------------------

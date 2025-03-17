@@ -23,8 +23,8 @@ class PopUpAlarm : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
 
         btnSetAlarm.setOnClickListener {
-            val hour = if (Build.VERSION.SDK_INT >= 23) timePicker.hour else timePicker.currentHour
-            val minute = if (Build.VERSION.SDK_INT >= 23) timePicker.minute else timePicker.currentMinute
+            val hour = timePicker.hour
+            val minute = timePicker.minute
 
             val intent = Intent()
             intent.putExtra("ALARM_HOURS", hour)

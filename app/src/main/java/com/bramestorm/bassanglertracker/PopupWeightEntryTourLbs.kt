@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
-import android.widget.TextView
 
 class PopupWeightEntryTourLbs : Activity() {
     private var isTournament: Boolean = false
@@ -22,11 +21,12 @@ class PopupWeightEntryTourLbs : Activity() {
 
   // ````````````````  Retrieve intent extras  ````````````````````````````````
 
-        isTournament = intent.getBooleanExtra("isTournament", false)
+       isTournament = intent.getBooleanExtra("isTournament", false)
         catchType = intent.getStringExtra("catchType") ?: ""
         selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
 
         // Debugging Log
+
         Log.d("PopupWeightEntry", "Received isTournament: $isTournament")
         Log.d("PopupWeightEntry", "Received catchType: $catchType")
         Log.d("PopupWeightEntry", "Received selectedSpecies: $selectedSpecies")
@@ -73,7 +73,8 @@ class PopupWeightEntryTourLbs : Activity() {
 
                     val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
                     val weightOz = edtWeightOz.text.toString().toIntOrNull() ?: 0
-                    val totalWeightOz = (weightLbs * 16) + weightOz
+                    val totalWeightOz = ((weightLbs * 16) + weightOz)
+            Log.d("DB_DEBUG", "✅ Sending Result - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue")
 
             resultIntent.putExtra("weightTotalOz", totalWeightOz)
             resultIntent.putExtra("catchType", catchType)

@@ -27,7 +27,7 @@ class CatchItemAdapter(context: Context, private val catches: MutableList<CatchI
                     val totalA8th = it.totalLengthA8th ?: 0
                     "${it.species}: ${totalA8th / 8} in ${totalA8th % 8}/8"
                 }
-                "length_metric" -> "${it.species}: ${it.lengthDecimalTenthCm?.div(10.0) ?: 0.0} cm"
+                "length_metric" -> "${it.species}: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm"
                 else -> it.toString()
             }
         } ?: ""

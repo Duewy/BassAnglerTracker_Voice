@@ -1,28 +1,33 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class CatchEntryKgs : AppCompatActivity() {
 
-    private lateinit var btnSetUp3: Button
-    private lateinit var btnSaveCatch: Button
-    private lateinit var btnOpenWeightPopup: Button
-    private lateinit var simpleListView: ListView
+    private lateinit var btnSetUp3Kgs: Button
+    private lateinit var btnOpenWeightPopupKgs: Button
+    private lateinit var simpleKgsListView: ListView
+    private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
-    private var lastCatchCount = -1
 
-    private var selectedSpecies: String = "Large Mouth"
-    private var totalWeightHundredthKg: Int = 0
-
-    private val requestWeightEntry = 1002
+    private var selectedSpecies: String = ""
+    private var  totalWeightHundredthKg: Int = 0
+    private val requestWeightEntry = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,100 +35,223 @@ class CatchEntryKgs : AppCompatActivity() {
 
         dbHelper = CatchDatabaseHelper(this)
 
-        btnSetUp3 = findViewById(R.id.btnSetUp3)
-        btnSaveCatch = findViewById(R.id.btnSaveCatch)
-        btnOpenWeightPopup = findViewById(R.id.btnOpenWeightPopup)
-        simpleListView = findViewById(R.id.simpleListView)
+        btnSetUp3Kgs = findViewById(R.id.btnSetUp3Kgs)
+        btnOpenWeightPopupKgs = findViewById(R.id.btnOpenWeightPopupKgs)
+        simpleKgsListView = findViewById(R.id.simpleKgsListView)
 
-        updateListView()
+        updateListViewKgs() // Load today's catches into ListView
 
-        btnOpenWeightPopup.setOnClickListener {
-            openWeightPopup()
+        btnOpenWeightPopupKgs.setOnClickListener {
+            openWeightPopupKgs()
         }
 
-        btnSaveCatch.setOnClickListener {
-            if (totalWeightHundredthKg > 0) {
-                saveCatch()
-            } else {
-                Toast.makeText(this, "Enter a valid weight!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        btnSetUp3.setOnClickListener {
+        btnSetUp3Kgs.setOnClickListener {
             val intent2 = Intent(this, SetUpActivity::class.java)
             startActivity(intent2)
         }
-    }
 
-    private fun openWeightPopup() {
+        simpleKgsListView.setOnItemLongClickListener { parent, view, position, id ->
+            if (catchList.isEmpty()) {
+                Toast.makeText(this, "No catches available", Toast.LENGTH_SHORT).show()
+                return@setOnItemLongClickListener true
+            }
+
+            if (position >= catchList.size) {
+                Log.e("DB_DEBUG", "⚠️ Invalid position: $position, Catch List Size: ${catchList.size}")
+                return@setOnItemLongClickListener true
+            }
+
+            val selectedCatch = catchList[position]
+            showEditDeleteDialog(selectedCatch)
+            true
+        }
+
+
+    }//`````````` END ON-CREATE `````````````
+
+
+
+    private fun openWeightPopupKgs() {
         val intent = Intent(this, PopupWeightEntryKgs::class.java)
         startActivityForResult(intent, requestWeightEntry)
     }
+
+
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n " +
+            "     which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n " +
+            "     contracts for common intents available in\n" +
+            "      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n" +
+            "      testing, and allow receiving results in separate, testable classes independent from your\n" +
+            "      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n" +
+            "      with the appropriate {@link ActivityResultContract} and handling the result in the\n " +
+            "     {@link ActivityResultCallback#onActivityResult(Object) callback}.")
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == requestWeightEntry && resultCode == Activity.RESULT_OK) {
-            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: "Unknown"
-            totalWeightHundredthKg = data?.getIntExtra("weightTotalHundredthKg", 0) ?: 0
+            totalWeightHundredthKg = data?.getIntExtra("weightTotalKg", 0) ?: 0
+            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
 
-            val weightKg = totalWeightHundredthKg / 100.0
-            Toast.makeText(this, "$selectedSpecies - $weightKg kg", Toast.LENGTH_SHORT).show()
+            Log.d("DB_DEBUG", "✅ Weight=$totalWeightHundredthKg, Species=$selectedSpecies")
+
+            //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
+            if (totalWeightHundredthKg  > 0) {
+                saveCatch()
+                Log.d("DB_DEBUG", "✅ saveCatch is called")
+            } else {
+                Log.e("DB_DEBUG", "⚠️ Invalid weight! Catch not saved.")
+            }
         }
+
     }
 
+    // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private fun saveCatch() {
-        val catch = CatchItem(
+        Log.d("DB_DEBUG", "🔍 We are in saveCatch().")
+        val newCatch = CatchItem(
             id = 0,
+            latitude = null,
+            longitude = null,
             dateTime = getCurrentDateTime(),
             species = selectedSpecies,
             totalWeightOz = null,
             totalLengthA8th = null,
-            lengthDecimalTenthCm = null,
+            totalLengthTenths = null,
             totalWeightHundredthKg = totalWeightHundredthKg,
             catchType = "kgs",
             markerType = selectedSpecies,
             clipColor = null
         )
 
-        dbHelper.insertCatch(catch)
-        Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+        val success = dbHelper.insertCatch(newCatch)
 
-        totalWeightHundredthKg = 0
-        updateListView()
+        if (success) {
+            Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "⚠️ Failed to save catch!", Toast.LENGTH_SHORT).show()
+        }
+
+        if (success) {
+            totalWeightHundredthKg = 0 // ✅ Move this after successful save
+        }
+        updateListViewKgs()  // ✅ Now only updates the UI, no extra insert
     }
 
-    private fun updateListView() {
-        Log.d("DB_DEBUG", "🔍 We are in updateListView.")
-        val databaseHelper = CatchDatabaseHelper(this)
-        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todayCatches = databaseHelper.getCatchesForToday("lbsOzs", todayDate)
 
-        if (todayCatches.size == lastCatchCount) {
-            Log.d("DB_DEBUG", "ListView update skipped (no new catches).")
-            return
+    //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
+
+    private fun updateListViewKgs() {
+        Log.d("DB_DEBUG", "🔄 updateListViewKgs() is being called.")
+
+        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        val todaysCatches = dbHelper.getCatchesForToday("kgs", todaysDate)
+            .sortedByDescending { it.dateTime }  // Sort by dateTime (newest first)
+
+        Log.d("DB_DEBUG", "🔍 Catches retrieved from DB: ${todaysCatches.size}")
+
+        // ✅ Make sure catchList is updated BEFORE updating the ListView
+        catchList.clear()
+        catchList.addAll(todaysCatches)
+
+        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the weight? it should be the ID # or dateTime... and totalWeightOz
+            val totalWeightHundredthKg = it.totalWeightHundredthKg?: 0
+            val kgs = totalWeightHundredthKg / 100
+            val grams = totalWeightHundredthKg % 100
+            "${it.species} - $kgs Kgs, $grams grams"
         }
-
-        lastCatchCount = todayCatches.size
-
-        val catchDisplayList = todayCatches.map {
-            val weightOz = it.totalWeightOz ?: 0
-            val pounds = weightOz / 16
-            val ounces = weightOz % 16
-
-            "${it.species} - $pounds lbs $ounces oz"
-        }
-
         runOnUiThread {
             val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
-            simpleListView.adapter = adapter
+            simpleKgsListView.adapter = adapter
         }
+
     }
 
-    
+
+    //*************** DELETE ENTRY from list View of Catches ********************
+
+    private fun showEditDeleteDialog(catchItem: CatchItem) {
+        AlertDialog.Builder(this)
+            .setTitle("Edit or Delete")
+            .setMessage("Do you want to edit or delete this entry?")
+            .setPositiveButton("Edit") { _, _ ->
+                showEditDialog(catchItem) // Call the new edit function
+            }
+            .setNegativeButton("Delete") { _, _ ->
+                val dbHelper = CatchDatabaseHelper(this)
+                dbHelper.deleteCatch(catchItem.id)
+                updateListViewKgs()
+                Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
+
+    //*************** EDIT list View of Catches ********************
+
+    private fun showEditDialog(catchItem: CatchItem) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_kgs, null)
+        val edtWeightKgs = dialogView.findViewById<EditText>(R.id.edtDialogWeightKgs)
+        val edtWeightGrams = dialogView.findViewById<EditText>(R.id.edtDialogWeightGrams)
+        val spinnerSpecies = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditKgs)
+
+        // Load species list from strings.xml
+        val speciesArray = resources.getStringArray(R.array.species_list)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSpecies.adapter = adapter
+
+        // Set current values
+        val totalWeightKgs = catchItem.totalWeightHundredthKg ?: 0 // Default to 0 if null
+        edtWeightKgs.setText((totalWeightKgs / 100).toString())
+        edtWeightGrams.setText((totalWeightKgs % 100).toString())
+
+        // Set spinner selection to the current species
+        val speciesIndex = speciesArray.indexOf(catchItem.species)
+        spinnerSpecies.setSelection(if (speciesIndex != -1) speciesIndex else 0) // ✅ Default to first species
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit Catch")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val newKgs = edtWeightKgs.text.toString().toIntOrNull() ?: 0
+                val newGrams = edtWeightGrams.text.toString().toIntOrNull() ?: 0
+                val totalWeightHundredthKg = (newKgs * 100) + newGrams
+                val species = spinnerSpecies.selectedItem.toString()
+
+                val dbHelper = CatchDatabaseHelper(this)
+
+                // ✅ Call updateCatch() with all required parameters
+                dbHelper.updateCatch(
+                    catchId = catchItem.id,
+                    newWeightOz = null,
+                    newWeightKg = totalWeightHundredthKg,  // Since this is Lbs/Oz mode, set Kg to null
+                    newLengthA8ths = null,  // No length update
+                    newLengthCm = null,  // No length update
+                    species = species
+                )
+
+                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Weight=$totalWeightHundredthKg, New Species=$species")
+
+                updateListViewKgs()
+                Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    // ############## GET DATE and TIME  ############################
+
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
-
     }
-}
+
+    // ??????????????????? TODAYS DATE  ?????????????????????????????????
+    private fun getTodaysDate(): String {
+        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return todaysDate.format(Date())
+    }
+
+}//+++++++++++++ END  od CATCH ENTRY Kgs ++++++++++++++++++++++++++++++++++++++++

@@ -23,7 +23,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:src="@android:drawable/ic_menu_edit"
-        android:contentDescription="Edit Catch"
+        android:contentDescription="@string/edit_catch"
         android:padding="6dp"
         android:clickable="true"
         android:focusable="true"/>

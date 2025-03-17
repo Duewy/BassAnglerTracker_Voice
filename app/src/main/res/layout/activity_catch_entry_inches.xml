@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/clip_orange"
+    android:background="@color/clip_red"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CatchEntryInches">
@@ -14,11 +14,11 @@
         android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="39dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="26dp"
-        android:text="todays fishing log inches"
+        android:layout_marginEnd="10dp"
+        android:text="@string/log_catches_inches"
+        android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -28,7 +28,7 @@
 
     <!-- btn Goto Set Up Page -->
     <Button
-        android:id="@+id/btnSetUp3"
+        android:id="@+id/btnSetUp3Inch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
@@ -37,55 +37,52 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
 
-    <TextView
-        android:id="@+id/txtAddCatch"
-        android:layout_width="wrap_content"
+    <!-- btn btnAddCatch -->
+    <LinearLayout
+        android:id="@+id/llAddCatch"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Catch:"
-        android:textSize="18sp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="@id/txtTodaysLog"
-        app:layout_constraintTop_toBottomOf="@id/btnSetUp3"  />
-    <!-- btn btnAddCatch by Goto Popup Page -->
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="20dp"
+        app:layout_constraintTop_toBottomOf="@id/btnSetUp3Inch">
 
-    <Button
-        android:id="@+id/btnOpenLengthPopup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="@string/addCatchBtn"
-        app:layout_constraintEnd_toStartOf="@+id/btnSetUp3"
-        app:layout_constraintHorizontal_bias="0.294"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtAddCatch" />
+        <TextView
+            android:id="@+id/txtAddCatch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:text="Add Catch:"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/btnSaveCatch"
-        android:layout_width="199dp"
-        android:layout_height="53dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="15dp"
-        android:text="@string/save_catch"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/txtAddCatch"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <Button
+            android:id="@+id/btnOpenWeightPopupInch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_weight=".5"
+            android:text="@string/addCatchBtn"
+            android:textSize="24sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@color/clip_blue"/>
+
+    </LinearLayout>
 
     <!-- List of Todays Catch -->
     <ListView
-        android:id="@+id/simpleListView"
+        android:id="@+id/simpleInchListView"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"
-        android:scrollbars="vertical"
         android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@id/btnSaveCatch"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-
-
+        app:layout_constraintTop_toBottomOf="@id/llAddCatch" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

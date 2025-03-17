@@ -5,11 +5,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.widget.*
 import android.util.Log
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
 
 class PopupWeightEntryLbs : Activity() {
+
     private var selectedSpecies: String = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,17 +47,18 @@ class PopupWeightEntryLbs : Activity() {
             }
         }
 
-        // Apply InputFilters to limit values
-        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(1, 99)) // Lbs: 1-99
+ // `````````````` Apply InputFilters to limit values  ````````````````````
+        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 1-99
         edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs: 0-15
 
-        // Save button functionality
+ // ````````````````````` Save button functionality ````````````````````
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
 
             val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
             val weightOz = edtWeightOzs.text.toString().toIntOrNull() ?: 0
-            val totalWeightOz = (weightLbs * 16) + weightOz
+            val totalWeightOz = ((weightLbs * 16) + weightOz)
+
             resultIntent.putExtra("weightTotalOz", totalWeightOz)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
@@ -59,17 +66,16 @@ class PopupWeightEntryLbs : Activity() {
 
                 setResult(Activity.RESULT_OK, resultIntent)
                 finish()
-
         }
 
-        // Cancel button functionality
+  // ~~~~~~~~~~~~~~~~ Cancel button functionality  ~~~~~~~~~~~~~~~~~~~~~
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
     }
 
-    // MinMaxInputFilter to enforce value limits
+ // -------------- Min & Max Input Filter to enforce value limits --------------------------
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(
             source: CharSequence?,
