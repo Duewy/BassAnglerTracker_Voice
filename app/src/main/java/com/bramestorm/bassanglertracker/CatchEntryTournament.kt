@@ -159,6 +159,8 @@ class CatchEntryTournament : AppCompatActivity() {
     //'''''''''''''' Pop Up Entry ''''''''''''''''''''''''''''
 
     private fun showWeightPopup() {
+        Log.d("TOURNAMENT_DEBUG", "🔄 showWeightPopup() called. Refreshing the list.")
+
         val intent = Intent(this, PopupWeightEntryTourLbs::class.java)
         intent.putExtra("isTournament", true)
 
@@ -182,22 +184,35 @@ class CatchEntryTournament : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("TOURNAMENT_DEBUG", "🔥 onActivityResult triggered: requestCode=$requestCode, resultCode=$resultCode")
 
         if (requestCode == 1005 && resultCode == Activity.RESULT_OK) {
-            Log.d("TOURNAMENT_DEBUG", "✅ Data received from popup. Updating list...")
-            updateTournamentList() // Refresh the tournament list
+
+            val newCatch = data?.getSerializableExtra("NEW_CATCH") as? CatchItem
+            if (newCatch != null) {
+                Log.d("TOURNAMENT_DEBUG", "✅ Received new tournament catch: $newCatch")
+                dbHelper.insertCatch(newCatch)
+                updateTournamentList()  // Refresh UI
+            } else {
+                Log.e("TOURNAMENT_DEBUG", "❌ No tournament catch received!")
+            }
         }
     }
+
 
     // `````````````` Available Colors  ````````````````````````````````
 
     private fun getAvailableClipColors(): List<String> {
+        Log.d("TOURNAMENT_DEBUG", "🔄 getAvailableClipColors() called. Refreshing the list.")
+
         val allCatches = dbHelper.getCatchesForToday("LbsOzs", getCurrentDate())
         val usedClipColors = allCatches.mapNotNull { it.clipColor?.uppercase() }.toSet()
         return listOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE").filterNot { it in usedClipColors }
     }
 
     private fun getColorFromName(colorName: String): Int {
+        Log.d("TOURNAMENT_DEBUG", "🔄 getColorFromName() called. Refreshing the list.")
+
         return when (colorName.uppercase()) {
             "RED" -> resources.getColor(R.color.clip_red, theme)
             "YELLOW" -> resources.getColor(R.color.clip_yellow, theme)
@@ -214,6 +229,8 @@ class CatchEntryTournament : AppCompatActivity() {
     // ```````````````` Tag Clip Color to LETTER for color blind '''''''''''''''''
 
     private fun getClipColorLetter(color: String): String {
+        Log.d("TOURNAMENT_DEBUG", "🔄 getClipColorLetter) called. Refreshing the list.")
+
         return when (color) {
             "BLUE" -> "B"
             "GREEN" -> "G"
@@ -227,6 +244,8 @@ class CatchEntryTournament : AppCompatActivity() {
 
     // ~~~~~~~~~~~~~ ADJUST TEXT VIEW VIABILITY for culling values ~~~~~~~~~~~~~
     private fun adjustTextViewVisibility() {
+        Log.d("TOURNAMENT_DEBUG", "🔄 adjustTextViewVisibility() called. Refreshing the list.")
+
         when (tournamentCatchLimit) {
             4 -> {
                 fifthRealWeight.alpha = 0.5f
@@ -261,6 +280,8 @@ class CatchEntryTournament : AppCompatActivity() {
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
+        Log.d("TOURNAMENT_DEBUG", "🔄 clearTournamentTextViews() called. Refreshing the list.")
+
         firstRealWeight.text = ""
         secondRealWeight.text = ""
         thirdRealWeight.text = ""
@@ -282,6 +303,9 @@ class CatchEntryTournament : AppCompatActivity() {
     //-------------- Up Date List ---------------------------
 
     private fun updateTournamentList() {
+
+        Log.d("TOURNAMENT_DEBUG", "🔄 updateTournamentList() called. Refreshing the list.")
+
         val allCatches = dbHelper.getCatchesForToday("LbsOzs", getCurrentDate())
             .sortedByDescending { it.totalWeightOz ?: 0 }
         val tournamentCatches = if (isCullingEnabled) allCatches.take(tournamentCatchLimit) else allCatches
@@ -338,6 +362,8 @@ class CatchEntryTournament : AppCompatActivity() {
 
     //''''''''''''' Up Date Total Weight '''''''''''''''''''''''''''''''''''''
     private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
+        Log.d("TOURNAMENT_DEBUG", "🔄 updateTotalWeight() called. Refreshing the list.")
+
         val totalWeightOz = tournamentCatches.sumOf { it.totalWeightOz ?: 0 }
         val totalLbs = (totalWeightOz / 16)
         val totalOz = (totalWeightOz % 16)

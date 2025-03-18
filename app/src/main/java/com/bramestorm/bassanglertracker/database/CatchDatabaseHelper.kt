@@ -72,6 +72,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_MARKER_TYPE, catch.markerType)
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
             }
+            Log.d("DB_DEBUG", "🚀 insertCatch() called ")
 
             val success = db.insert(TABLE_NAME, null, values)
             success != -1L
@@ -79,6 +80,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             Log.e("DB_ERROR", "❌ Error inserting catch: ${e.message}")
             false
         } finally {
+
             db.close() // ✅ Make sure to close the database
         }
     }
@@ -138,6 +140,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                     markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),                //Tournament Culling Limits
                     clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR))                   // Culling Clip colors from SoftLock
                 )
+
                 catchList.add(catch)
             } while (cursor.moveToNext())
         } else {

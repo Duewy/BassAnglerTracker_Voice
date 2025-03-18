@@ -36,9 +36,13 @@ class PopupWeightEntryTourLbs : Activity() {
         setupSpeciesSpinner(tournamentSpecies)
         setupClipColorSpinner()
 
-        btnSaveWeight.setOnClickListener { saveWeightEntry() }
+        btnSaveWeight.setOnClickListener {
+            Log.d("POPUP_DEBUG", "💾 Save button clicked - preparing to send data")
+            saveWeightEntry() }
+
         btnCancel.setOnClickListener { setResult(Activity.RESULT_CANCELED); finish() }
-    }
+
+    }// ----------- END On Create ----------------------------------------
 
     private fun setupSpeciesSpinner(tournamentSpecies: String) {
         val speciesList = intent.getStringArrayListExtra("speciesList") ?: arrayListOf()
@@ -90,15 +94,5 @@ class PopupWeightEntryTourLbs : Activity() {
         finish()
     }
 
-    private fun getColorFromName(colorName: String): Int {
-        return when (colorName.uppercase()) {
-            "RED" -> android.graphics.Color.RED
-            "BLUE" -> android.graphics.Color.BLUE
-            "GREEN" -> android.graphics.Color.GREEN
-            "YELLOW" -> android.graphics.Color.YELLOW
-            "ORANGE" -> android.graphics.Color.rgb(255, 165, 0) // Orange color
-            "WHITE" -> android.graphics.Color.WHITE
-            else -> android.graphics.Color.GRAY
-        }
-    }
+
 }
