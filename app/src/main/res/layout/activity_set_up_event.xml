@@ -204,28 +204,18 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <!--CanAm Flag -->
+            <!--Tournament Limit Marker Set Up  -->
 
             <TextView
                 android:id="@+id/txtLimit_Marker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Limit#    Colors/Letters"
+                android:layout_marginEnd="15dp"
+                android:text="Culling Limit#"
                 android:textColor="@color/black"
                 android:textSize="26sp"
                 android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <!--Tournament Limit Marker Set Up  -->
 
             <ToggleButton
                 android:id="@+id/tglCullingValue"
@@ -244,22 +234,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
                 app:layout_constraintWidth="wrap_content" />
 
-            <ToggleButton
-                android:id="@+id/tglColorLetter"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_marginTop="5dp"
-                android:background="@color/Log_blue_secondary"
-                android:textColor="@color/black"
-                android:textOff="Colors"
-                android:textOn="Letters"
-                android:textSize="34sp"
-                android:textStyle="bold"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
-                app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
-                app:layout_constraintWidth="wrap_content" />
+
 
         </LinearLayout>
 

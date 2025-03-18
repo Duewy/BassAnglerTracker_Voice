@@ -73,7 +73,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
             }
 
-            val success = db.insert(TABLE_CATCHES, null, values)
+            val success = db.insert(TABLE_NAME, null, values)
             success != -1L
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ Error inserting catch: ${e.message}")

@@ -27,7 +27,6 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var btnTournament: Button
     private lateinit var btnStartFishing: Button
     private lateinit var spinnerTournamentSpecies: Spinner
-    private lateinit var tglColorLetter: ToggleButton
     private lateinit var tglCullingValue: ToggleButton
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var tglGPS: ToggleButton
@@ -57,12 +56,10 @@ class SetUpActivity : AppCompatActivity() {
         btnTournament = findViewById(R.id.btnTournament)
         btnStartFishing = findViewById(R.id.btnStartFishing)
         tglCullingValue = findViewById(R.id.tglCullingValue)
-        tglColorLetter = findViewById(R.id.tglColorLetter)
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
 
         tglCullingValue.visibility = View.INVISIBLE
-        tglColorLetter.visibility = View.INVISIBLE
         spinnerTournamentSpecies.visibility = View.INVISIBLE
 
         // Toggle Weight Selection
@@ -113,7 +110,6 @@ class SetUpActivity : AppCompatActivity() {
             btnLength.visibility = View.VISIBLE
             btnMetric.visibility = View.VISIBLE
             tglCullingValue.visibility = View.INVISIBLE
-            tglColorLetter.visibility = View.INVISIBLE
             spinnerTournamentSpecies.visibility = View.INVISIBLE
         }
 
@@ -128,7 +124,6 @@ class SetUpActivity : AppCompatActivity() {
             btnLength.visibility =
                 View.INVISIBLE       //take away measuring options for Tournament mode
             tglCullingValue.visibility = View.VISIBLE
-            tglColorLetter.visibility = View.VISIBLE
             spinnerTournamentSpecies.visibility = View.VISIBLE
         }
 
@@ -168,7 +163,6 @@ class SetUpActivity : AppCompatActivity() {
                 val intent = Intent(this, nextActivity).apply {
                     if (isTournamentSelected) {
                         putExtra("NUMBER_OF_CATCHES", if (tglCullingValue.isChecked) 5 else 4)
-                        putExtra("Color_Numbers", if (tglColorLetter.isChecked) "Color" else "Number")
                         putExtra("TOURNAMENT_SPECIES", spinnerTournamentSpecies.selectedItem?.toString() ?: "Unknown")
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)

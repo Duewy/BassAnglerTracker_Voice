@@ -75,12 +75,114 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/timer_place_holder" />
 
+    <TextView
+        android:id="@+id/txtColorLetter1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:contentDescription="@string/letter_of_color_clip_for_color_blind"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtColorLetter2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtColorLetter1"
+        app:layout_constraintWidth_percent="0.09"/>
+
+    <TextView
+        android:id="@+id/txtColorLetter3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtColorLetter2"
+        app:layout_constraintWidth_percent="0.09"/>
+
+    <TextView
+        android:id="@+id/txtColorLetter4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtColorLetter3"
+        app:layout_constraintWidth_percent="0.09"/>
+
+    <TextView
+        android:id="@+id/txtColorLetter5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtColorLetter4"
+        app:layout_constraintWidth_percent="0.09"/>
+
+    <TextView
+        android:id="@+id/txtColorLetter6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtColorLetter5"
+        app:layout_constraintWidth_percent="0.09"/>
 
     <TextView
         android:id="@+id/firstRealWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         android:background="@color/grey"
         android:gravity="center"
@@ -90,7 +192,7 @@
         android:textSize="45sp"
         android:textStyle="bold"
         app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/txtColorLetter1"
         app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
         app:layout_constraintWidth_percent="0.35" />
 
@@ -471,6 +573,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/totalRealWeight"
         app:layout_constraintWidth_percent="0.25" />
+
     <Button
         android:id="@+id/btnResetCatch"
         android:layout_width="wrap_content"
@@ -481,6 +584,8 @@
         android:text="Reset-?"
         app:layout_constraintStart_toEndOf="@id/btnMenu"
         app:layout_constraintBottom_toBottomOf="@id/btnMenu" />
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

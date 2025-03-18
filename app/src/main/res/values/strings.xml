@@ -69,6 +69,7 @@
     <string name="user_training_page">User Training Page</string>
     <string name="weight_lbs_ozs">Weight Lbs/Ozs</string>
     <string name="alarm">ALARM</string>
+    <string name="letter_of_color_clip_for_color_blind">Letter of Color Clip for Color Blind</string>
 
 
     //species
@@ -82,6 +83,17 @@
         <item>Catfish</item>
         <item>Panfish</item>
     </string-array>
+
+    //clip_colors
+    <string-array name="clip_colors">
+        <item>Red</item>
+        <item>Yellow</item>
+        <item>Green</item>
+        <item>Orange</item>
+        <item>White</item>
+        <item>Blue</item>
+    </string-array>
+
 
     //dec_values
     <string-array name="dec_values">
