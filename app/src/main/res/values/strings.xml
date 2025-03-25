@@ -2,6 +2,7 @@
     <string name="app_name">BassAnglerTracker</string>
     <string name="app_image_description">SoftLock Culling System with Voice Controlled Culling</string>
     <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and Ozs)</string>
+    <string name="enter_catch_kgs">Enter Catch (Kgs)</string>
     <string name="img_setup">Set Up Page</string>
     <string name="addCatchBtn">Add a Catch</string>
     <string name="timer_place_holder">Time Remaining</string>
@@ -35,10 +36,10 @@
     <string name="set_alarm">Set Alarm</string>
     <string name="cancel">Cancel</string>
     <string name="title_enter_catch">Enter Catch:</string>
-    <string name="title_weight_lbs_oz">Species and Weight (Lbs/Oz)</string>
-    <string name="title_weight_kgs">Enter Catch: Species and Weight(Kgs and Grams)</string>
-    <string name="enter_catch_details_inches">Enter Catch: Species and Length -Inches-</string>
-    <string name="enter_catch_details_cm">Enter Catch: Species and Length -Centimeters-</string>
+    <string name="title_weight_lbs_oz">Species and Weight -Lbs/Oz-</string>
+    <string name="title_weight_kgs">Species and Weight -Kgs-</string>
+    <string name="enter_catch_details_inches">Species and Length -Inches-</string>
+    <string name="enter_catch_details_cm">Species and Length -Cms-</string>
     <string name="inches">Inches</string>
     <string name="_8ths_of_inch">8ths of inch</string>
     <string name="select_species">Select Species</string>
@@ -52,7 +53,7 @@
     <string name="enter_cm_and_mm">Enter Cm and mm</string>
     <string name="cms_0_to_99">Cms 0 to 99</string>
     <string name="_0_to_9_mm">0 to 9 mm</string>
-    <string name="enter_weight_centimeters">Enter Weight (Centimeters)</string>
+    <string name="enter_length_centimeters">Enter Length -Centimeters-</string>
     <string name="enter_inches_and_8ths">Enter Inches and 8ths</string>
     <string name="kgs_100_0_to_99">Kgs/100 0 to 99</string>
     <string name="kgs_0_to_99kgs">-Kgs- 0 to 99Kgs</string>
@@ -70,6 +71,35 @@
     <string name="weight_lbs_ozs">Weight Lbs/Ozs</string>
     <string name="alarm">ALARM</string>
     <string name="letter_of_color_clip_for_color_blind">Letter of Color Clip for Color Blind</string>
+    <string name="catch_weight">Catch Weight</string>
+    <string name="train_voice_commands">Train VCC</string>
+    <string name="main_page">main Page</string>
+    <string name="setup">SetUp</string>
+    <string name="ozs">Ozs</string>
+    <string name="lbs">Lbs</string>
+    <string name="lbs_ozs">Lbs Ozs</string>
+    <string name="tournament_species">Tournament Species</string>
+    <string name="fish_image">Fish Image</string>
+    <string name="select_clip_color">Select Clip Color</string>
+    <string name="kgs">Kgs</string>
+    <string name="x_00">X.00</string>
+    <string name="_0_7_8ths">0-7 8ths</string>
+    <string name="_8ths">8ths</string>
+    <string name="enter_catch_details_kgs">Enter Catch Details Kgs</string>
+    <string name="enter_catch_details_inches_8ths">Enter Catch Details Inches</string>
+    <string name="_0_99_cms">0-99 Cms</string>
+    <string name="cms">Cms</string>
+    <string name="_0_9_mm">0-9 mm</string>
+    <string name="enter_catch_details_cms">Enter Catch Details -Cms-</string>
+    <string name="mm">mm</string>
+    <string name="menu">menu</string>
+    <string name="fun_day_weight">Fun Day Weight</string>
+    <string name="fund_day_length">Fund Day Length</string>
+    <string name="tournament_weight">Tournament Weight</string>
+    <string name="tournament_length">Tournament Length</string>
+    <string name="weight_kgs">WEIGHT Kgs</string>
+    <string name="length_inches">Length Inches</string>
+    <string name="total_length_cms">Total Length Cms</string>
 
 
     //species

@@ -50,7 +50,7 @@ class CatchEntryLbsOzs : AppCompatActivity() {
             startActivity(intent2)
         }
 
-                simpleLbsListView.setOnItemLongClickListener { parent, view, position, id ->
+        simpleLbsListView.setOnItemLongClickListener { _, _, position, _ ->
             if (catchList.isEmpty()) {
                 Toast.makeText(this, "No catches available", Toast.LENGTH_SHORT).show()
                 return@setOnItemLongClickListener true
@@ -64,7 +64,9 @@ class CatchEntryLbsOzs : AppCompatActivity() {
             val selectedCatch = catchList[position]
             showEditDeleteDialog(selectedCatch)
             true
-             }
+        }
+
+
 
 
     }//`````````` END ON-CREATE `````````````
@@ -139,29 +141,22 @@ class CatchEntryLbsOzs : AppCompatActivity() {
  //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
 
     private fun updateListViewLb() {
-
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val todaysCatches = dbHelper.getCatchesForToday("lbsOzs", todaysDate)
-            .sortedByDescending { it.dateTime }  // Sort by dateTime (newest first)
+            .sortedByDescending { it.dateTime }
 
         Log.d("DB_DEBUG", "🔍 Catches retrieved from DB: ${todaysCatches.size}")
 
-        // ✅ Make sure catchList is updated BEFORE updating the ListView
         catchList.clear()
         catchList.addAll(todaysCatches)
 
-        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the weight? it should be the ID # or dateTime... and totalWeightOz
-            val weightOz = it.totalWeightOz ?: 0
-            val pounds = weightOz / 16
-            val ounces = weightOz % 16
-            "${it.species} - $pounds lbs $ounces oz"
-        }
         runOnUiThread {
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            val adapter = CatchItemAdapter(this, catchList)
             simpleLbsListView.adapter = adapter
-        }
 
+        }
     }
+
 
 
     //*************** DELETE ENTRY from list View of Catches ********************

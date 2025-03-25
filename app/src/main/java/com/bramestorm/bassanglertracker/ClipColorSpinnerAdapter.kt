@@ -8,27 +8,27 @@ import android.widget.TextView
 
 class ClipColorSpinnerAdapter(
     private val context: Context,
-    private val colorList: List<String> // Color names
-) : ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, colorList) {
+    private val colorList: List<String>
+) : ArrayAdapter<String>(context, R.layout.spinner_color_item, colorList) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = super.getView(position, convertView, parent)
-        val textView = view.findViewById<TextView>(android.R.id.text1)
-        val colorName = colorList[position]
-
-        textView.text = colorName
-        textView.setTextColor(getColorFromName(colorName)) // ✅ Set text color
-
-        return view
+        return createColorView(position, convertView, parent)
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = super.getDropDownView(position, convertView, parent)
-        val textView = view.findViewById<TextView>(android.R.id.text1)
-        val colorName = colorList[position]
+        return createColorView(position, convertView, parent)
+    }
 
-        textView.text = colorName
-        textView.setTextColor(getColorFromName(colorName)) // ✅ Set text color
+    private fun createColorView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as android.view.LayoutInflater
+        val view = inflater.inflate(R.layout.spinner_color_item, parent, false)
+
+        val colorNameView = view.findViewById<TextView>(R.id.spinnerColorName)
+        val colorPatchView = view.findViewById<View>(R.id.spinnerColorBox)
+
+        val colorName = colorList[position]
+        colorNameView.text = colorName
+        colorPatchView.setBackgroundColor(getColorFromName(colorName))
 
         return view
     }
@@ -41,7 +41,7 @@ class ClipColorSpinnerAdapter(
             "BLUE" -> context.getColor(R.color.clip_blue)
             "WHITE" -> context.getColor(R.color.clip_white)
             "ORANGE" -> context.getColor(R.color.clip_orange)
-            else -> context.getColor(R.color.black) // Default
+            else -> context.getColor(R.color.black)
         }
     }
 }

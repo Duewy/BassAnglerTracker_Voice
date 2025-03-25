@@ -155,16 +155,29 @@ class CatchEntryKgs : AppCompatActivity() {
         catchList.clear()
         catchList.addAll(todaysCatches)
 
-        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the weight? it should be the ID # or dateTime... and totalWeightOz
-            val totalWeightHundredthKg = it.totalWeightHundredthKg?: 0
+        val catchDisplayList = todaysCatches.map {
+            val totalWeightHundredthKg = it.totalWeightHundredthKg ?: 0
             val kgs = totalWeightHundredthKg / 100
             val grams = totalWeightHundredthKg % 100
-            "${it.species} - $kgs Kgs, $grams grams"
+
+            // Format the time from dateTime
+            val timeFormatted = try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                val parsedDate = inputFormat.parse(it.dateTime ?: "")
+                outputFormat.format(parsedDate ?: Date())
+            } catch (e: Exception) {
+                "N/A"
+            }
+
+            "${it.species} - $kgs.$grams Kgs @ $timeFormatted"
         }
+
         runOnUiThread {
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            val adapter = CatchItemAdapter(this, catchList)
             simpleKgsListView.adapter = adapter
         }
+
 
     }
 

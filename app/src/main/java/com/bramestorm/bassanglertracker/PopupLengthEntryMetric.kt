@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
 import android.util.Log
+import android.view.View
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -23,22 +23,29 @@ class PopupLengthEntryMetric : Activity() {
 
         val edtLengthCm: EditText = findViewById(R.id.edtLengthCms)
         val edtLengthDecimal: EditText = findViewById(R.id.edtLengthDecimal)
-        val btnSaveCatch: Button = findViewById(R.id.btnSaveCatch)
+        val btnSaveCatch: Button = findViewById(R.id.btnSaveLength)
         val btnCancel: Button = findViewById(R.id.btnCancel)
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerCmsSpeciesPopUp)
 
         // Load species list from strings.xml
-        val speciesArray = resources.getStringArray(R.array.species_list)
+        val speciesList = listOf(
+            SpeciesItem("Largemouth", R.drawable.fish_large_mouth),
+            SpeciesItem("Smallmouth", R.drawable.fish_small_mouth),
+            SpeciesItem("Crappie", R.drawable.fish_crappie),
+            SpeciesItem("Walleye", R.drawable.fish_walleye),
+            SpeciesItem("Catfish", R.drawable.fish_catfish),
+            SpeciesItem("Perch", R.drawable.fish_perch),
+            SpeciesItem("Pike", R.drawable.fish_northern_pike),
+            SpeciesItem("Bluegill", R.drawable.fish_bluegill)
+        )
 
-        // Set up the spinner with species list
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
 
 // Update selectedSpecies when user picks an item
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                selectedSpecies = speciesArray[position] // Update selectedSpecies
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedSpecies = speciesList[position].name
                 Log.d("DB_DEBUG", "Species selected: $selectedSpecies") // Debugging log
             }
 

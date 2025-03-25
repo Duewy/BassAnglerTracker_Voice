@@ -25,9 +25,10 @@
             android:textSize="25sp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="@color/black"
+            android:textColor="@color/clip_white"
             android:textStyle="bold"
-            android:background="@color/clip_yellow"
+            android:background="@color/clip_green"
+            android:padding="5dp"
             android:layout_marginBottom="10dp"/>
 
         <!-- Species Spinner -->
@@ -36,8 +37,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:gravity="center">
+            android:layout_gravity="left"
+            android:gravity="left">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -45,7 +46,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="10dp"
                 android:gravity="left"
                 android:text="@string/select_species"
                 android:textColor="@color/black"

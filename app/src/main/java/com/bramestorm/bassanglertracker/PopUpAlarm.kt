@@ -2,7 +2,6 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TimePicker
@@ -27,8 +26,8 @@ class PopUpAlarm : AppCompatActivity() {
             val minute = timePicker.minute
 
             val intent = Intent()
-            intent.putExtra("ALARM_HOURS", hour)
-            intent.putExtra("ALARM_MINUTES", minute)
+            intent.putExtra("ALARM_HOUR", hour)
+            intent.putExtra("ALARM_MINUTE", minute)
             setResult(Activity.RESULT_OK, intent)
             finish()
         }

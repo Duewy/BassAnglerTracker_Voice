@@ -11,22 +11,34 @@
 
     <!-- Page Label -->
     <TextView
-        android:id="@+id/txtTodaysLog"
+        android:id="@+id/txtTodaysLogKgs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="@string/title_weight_kgs"
+        android:text="todays fishing log"
         android:textColor="@color/black"
         android:textAllCaps="true"
-        android:textSize="26sp"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtTodaysLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.00 Kgs "
+        android:textColor="@color/black"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogKgs" />
 
     <!-- btn Goto Set Up Page -->
     <Button
@@ -50,7 +62,7 @@
         app:layout_constraintTop_toBottomOf="@id/btnSetUp3Kgs">
 
         <TextView
-            android:id="@+id/txtAddCatch"
+            android:id="@+id/txtAddCatchKg"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"

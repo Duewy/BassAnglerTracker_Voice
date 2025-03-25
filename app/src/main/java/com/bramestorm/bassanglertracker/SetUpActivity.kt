@@ -33,11 +33,11 @@ class SetUpActivity : AppCompatActivity() {
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
     private val prefs by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
 
-    private var isWeightSelected = true
+    private var isWeightSelected = false
     private var isLengthSelected = false
-    private var isImperialSelected = true
+    private var isImperialSelected = false
     private var isMetricSelected = false
-    private var isFunDaySelected = true
+    private var isFunDaySelected = false
     private var isTournamentSelected = false
 
     private var isValUnits = false
@@ -68,6 +68,8 @@ class SetUpActivity : AppCompatActivity() {
             isWeightSelected = true
             isLengthSelected = false
             isValMeasuring = true
+            btnImperial.text = "Lbs Ozs"
+            btnMetric.text = " Kgs"
             btnWeight.setBackgroundResource(R.color.white)
             btnLength.setBackgroundResource(R.color.grey)
         }
@@ -77,6 +79,8 @@ class SetUpActivity : AppCompatActivity() {
             isLengthSelected = true
             isWeightSelected = false
             isValMeasuring = true
+            btnImperial.text = "Inches 8ths"
+            btnMetric.text = "Cms"
             btnLength.setBackgroundResource(R.color.white)
             btnWeight.setBackgroundResource(R.color.grey)
         }
@@ -146,16 +150,14 @@ class SetUpActivity : AppCompatActivity() {
 
         // Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
-            Log.d("DEBUG", "Fun Day: $isFunDaySelected | Tournament: $isTournamentSelected")
-            Log.d("DEBUG", "Weight: $isWeightSelected | Length: $isLengthSelected | Imperial: $isImperialSelected | Metric: $isMetricSelected")
 
             val nextActivity = when {
                 isFunDaySelected && isWeightSelected && isImperialSelected -> CatchEntryLbsOzs::class.java
                 isFunDaySelected && isWeightSelected && isMetricSelected -> CatchEntryKgs::class.java
                 isFunDaySelected && isLengthSelected && isImperialSelected -> CatchEntryInches::class.java
                 isFunDaySelected && isLengthSelected && isMetricSelected -> CatchEntryMetric::class.java
-                isTournamentSelected && isImperialSelected -> CatchEntryTournament::class.java
-                isTournamentSelected -> CatchEntryTournamentKgs::class.java
+                isTournamentSelected && isWeightSelected && isImperialSelected -> CatchEntryTournament::class.java
+                isTournamentSelected && isWeightSelected&& isMetricSelected-> CatchEntryTournamentKgs::class.java
                 else -> null
             }
 

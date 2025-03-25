@@ -7,6 +7,7 @@ android {
     namespace = "com.bramestorm.bassanglertracker"
     compileSdk = 35
 
+
     defaultConfig {
         applicationId = "com.bramestorm.bassanglertracker"
         minSdk = 23
@@ -18,6 +19,17 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        splits {
+            abi {
+                isEnable = true
+                reset()
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                isUniversalApk = true
+            }
+        }
+
+
+
     }
 
     buildTypes {

@@ -5,11 +5,10 @@
     android:orientation="horizontal"
     android:padding="8dp"
     android:gravity="center_vertical"
-    android:background="#D3D3D3">>
+    android:background="#D3D3D3">
 
     <!-- Color Patch -->
 
-    <!-- Color Name -->
     <ImageView
         android:id="@+id/spinnerColorBox"
         android:layout_width="100dp"
@@ -18,10 +17,11 @@
         android:background="#000000"
         android:contentDescription="Color Patch" />
 
+    <!-- Color Name -->
     <TextView
         android:id="@+id/spinnerColorName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#000000" />

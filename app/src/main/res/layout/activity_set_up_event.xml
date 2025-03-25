@@ -43,13 +43,15 @@
 
     <!-- Main Content LinearLayout -->
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:gravity="center"
         android:padding="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerImagesLayout" >
+        app:layout_constraintTop_toBottomOf="@id/headerImagesLayout">
 
         <!-- Measurement Type Header -->
         <TextView
@@ -58,8 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp"
             android:gravity="center"
-            android:textColor="@color/black"
             android:text="Type of Measuring"
+            android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -85,9 +87,9 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:textColor="@color/black"
                 android:background="@color/clip_yellow"
                 android:text="Length"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -97,17 +99,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
-                android:textColor="@color/black"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:text="Type of Units"
-                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textSize="24sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -124,8 +128,8 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/Log_blue_secondary"
-                android:textColor="@color/black"
                 android:text="Imperial"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <Button
@@ -139,12 +143,30 @@
                 android:textSize="18sp" />
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="Type of Fishing Day"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- Fun Day & Tournament Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -154,8 +176,8 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/clip_orange"
-                android:textColor="@color/black"
                 android:text="Fun Day"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <Button
@@ -164,11 +186,167 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/bright_red"
+                android:drawableBottom="@drawable/button_outline"
                 android:text="Tournament"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
         </LinearLayout>
+
+
+        <View
+            android:id="@+id/divider8"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!--Tournament Limit Marker Set Up  -->
+
+            <TextView
+                android:id="@+id/txtLimit_Marker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="15dp"
+                android:gravity="center"
+                android:text="Culling Limit#"
+                android:textColor="@color/black"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <ToggleButton
+                android:id="@+id/tglCullingValue"
+                android:layout_width="65dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@color/Log_white"
+                android:shadowColor="@color/Log_red"
+                android:shadowDx="@dimen/material_emphasis_high_type"
+                android:textColor="@color/black"
+                android:textOff="4"
+                android:textOn="5"
+                android:textSize="45sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
+                app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
+                app:layout_constraintWidth="wrap_content" />
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider7"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/clip_blue" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="7dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!--CanAm Flag -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" GPS"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="- - "
+                android:textColor="@color/black"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtSpeciesSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tournament_species"
+                android:textColor="@color/black"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ToggleButton
+                android:id="@+id/tglGPS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_outline_red"
+                android:contentDescription="@string/gps_info"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="24dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="12dp"
+                android:textColor="@color/black"
+                android:textOff="OFF"
+                android:textOn="ON"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" --"
+                android:textColor="@color/black"
+                android:textSize="40sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinnerTournamentSpecies"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:background="@color/clip_white"
+                android:entries="@array/species_list"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -185,10 +363,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="10dp"
-                android:background="@color/magenta_fuchsia"
+                android:background="@drawable/btn_outline_green"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="24dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="12dp"
                 android:text="Start Fishing Event"
                 android:textColor="@color/black"
                 android:textSize="22sp"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnTournament" />
@@ -197,129 +381,22 @@
         </LinearLayout>
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <!--Tournament Limit Marker Set Up  -->
-
-            <TextView
-                android:id="@+id/txtLimit_Marker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="15dp"
-                android:text="Culling Limit#"
-                android:textColor="@color/black"
-                android:textSize="26sp"
-                android:textStyle="bold" />
-
-            <ToggleButton
-                android:id="@+id/tglCullingValue"
-                android:layout_width="65dp"
-                android:layout_height="60dp"
-                android:layout_marginTop="5dp"
-                android:background="@color/Log_blue"
-                android:textColor="@color/black"
-                android:textOff="4"
-                android:textOn="5"
-                android:textSize="34sp"
-                android:textStyle="bold"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
-                app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
-                app:layout_constraintWidth="wrap_content" />
-
-
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
-            android:layout_marginStart="10dp"
-            android:gravity="left"
-            android:orientation="horizontal">
-
-            <!--CanAm Flag -->
-
-            <TextView
-                android:id="@+id/txtSpeciesSelector"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:text="Tournament Species"
-                android:textColor="@color/black"
-                android:textSize="26sp"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-"
-                android:textColor="@color/black"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                android:layout_marginStart="5dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" GPS"
-                android:textColor="@color/black"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginStart="20dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Spinner
-                android:id="@+id/spinnerTournamentSpecies"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="10dp"
-                android:background="@color/clip_white"
-                android:entries="@array/species_list"
-                android:textColor="@color/black"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" -- "
-                android:textColor="@color/black"
-                android:textSize="40sp"
-                android:textStyle="bold"  />
-
-            <ToggleButton
-                android:id="@+id/tglGPS"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/clip_orange"
-                android:contentDescription="@string/gps_info"
-                android:textColor="@color/black"
-                android:textOff="OFF"
-                android:textOn="ON"
-                android:textSize="26sp"
-                android:textStyle="bold" />
-
-
-        </LinearLayout>
-
-
     </LinearLayout>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="73dp"
+        android:background="@drawable/btn_outline_blue"
+        android:text="@string/menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.198"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

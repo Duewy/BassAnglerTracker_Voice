@@ -15,10 +15,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log Lbs"
+        android:text="todays fishing log"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -26,6 +26,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtLbs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lbs , Ozs"
+        android:textColor="@color/black"
+        android:textAllCaps="true"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
 
     <!-- btn Goto Set Up Page -->
     <Button
@@ -36,11 +49,11 @@
         android:layout_marginTop="10dp"
         android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
+        app:layout_constraintTop_toBottomOf="@id/txtLbs" />
 
     <!-- btn btnAddCatch -->
     <LinearLayout
-        android:id="@+id/llAddCatch"
+        android:id="@+id/llAddCatchLbs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -49,7 +62,7 @@
         app:layout_constraintTop_toBottomOf="@id/btnSetUp3">
 
         <TextView
-            android:id="@+id/txtAddCatch"
+            android:id="@+id/txtAddCatchLbs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
@@ -84,6 +97,7 @@
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintTop_toBottomOf="@id/llAddCatch" />
+        app:layout_constraintTop_toBottomOf="@+id/llAddCatchLbs" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

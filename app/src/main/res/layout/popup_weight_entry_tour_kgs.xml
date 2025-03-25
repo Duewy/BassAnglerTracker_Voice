@@ -18,39 +18,86 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enter Catch Details  -Kgs , Grams - "
+            android:text="@string/enter_catch_details_kgs"
             android:textColor="@color/black"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:background="@color/clip_orange"
+            android:textStyle="bold"
+            android:padding="5dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="15dp"
+                android:text="Select Species"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="40dp"
+                android:text="@string/select_clip_color"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
 
         <!-- Species Spinner -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:text="Select Species"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
+            <Spinner
+                android:id="@+id/spinnerSpeciesPopUp"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-        <Spinner
-            android:id="@+id/spinnerSpeciesPopUp"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:spinnerMode="dialog"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"
-            android:background="@color/clip_white"
-            android:entries="@array/species_list" />
+            <Spinner
+                android:id="@+id/clipColorSpinner"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="15dp"
+                android:background="@color/lite_grey"
+                android:entries="@array/clip_colors"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
 
         <!-- Weight Input (Lbs/Ozs) -->
 
         <LinearLayout
-            android:id="@+id/layoutWeightLbsOzs"
+            android:id="@+id/layoutWeightKgs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -59,41 +106,75 @@
             <EditText
                 android:id="@+id/edtWeightTourKgs"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:textColor="@color/black"
-                android:hint="  Kgs"
-                android:inputType="number" />
+                android:hint="00.XX"
+                android:inputType="number"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/kgs"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
 
             <EditText
                 android:id="@+id/edtWeightTourGrams"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:hint="    Grams"
-                android:inputType="number" />
+                android:hint="@string/x_00"
+                android:inputType="number"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text=""
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
-                <!-- Save and Cancel Buttons -->
+                    <!-- Save and Cancel Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                android:id="@+id/btnSaveWeight"
+                android:id="@+id/btnCancelKgs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:text="Save" />
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_green"
+                android:text="Cancel"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnCancel"
+                android:id="@+id/btnSaveWeightKgs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel" />
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_blue"
+                android:text="Save Catch"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

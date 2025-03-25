@@ -4,20 +4,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/clip_red"
+    android:background="@color/Log_red_secondary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CatchEntryInches">
 
     <!-- Page Label -->
     <TextView
-        android:id="@+id/txtTodaysLog"
+        android:id="@+id/txtTodaysLogInches"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
-        android:text="@string/log_catches_inches"
+        android:layout_marginBottom="26dp"
+        android:text="todays fishing log"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -25,6 +26,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtTodaysLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 - 0/8 Inches"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogInches" />
 
     <!-- btn Goto Set Up Page -->
     <Button

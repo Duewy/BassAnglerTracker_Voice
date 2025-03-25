@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_dynamic_primary90"
+    android:background="@color/Log_green_secondary"
     android:contentDescription="@string/app_image_description">
 
 
@@ -14,6 +13,8 @@
         android:layout_height="85dp"
         android:layout_marginTop="15dp"
         android:contentDescription="@string/app_image_description"
+        android:scaleX="1.5"
+        app:layout_constraintBottom_toTopOf="@+id/ManualMode1linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -30,9 +31,8 @@
 
         <TextView
             android:id="@+id/textView4"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:paddingHorizontal="25dp"
             android:text="@string/using_culling_app_in_manual_mode"
@@ -47,9 +47,11 @@
         android:layout_width="0dp"
         android:layout_height="5dp"
         android:layout_marginVertical="15dp"
+        android:layout_marginTop="12dp"
         android:background="@color/black"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ManualMode1linearLayout" />
 
@@ -58,8 +60,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="15dp"
         android:layout_weight="1"
         android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/divider2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider">
@@ -101,64 +105,29 @@
         app:layout_constraintTop_toBottomOf="@+id/divider2">
 
         <Button
-            android:id="@+id/btnLbsCatch"
+            android:id="@+id/btnFundDayWeight"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="@string/catch_lbs"
-            android:textColor="@color/black"
+            android:background="@color/clip_blue"
+            android:text="@string/fun_day_weight"
+            android:textColor="@color/clip_white"
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btnCatchKgs"
+            android:id="@+id/btnFundDayLength"
+            style="@style/Widget.AppCompat.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="@string/catch_kgs"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/llButtons2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:paddingVertical="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llButtons">
-
-        <Button
-            android:id="@+id/btnCatchInches"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="@string/catch_inch"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
-
-        <Button
-            android:id="@+id/btnCatchCms"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="@string/catch_cms"
-            android:textColor="@color/black"
+            android:background="@color/clip_blue"
+            android:text="@string/fund_day_length"
+            android:textColor="@color/clip_white"
             android:textSize="20sp" />
 
     </LinearLayout>
@@ -167,33 +136,34 @@
         android:id="@+id/llButtons3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
         android:layout_weight="1"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llButtons2">
+        app:layout_constraintTop_toBottomOf="@id/llButtons">
 
         <Button
-            android:id="@+id/btnTournamentLbs"
+            android:id="@+id/btnTournamentWeight"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="Tournament Lbs"
+            android:background="@color/clip_orange"
+            android:text="@string/tournament_weight"
             android:textColor="@color/black"
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btnTournamentKgs"
+            android:id="@+id/btnTournamentLength"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="Tournament Kgs"
+            android:background="@color/clip_orange"
+            android:text="@string/tournament_length"
             android:textColor="@color/black"
             android:textSize="20sp" />
     </LinearLayout>
@@ -202,7 +172,7 @@
         android:id="@+id/divider4"
         android:layout_width="0dp"
         android:layout_height="5dp"
-        android:layout_marginVertical="15dp"
+        android:layout_marginVertical="25dp"
         android:background="@color/black"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
@@ -214,15 +184,19 @@
         android:id="@+id/textView6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
         android:layout_weight="1"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:paddingVertical="5dp"
         android:text="@string/using_the_voice_commands"
         android:textColor="@color/black"
-        android:textSize="18sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:typeface="serif"
+        app:layout_constraintBottom_toTopOf="@+id/divider5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider4" />
 
     <View
@@ -241,6 +215,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:background="@color/clip_white"
         android:orientation="horizontal"
         android:paddingVertical="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -248,13 +223,13 @@
         app:layout_constraintTop_toBottomOf="@id/divider5">
 
         <Button
-            android:id="@+id/btnUseVCC"
+            android:id="@+id/btnWhatIsVCC"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
+            android:background="@drawable/btn_outline_red"
             android:text="@string/what_is_vcc"
             android:textColor="@color/black"
             android:textSize="20sp" />
@@ -266,8 +241,8 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@color/softlock_green"
-            android:text="@string/teach_vcc"
+            android:background="@drawable/btn_outline_red"
+            android:text="@string/train_voice_commands"
             android:textColor="@color/black"
             android:textSize="20sp" />
 
@@ -284,21 +259,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/llButtons4" />
 
-    <Button
-        android:id="@+id/btnSetUpUser"
-        android:layout_width="wrap_content"
+    <LinearLayout
+
+        android:id="@+id/llButtons5"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:gravity="center"
-        android:text="@string/goto_setup"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:textSize="22sp"
-        android:background="@color/lite_grey"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:paddingVertical="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider6" />
+        app:layout_constraintTop_toBottomOf="@id/divider6">
+
+        <Button
+            android:id="@+id/btnMenuUser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight=".4"
+            android:background="@drawable/btn_outline_blue"
+            android:text="@string/menu"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnSetUpUser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight=".4"
+            android:background="@drawable/btn_outline_green"
+            android:text="@string/img_setup"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

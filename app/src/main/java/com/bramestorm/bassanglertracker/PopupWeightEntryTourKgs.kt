@@ -3,12 +3,10 @@ package com.bramestorm.bassanglertracker
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
-import android.widget.TextView
 
 class PopupWeightEntryTourKgs : Activity() {
 
@@ -33,8 +31,8 @@ class PopupWeightEntryTourKgs : Activity() {
             val edtWeightKgs: EditText = findViewById(R.id.edtWeightTourKgs)
             val edtWeightGrams: EditText = findViewById(R.id.edtWeightTourGrams) // New field for decimal kg
 
-            val btnSaveWeight: Button = findViewById(R.id.btnSaveWeight)
-            val btnCancel: Button = findViewById(R.id.btnCancel)
+            val btnSaveWeight: Button = findViewById(R.id.btnSaveWeightKgs)
+            val btnCancel: Button = findViewById(R.id.btnCancelKgs)
             val spinnerSpecies: Spinner = findViewById(R.id.spinnerSpeciesPopUp) // Matches XML ID
 
             // Get pre-selected tournament species

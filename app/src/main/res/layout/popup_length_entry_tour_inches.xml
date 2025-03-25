@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/popup_background"
+        android:orientation="vertical"
+        android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Popup Title -->
+
+        <TextView
+            android:id="@+id/txtPopupTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/enter_catch_details_inches_8ths"
+            android:textColor="@color/clip_white"
+            android:background="@color/clip_green"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:padding="5dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="30dp"
+                android:text="Select Species"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="40dp"
+                android:text="@string/select_clip_color"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <!-- Species Spinner -->
+            <Spinner
+                android:id="@+id/spinnerSpeciesPopUp"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Clip Color Spinner -->
+            <Spinner
+                android:id="@+id/clipColorSpinner"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:background="@color/lite_grey"
+                android:entries="@array/clip_colors"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Length Input (Inches & 8ths) -->
+
+        <LinearLayout
+            android:id="@+id/layoutLengthInches"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <EditText
+                android:id="@+id/edtLengthTourInches"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:hint="0-99 Inches"
+                android:textColorHint="@color/lite_grey"
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/inches"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+
+            <EditText
+                android:id="@+id/edtLengthTour8ths"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:hint="@string/_8ths_of_inch"
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:textColorHint="@color/lite_grey"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/_8ths"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Save and Cancel Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/btnCancelInches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_green"
+                android:text="Cancel"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSaveLengthInches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_blue"
+                android:text="Save Catch"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

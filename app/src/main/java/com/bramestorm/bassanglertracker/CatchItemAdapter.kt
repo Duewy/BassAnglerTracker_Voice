@@ -5,32 +5,69 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.TextView
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class CatchItemAdapter(context: Context, private val catches: MutableList<CatchItem>) :
-    ArrayAdapter<CatchItem>(context, 0, catches) {
+
+class CatchItemAdapter(
+    context: Context,
+    private val catches: MutableList<CatchItem>,
+
+) : ArrayAdapter<CatchItem>(context, 0, catches) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
-        val catchItem = getItem(position)
-        val textView = view.findViewById<TextView>(android.R.id.text1)
+            .inflate(R.layout.list_item_catch, parent, false)
 
-        textView.text = catchItem?.let {
-            when (it.catchType) {
-                "weight_imperial" -> {
+        val catchItem = getItem(position)
+        val txtCatchInfo = view.findViewById<TextView>(R.id.txtCatchInfo)
+        val imgSpecies = view.findViewById<ImageView>(R.id.imgSpecies)
+
+        // Format time from dateTime string
+        val timeFormatted = try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+            val parsedDate = inputFormat.parse(catchItem?.dateTime ?: "")
+            outputFormat.format(parsedDate ?: Date())
+        } catch (e: Exception) {
+            "N/A"
+        }
+
+
+
+        catchItem?.let {
+            val speciesName = it.species ?: "Unknown"
+            val infoText = when (it.catchType) {
+                "lbsOzs"  -> {
                     val totalOz = it.totalWeightOz ?: 0
-                    "${it.species}: ${totalOz / 16} lbs, ${totalOz % 16} oz"
+                    "$speciesName: ${totalOz / 16}Lbs ${totalOz % 16}oz, @ $timeFormatted"
                 }
-                "weight_metric" -> "${it.species}: ${it.totalWeightHundredthKg?.div(10.0) ?: 0.0} kg"
-                "length_imperial" -> {
+                "kgs" -> "$speciesName: ${it.totalWeightHundredthKg?.div(100.0) ?: 0.0} Kg, @ $timeFormatted"
+                "inches" -> {
                     val totalA8th = it.totalLengthA8th ?: 0
-                    "${it.species}: ${totalA8th / 8} in ${totalA8th % 8}/8"
+                    val inches = totalA8th / 8
+                    val a8ths = totalA8th % 8
+                    val lengthFormatted = when (a8ths) {
+                        0 -> "$inches in"
+                        2 -> "$inches 1/4 in"
+                        4 -> "$inches 1/2 in"
+                        6 -> "$inches 3/4 in"
+                        else -> "$inches ${a8ths}/8 in"
+                    }
+                    "$speciesName: $lengthFormatted, @ $timeFormatted"
                 }
-                "length_metric" -> "${it.species}: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm"
+                "metric" -> "$speciesName: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm,  ,  @ $timeFormatted"
                 else -> it.toString()
             }
-        } ?: ""
+
+            txtCatchInfo.text = infoText
+            imgSpecies.setImageResource(getSpeciesImageResId(speciesName))
+
+        }
+
         return view
     }
 }

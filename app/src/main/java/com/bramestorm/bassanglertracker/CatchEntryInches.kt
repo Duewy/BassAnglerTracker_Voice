@@ -146,12 +146,29 @@ class CatchEntryInches : AppCompatActivity() {
             val totalLengthA8th = it.totalLengthA8th ?: 0
             val inches = totalLengthA8th / 8
             val a8ths = totalLengthA8th  % 8
-            "${it.species} - $inches inches $a8ths 8ths"
+            // Format the time from dateTime
+            val timeFormatted = try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                val parsedDate = inputFormat.parse(it.dateTime ?: "")
+                outputFormat.format(parsedDate ?: Date())
+            } catch (e: Exception) {
+                "N/A"
+            }
+            when (a8ths) {
+                0 -> "${it.species} - $inches Inches @ $timeFormatted"
+                2 -> "${it.species} - $inches 1/4 Inches @ $timeFormatted"
+                4 -> "${it.species} - $inches 1/2 Inches @ $timeFormatted"
+                6 -> "${it.species} - $inches 3/4 Inches @ $timeFormatted"
+                else -> "${it.species} - $inches ${a8ths}/8 Inches @ $timeFormatted"
+            }
         }
+
         runOnUiThread {
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            val adapter = CatchItemAdapter(this, catchList)
             simpleInchListView.adapter = adapter
         }
+
 
     }
 

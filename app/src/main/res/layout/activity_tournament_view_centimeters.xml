@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/clip_yellow"
+    tools:context=".CatchEntryTournamentCentimeters">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="235dp"
+        android:layout_height="61dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="5dp"
+        android:contentDescription="@string/app_image_description"
+        android:scaleX="1.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.4"
+        app:srcCompat="@drawable/voice_controlled_culling_words" />
+
+    <Button
+        android:id="@+id/btnStartFishingCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/softlock_blue"
+        android:gravity="center"
+        android:shadowColor="#8FC16D"
+        android:text="@string/addCatchBtn"
+        android:textColor="@color/clip_white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.09"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintWidth_percent="0.55" />
+
+    <Button
+        android:id="@+id/btnAlarmCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80C5D2E8"
+        android:gravity="center"
+        android:hint="@string/days_End_time"
+        android:text="@string/alarm"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_red"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btnStartFishingCms"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/btnStartFishingCms"
+        app:layout_constraintWidth_percent="0.3" />
+
+    <TextClock
+        android:id="@+id/timeNOW"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.4"
+        tools:text="@string/timer_place_holder" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:contentDescription="@string/letter_of_color_clip_for_color_blind"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishingCms"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCmsColorLetter1"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCmsColorLetter2"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCmsColorLetter3"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCmsColorLetter4"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/txtCmsColorLetter6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCmsColorLetter5"
+        app:layout_constraintWidth_percent="0.09" />
+
+    <TextView
+        android:id="@+id/firstRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/txtCmsColorLetter1"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishingCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/secondRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@+id/firstRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/firstRealLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/thirdRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@+id/secondRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/secondRealLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/fourthRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@+id/thirdRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/thirdRealLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/fifthRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@+id/fourthRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/fourthRealLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/sixthRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:gravity="center"
+        android:text="3 Lbs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/fifthRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/fifthRealLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+
+    <TextView
+        android:id="@+id/firstDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstRealLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishingCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/secondDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/firstDecLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/thirdDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/secondDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/secondDecLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/fourthDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/thirdDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/thirdDecLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/fifthDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/fourthDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/fourthDecLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/sixthDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/grey"
+        android:text="18 ozs"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toStartOf="@id/fifthDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@+id/fifthDecLengthCms"
+        app:layout_constraintWidth_percent="0.35" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/btnStartFishingCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/secondDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/firstDecLengthCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/secondDecLengthCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/thirdDecLengthCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/fourthDecLengthCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtTypeLetterCms6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/firstDecLengthCms"
+        app:layout_constraintTop_toBottomOf="@id/fifthDecLengthCms"
+        app:layout_constraintWidth_percent="0.1" />
+
+
+    <TextView
+        android:id="@+id/total_LengthViewCms"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="@string/total_length_cms"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.379"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sixthRealLengthCms" />
+
+    <TextView
+        android:id="@+id/totalRealLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="15dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:textAlignment="gravity"
+        android:textColor="@color/black"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@id/sixthRealLengthCms"
+        app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintTop_toBottomOf="@id/total_LengthViewCms"
+        app:layout_constraintWidth_percent="0.2" />
+
+    <TextView
+        android:id="@+id/txtCmsHolder"
+        android:layout_width="wrap_content"
+        android:layout_height="72dp"
+        android:gravity="bottom"
+        android:text="."
+        android:textColor="@color/black"
+        android:textSize="80sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealLengthCms"
+        app:layout_constraintStart_toEndOf="@id/totalRealLengthCms" />
+
+    <TextView
+        android:id="@+id/totalDecLengthCms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/clip_white"
+        android:gravity="center"
+        android:textAlignment="gravity"
+        android:textColor="@color/black"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealLengthCms"
+        app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintStart_toEndOf="@id/txtCmsHolder"
+        app:layout_constraintWidth_percent="0.2" />
+
+    <TextView
+        android:id="@+id/txtHolderCms"
+        android:layout_width="wrap_content"
+        android:layout_height="72dp"
+        android:gravity="bottom"
+        android:layout_marginStart="5dp"
+        android:text="@string/cms"
+        android:textColor="@color/black"
+        android:textScaleX="0.5"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalDecLengthCms"
+        app:layout_constraintStart_toEndOf="@id/totalDecLengthCms" />
+
+    <Button
+        android:id="@+id/btnSetUpCms"
+        android:layout_width="wrap_content"
+        android:layout_height="55dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:paddingHorizontal="10dp"
+        android:background="@drawable/btn_outline_green"
+        android:text="@string/setup"
+        android:textAlignment="gravity"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.11"
+        app:layout_constraintHorizontal_bias="0.103"
+        app:layout_constraintTop_toBottomOf="@id/totalRealLengthCms"
+        app:layout_constraintWidth_percent="0.25" />
+
+    <Button
+        android:id="@+id/btnMainCms"
+        android:layout_width="wrap_content"
+        android:layout_height="55dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/btn_outline_blue"
+        android:text="@string/main_page"
+        android:textAlignment="gravity"
+        android:textSize="25sp"
+        app:layout_constraintHeight_percent="0.11"
+        app:layout_constraintHorizontal_bias="0.103"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/totalRealLengthCms"
+        app:layout_constraintWidth_percent="0.25" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

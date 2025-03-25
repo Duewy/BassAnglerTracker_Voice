@@ -26,7 +26,8 @@
             android:gravity="center"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:background="@color/Log_green_secondary"
+            android:background="@color/clip_orange"
+            android:padding="5dp"
             android:layout_marginBottom="10dp" />
 
         <!-- Species Spinner -->
@@ -35,7 +36,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="center">
+            android:gravity="left">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -142,26 +143,37 @@
 
 
         <!-- SAVE btn  -->
-        <Button
-            android:id="@+id/btnSaveWeight"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/Log_green"
-            android:text="Save Catch"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/Log_green_secondary"
+                android:text="Cancel"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSaveWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/Log_green"
+                android:text="Save Catch"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <!-- CANCEL btn  -->
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/Log_green_secondary"
-            android:text="Cancel"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,17 +22,18 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="@string/enter_catch_details_inches"
-            android:textColor="@color/black"
-            android:textSize="22sp"
+            android:textColor="@color/clip_white"
+            android:textSize="25sp"
             android:textStyle="bold"
-            android:background="@color/Log_red"/>
+            android:padding="5dp"
+            android:background="@color/clip_red"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="center">
+            android:gravity="left">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,7 +136,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="8ths"
+                android:text="@string/_8ths"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"

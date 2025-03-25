@@ -146,12 +146,23 @@ class CatchEntryMetric : AppCompatActivity() {
             val lengthEntryMetric = it.totalLengthTenths ?: 0
             val centimeters =  lengthEntryMetric  / 10
             val millimeters = lengthEntryMetric  % 10
-            "${it.species} - $centimeters Cm $millimeters mm"
+            // Format the time from dateTime
+            val timeFormatted = try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                val parsedDate = inputFormat.parse(it.dateTime ?: "")
+                outputFormat.format(parsedDate ?: Date())
+            } catch (e: Exception) {
+                "N/A"
+            }
+
+            "${it.species} - $centimeters.$millimeters Cms @ $timeFormatted"
         }
         runOnUiThread {
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, catchDisplayList)
+            val adapter = CatchItemAdapter(this, catchList)
             simpleCmListView.adapter = adapter
         }
+
 
     }
 

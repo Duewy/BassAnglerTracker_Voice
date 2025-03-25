@@ -4,6 +4,7 @@
 
     
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -38,7 +39,10 @@
 
         <activity android:name=".CatchEntryTournament"/>
         <activity android:name=".CatchEntryTournamentKgs"/>
-        <activity android:name=".UserTrainingIndex"/>
+        <activity android:name=".CatchEntryTournamentInches"/>
+        <activity android:name=".CatchEntryTournamentCentimeters"/>
+
+        <activity android:name=".training.UserTrainingIndex"/>
 
         <activity android:name=".PopupWeightEntryTourKgs"/>
         <activity android:name=".PopupWeightEntryTourLbs"/>
@@ -49,7 +53,8 @@
         <activity android:name=".PopupLengthEntryMetric"/>
 
         <activity android:name=".PopUpAlarm"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+            android:theme="@style/Theme.BassAnglerTracker"/>
+
 
 
     </application>
