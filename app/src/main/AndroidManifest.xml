@@ -44,16 +44,27 @@
 
         <activity android:name=".training.UserTrainingIndex"/>
 
-        <activity android:name=".PopupWeightEntryTourKgs"/>
-        <activity android:name=".PopupWeightEntryTourLbs"/>
+        <activity android:name=".PopupWeightEntryTourKgs"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupWeightEntryTourLbs"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupLengthEntryTourInches"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupLengthEntryTourCms"
+            android:windowSoftInputMode="adjustResize"/>
 
-        <activity android:name=".PopupWeightEntryKgs"/>
-        <activity android:name=".PopupWeightEntryLbs"/>
-        <activity android:name=".PopupLengthEntryInches"/>
-        <activity android:name=".PopupLengthEntryMetric"/>
+        <activity android:name=".PopupWeightEntryKgs"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupWeightEntryLbs"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupLengthEntryInches"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".PopupLengthEntryMetric"
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity android:name=".PopUpAlarm"
-            android:theme="@style/Theme.BassAnglerTracker"/>
+            android:theme="@style/Theme.BassAnglerTracker"
+            android:windowSoftInputMode="adjustResize"/>
 
 
 

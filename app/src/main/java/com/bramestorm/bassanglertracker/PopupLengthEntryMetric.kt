@@ -11,6 +11,7 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 
 class PopupLengthEntryMetric : Activity() {
 
@@ -65,6 +66,11 @@ class PopupLengthEntryMetric : Activity() {
             val lengthCm = edtLengthCm.text.toString().toIntOrNull() ?: 0
             val lengthDecimal = edtLengthDecimal.text.toString().toIntOrNull() ?: 0
             val totalLengthCms = ((lengthCm * 10) + lengthDecimal)
+
+            if ( totalLengthCms == 0) {
+                Toast.makeText(this, "Length cannot be 0.o cms!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             resultIntent.putExtra("lengthTotalCms", totalLengthCms)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)

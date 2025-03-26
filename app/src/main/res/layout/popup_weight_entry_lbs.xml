@@ -3,7 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -97,7 +100,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint=" -Lbs-  0 to 99Lbs"
+                android:hint="-Lbs-  0 to 99 Lbs"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -109,7 +112,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="    -Ozs-  0 to 15Ozs"
+                android:hint="-Ozs-  0 to 15 Ozs"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -157,6 +160,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <!-- CANCEL btn  -->
             <Button
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
@@ -169,6 +173,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <!-- SAVE btn  -->
             <Button
                 android:id="@+id/btnSaveWeight"
                 android:layout_width="wrap_content"
@@ -182,7 +187,6 @@
 
         </LinearLayout>
 
-        <!-- CANCEL btn  -->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

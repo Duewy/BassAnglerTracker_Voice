@@ -46,27 +46,29 @@ class UserTrainingIndex : AppCompatActivity() {
         // GOOGLE DRIVE to save files on...
 
         btnFunDayWeight.setOnClickListener {
-            val pdfUrl = "https://drive.google.com/file/d/1nMVrC_QPpsHdZiOIF3RXUyc6-8QtDVZ0/view?usp=drive_link"
+            val pdfUrl = "https://drive.google.com/file/d/1vya_3-wf4B0FXad4jZ8N0SvXWQLBwKww/view?usp=sharing"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             startActivity(intent)
+
         }
 
         btnFunDayLength.setOnClickListener{
-            val pdfUrl = "https://drive.google.com/file/d/1vya_3-wf4B0FXad4jZ8N0SvXWQLBwKww/view?usp=drive_link"
+            val pdfUrl = "https://drive.google.com/file/d/1nMVrC_QPpsHdZiOIF3RXUyc6-8QtDVZ0/view?usp=sharing"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             startActivity(intent)
         }
 
         btnTournamentWeight.setOnClickListener{
-            val pdfUrl = "https://drive.google.com/file/d/1qmCiOOKdNhDi3-siebhOze3CUvBWGqvM/view?usp=drive_link"
+            val pdfUrl = "https://drive.google.com/file/d/1qmCiOOKdNhDi3-siebhOze3CUvBWGqvM/view?usp=sharing"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             startActivity(intent)
         }
 
         btnTournamentLength.setOnClickListener {
-            val pdfUrl = "https://drive.google.com/file/d/1NyX9nR2BIc5kqcSQ467QkYDvfcyZHt9k/view?usp=drive_link"
+            val pdfUrl = "https://drive.google.com/file/d/1NyX9nR2BIc5kqcSQ467QkYDvfcyZHt9k/view?usp=sharing"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
-            startActivity(intent)  }
+            startActivity(intent)
+        }
 
     }
 }

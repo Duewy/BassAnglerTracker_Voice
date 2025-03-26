@@ -11,6 +11,7 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 
 class PopupWeightEntryKgs : Activity() {
 
@@ -54,10 +55,10 @@ class PopupWeightEntryKgs : Activity() {
             }
         }
 
-        // `````````````` Apply InputFilters to limit values  ````````````````````
-       // edtWeightKgs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Kgs: 0-99
-       // edtWeightGrams.filters = arrayOf(MinMaxInputFilter(0, 99)) // Kgs/1000 (0 to 99)
 
+        // `````````````` Apply InputFilters to limit values  ````````````````````
+        edtWeightKgs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Kgs: 1-99
+        edtWeightGrams.filters = arrayOf(MinMaxInputFilter(0, 99)) // Grams: 0-99
         // ````````````````````` SAVE CATCH ENTRY  ````````````````````
 
         btnSaveWeight.setOnClickListener {
@@ -67,10 +68,14 @@ class PopupWeightEntryKgs : Activity() {
             val weightGrams = edtWeightGrams.text.toString().toIntOrNull() ?: 0
             val totalWeightHundredthKg  = ((weightKgs * 100) + weightGrams)
 
+            if (totalWeightHundredthKg == 0) {
+                Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             resultIntent.putExtra("weightTotalKg", totalWeightHundredthKg )
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $totalWeightHundredthKg  GRAMS, Species: $selectedSpecies")
 
                 setResult(Activity.RESULT_OK, resultIntent)
                 finish()

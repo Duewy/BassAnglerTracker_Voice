@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#801976D2"
@@ -24,41 +28,6 @@
         app:layout_constraintWidth_percent="0.4"
         app:srcCompat="@drawable/voice_controlled_culling_words" />
 
-    <Button
-        android:id="@+id/btnStartFishing"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/softlock_blue"
-        android:gravity="center"
-        android:shadowColor="#8FC16D"
-        android:text="@string/addCatchBtn"
-        android:textColor="@color/clip_white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintHeight_percent="0.09"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintWidth_percent="0.55" />
-
-    <Button
-        android:id="@+id/btnAlarm"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#80C5D2E8"
-        android:gravity="center"
-        android:hint="@string/days_End_time"
-        android:text="@string/alarm"
-        android:textAllCaps="true"
-        android:textColor="@color/clip_red"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btnStartFishing"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.085"
-        app:layout_constraintStart_toEndOf="@id/btnStartFishing"
-        app:layout_constraintWidth_percent="0.3"/>
-
     <TextClock
         android:id="@+id/timeNOW"
         android:layout_width="0dp"
@@ -75,6 +44,43 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/timer_place_holder" />
 
+    <Button
+        android:id="@+id/btnStartFishing"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/softlock_blue"
+        android:gravity="center"
+        android:shadowColor="#8FC16D"
+        android:text="@string/addCatchBtn"
+        android:textColor="@color/clip_white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginEnd="5dp"
+        app:layout_constraintHeight_percent="0.09"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintWidth_percent="0.55" />
+
+    <Button
+        android:id="@+id/btnAlarm"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#80C5D2E8"
+        android:gravity="center"
+        android:hint="@string/days_End_time"
+        android:text="@string/alarm"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_red"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btnStartFishing"
+        app:layout_constraintStart_toStartOf="@id/timeNOW"
+        app:layout_constraintHeight_percent="0.085"
+        app:layout_constraintStart_toEndOf="@id/btnStartFishing"
+        app:layout_constraintWidth_percent="0.3"/>
+
+
     <TextView
         android:id="@+id/txtColorLetter1"
         android:layout_width="0dp"
@@ -85,7 +91,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnStartFishing"
@@ -100,7 +106,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtColorLetter1"
@@ -115,7 +121,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtColorLetter2"
@@ -130,7 +136,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtColorLetter3"
@@ -145,7 +151,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtColorLetter4"
@@ -160,7 +166,7 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="45sp"
+        android:textSize="40sp"
         app:layout_constraintHeight_percent="0.085"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtColorLetter5"
@@ -343,7 +349,7 @@
         android:layout_marginTop="5dp"
         android:background="@color/grey"
         android:textAlignment="center"
-        android:text="18 ozs"
+        android:text="@string/_18_ozs"
         android:textColor="@color/black"
         android:textSize="45sp"
         android:textStyle="bold"
@@ -476,6 +482,7 @@
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/totalRealWeight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.379"
         app:layout_constraintStart_toStartOf="parent"
@@ -485,6 +492,7 @@
         android:id="@+id/totalRealWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="83dp"
         android:layout_marginEnd="25dp"
         android:background="@color/clip_white"
         android:gravity="center"
@@ -492,19 +500,20 @@
         android:textColor="@color/black"
         android:textSize="48sp"
         android:textStyle="bold"
-        app:layout_constraintHeight_percent="0.1"
         app:layout_constraintEnd_toEndOf="@id/sixthRealWeight"
-        app:layout_constraintWidth_percent="0.2"
-        app:layout_constraintTop_toBottomOf="@id/total_weightView" />
+        app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/total_weightView"
+        app:layout_constraintWidth_percent="0.2" />
 
     <TextView
         android:id="@+id/txtLbHolder"
         android:layout_width="wrap_content"
         android:layout_height="72dp"
-        android:textScaleX="0.3"
-        android:text="@string/lbs"
         android:gravity="bottom"
+        android:text="@string/lbs"
         android:textColor="@color/black"
+        android:textScaleX="0.3"
         android:textSize="60sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"
@@ -515,16 +524,19 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="5dp"
+        android:layout_marginEnd="1dp"
         android:background="@color/clip_white"
         android:gravity="center"
         android:textAlignment="gravity"
         android:textColor="@color/black"
         android:textSize="48sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"
+        app:layout_constraintEnd_toStartOf="@+id/txtHolderOzs"
         app:layout_constraintHeight_percent="0.1"
         app:layout_constraintStart_toEndOf="@id/txtLbHolder"
-        app:layout_constraintWidth_percent="0.2"
-        app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"/>
+        app:layout_constraintTop_toBottomOf="@+id/total_weightView"
+        app:layout_constraintWidth_percent="0.2" />
 
     <TextView
         android:id="@+id/txtHolderOzs"
@@ -539,37 +551,34 @@
         app:layout_constraintBottom_toBottomOf="@id/totalDecWeight"
         app:layout_constraintStart_toEndOf="@id/totalDecWeight" />
 
-    <Button
-        android:id="@+id/btnMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:background="@color/secondary"
-        android:text="@string/setup"
-        android:textAlignment="gravity"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.11"
-        app:layout_constraintHorizontal_bias="0.103"
-        app:layout_constraintTop_toBottomOf="@id/totalRealWeight"
-        app:layout_constraintWidth_percent="0.25" />
 
     <Button
         android:id="@+id/btnMainPg"
         android:layout_width="wrap_content"
         android:layout_height="55dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="15dp"
-        android:background="@color/secondary"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/btn_outline_green"
         android:text="@string/main_page"
         android:textAlignment="gravity"
         android:textSize="25sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHeight_percent="0.11"
-        app:layout_constraintHorizontal_bias="0.103"
+        app:layout_constraintStart_toStartOf="@id/firstRealWeight"
+        app:layout_constraintTop_toBottomOf="@id/totalRealWeight" />
+
+    <Button
+        android:id="@+id/btnMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="55dp"
+        android:background="@drawable/btn_outline_blue"
+        android:text="@string/setup"
+        android:textAlignment="gravity"
+        android:textSize="25sp"
+        app:layout_constraintTop_toTopOf="@id/btnMainPg"
+        app:layout_constraintStart_toStartOf="@+id/firstDecWeight"
         app:layout_constraintTop_toBottomOf="@id/totalRealWeight"
-        app:layout_constraintWidth_percent="0.25"  />
+ />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

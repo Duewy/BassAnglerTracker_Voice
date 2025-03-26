@@ -1,11 +1,14 @@
 package com.bramestorm.bassanglertracker.database
 
+import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import com.bramestorm.bassanglertracker.CatchItem
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -21,6 +24,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val TABLE_NAME = "catches"
         private const val COLUMN_ID = "id"
         private const val COLUMN_DATE_TIME = "date_time"
+        private const val COLUMN_LATITUDE = "latitude"
+        private const val COLUMN_LONGITUDE = "longitude"
         private const val COLUMN_SPECIES = "species"
         private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"
         private const val COLUMN_TOTAL_LENGTH_8THS = "total_length_8ths"
@@ -36,6 +41,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         CREATE TABLE $TABLE_NAME (
             $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             $COLUMN_DATE_TIME TEXT NOT NULL,
+            $COLUMN_LATITUDE REAL,
+            $COLUMN_LONGITUDE REAL,
             $COLUMN_SPECIES TEXT NOT NULL,
             $COLUMN_TOTAL_WEIGHT_OZ INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_8THS INTEGER DEFAULT 0,
@@ -59,6 +66,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     // **************** - INSERT CATCH -  *****************************************
 
     fun insertCatch(catch: CatchItem): Boolean {
+
         val db = this.writableDatabase
         return try {
             val values = ContentValues().apply {
@@ -71,6 +79,15 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_CATCH_TYPE, catch.catchType)
                 put(COLUMN_MARKER_TYPE, catch.markerType)
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
+                // Add GPS coordinates if enabled
+                val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
+                if (gpsEnabled) {
+                    val location = getLastKnownLocation()
+                    location?.let {
+                        put(COLUMN_LATITUDE,catch.latitude)
+                        put(COLUMN_LONGITUDE,catch.longitude)
+                    }
+                }
             }
             Log.d("DB_DEBUG", "🚀 insertCatch() called ")
 
@@ -82,32 +99,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         } finally {
 
             db.close() // ✅ Make sure to close the database
-        }
-    }
-
-
-    private fun saveCatchToDatabase(catch: CatchItem) {
-        val db = writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_DATE_TIME, catch.dateTime)
-            put(COLUMN_SPECIES, catch.species)
-            put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz ?: 0)
-            put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th ?: 0)
-            put(COLUMN_TOTAL_LENGTH_TENTHS, catch.totalLengthTenths ?: 0)
-            put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg ?: 0)
-            put(COLUMN_CATCH_TYPE, catch.catchType)
-            put(COLUMN_MARKER_TYPE, catch.markerType)
-            put(COLUMN_CLIP_COLOR, catch.clipColor)
-
-        }
-
-        val result = db.insert(TABLE_NAME, null, values)
-        db.close()
-
-        if (result == -1L) {
-            Log.e("DB_DEBUG", "⚠️ Insert FAILED for catch: $values")
-        } else {
-            Log.d("DB_DEBUG", "✅ Insert SUCCESS for catch: $values")
         }
     }
 
@@ -212,6 +203,22 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
     fun getTournamentResetPoint(): String? {
         return resetPoint
+    }
+
+    // $$$$$$$$$$$$ Get Last Known Location  $$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+    private fun getLastKnownLocation(): android.location.Location? {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        val providers = locationManager.getProviders(true)
+        for (provider in providers.reversed()) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null
+            }
+            val location = locationManager.getLastKnownLocation(provider)
+            if (location != null) return location
+        }
+        return null
     }
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++

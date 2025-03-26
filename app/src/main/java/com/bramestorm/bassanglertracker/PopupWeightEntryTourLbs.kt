@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 
 class PopupWeightEntryTourLbs : Activity() {
 
@@ -74,6 +75,8 @@ class PopupWeightEntryTourLbs : Activity() {
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
 
+        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
+        edtWeightOz.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
 
     // `````````` SAVE btn ````````````````
         btnSaveWeight.setOnClickListener {

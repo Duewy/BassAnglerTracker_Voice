@@ -25,6 +25,7 @@ class CatchEntryTournament : AppCompatActivity() {
     // Buttons
     private lateinit var btnTournamentCatch: Button
     private lateinit var btnMenu: Button
+    private lateinit var btnMainPg:Button
     private lateinit var btnAlarm: Button
 
 
@@ -116,6 +117,7 @@ class CatchEntryTournament : AppCompatActivity() {
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         btnMenu = findViewById(R.id.btnMenu)
+        btnMainPg = findViewById(R.id.btnMainPg)
         btnAlarm = findViewById(R.id.btnAlarm)
 
         // Assign TextViews
@@ -143,13 +145,6 @@ class CatchEntryTournament : AppCompatActivity() {
         totalRealWeight = findViewById(R.id.totalRealWeight)
         totalDecWeight = findViewById(R.id.totalDecWeight)
 
-        txtTypeLetter1 = findViewById(R.id.txtTypeLetter1)
-        txtTypeLetter2 =findViewById(R.id.txtTypeLetter2)
-        txtTypeLetter3 = findViewById(R.id.txtTypeLetter3)
-        txtTypeLetter4= findViewById(R.id.txtTypeLetter4)
-        txtTypeLetter5= findViewById(R.id.txtTypeLetter5)
-        txtTypeLetter6= findViewById(R.id.txtTypeLetter6)
-
         txtColorLetter1 = findViewById(R.id.txtColorLetter1)
         txtColorLetter2 = findViewById(R.id.txtColorLetter2)
         txtColorLetter3 = findViewById(R.id.txtColorLetter3)
@@ -167,6 +162,7 @@ class CatchEntryTournament : AppCompatActivity() {
 
         btnTournamentCatch.setOnClickListener { showWeightPopup() }
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
+        btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
         val dbHelper = CatchDatabaseHelper(this)
 
@@ -261,8 +257,10 @@ class CatchEntryTournament : AppCompatActivity() {
             .take(tournamentCatchLimit)
             .size
 
-        val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        if (currentCount >= 2) {
+            val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
 

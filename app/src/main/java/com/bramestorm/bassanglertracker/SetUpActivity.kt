@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.Toast
@@ -30,6 +31,7 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var tglCullingValue: ToggleButton
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var tglGPS: ToggleButton
+    private lateinit var btnMainSetup:Button
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
     private val prefs by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
 
@@ -39,6 +41,7 @@ class SetUpActivity : AppCompatActivity() {
     private var isMetricSelected = false
     private var isFunDaySelected = false
     private var isTournamentSelected = false
+    private var selectedSpecies: String = ""
 
     private var isValUnits = false
     private var isValMeasuring = false
@@ -58,6 +61,7 @@ class SetUpActivity : AppCompatActivity() {
         tglCullingValue = findViewById(R.id.tglCullingValue)
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
+        btnMainSetup = findViewById(R.id.btnMainSetup)
 
         tglCullingValue.visibility = View.INVISIBLE
         spinnerTournamentSpecies.visibility = View.INVISIBLE
@@ -121,12 +125,11 @@ class SetUpActivity : AppCompatActivity() {
             Log.d("DEBUG", "Tournament Is Selected ")
             isTournamentSelected = true
             isFunDaySelected = false
-            isLengthSelected = false
-            isWeightSelected = true
+          //  isLengthSelected = false
+          //  isWeightSelected = true
             btnTournament.setBackgroundResource(R.color.white)
             btnFunDay.setBackgroundResource(R.color.grey)
-            btnLength.visibility =
-                View.INVISIBLE       //take away measuring options for Tournament mode
+            btnLength.visibility = View.VISIBLE
             tglCullingValue.visibility = View.VISIBLE
             spinnerTournamentSpecies.visibility = View.VISIBLE
         }
@@ -147,6 +150,38 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
 
+        btnMainSetup.setOnClickListener {
+            val intent2 = Intent(this, MainActivity::class.java)
+            startActivity(intent2)
+        }
+
+        // Load species list from strings.xml
+        val speciesList = listOf(
+            SpeciesItem("Large Mouth", R.drawable.fish_large_mouth),
+            SpeciesItem("Small Mouth", R.drawable.fish_small_mouth),
+            SpeciesItem("Crappie", R.drawable.fish_crappie),
+            SpeciesItem("Walleye", R.drawable.fish_walleye),
+            SpeciesItem("Catfish", R.drawable.fish_catfish),
+            SpeciesItem("Perch", R.drawable.fish_perch),
+            SpeciesItem("Pike", R.drawable.fish_northern_pike),
+            SpeciesItem("Bluegill", R.drawable.fish_bluegill)
+        )
+
+        val adapter = SpeciesSpinnerAdapter(this, speciesList)
+        spinnerTournamentSpecies.adapter = adapter
+
+// Update selectedSpecies when user picks an item
+        spinnerTournamentSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedSpecies = speciesList[position].name
+
+                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
+
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // You can leave this empty if you don’t need to handle it
+            }
+        }
 
         // Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
@@ -156,8 +191,11 @@ class SetUpActivity : AppCompatActivity() {
                 isFunDaySelected && isWeightSelected && isMetricSelected -> CatchEntryKgs::class.java
                 isFunDaySelected && isLengthSelected && isImperialSelected -> CatchEntryInches::class.java
                 isFunDaySelected && isLengthSelected && isMetricSelected -> CatchEntryMetric::class.java
+
                 isTournamentSelected && isWeightSelected && isImperialSelected -> CatchEntryTournament::class.java
-                isTournamentSelected && isWeightSelected&& isMetricSelected-> CatchEntryTournamentKgs::class.java
+                isTournamentSelected && isWeightSelected && isMetricSelected-> CatchEntryTournamentKgs::class.java
+                isTournamentSelected && isLengthSelected && isMetricSelected-> CatchEntryTournamentCentimeters::class.java
+                isTournamentSelected && isLengthSelected && isImperialSelected-> CatchEntryTournamentInches::class.java
                 else -> null
             }
 
@@ -165,7 +203,7 @@ class SetUpActivity : AppCompatActivity() {
                 val intent = Intent(this, nextActivity).apply {
                     if (isTournamentSelected) {
                         putExtra("NUMBER_OF_CATCHES", if (tglCullingValue.isChecked) 5 else 4)
-                        putExtra("TOURNAMENT_SPECIES", spinnerTournamentSpecies.selectedItem?.toString() ?: "Unknown")
+                        putExtra("TOURNAMENT_SPECIES", selectedSpecies)
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                     }

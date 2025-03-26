@@ -7,10 +7,13 @@ import android.text.InputFilter
 import android.text.Spanned
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 
 class PopupWeightEntryLbs : Activity() {
 
@@ -19,6 +22,8 @@ class PopupWeightEntryLbs : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
         setContentView(R.layout.popup_weight_entry_lbs)
 
         val edtWeightLbs: EditText = findViewById(R.id.edtWeightLbs)
@@ -29,8 +34,8 @@ class PopupWeightEntryLbs : Activity() {
 
         // Load species list from strings.xml
         val speciesList = listOf(
-            SpeciesItem("Largemouth", R.drawable.fish_large_mouth),
-            SpeciesItem("Smallmouth", R.drawable.fish_small_mouth),
+            SpeciesItem("Large Mouth", R.drawable.fish_large_mouth),
+            SpeciesItem("Small Mouth", R.drawable.fish_small_mouth),
             SpeciesItem("Crappie", R.drawable.fish_crappie),
             SpeciesItem("Walleye", R.drawable.fish_walleye),
             SpeciesItem("Catfish", R.drawable.fish_catfish),
@@ -44,7 +49,12 @@ class PopupWeightEntryLbs : Activity() {
 
 // Update selectedSpecies when user picks an item
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedSpecies = speciesList[position].name
                 Log.d("DB_DEBUG", "Species selected: $selectedSpecies") // Debugging log
             }
@@ -54,11 +64,12 @@ class PopupWeightEntryLbs : Activity() {
             }
         }
 
- // `````````````` Apply InputFilters to limit values  ````````````````````
+        // `````````````` Apply InputFilters to limit values  ````````````````````
         edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 1-99
         edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs: 0-15
 
- // ````````````````````` Save button functionality ````````````````````
+
+        // ````````````````````` Save button functionality ````````````````````
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
 
@@ -66,19 +77,31 @@ class PopupWeightEntryLbs : Activity() {
             val weightOz = edtWeightOzs.text.toString().toIntOrNull() ?: 0
             val totalWeightOz = ((weightLbs * 16) + weightOz)
 
+            if (totalWeightOz == 0) {
+                Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             resultIntent.putExtra("weightTotalOz", totalWeightOz)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $totalWeightOz oz, Species: $selectedSpecies")
-
-                setResult(Activity.RESULT_OK, resultIntent)
-                finish()
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
         }
 
-  // ~~~~~~~~~~~~~~~~ Cancel button functionality  ~~~~~~~~~~~~~~~~~~~~~
+        // ~~~~~~~~~~~~~~~~ Cancel button functionality  ~~~~~~~~~~~~~~~~~~~~~
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
+        }
+
+        // Set focus to the inches field
+        edtWeightLbs.requestFocus()
+
+// Delay to allow layout to render before requesting keyboard
+        edtWeightLbs.post {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(edtWeightLbs, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 

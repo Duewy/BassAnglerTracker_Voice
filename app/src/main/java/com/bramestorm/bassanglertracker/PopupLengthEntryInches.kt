@@ -11,6 +11,7 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 
 class PopupLengthEntryInches : Activity() {
 
@@ -65,10 +66,14 @@ class PopupLengthEntryInches : Activity() {
             val lengthInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
             val length8ths = edtLength8ths.text.toString().toIntOrNull() ?: 0
             val lengthTotalInches = ((lengthInches * 8) + length8ths)
+
+            if ( lengthTotalInches == 0) {
+                Toast.makeText(this, "Length cannot be 0.o cms!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             resultIntent.putExtra("lengthTotalInches", lengthTotalInches)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
-
-            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $lengthTotalInches in 8th of Inches, Species: $selectedSpecies")
 
             setResult(Activity.RESULT_OK, resultIntent)
             finish()

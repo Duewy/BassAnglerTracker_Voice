@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 
 class PopupLengthEntryTourInches : Activity() {
 
@@ -71,6 +72,8 @@ class PopupLengthEntryTourInches : Activity() {
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
 
+        edtLengthInches.filters = arrayOf(MinMaxInputFilter(0, 99)) // Inches: 0-99
+        edtLength8ths.filters = arrayOf(MinMaxInputFilter(0, 7)) //  0 - 7 / 8ths
 
         // `````````` btn SAVE  ````````````````
         btnSaveLengthInches.setOnClickListener {
@@ -80,7 +83,8 @@ class PopupLengthEntryTourInches : Activity() {
 
             val lengthInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
             val length8ths = edtLength8ths.text.toString().toIntOrNull() ?: 0
-            val totalLengthA8th= ((lengthInches * 16) + length8ths)
+
+            val totalLengthA8th= ((lengthInches * 8) + length8ths)
 
             if ( totalLengthA8th == 0) {
                 Toast.makeText(this, "Length cannot be 0 Inches!", Toast.LENGTH_SHORT).show()

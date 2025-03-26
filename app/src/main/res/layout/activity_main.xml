@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -59,7 +60,7 @@
         android:gravity="center"
         android:shadowColor="#8FC16D"
         android:text="@string/user_training_page"
-        android:textColor="@color/clip_white"
+        android:textColor="@color/clip_blue"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

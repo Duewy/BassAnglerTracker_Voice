@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="30dp"
-                android:text="Select Species"
+                android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -168,7 +168,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_outline_green"
-                android:text="Cancel"
+                android:contentDescription="@string/cancel_out"
+                android:text="@string/cancel"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -180,7 +181,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_outline_blue"
-                android:text="Save Catch"
+                android:contentDescription="@string/save_catch_button"
+                android:text="@string/save_catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />

@@ -1,25 +1,27 @@
 package com.bramestorm.bassanglertracker
 
     import android.app.Activity
-    import android.content.Intent
-    import android.graphics.Color
-    import android.media.MediaPlayer
-    import android.os.Bundle
-    import android.os.Handler
-    import android.os.Looper
-    import android.util.Log
-    import android.view.View
-    import android.view.animation.AnimationUtils
-    import android.widget.Button
-    import android.widget.TextView
-    import android.widget.Toast
-    import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-    import java.text.SimpleDateFormat
-    import java.util.Calendar
-    import java.util.Date
-    import java.util.Locale
+import android.content.Intent
+import android.graphics.Color
+import android.media.MediaPlayer
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
-class CatchEntryTournamentCentimeters {
+class CatchEntryTournamentCentimeters : AppCompatActivity() {
+
 
         // Buttons
         private lateinit var btnStartFishingCms: Button
@@ -97,7 +99,7 @@ class CatchEntryTournamentCentimeters {
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data
-                val totalLengthTenths = data?.getIntExtra("totalLengthTenths", 0) ?: 0
+                val totalLengthTenths = data?.getIntExtra("lengthTotalCms", 0) ?: 0
                 val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
                 val clipColor = data?.getStringExtra("clip_color") ?: ""
 
@@ -135,29 +137,29 @@ class CatchEntryTournamentCentimeters {
             fifthDecLengthCms = findViewById(R.id.fifthDecLengthCms)
             sixthDecLengthCms = findViewById(R.id.sixthDecLengthCms)
 
-            txtTypeLetter1 = findViewById(R.id.txtTypeLetter1)
-            txtTypeLetter2 = findViewById(R.id.txtTypeLetter2)
-            txtTypeLetter3 = findViewById(R.id.txtTypeLetter3)
-            txtTypeLetter4 = findViewById(R.id.txtTypeLetter4)
-            txtTypeLetter5 = findViewById(R.id.txtTypeLetter5)
-            txtTypeLetter6 = findViewById(R.id.txtTypeLetter6)
+            txtTypeLetter1 = findViewById(R.id.txtTypeLetterCms1)
+            txtTypeLetter2 = findViewById(R.id.txtTypeLetterCms2)
+            txtTypeLetter3 = findViewById(R.id.txtTypeLetterCms3)
+            txtTypeLetter4 = findViewById(R.id.txtTypeLetterCms4)
+            txtTypeLetter5 = findViewById(R.id.txtTypeLetterCms5)
+            txtTypeLetter6 = findViewById(R.id.txtTypeLetterCms6)
 
             totalRealLengthCms = findViewById(R.id.totalRealLengthCms)
             totalDecLengthCms = findViewById(R.id.totalDecLengthCms)
 
-            txtTypeLetter1 = findViewById(R.id.txtTypeLetter1)
-            txtTypeLetter2 =findViewById(R.id.txtTypeLetter2)
-            txtTypeLetter3 = findViewById(R.id.txtTypeLetter3)
-            txtTypeLetter4= findViewById(R.id.txtTypeLetter4)
-            txtTypeLetter5= findViewById(R.id.txtTypeLetter5)
-            txtTypeLetter6= findViewById(R.id.txtTypeLetter6)
+            txtTypeLetter1 = findViewById(R.id.txtTypeLetterCms1)
+            txtTypeLetter2 =findViewById(R.id.txtTypeLetterCms2)
+            txtTypeLetter3 = findViewById(R.id.txtTypeLetterCms3)
+            txtTypeLetter4= findViewById(R.id.txtTypeLetterCms4)
+            txtTypeLetter5= findViewById(R.id.txtTypeLetterCms5)
+            txtTypeLetter6= findViewById(R.id.txtTypeLetterCms6)
 
-            txtColorLetter1 = findViewById(R.id.txtColorLetter1)
-            txtColorLetter2 = findViewById(R.id.txtColorLetter2)
-            txtColorLetter3 = findViewById(R.id.txtColorLetter3)
-            txtColorLetter4 = findViewById(R.id.txtColorLetter4)
-            txtColorLetter5 = findViewById(R.id.txtColorLetter5)
-            txtColorLetter6 = findViewById(R.id.txtColorLetter6)
+            txtColorLetter1 = findViewById(R.id.txtCmsColorLetter1)
+            txtColorLetter2 = findViewById(R.id.txtCmsColorLetter2)
+            txtColorLetter3 = findViewById(R.id.txtCmsColorLetter3)
+            txtColorLetter4 = findViewById(R.id.txtCmsColorLetter4)
+            txtColorLetter5 = findViewById(R.id.txtCmsColorLetter5)
+            txtColorLetter6 = findViewById(R.id.txtCmsColorLetter6)
 
 
 
@@ -203,7 +205,7 @@ class CatchEntryTournamentCentimeters {
         private fun saveTournamentCatch(totalLengthTenths: Int, bassType: String, clipColor: String) {
             val availableColors = calculateAvailableClipColors(
                 dbHelper,
-                catchType = "Metric",
+                catchType = "metric",
                 date = getCurrentDate(),
                 tournamentCatchLimit = tournamentCatchLimit,
                 isCullingEnabled = isCullingEnabled
@@ -226,15 +228,11 @@ class CatchEntryTournamentCentimeters {
                 markerType = speciesInitial,
                 clipColor = cleanClipColor
             )
-
             val result = dbHelper.insertCatch(catch)
-            Log.d("DB_DEBUG", "✅ Catch Insert Result: $result, Stored Clip Color: ${catch.clipColor}")
-
             Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
-
-
             updateTournamentList()
         }
+//+++++++++++++++ Get Top Catches  ++++++++++++++++++++++
 
         private fun getTopTournamentCatches(): List<CatchItem> {
             val allCatches = dbHelper.getCatchesForToday("metric", getCurrentDate())
@@ -264,9 +262,10 @@ class CatchEntryTournamentCentimeters {
                 .sortedByDescending { it.totalLengthTenths ?: 0 }
                 .take(tournamentCatchLimit)
                 .size
-
-            val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            if (currentCount >= 2) {
+                val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
         }
 
 
@@ -439,7 +438,7 @@ class CatchEntryTournamentCentimeters {
             isCullingEnabled: Boolean
         ): List<ClipColor> {
             val allCatches = dbHelper.getCatchesForToday(catchType, date)
-            val sorted = allCatches.sortedByDescending { it.totalLengthCms ?: 0 }
+            val sorted = allCatches.sortedByDescending { it.totalLengthTenths ?: 0 }
             val topCatches = sorted.take(tournamentCatchLimit) // ✅ Always limit to top N
 
             val usedColors = topCatches.mapNotNull { it.clipColor }

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 
 class PopupLengthEntryTourCms : Activity() {
 
@@ -72,6 +73,9 @@ class PopupLengthEntryTourCms : Activity() {
         spinnerClipColor.adapter = adapter
 
 
+        edtLengthCms.filters = arrayOf(MinMaxInputFilter(0, 99)) // Cms: 0-99
+        edtLengthDec.filters = arrayOf(MinMaxInputFilter(0, 9)) // mm 0 - 9
+
         // `````````` btn SAVE  ````````````````
         btnSaveLengthCms.setOnClickListener {
             val selectedSpeciesValue = spinnerSpecies.selectedItem.toString()
@@ -86,8 +90,6 @@ class PopupLengthEntryTourCms : Activity() {
                 Toast.makeText(this, "Length cannot be 0.o cms!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
-            Log.d("CLIPS", "✅ Sending Result - weightLengthCms: $totalLengthTenths, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
 
             val resultIntent = Intent().apply {
                 putExtra("lengthTotalCms", totalLengthTenths)

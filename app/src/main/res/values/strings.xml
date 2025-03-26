@@ -100,6 +100,9 @@
     <string name="weight_kgs">WEIGHT Kgs</string>
     <string name="length_inches">Length Inches</string>
     <string name="total_length_cms">Total Length Cms</string>
+    <string name="save_catch_button">Save Catch Button</string>
+    <string name="cancel_out">Cancel out</string>
+    <string name="_18_ozs">18 ozs</string>
 
 
     //species
