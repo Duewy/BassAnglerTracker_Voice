@@ -7,8 +7,12 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.CatchItem
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -66,9 +70,10 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     // **************** - INSERT CATCH -  *****************************************
 
     fun insertCatch(catch: CatchItem): Boolean {
-
         val db = this.writableDatabase
-        return try {
+        var rowId: Long = -1
+
+        try {
             val values = ContentValues().apply {
                 put(COLUMN_DATE_TIME, catch.dateTime)
                 put(COLUMN_SPECIES, catch.species)
@@ -79,26 +84,50 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_CATCH_TYPE, catch.catchType)
                 put(COLUMN_MARKER_TYPE, catch.markerType)
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
-                // Add GPS coordinates if enabled
-                val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
-                if (gpsEnabled) {
-                    val location = getLastKnownLocation()
-                    location?.let {
-                        put(COLUMN_LATITUDE,catch.latitude)
-                        put(COLUMN_LONGITUDE,catch.longitude)
-                    }
-                }
+                // GPS is added later, async
             }
-            Log.d("DB_DEBUG", "🚀 insertCatch() called ")
 
-            val success = db.insert(TABLE_NAME, null, values)
-            success != -1L
+            rowId = db.insert(TABLE_NAME, null, values)
+
+            if (rowId == -1L) {
+                Log.e("DB_ERROR", "❌ Failed to insert catch.")
+                return false
+            }
+
+            Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
+
+            // Launch delayed GPS update in background
+            val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
+            if (gpsEnabled) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    // ✅ Check permission here
+                    if (
+                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        val location = getLastKnownLocation()
+                        location?.let {
+                            updateCatchGPS(rowId.toInt(), it.latitude, it.longitude)
+                            // 🧃 Show GPS Toast for confirmation
+                            Toast.makeText(
+                                context,
+                                "📍 GPS Received: ${"%.5f".format(it.latitude)}, ${"%.5f".format(it.longitude)}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } else {
+                        Log.w("GPS_DEBUG", "⚠️ GPS permission not granted — skipping update")
+                    }
+                }, 5000) // Wait 5 seconds to allow GPS to warm up
+            }
+
+            return true
+
         } catch (e: Exception) {
-            Log.e("DB_ERROR", "❌ Error inserting catch: ${e.message}")
-            false
+            Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
+            return false
         } finally {
-
-            db.close() // ✅ Make sure to close the database
+            db.close()
         }
     }
 
@@ -205,6 +234,26 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return resetPoint
     }
 
+    //++++++++++++ UPDATE GPS  ++++++++++++++++++++++++++++++++++
+
+   private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("latitude", lat)
+            put("longitude", lon)
+        }
+
+        val rowsUpdated = db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
+        db.close()
+
+        if (rowsUpdated > 0) {
+            Log.d("DB_DEBUG", "📍 GPS updated for catch ID=$catchId")
+        } else {
+            Log.e("DB_ERROR", "⚠️ Failed to update GPS for catch ID=$catchId")
+        }
+    }
+
+
     // $$$$$$$$$$$$ Get Last Known Location  $$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     private fun getLastKnownLocation(): android.location.Location? {
@@ -213,11 +262,17 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         for (provider in providers.reversed()) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e("GPS_DEBUG", "❌ Location permission not granted")
                 return null
             }
             val location = locationManager.getLastKnownLocation(provider)
-            if (location != null) return location
+            if (location != null) {
+                Log.d("GPS_DEBUG", "✅ Got location from $provider: ${location.latitude}, ${location.longitude}")
+                return location
+            }
         }
+
+        Log.w("GPS_DEBUG", "⚠️ No location found from any provider")
         return null
     }
 

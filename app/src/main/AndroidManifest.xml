@@ -20,6 +20,16 @@
         android:theme="@style/Theme.BassAnglerTracker">
 
         <activity
+            android:name=".IntroPage"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -43,6 +53,8 @@
         <activity android:name=".CatchEntryTournamentCentimeters"/>
 
         <activity android:name=".training.UserTrainingIndex"/>
+        <activity android:name=".training.UserTrainingVoiceCommands"/>
+
 
         <activity android:name=".PopupWeightEntryTourKgs"
             android:windowSoftInputMode="adjustResize"/>

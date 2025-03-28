@@ -17,8 +17,9 @@ class UserTrainingIndex : AppCompatActivity() {
     private lateinit var btnFunDayLength:Button
     private lateinit var btnTournamentWeight:Button
     private lateinit var btnTournamentLength:Button
-    private lateinit var btnWhatIsVCC:Button
-    private lateinit var btnTeachVCC:Button
+    private lateinit var btnWhatIsGPS:Button
+    private lateinit var btnMappingGPS:Button
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +31,9 @@ class UserTrainingIndex : AppCompatActivity() {
         btnFunDayLength = findViewById(R.id.btnFundDayLength)
         btnTournamentWeight = findViewById(R.id.btnTournamentWeight)
         btnTournamentLength = findViewById(R.id.btnTournamentLength)
-        btnWhatIsVCC = findViewById(R.id.btnWhatIsVCC)
-        btnTeachVCC = findViewById(R.id.btnTeachVCC)
+        btnWhatIsGPS = findViewById(R.id.btnWhatIsGPS)
+        btnMappingGPS = findViewById(R.id.btnMappingGPS)
+
 
 
         btnSetUpUser.setOnClickListener {
@@ -43,6 +45,8 @@ class UserTrainingIndex : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
+
+
         // GOOGLE DRIVE to save files on...
 
         btnFunDayWeight.setOnClickListener {
@@ -69,6 +73,10 @@ class UserTrainingIndex : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             startActivity(intent)
         }
+
+        btnWhatIsGPS.setOnClickListener {  }        //FILL in with Google Drive Docs
+
+        btnMappingGPS.setOnClickListener {  }
 
     }
 }

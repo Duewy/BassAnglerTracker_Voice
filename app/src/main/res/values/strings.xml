@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BassAnglerTracker</string>
+    <string name="app_name">Catch Call</string>
     <string name="app_image_description">SoftLock Culling System with Voice Controlled Culling</string>
     <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and Ozs)</string>
     <string name="enter_catch_kgs">Enter Catch (Kgs)</string>
@@ -57,7 +57,7 @@
     <string name="enter_inches_and_8ths">Enter Inches and 8ths</string>
     <string name="kgs_100_0_to_99">Kgs/100 0 to 99</string>
     <string name="kgs_0_to_99kgs">-Kgs- 0 to 99Kgs</string>
-    <string name="using_culling_app_in_manual_mode">Using Culling App in Manual Mode</string>
+    <string name="using_culling_app_in_manual_mode"><u>Using App in Manual Mode</u></string>
     <string name="select_the_button_for_each_topic">Select the button for each topic</string>
     <string name="catch_kgs">Catch Kgs</string>
     <string name="catch_lbs">Catch Lbs</string>
@@ -103,6 +103,19 @@
     <string name="save_catch_button">Save Catch Button</string>
     <string name="cancel_out">Cancel out</string>
     <string name="_18_ozs">18 ozs</string>
+    <string name="using_voice_controls"><u>Using Voice Controls</u></string>
+    <string name="gps_mapping">GPS Mapping</string>
+    <string name="selecting_gps">Selecting GPS</string>
+    <string name="enabling_voice_controls">Enabling Voice Controls</string>
+    <string name="the_hands_free_fishing_log">The Hands_Free Fishing Log</string>
+    <string name="user_manual_manual">User Manual Manual</string>
+    <string name="user_voice_manual">User Voice Manual</string>
+    <string name="voice_controls">Voice Controls</string>
+    <string name="set_up">Set_Up</string>
+    <string name="teach_the_computer">Teach the computer. \n\ You will teach the computer to recognize the key words that are used with this Catch and Call Tracker app. The better the computer recognizes your words the easier the commands will be followed. Your time on the water is precious so lets make the best of it.</string>
+    <string name="say_the_key_words">Say the Key Words</string>
+    <string name="what_computer_heard">What Computer Heard</string>
+    <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
 
 
     //species

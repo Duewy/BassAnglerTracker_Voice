@@ -51,7 +51,7 @@
 
             <Spinner
                 android:id="@+id/spinnerCmsSpeciesPopUp"
-                android:layout_width="175dp"
+                android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:dropDownSelector="@color/clip_yellow"

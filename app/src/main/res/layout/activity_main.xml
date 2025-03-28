@@ -12,33 +12,45 @@
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="250dp"
         android:contentDescription="@string/app_image_description"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/vcc_app_icon_lng" />
+        app:layout_constraintVertical_bias="0.10"
+        app:srcCompat="@drawable/catch_call_tracker_angler_main" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Start the Fishing Day"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView2" />
 
     <Button
         android:id="@+id/btnSetUp11"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="135dp"
-        android:layout_marginEnd="115dp"
-        android:layout_marginBottom="150dp"
-        android:background="@color/softlock_blue"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/btn_outline_blue"
         android:gravity="center"
-        android:shadowColor="#8FC16D"
-        android:text="@string/goto_SetUp_description"
-        android:textColor="@color/clip_white"
+        android:paddingHorizontal="15dp"
+        android:text="@string/set_up"
+        android:textColor="@color/clip_blue"
         android:textSize="28sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:layout_constraintTop_toBottomOf="@id/imageView2" />
 
     <View
         android:id="@+id/divider6"
@@ -51,22 +63,62 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnSetUp11" />
 
-    <Button
-        android:id="@+id/btnUserPage"
+    <TextView
+        android:id="@+id/textView17"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="20dp"
-        android:background="@color/softlock_green"
+        android:text="Check out the How To Pages"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider6"/>
+
+    <Button
+        android:id="@+id/btnManualControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/btn_outline_red"
         android:gravity="center"
-        android:shadowColor="#8FC16D"
-        android:text="@string/user_training_page"
+        android:paddingHorizontal="15dp"
+        android:text="Manual Controls"
         android:textColor="@color/clip_blue"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.17"
-        app:layout_constraintStart_toStartOf="@+id/imageView2"
-        app:layout_constraintTop_toBottomOf="@id/divider6" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView17" />
+
+    <View
+        android:id="@+id/divider7"
+        android:layout_width="0dp"
+        android:layout_height="5dp"
+        android:layout_marginVertical="10dp"
+        android:background="@color/black"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnManualControls" />
+
+
+    <Button
+        android:id="@+id/btnVCC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:paddingHorizontal="15dp"
+        android:background="@drawable/btn_outline_green"
+        android:gravity="center"
+        android:text="@string/voice_controls"
+        android:textColor="@color/clip_blue"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider7" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
