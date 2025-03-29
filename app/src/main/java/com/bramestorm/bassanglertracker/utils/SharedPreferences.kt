@@ -12,10 +12,21 @@ object SharedPreferencesManager {
     }
 
 
-    fun getSelectedSpecies(context: Context): Set<String> {
+    fun getSelectedSpecies(context: Context): List<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getStringSet(SELECTED_SPECIES_KEY, emptySet()) ?: emptySet()
+        val savedSet = prefs.getStringSet(SELECTED_SPECIES_KEY, null)
+        return savedSet?.toList() ?: listOf(
+            "Largemouth",
+            "Smallmouth",
+            "Crappie",
+            "Walleye",
+            "Catfish",
+            "Perch",
+            "Pike",
+            "Bluegill"
+        )
     }
+
 
     fun clearSelectedSpecies(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

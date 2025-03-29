@@ -13,7 +13,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-
+import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
 
 
 class PopupLengthEntryInches : Activity() {
@@ -36,7 +36,7 @@ class PopupLengthEntryInches : Activity() {
         val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
 
         val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = CatchItemAdapter.getSpeciesImageResId(speciesName)
+            val imageRes = getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
 

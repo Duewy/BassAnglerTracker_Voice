@@ -29,17 +29,12 @@
             </intent-filter>
         </activity>
 
-
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.BassAnglerTracker">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.BassAnglerTracker" />
+
 
         <activity android:name=".SetUpActivity"/>
 
@@ -57,6 +52,7 @@
         <activity android:name=".training.UserTrainingVoiceCommands"/>
         <activity android:name=".training.TrainingWords"/>
 
+        <activity android:name=".SpeciesSelectionActivity"/>
 
         <activity android:name=".PopupWeightEntryTourKgs"
             android:windowSoftInputMode="adjustResize"/>

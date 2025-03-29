@@ -191,15 +191,17 @@ class TrainingWords : AppCompatActivity() {
     private fun checkPhraseMatch(spoken: String) {
         val currentPhrase = txtSayThis.text.toString().replace("Say This: ", "").trim()
 
-        val feedback = if (spoken.equals(currentPhrase, ignoreCase = true)) {
-            "You said: \"$spoken\"\n✔ That is a match!"
-        } else {
-            "You said: \"$spoken\"\n❌ That does not match \"$currentPhrase\""
-        }
+        // Normalize both strings
+        val normalizedSpoken = spoken.replace("\\s|-".toRegex(), "").lowercase()
+        val normalizedTarget = currentPhrase.replace("\\s|-".toRegex(), "").lowercase()
 
-        txtWhatComputerHeard.text = feedback
-        textToSpeech.speak(feedback, TextToSpeech.QUEUE_FLUSH, null, null)
+        if (normalizedSpoken == normalizedTarget) {
+            txtWhatComputerHeard.text = "You said: \"$spoken\"\n✔ That is a match!"
+        } else {
+            txtWhatComputerHeard.text = "You said: \"$spoken\"\n❌ That does not match \"$currentPhrase\""
+        }
     }
+
 
 
 
