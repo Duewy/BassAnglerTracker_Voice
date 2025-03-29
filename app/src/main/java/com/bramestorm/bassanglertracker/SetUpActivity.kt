@@ -32,6 +32,7 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var tglGPS: ToggleButton
     private lateinit var btnMainSetup:Button
+    private lateinit var btnCustomizeSpecies :Button
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
     private val prefs by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
 
@@ -62,6 +63,7 @@ class SetUpActivity : AppCompatActivity() {
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
         btnMainSetup = findViewById(R.id.btnMainSetup)
+        btnCustomizeSpecies = findViewById(R.id.btnCustomizeSpecies)
 
         tglCullingValue.visibility = View.INVISIBLE
         spinnerTournamentSpecies.visibility = View.INVISIBLE
@@ -153,6 +155,11 @@ class SetUpActivity : AppCompatActivity() {
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
             startActivity(intent2)
+        }
+
+        btnCustomizeSpecies.setOnClickListener {
+            val intent = Intent(this, SpeciesSelectionActivity::class.java)
+            startActivity(intent)
         }
 
         // Load species list from strings.xml

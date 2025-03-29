@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,4 +71,6 @@ class CatchItemAdapter(
 
         return view
     }
+
+
 }

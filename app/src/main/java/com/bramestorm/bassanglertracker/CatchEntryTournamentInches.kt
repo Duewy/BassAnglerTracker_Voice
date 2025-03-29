@@ -76,6 +76,7 @@ class CatchEntryTournamentInches : AppCompatActivity() {
     private lateinit var totalDecLengthInches: TextView
 
     private var availableClipColors: List<ClipColor> = emptyList()
+    private val flashHandler = Handler(Looper.getMainLooper())
 
 
     // Database Helper
@@ -179,6 +180,20 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    // +++++++++++++ On-Destroy +++++++++++++++++++
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Clean up all handlers and media players
+        handler.removeCallbacksAndMessages(null)
+        flashHandler.removeCallbacksAndMessages(null)
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -541,7 +556,9 @@ class CatchEntryTournamentInches : AppCompatActivity() {
                 startAlarm()
             }
 
-            handler.postDelayed(this, 60000)  // ✅ every 60 seconds now
+            if (!alarmTriggered) {
+                handler.postDelayed(this, 60000)
+            }
         }
     }
 

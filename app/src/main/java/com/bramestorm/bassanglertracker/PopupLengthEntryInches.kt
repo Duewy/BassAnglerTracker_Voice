@@ -12,6 +12,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+
+
 
 class PopupLengthEntryInches : Activity() {
 
@@ -29,16 +32,14 @@ class PopupLengthEntryInches : Activity() {
 
 
         // Load species list from strings.xml
-        val speciesList = listOf(
-            SpeciesItem("Largemouth", R.drawable.fish_large_mouth),
-            SpeciesItem("Smallmouth", R.drawable.fish_small_mouth),
-            SpeciesItem("Crappie", R.drawable.fish_crappie),
-            SpeciesItem("Walleye", R.drawable.fish_walleye),
-            SpeciesItem("Catfish", R.drawable.fish_catfish),
-            SpeciesItem("Perch", R.drawable.fish_perch),
-            SpeciesItem("Pike", R.drawable.fish_northern_pike),
-            SpeciesItem("Bluegill", R.drawable.fish_bluegill)
-        )
+        // Load species from SharedPreferences and map to SpeciesItem with default icon
+        val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
+
+        val speciesList = savedSpecies.map { speciesName ->
+            val imageRes = CatchItemAdapter.getSpeciesImageResId(speciesName)
+            SpeciesItem(speciesName, imageRes)
+        }
+
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter

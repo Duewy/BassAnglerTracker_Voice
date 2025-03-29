@@ -17,8 +17,6 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
     private lateinit var btnTeachVCC : Button
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -53,7 +51,8 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         }
 
         btnTeachVCC.setOnClickListener {
-
+            val intent = Intent(this, TrainingWords::class.java)
+            startActivity(intent)
         }
 
     }//_____________ END On Create ____________________

@@ -74,6 +74,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
     private lateinit var totalDecWeightKgs: TextView
 
     private var availableClipColors: List<ClipColor> = emptyList()
+    private val flashHandler = Handler(Looper.getMainLooper())
 
 
     // Database Helper
@@ -170,6 +171,17 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Clean up all handlers and media players
+        handler.removeCallbacksAndMessages(null)
+        flashHandler.removeCallbacksAndMessages(null)
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -533,7 +545,9 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
                 startAlarm()
             }
 
-            handler.postDelayed(this, 60000)  // ✅ every 60 seconds now
+            if (!alarmTriggered) {
+                handler.postDelayed(this, 60000)
+            }
         }
     }
 

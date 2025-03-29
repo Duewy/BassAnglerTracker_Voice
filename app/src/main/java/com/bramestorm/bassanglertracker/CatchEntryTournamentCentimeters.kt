@@ -76,6 +76,7 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private lateinit var totalDecLengthCms: TextView
 
         private var availableClipColors: List<ClipColor> = emptyList()
+        private val flashHandler = Handler(Looper.getMainLooper())
 
 
         // Database Helper
@@ -179,6 +180,19 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             handler.postDelayed(checkAlarmRunnable, 60000)
         }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      // +++++++++++++ On-Destroy +++++++++++++++++++
+
+        override fun onDestroy() {
+            super.onDestroy()
+
+            // Clean up all handlers and media players
+            handler.removeCallbacksAndMessages(null)
+            flashHandler.removeCallbacksAndMessages(null)
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
 
         /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -538,7 +552,9 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                     startAlarm()
                 }
 
-                handler.postDelayed(this, 60000)  // ✅ every 60 seconds now
+                if (!alarmTriggered) {
+                    handler.postDelayed(this, 60000)
+                }
             }
         }
 

@@ -116,6 +116,12 @@
     <string name="say_the_key_words">Say the Key Words</string>
     <string name="what_computer_heard">What Computer Heard</string>
     <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
+    <string name="list_of_species_for_your_fishing_day">List of Species for your fishing day</string>
+    <string name="selected_0_8">Selected: 0 / 8</string>
+    <string name="save_selection">Save Selection</string>
+    <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
+    <string name="selected_species_count">Selected: %1$d / %2$d</string>
+
 
 
     //species

@@ -1,4 +1,6 @@
-package com.bramestorm.bassanglertracker
+package com.bramestorm.bassanglertracker.utils
+
+import com.bramestorm.bassanglertracker.R
 
 fun getSpeciesImageResId(species: String?): Int {
     return when (species?.lowercase()) {

@@ -20,6 +20,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+
 class CatchEntryTournament : AppCompatActivity() {
 
     // Buttons
@@ -74,6 +75,8 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var totalDecWeight: TextView
 
     private var availableClipColors: List<ClipColor> = emptyList()
+    private val flashHandler = Handler(Looper.getMainLooper())
+
 
 
     // Database Helper
@@ -170,6 +173,13 @@ class CatchEntryTournament : AppCompatActivity() {
         handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
+        flashHandler.removeCallbacksAndMessages(null)
+        mediaPlayer?.release()
+    }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -534,7 +544,9 @@ class CatchEntryTournament : AppCompatActivity() {
                 startAlarm()
             }
 
-            handler.postDelayed(this, 60000)  // ✅ every 60 seconds now
+            if (!alarmTriggered) {
+                handler.postDelayed(this, 60000)
+            }
         }
     }
 
@@ -617,6 +629,7 @@ class CatchEntryTournament : AppCompatActivity() {
             }, 700) // Wait ~1 blink duration
         }, 1000) // Initial 1 second delay
     }
+
 
 
 }//################## END  ################################
