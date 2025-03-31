@@ -33,18 +33,19 @@ class PopupLengthEntryInches : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
+        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
 
+        // Map to SpeciesItem (name + image)
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
 
-
+            // Custom adapter with images
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
 
-// Update selectedSpecies when user picks an item
+        // Update selectedSpecies when user picks an item
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedSpecies = speciesList[position].name
@@ -69,12 +70,14 @@ class PopupLengthEntryInches : Activity() {
             val lengthTotalInches = ((lengthInches * 8) + length8ths)
 
             if ( lengthTotalInches == 0) {
-                Toast.makeText(this, "Length cannot be 0.o cms!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Length cannot be 0 Inches 0/8ths !", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             resultIntent.putExtra("lengthTotalInches", lengthTotalInches)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
+
+            Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $lengthTotalInches (in 1/8ths), Species: $selectedSpecies")
 
             setResult(Activity.RESULT_OK, resultIntent)
             finish()

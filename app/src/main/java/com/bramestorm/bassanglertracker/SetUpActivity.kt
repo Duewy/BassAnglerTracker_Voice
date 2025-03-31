@@ -162,20 +162,18 @@ class SetUpActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Load species list from strings.xml
-        val speciesList = listOf(
-            SpeciesItem("Large Mouth", R.drawable.fish_large_mouth),
-            SpeciesItem("Small Mouth", R.drawable.fish_small_mouth),
-            SpeciesItem("Crappie", R.drawable.fish_crappie),
-            SpeciesItem("Walleye", R.drawable.fish_walleye),
-            SpeciesItem("Catfish", R.drawable.fish_catfish),
-            SpeciesItem("Perch", R.drawable.fish_perch),
-            SpeciesItem("Pike", R.drawable.fish_northern_pike),
-            SpeciesItem("Bluegill", R.drawable.fish_bluegill)
-        )
+
+                // Load user-selected species list with icons
+        val savedSpecies = com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.getOrderedSpeciesList(this)
+
+        val speciesList = savedSpecies.map { speciesName ->
+            val imageRes = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(speciesName)
+            SpeciesItem(speciesName, imageRes)
+        }
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerTournamentSpecies.adapter = adapter
+
 
 // Update selectedSpecies when user picks an item
         spinnerTournamentSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

@@ -1,8 +1,11 @@
 package com.bramestorm.bassanglertracker
 
-    import android.app.Activity
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -14,11 +17,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 
 class CatchEntryTournamentCentimeters : AppCompatActivity() {
 
@@ -200,9 +205,9 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             val intent = Intent(this, PopupLengthEntryTourCms::class.java)
             intent.putExtra("isTournament", true)
 
-            if (tournamentSpecies == "Large Mouth") {
+            if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
                 intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-            } else         if (tournamentSpecies == "Small Mouth") {
+            } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
                 intent.putExtra("tournamentSpecies", "Small Mouth Bass")
             } else{
                 intent.putExtra("tournamentSpecies", tournamentSpecies)
@@ -336,8 +341,17 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                     RealLengthCms[i].text = lengthCms.toString()
                     DecLengthCms[i].text =lengthDec.toString()
 
+// ✅ First set the clip color background
                     RealLengthCms[i].setBackgroundResource(clipColor.resId)
                     DecLengthCms[i].setBackgroundResource(clipColor.resId)
+
+// ✅ Then layer on a black border to improve visibility
+                    val baseColor = ContextCompat.getColor(this, clipColor.resId)
+                    val layeredDrawable = createLayeredDrawable(baseColor)
+                    RealLengthCms[i].background = layeredDrawable
+                    DecLengthCms[i].background = layeredDrawable
+
+
 
                     val textColor = if (clipColor == ClipColor.BLUE)
                         resources.getColor(R.color.clip_white, theme)
@@ -390,22 +404,26 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             updateTotalLength(tournamentCatches)
             adjustTextViewVisibility()
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                when (tournamentCatchLimit) {
-                    4 -> {
-                        blinkTextViewTwice(fourthRealLengthCms)
-                        blinkTextViewTwice(fourthDecLengthCms)
+            if (tournamentCatches.size >= tournamentCatchLimit) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    when (tournamentCatchLimit) {
+                        4 -> {
+                            blinkTextViewTwice(fourthRealLengthCms)
+                            blinkTextViewTwice(fourthDecLengthCms)
+                        }
+
+                        5 -> {
+                            blinkTextViewTwice(fifthRealLengthCms)
+                            blinkTextViewTwice(fifthDecLengthCms)
+                        }
+
+                        6 -> {
+                            blinkTextViewTwice(sixthRealLengthCms)
+                            blinkTextViewTwice(sixthDecLengthCms)
+                        }
                     }
-                    5 -> {
-                        blinkTextViewTwice(fifthRealLengthCms)
-                        blinkTextViewTwice(fifthDecLengthCms)
-                    }
-                    6 -> {
-                        blinkTextViewTwice(sixthRealLengthCms)
-                        blinkTextViewTwice(sixthDecLengthCms)
-                    }
-                }
-            }, 300) // Wait
+                }, 300) // Wait
+            }
 
 
         }
@@ -640,6 +658,25 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                 }, 700) // Wait ~1 blink duration
             }, 1000) // Initial 1 second delay
         }
+
+// +++++++++++++++ Boarder Around Clip Colors  ++++++++++++++++++++++++
+
+    private fun createLayeredDrawable(baseColor: Int): Drawable {
+        val colorDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setColor(baseColor)
+        }
+
+        val borderDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setStroke(4, Color.BLACK) // 4dp border
+            setColor(Color.TRANSPARENT) // Don't cover the base
+        }
+
+        return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
+    }
 
 
     }//################## END  ################################

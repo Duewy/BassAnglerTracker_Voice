@@ -1,85 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/speciesSelectionLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/design_default_color_secondary"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".SpeciesSelectionActivity">
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/txtSpeciesTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="15dp"
-        android:paddingBottom="8dp"
-        android:text="@string/select_8_species_to_target_today"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <!-- Selected Count -->
-    <TextView
-        android:id="@+id/txtSelectedCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="8dp"
-        android:text="@string/selected_0_8"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <!-- Scrollable species list -->
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/speciesSelectionLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:contentDescription="@string/list_of_species_for_your_fishing_day"
-        android:contextClickable="true"
-        android:fillViewport="true"
-        android:paddingBottom="10dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/design_default_color_secondary"
+        android:padding="16dp"
+        tools:context=".SpeciesSelectionActivity">
 
-        <LinearLayout
-            android:id="@+id/layoutSpeciesList"
-            android:layout_width="match_parent"
+        <!-- Title -->
+        <TextView
+            android:id="@+id/txtSpeciesTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"/>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:paddingBottom="8dp"
+            android:text="@string/select_8_species_to_target_today"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    </ScrollView>
+        <!-- Selected Count -->
+        <TextView
+            android:id="@+id/txtSelectedCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="8dp"
+            android:text="@string/selected_0_8"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/btnSaveSpecies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/btn_outline_blue"
-        android:enabled="false"
-        android:padding="15dp"
-        android:text="@string/save_selection"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:textSize="25sp"/>
+        <!-- RecyclerView for drag-and-drop -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSpecies"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingBottom="10dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_species_select" />
 
-    <Button
-        android:id="@+id/btnAddSpecies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:padding="15dp"
-        android:background="@drawable/btn_outline_green"
-        android:text="Add Custom Species"
-        android:textColor="@color/black"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSaveSpecies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_outline_blue"
+            android:enabled="false"
+            android:padding="15dp"
+            android:text="@string/save_selection"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="25sp" />
 
-
-</LinearLayout>
+        <!-- Add Custom Species -->
+        <Button
+            android:id="@+id/btnAddSpecies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:padding="15dp"
+            android:background="@drawable/btn_outline_green"
+            android:text="Add Custom Species"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</ScrollView>

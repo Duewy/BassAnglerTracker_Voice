@@ -3,6 +3,9 @@ package com.bramestorm.bassanglertracker
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -14,11 +17,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 
 class CatchEntryTournamentKgs : AppCompatActivity() {
 
@@ -189,9 +194,9 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         val intent = Intent(this, PopupWeightEntryTourKgs::class.java)
         intent.putExtra("isTournament", true)
 
-        if (tournamentSpecies == "Large Mouth") {
+        if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
             intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-        } else         if (tournamentSpecies == "Small Mouth") {
+        } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
             intent.putExtra("tournamentSpecies", "Small Mouth Bass")
         } else{
             intent.putExtra("tournamentSpecies", tournamentSpecies)
@@ -316,8 +321,8 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
                 val catch = tournamentCatches[i]
                 val totalWeightKgs = catch.totalWeightHundredthKg ?: 0
-                val weightKgs = totalWeightKgs / 10
-                val weightDec = totalWeightKgs % 10
+                val weightKgs = totalWeightKgs / 100
+                val weightDec = totalWeightKgs % 100
 
                 val clipColor = try {
                     ClipColor.valueOf(catch.clipColor?.uppercase() ?: "")
@@ -330,6 +335,13 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
                 realWeightKgs[i].setBackgroundResource(clipColor.resId)
                 decWeightKgs[i].setBackgroundResource(clipColor.resId)
+
+                val baseColor = ContextCompat.getColor(this, clipColor.resId)
+                val layeredDrawable = createLayeredDrawable(baseColor)
+                realWeightKgs[i].background = layeredDrawable
+                decWeightKgs[i].background = layeredDrawable
+
+
 
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
@@ -382,22 +394,26 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         updateTotalWeight(tournamentCatches)
         adjustTextViewVisibility()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            when (tournamentCatchLimit) {
-                4 -> {
-                    blinkTextViewTwice(fourthRealWeightKgs)
-                    blinkTextViewTwice(fourthDecWeightKgs)
+        if (tournamentCatches.size >= tournamentCatchLimit) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                when (tournamentCatchLimit) {
+                    4 -> {
+                        blinkTextViewTwice(fourthRealWeightKgs)
+                        blinkTextViewTwice(fourthDecWeightKgs)
+                    }
+
+                    5 -> {
+                        blinkTextViewTwice(fifthRealWeightKgs)
+                        blinkTextViewTwice(fifthDecWeightKgs)
+                    }
+
+                    6 -> {
+                        blinkTextViewTwice(sixthRealWeightKgs)
+                        blinkTextViewTwice(sixthDecWeightKgs)
+                    }
                 }
-                5 -> {
-                    blinkTextViewTwice(fifthRealWeightKgs)
-                    blinkTextViewTwice(fifthDecWeightKgs)
-                }
-                6 -> {
-                    blinkTextViewTwice(sixthRealWeightKgs)
-                    blinkTextViewTwice(sixthDecWeightKgs)
-                }
-            }
-        }, 300) // Wait
+            }, 300) // Wait
+        }
 
 
     }
@@ -631,5 +647,23 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         }, 1000) // Initial 1 second delay
     }
 
+//+++++++++++++++++++++ Create Boarder Around Clip Color  ++++++++++++++++++++
+
+    private fun createLayeredDrawable(baseColor: Int): Drawable {
+        val colorDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setColor(baseColor)
+        }
+
+        val borderDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setStroke(4, Color.BLACK) // 4dp border
+            setColor(Color.TRANSPARENT) // Don't cover the base
+        }
+
+        return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
+    }
 
 }//################## END  ################################

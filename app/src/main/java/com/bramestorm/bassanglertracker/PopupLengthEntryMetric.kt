@@ -32,7 +32,8 @@ class PopupLengthEntryMetric : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
+
+        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = getSpeciesImageResId(speciesName)
@@ -74,7 +75,7 @@ class PopupLengthEntryMetric : Activity() {
             resultIntent.putExtra("lengthTotalCms", totalLengthCms)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $totalLengthCms oz, Species: $selectedSpecies")
+            Log.d("DB_DEBUG", "🚀 Returning weight from Pop Up: $totalLengthCms mm, Species: $selectedSpecies")
 
             setResult(Activity.RESULT_OK, resultIntent)
             finish()

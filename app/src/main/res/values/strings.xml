@@ -107,7 +107,7 @@
     <string name="gps_mapping">GPS Mapping</string>
     <string name="selecting_gps">Selecting GPS</string>
     <string name="enabling_voice_controls">Enabling Voice Controls</string>
-    <string name="the_hands_free_fishing_log">The Hands_Free Fishing Log</string>
+    <string name="the_hands_free_fishing_log">Your Hands-Free Fishing Log</string>
     <string name="user_manual_manual">User Manual Manual</string>
     <string name="user_voice_manual">User Voice Manual</string>
     <string name="voice_controls">Voice Controls</string>
@@ -121,7 +121,7 @@
     <string name="save_selection">Save Selection</string>
     <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
     <string name="selected_species_count">Selected: %1$d / %2$d</string>
-
+    <string name="voice_commands_or_manual_input">Voice Commands \n\ or \n\ Manual Input</string>
 
 
     //species

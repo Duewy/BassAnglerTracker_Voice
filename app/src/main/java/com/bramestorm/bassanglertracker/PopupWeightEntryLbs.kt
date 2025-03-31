@@ -36,7 +36,8 @@ class PopupWeightEntryLbs : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
+        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
+
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = getSpeciesImageResId(speciesName)

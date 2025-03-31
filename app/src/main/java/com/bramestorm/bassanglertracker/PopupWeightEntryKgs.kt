@@ -33,7 +33,8 @@ class PopupWeightEntryKgs : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpecies(this)
+        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
+
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = getSpeciesImageResId(speciesName)
@@ -68,7 +69,7 @@ class PopupWeightEntryKgs : Activity() {
             val totalWeightHundredthKg  = ((weightKgs * 100) + weightGrams)
 
             if (totalWeightHundredthKg == 0) {
-                Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Weight cannot be 0Kgs !", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 

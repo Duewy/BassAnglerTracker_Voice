@@ -2,13 +2,15 @@ package com.bramestorm.bassanglertracker
 
 import android.os.Bundle
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 
@@ -26,49 +28,55 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var txtSelectedCount: TextView
     private lateinit var btnSaveSpecies: Button
     private lateinit var btnAddSpecies :Button
-    private var selectedSpecies = mutableListOf<String>()
     private val maxSelection = 8
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_species_selection)
 
-        layoutSpeciesList = findViewById(R.id.layoutSpeciesList)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerSpecies)
         txtSelectedCount = findViewById(R.id.txtSelectedCount)
-        btnSaveSpecies= findViewById(R.id.btnSaveSpecies)
+        btnSaveSpecies = findViewById(R.id.btnSaveSpecies)
         btnAddSpecies = findViewById(R.id.btnAddSpecies)
 
-        selectedSpecies = SharedPreferencesManager.getSelectedSpecies(this).toMutableList()
-        updateSelectedCount()
+        val savedSpeciesNames = SharedPreferencesManager.getOrderedSpeciesList(this)
+        val speciesList = savedSpeciesNames.map { name ->
+            val icon = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(name)
+            SpeciesItem(name, icon)
+        }.toMutableList()
 
-        for (species in allSpecies) {
-            val checkbox = CheckBox(this)
-            checkbox.text = species
-            checkbox.isChecked = selectedSpecies.contains(species)
+        val adapter = SpeciesReorderAdapter(speciesList)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-            checkbox.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    if (selectedSpecies.size < maxSelection) {
-                        selectedSpecies.add(species)
-                    } else {
-                        checkbox.isChecked = false
-                        Toast.makeText(this, "You can only select up to $maxSelection species", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    selectedSpecies.remove(species)
-                }
-                updateSelectedCount()
+        // Enable drag-and-drop
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                adapter.moveItem(viewHolder.adapterPosition, target.adapterPosition)
+                return true
             }
 
-            layoutSpeciesList.addView(checkbox)
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
         }
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView)
 
+        updateSelectedCount(speciesList.size)
+
+        // Save reordered list
         btnSaveSpecies.setOnClickListener {
-            SharedPreferencesManager.saveSelectedSpecies(this, selectedSpecies)
+            val newOrder = adapter.getOrderedList().map { it.name }
+            SharedPreferencesManager.saveOrderedSpeciesList(this, newOrder)
             Toast.makeText(this, "Species selection saved!", Toast.LENGTH_SHORT).show()
             finish()
         }
 
+        // Add custom species
         btnAddSpecies.setOnClickListener {
             val input = EditText(this)
             AlertDialog.Builder(this)
@@ -76,10 +84,15 @@ class SpeciesSelectionActivity : AppCompatActivity() {
                 .setMessage("Enter the species name:")
                 .setView(input)
                 .setPositiveButton("Add") { _, _ ->
-                    val newSpecies = input.text.toString().trim()
-                    if (newSpecies.isNotEmpty() && !allSpecies.contains(newSpecies)) {
-                        allSpecies.add(newSpecies)
-                        addCheckboxForSpecies(newSpecies)
+                    val newSpeciesName = input.text.toString().trim()
+                    if (newSpeciesName.isNotEmpty() &&
+                        speciesList.none { it.name.equals(newSpeciesName, ignoreCase = true) }
+                    ) {
+                        val imageRes = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(newSpeciesName)
+                        val newSpecies = SpeciesItem(newSpeciesName, imageRes)
+                        speciesList.add(newSpecies)
+                        adapter.notifyItemInserted(speciesList.size - 1)
+                        updateSelectedCount(speciesList.size)
                     } else {
                         Toast.makeText(this, "Invalid or duplicate species", Toast.LENGTH_SHORT).show()
                     }
@@ -87,34 +100,13 @@ class SpeciesSelectionActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
+    }
+        //++++++++++++ END On Create +++++++++++++++++++++++++++++++
 
-    }//++++++++++++ END On Create +++++++++++++++++++++++++++++++
 
-    private fun addCheckboxForSpecies(species: String) {
-        val checkbox = CheckBox(this)
-        checkbox.text = species
-        checkbox.isChecked = selectedSpecies.contains(species)
-
-        checkbox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                if (selectedSpecies.size < maxSelection) {
-                    selectedSpecies.add(species)
-                } else {
-                    checkbox.isChecked = false
-                    Toast.makeText(this, "You can only select up to $maxSelection species", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                selectedSpecies.remove(species)
-            }
-            updateSelectedCount()
-        }
-
-        layoutSpeciesList.addView(checkbox)
+    private fun updateSelectedCount(count: Int) {
+        txtSelectedCount.text = getString(R.string.selected_species_count, count, 8)
+        btnSaveSpecies.isEnabled = count > 0
     }
 
-
-    private fun updateSelectedCount() {
-        txtSelectedCount.text = getString(R.string.selected_species_count, selectedSpecies.size, maxSelection)
-        btnSaveSpecies.isEnabled = selectedSpecies.isNotEmpty()
-    }
 }

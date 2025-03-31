@@ -3,6 +3,9 @@ package com.bramestorm.bassanglertracker
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -14,11 +17,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
 
 class CatchEntryTournamentInches : AppCompatActivity() {
 
@@ -201,9 +206,9 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         val intent = Intent(this, PopupLengthEntryTourInches::class.java)
         intent.putExtra("isTournament", true)
 
-        if (tournamentSpecies == "Large Mouth") {
+        if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
             intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-        } else         if (tournamentSpecies == "Small Mouth") {
+        } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
             intent.putExtra("tournamentSpecies", "Small Mouth Bass")
         } else{
             intent.putExtra("tournamentSpecies", tournamentSpecies)
@@ -311,7 +316,7 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         // ✨ Clean way to update available clip colors
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "metric",
+            catchType = "inches",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
@@ -339,8 +344,17 @@ class CatchEntryTournamentInches : AppCompatActivity() {
                 realLengthInches[i].text = lengthInches.toString()
                 decLengthInches[i].text ="$lengthDec /8"
 
+// ✅ First set the clip color background
                 realLengthInches[i].setBackgroundResource(clipColor.resId)
                 decLengthInches[i].setBackgroundResource(clipColor.resId)
+
+// ✅ Then layer on a black border to improve visibility
+                val baseColor = ContextCompat.getColor(this, clipColor.resId)
+                val layeredDrawable = createLayeredDrawable(baseColor)
+                realLengthInches[i].background = layeredDrawable
+                decLengthInches[i].background = layeredDrawable
+
+
 
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
@@ -393,22 +407,25 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         updateTotalLength(tournamentCatches)
         adjustTextViewVisibility()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            when (tournamentCatchLimit) {
-                4 -> {
-                    blinkTextViewTwice(fourthRealLengthInches)
-                    blinkTextViewTwice(fourthDecLengthInches)
+        if (tournamentCatches.size >= tournamentCatchLimit) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                when (tournamentCatchLimit) {
+                    4 -> {
+                        blinkTextViewTwice(fourthRealLengthInches)
+                        blinkTextViewTwice(fourthDecLengthInches)
+                    }
+                    5 -> {
+                        blinkTextViewTwice(fifthRealLengthInches)
+                        blinkTextViewTwice(fifthDecLengthInches)
+                    }
+                    6 -> {
+                        blinkTextViewTwice(sixthRealLengthInches)
+                        blinkTextViewTwice(sixthDecLengthInches)
+                    }
                 }
-                5 -> {
-                    blinkTextViewTwice(fifthRealLengthInches)
-                    blinkTextViewTwice(fifthDecLengthInches)
-                }
-                6 -> {
-                    blinkTextViewTwice(sixthRealLengthInches)
-                    blinkTextViewTwice(sixthDecLengthInches)
-                }
-            }
-        }, 300) // Wait
+            }, 300)
+        }
+
 
 
     }
@@ -645,6 +662,23 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         }, 1000) // Initial 1 second delay
     }
 
+
+    private fun createLayeredDrawable(baseColor: Int): Drawable {
+        val colorDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setColor(baseColor)
+        }
+
+        val borderDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 4f
+            setStroke(4, Color.BLACK) // 4dp border
+            setColor(Color.TRANSPARENT) // Don't cover the base
+        }
+
+        return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
+    }
 
 }//################## END  ################################
 
