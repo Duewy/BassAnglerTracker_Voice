@@ -59,6 +59,10 @@
     <color name="Log_white">#85FDFDFD</color>
     <color name="Log_orange">#80FE671E</color>
 
+    <color name="selected_background">#FFDDFF</color>
+    <color name="unselected_background">#FFFFFF</color>
+    <color name="selected_2_background">#CCFF90</color> <!-- Light green -->
+
 
     <color name="ic_launcher_background">#FFBB00</color>
 

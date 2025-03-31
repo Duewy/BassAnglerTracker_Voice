@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 

@@ -48,6 +48,8 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
         android:text="@string/goto_SetUp_description"
+        android:background="@drawable/btn_outline_grey"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtLbs" />
 

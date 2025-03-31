@@ -20,6 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BassAnglerTracker">
 
+            <!-- All Activities here -->
+
         <activity
             android:name=".IntroPage"
             android:exported="true">
@@ -37,6 +39,10 @@
 
         <activity android:name=".SetUpActivity"/>
 
+        <activity android:name=".adapters.AllSpeciesSelectionActivity" />
+        <activity android:name=".SpeciesSelectionActivity" />
+
+
         <activity android:name=".CatchEntryLbsOzs"/>
         <activity android:name=".CatchEntryKgs"/>
         <activity android:name=".CatchEntryInches"/>
@@ -50,8 +56,6 @@
         <activity android:name=".training.UserTrainingIndex"/>
         <activity android:name=".training.UserTrainingVoiceCommands"/>
         <activity android:name=".training.TrainingWords"/>
-
-        <activity android:name=".SpeciesSelectionActivity"/>
 
         <activity android:name=".PopupWeightEntryTourKgs"
             android:windowSoftInputMode="adjustResize"/>
@@ -74,6 +78,7 @@
         <activity android:name=".PopUpAlarm"
             android:theme="@style/Theme.BassAnglerTracker"
             android:windowSoftInputMode="adjustResize"/>
+
 
 
 

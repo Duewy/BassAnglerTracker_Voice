@@ -122,6 +122,11 @@
     <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
     <string name="selected_species_count">Selected: %1$d / %2$d</string>
     <string name="voice_commands_or_manual_input">Voice Commands \n\ or \n\ Manual Input</string>
+    <string name="user_can_add_your_own_species_to_the_list">User Can Add Your Own Species to the List</string>
+    <string name="select_up_to_8_species">Select up to 8 Species</string>
+    <string name="editable_species_list">Editable Species List</string>
+    <string name="user_can">User can Select or Add Species to Target List</string>
+    <string name="save_species_list">Save Species List</string>
 
 
     //species

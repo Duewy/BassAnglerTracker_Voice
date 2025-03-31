@@ -14,6 +14,6 @@ class IntroPage : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
             finish() // closes the splash screen so it can't be returned to
-        }, 5000) // 5000 milliseconds = 5 seconds
+        }, 1000) // 5000 milliseconds = 5 seconds
     }
 }
