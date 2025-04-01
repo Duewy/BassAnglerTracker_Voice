@@ -7,16 +7,14 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 class CatchItemAdapter(
     context: Context,
     private val catches: MutableList<CatchItem>,
-
 ) : ArrayAdapter<CatchItem>(context, 0, catches) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -37,12 +35,10 @@ class CatchItemAdapter(
             "N/A"
         }
 
-
-
         catchItem?.let {
             val speciesName = it.species ?: "Unknown"
             val infoText = when (it.catchType) {
-                "lbsOzs"  -> {
+                "lbsOzs" -> {
                     val totalOz = it.totalWeightOz ?: 0
                     "$speciesName: ${totalOz / 16}Lbs ${totalOz % 16}oz, @ $timeFormatted"
                 }
@@ -60,17 +56,14 @@ class CatchItemAdapter(
                     }
                     "$speciesName: $lengthFormatted, @ $timeFormatted"
                 }
-                "metric" -> "$speciesName: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm,  ,  @ $timeFormatted"
+                "metric" -> "$speciesName: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm, @ $timeFormatted"
                 else -> it.toString()
             }
 
             txtCatchInfo.text = infoText
-            imgSpecies.setImageResource(getSpeciesImageResId(speciesName))
-
+            imgSpecies.setImageResource(SpeciesImageHelper.getSpeciesImageResId(speciesName))
         }
 
         return view
     }
-
-
 }

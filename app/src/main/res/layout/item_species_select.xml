@@ -13,7 +13,8 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_drag_handle" />
+        android:src="@drawable/ic_drag_handle"
+        android:contentDescription="@string/drag_handle_for_user"/>
 
     <!-- Species Icon -->
     <ImageView
@@ -21,7 +22,8 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginEnd="12dp"
-        android:src="@drawable/fish_default" />
+        android:src="@drawable/fish_default"
+        android:contentDescription="@string/species_image"/>
 
     <!-- Species Name -->
     <TextView
@@ -29,8 +31,31 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Species Name"
+        android:text="@string/species_name"
         android:textSize="18sp"
         android:textColor="@color/black"
         android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnEditSpecies"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="@string/edit"
+        android:textColor="@color/clip_blue"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/btn_outline_blue"/>
+
+    <Button
+        android:id="@+id/btnDeleteSpecies"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:text="@string/delete"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/clip_red"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/btn_outline_green"/>
+
 </LinearLayout>

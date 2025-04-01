@@ -16,7 +16,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 
 class PopupWeightEntryLbs : Activity() {
 
@@ -39,9 +39,8 @@ class PopupWeightEntryLbs : Activity() {
         // Load species from SharedPreferences and map to SpeciesItem with default icon
         val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
 
-
         val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = getSpeciesImageResId(speciesName)
+            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
 

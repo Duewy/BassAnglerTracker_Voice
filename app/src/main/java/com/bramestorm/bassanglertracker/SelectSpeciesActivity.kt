@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 
 
 class SpeciesSelectionActivity : AppCompatActivity() {
@@ -42,7 +43,8 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         val savedSpeciesNames = SharedPreferencesManager.getOrderedSpeciesList(this)
         val speciesList = savedSpeciesNames.map { name ->
-            val icon = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(name)
+            val icon = SpeciesImageHelper.getSpeciesImageResId(name)
+
             SpeciesItem(name, icon)
         }.toMutableList()
 
@@ -86,10 +88,15 @@ class SpeciesSelectionActivity : AppCompatActivity() {
                 .setView(input)
                 .setPositiveButton("Add") { _, _ ->
                     val newSpeciesName = input.text.toString().trim()
+                    // ⛔ Check species limit INSIDE this block
+                    if (speciesList.size >= maxSelection) {
+                        Toast.makeText(this, "You can only select up to $maxSelection species.", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
                     if (newSpeciesName.isNotEmpty() &&
                         speciesList.none { it.name.equals(newSpeciesName, ignoreCase = true) }
                     ) {
-                        val imageRes = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(newSpeciesName)
+                        val imageRes = SpeciesImageHelper.getSpeciesImageResId(newSpeciesName)
                         val newSpecies = SpeciesItem(newSpeciesName, imageRes)
                         speciesList.add(newSpecies)
                         adapter.notifyItemInserted(speciesList.size - 1)
@@ -98,6 +105,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
                         Toast.makeText(this, "Invalid or duplicate species", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 .setNegativeButton("Cancel", null)
                 .show()
         }

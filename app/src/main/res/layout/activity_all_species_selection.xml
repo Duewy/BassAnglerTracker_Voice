@@ -62,25 +62,12 @@
             android:paddingBottom="10dp"
             android:scrollbars="vertical"
             android:background="@color/lite_grey"
-            android:paddingLeft="10dp"/>
+            android:paddingStart="10dp"
+            android:paddingEnd="1dp"/>
 
         <!-- Save Button -->
 
         <!-- Add Custom Species -->
-        <Button
-            android:id="@+id/btnSaveSpeciesList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/btn_outline_blue"
-            android:enabled="false"
-            android:fadeScrollbars="true"
-            android:padding="15dp"
-            android:text="@string/save_species_list"
-            android:textColor="@color/black"
-            android:textSize="25sp"
-            android:textStyle="bold" />
 
         <View
             android:id="@+id/divider16"
@@ -92,6 +79,36 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnSaveSpeciesList" />
+
+        <Button
+            android:id="@+id/btnSaveSpeciesList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_outline_orange"
+            android:enabled="false"
+            android:fadeScrollbars="true"
+            android:padding="15dp"
+            android:text="@string/save_species_list"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnAddSpeciesToList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_outline_red"
+            android:enabled="false"
+            android:fadeScrollbars="true"
+            android:padding="15dp"
+            android:text="@string/add_species"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnCancel"

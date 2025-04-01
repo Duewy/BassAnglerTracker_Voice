@@ -1,7 +1,12 @@
 package com.bramestorm.bassanglertracker.training
 
+// TrainingWords.kt
+// - Handles voice training phrases
+// - Also runs voice-to-species mapping using VoiceInputMapper
+// - Uses SpeechRecognizer for phrase comparison and species recognition
+
+
 import android.Manifest
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -207,48 +212,33 @@ class TrainingWords : AppCompatActivity() {
 
 
 
-    // ########## SeT UP For Voice Listener   #####################
-
-    private fun startListening() {
-        speechRecognizer.setRecognitionListener(object : android.speech.RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onError(error: Int) {
-                txtWhatComputerHeard.text = "Error recognizing speech."
-            }
-
-            override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val spokenText = matches?.firstOrNull()?.trim() ?: "Nothing heard"
-                txtWhatComputerHeard.text = "You said: \"$spokenText\""
-
-                checkPhraseMatch(spokenText)
-            }
-
-            override fun onPartialResults(partialResults: Bundle?) {}
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-        })
-
-        speechRecognizer.startListening(speechIntent)
-    }
 
     //_________________ Get DAta from Microphone _______________
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+            val resultList = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val spokenText = resultList?.firstOrNull()
 
-        if (requestCode == SPEECH_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            val spokenText = result?.get(0)?.trim() ?: "Nothing heard"
-
-            // Display + evaluate result
-            checkPhraseMatch(spokenText)
+            spokenText?.let {
+                handleVoiceInput(it)
+            }
         }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
+
+
+    fun handleVoiceInput(rawInput: String) {
+        val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
+
+        if (matchedSpecies != null) {
+            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n✔ That is a match for \"$matchedSpecies\"!"
+            // You could also set a spinner value or pass species to the next function here
+        } else {
+            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n❌ Species not recognized."
+        }
+    }
 
 
 }// +++++++++++ END Training-Words ++++++++++++++++++++++++

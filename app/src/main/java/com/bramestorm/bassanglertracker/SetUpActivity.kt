@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.models.SpeciesItem
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -168,7 +169,7 @@ class SetUpActivity : AppCompatActivity() {
         val savedSpecies = com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.getOrderedSpeciesList(this)
 
         val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = com.bramestorm.bassanglertracker.utils.getSpeciesImageResId(speciesName)
+            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
 

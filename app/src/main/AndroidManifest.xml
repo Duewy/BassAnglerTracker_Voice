@@ -39,7 +39,7 @@
 
         <activity android:name=".SetUpActivity"/>
 
-        <activity android:name=".adapters.AllSpeciesSelectionActivity" />
+        <activity android:name=".activities.AllSpeciesSelectionActivity" />
         <activity android:name=".SpeciesSelectionActivity" />
 
 
