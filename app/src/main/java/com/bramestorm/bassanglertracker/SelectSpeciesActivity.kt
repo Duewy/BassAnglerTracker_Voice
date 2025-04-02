@@ -21,9 +21,12 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnAdjustList: Button
     private lateinit var txtTitle: TextView
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_species_selection)
+
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this) // 💥 FIXED
 
         recyclerView = findViewById(R.id.recyclerSpecies)
         btnSave = findViewById(R.id.btnSaveSpecies)
@@ -39,6 +42,8 @@ class SpeciesSelectionActivity : AppCompatActivity() {
         val itemTouchHelper = ItemTouchHelper(SpeciesItemTouchHelperCallback(adapter))
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
+
+        // ------------ SAVE Button ----------------------
         btnSave.setOnClickListener {
             val reorderedList = adapter.getCurrentOrder()
             SharedPreferencesManager.saveSelectedSpeciesList(this, reorderedList)
@@ -46,9 +51,11 @@ class SpeciesSelectionActivity : AppCompatActivity() {
             finish()
         }
 
+        // ----------- AdjustList Button -----------------
         btnAdjustList.setOnClickListener {
             val intent = Intent(this, AllSpeciesSelectionActivity::class.java)
             startActivity(intent)
         }
     }
+
 }

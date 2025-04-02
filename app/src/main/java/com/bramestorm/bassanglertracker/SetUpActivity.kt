@@ -52,7 +52,11 @@ class SetUpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        SharedPreferencesManager.clearSelectedSpecies(this)
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
         setContentView(R.layout.activity_set_up_event)
+
 
         // Initialize UI components
         btnWeight = findViewById(R.id.btnWeight)
@@ -79,8 +83,8 @@ class SetUpActivity : AppCompatActivity() {
             isValMeasuring = true
             btnImperial.text = "Lbs Ozs"
             btnMetric.text = " Kgs"
-            btnWeight.setBackgroundResource(R.color.white)
-            btnLength.setBackgroundResource(R.color.grey)
+            btnWeight.setBackgroundResource(R.color.clip_red)
+            btnLength.setBackgroundResource(R.color.lite_grey)
         }
 
         btnLength.setOnClickListener {
@@ -90,8 +94,8 @@ class SetUpActivity : AppCompatActivity() {
             isValMeasuring = true
             btnImperial.text = "Inches 8ths"
             btnMetric.text = "Cms"
-            btnLength.setBackgroundResource(R.color.white)
-            btnWeight.setBackgroundResource(R.color.grey)
+            btnLength.setBackgroundResource(R.color.clip_red)
+            btnWeight.setBackgroundResource(R.color.lite_grey)
         }
 
         // Toggle Units Selection
@@ -100,8 +104,8 @@ class SetUpActivity : AppCompatActivity() {
             isImperialSelected = true
             isMetricSelected = false
             isValUnits = true
-            btnImperial.setBackgroundResource(R.color.white)
-            btnMetric.setBackgroundResource(R.color.grey)
+            btnImperial.setBackgroundResource(R.color.clip_red)
+            btnMetric.setBackgroundResource(R.color.lite_grey)
         }
 
         btnMetric.setOnClickListener {
@@ -109,8 +113,8 @@ class SetUpActivity : AppCompatActivity() {
             isMetricSelected = true
             isImperialSelected = false
             isValUnits = true
-            btnMetric.setBackgroundResource(R.color.white)
-            btnImperial.setBackgroundResource(R.color.grey)
+            btnMetric.setBackgroundResource(R.color.clip_red)
+            btnImperial.setBackgroundResource(R.color.lite_grey)
         }
 
         // Toggle Fun Day/Tournament Selection
@@ -118,8 +122,8 @@ class SetUpActivity : AppCompatActivity() {
             Log.d("DEBUG", "FunDay Is Selected ")
             isFunDaySelected = true
             isTournamentSelected = false
-            btnFunDay.setBackgroundResource(R.color.white)
-            btnTournament.setBackgroundResource(R.color.grey)
+            btnFunDay.setBackgroundResource(R.color.clip_red)
+            btnTournament.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             btnMetric.visibility = View.VISIBLE
             tglCullingValue.visibility = View.INVISIBLE
@@ -132,8 +136,8 @@ class SetUpActivity : AppCompatActivity() {
             isFunDaySelected = false
           //  isLengthSelected = false
           //  isWeightSelected = true
-            btnTournament.setBackgroundResource(R.color.white)
-            btnFunDay.setBackgroundResource(R.color.grey)
+            btnTournament.setBackgroundResource(R.color.clip_red)
+            btnFunDay.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             tglCullingValue.visibility = View.VISIBLE
             spinnerTournamentSpecies.visibility = View.VISIBLE
@@ -166,20 +170,23 @@ class SetUpActivity : AppCompatActivity() {
         }
 
 
-                // Load user-selected species list with icons
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
+        //----------  Load user-Selected SPECIES LIST with icons --------------
+
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
+            SharedPreferencesManager.getAllSpecies(this)
+        }
+
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
 
-
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerTournamentSpecies.adapter = adapter
 
 
-// Update selectedSpecies when user picks an item
+        // ----------------- Update selectedSpecies when user picks an item -------------------
         spinnerTournamentSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedSpecies = speciesList[position].name
@@ -219,7 +226,7 @@ class SetUpActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "⚠️ Please select a valid option!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "⚠️ Please select a Measurement and Unit Type!", Toast.LENGTH_SHORT).show()
             }
         }
     }//-------------- END of ON CREATE  _______________________

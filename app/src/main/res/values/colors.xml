@@ -49,6 +49,7 @@
     <!-- Logging Page colors-->
 
     <color name="Log_red">#C3D50011</color>
+    <color name="Selected_red">#EC1414</color>
     <color name="Log_red_secondary">#F41631</color>
     <color name="Log_yellow">#80FEFE20</color>
     <color name="Log_yellow_secondary">#80DACF05</color>
@@ -64,6 +65,7 @@
     <color name="selected_2_background">#CCFF90</color> <!-- Light green -->
 
     <color name="material_dynamic_primary70">#72B0D1</color>
+    <color name="highlight_yellow">#F6DF0E</color>
 
     <color name="ic_launcher_background">#FFBB00</color>
 

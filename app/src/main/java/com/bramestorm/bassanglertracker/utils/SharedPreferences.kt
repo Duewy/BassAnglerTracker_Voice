@@ -23,10 +23,16 @@ object SharedPreferencesManager {
 
         if (!alreadyLoaded) {
             saveAllSpecies(context, defaultSpecies)
-            saveSelectedSpeciesList(context, defaultSpecies.take(5)) // Load 5 by default
+            saveSelectedSpeciesList(context, defaultSpecies)
             prefs.edit().putBoolean(INIT_FLAG_KEY, true).apply()
         }
     }
+
+    fun getSafeSpeciesList(context: Context): List<String> {
+        val selected = SharedPreferencesManager.getSelectedSpeciesList(context)
+        return if (selected.isNotEmpty()) selected else SharedPreferencesManager.getAllSpecies(context)
+    }
+
 
     fun getSelectedSpeciesList(context: Context): List<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -56,12 +62,16 @@ object SharedPreferencesManager {
 
     fun getUserAddedSpeciesList(context: Context): List<String> {
         val saved = getAllSavedSpecies(context)
+        val defaultSpecies = listOf("Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
         return saved.filterNot { it in defaultSpecies }
     }
 
     fun getAllSpecies(context: Context): List<String> {
-        return (defaultSpecies + getUserAddedSpeciesList(context)).distinct()
+        val defaultSpecies = listOf("Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
+        val userAdded = getUserAddedSpeciesList(context)
+        return (defaultSpecies + userAdded).distinct()
     }
+
 
     fun clearSelectedSpecies(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

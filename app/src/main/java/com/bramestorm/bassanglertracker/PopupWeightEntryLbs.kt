@@ -26,6 +26,7 @@ class PopupWeightEntryLbs : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         setContentView(R.layout.popup_weight_entry_lbs)
 
@@ -37,15 +38,18 @@ class PopupWeightEntryLbs : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
 
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
+            SharedPreferencesManager.getAllSpecies(this)
+        }
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
-
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
+
+
 
 // Update selectedSpecies when user picks an item
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

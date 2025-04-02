@@ -1,18 +1,25 @@
-package com.bramestorm.bassanglertracker
+package com.bramestorm.bassanglertracker.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import java.util.Collections
 
 class SpeciesReorderAdapter(
     private val speciesList: MutableList<SpeciesItem>
 ) : RecyclerView.Adapter<SpeciesReorderAdapter.SpeciesViewHolder>() {
+
+    private var selectedPosition: Int = RecyclerView.NO_POSITION
+
+    inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val speciesName: TextView = itemView.findViewById(R.id.txtSpeciesName)
+        val speciesIcon: ImageView = itemView.findViewById(R.id.imgSpecies)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpeciesViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -21,8 +28,15 @@ class SpeciesReorderAdapter(
     }
 
     override fun onBindViewHolder(holder: SpeciesViewHolder, position: Int) {
-        val speciesItem = speciesList[position]
-        holder.bind(speciesItem)
+        val item = speciesList[position]
+        holder.speciesName.text = item.name
+        holder.speciesIcon.setImageResource(item.imageResId)
+
+        if (position == selectedPosition) {
+            holder.itemView.setBackgroundResource(R.color.highlight_yellow)
+        } else {
+            holder.itemView.setBackgroundResource(android.R.color.transparent)
+        }
     }
 
     override fun getItemCount(): Int = speciesList.size
@@ -30,45 +44,10 @@ class SpeciesReorderAdapter(
     fun moveItem(fromPosition: Int, toPosition: Int) {
         Collections.swap(speciesList, fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
+        selectedPosition = toPosition
     }
 
-    fun getOrderedList(): List<SpeciesItem> = speciesList
-
-    inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val speciesName: TextView = itemView.findViewById(R.id.txtSpeciesName)
-        private val speciesIcon: ImageView = itemView.findViewById(R.id.imgSpecies)
-
-        fun bind(item: SpeciesItem) {
-            speciesName.text = item.name
-            speciesIcon.setImageResource(item.imageResId)
-
-            //--------- Highlight the Item that is Selected ----------------
-            if (item.isSelected) {
-                itemView.setBackgroundColor(itemView.context.getColor(R.color.selected_background))
-            } else {
-                itemView.setBackgroundColor(itemView.context.getColor(R.color.unselected_background))
-            }
-
-            // Toggle selection when clicked
-            itemView.setOnClickListener {
-                val selectedCount = speciesList.count { it.isSelected }
-
-                if (!item.isSelected && selectedCount >= 8) {
-                    // Already 8 selected, can't add more
-                    Toast.makeText(
-                        itemView.context,
-                        "You can only select up to 8 species. Please deselect one first.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                }
-
-                // Toggle selection
-                item.isSelected = !item.isSelected
-                notifyItemChanged(adapterPosition)
-            }
-
-        }
-
+    fun getCurrentOrder(): List<String> {
+        return speciesList.map { it.name }
     }
 }

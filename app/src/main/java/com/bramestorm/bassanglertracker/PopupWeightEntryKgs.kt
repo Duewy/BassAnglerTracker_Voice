@@ -34,15 +34,17 @@ class PopupWeightEntryKgs : Activity() {
 
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
 
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
+            SharedPreferencesManager.getAllSpecies(this)
+        }
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
-
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
+
 
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
