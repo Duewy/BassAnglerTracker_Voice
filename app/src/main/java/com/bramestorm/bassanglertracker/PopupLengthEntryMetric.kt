@@ -43,6 +43,7 @@ class PopupLengthEntryMetric : Activity() {
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
+        Log.d("POPUP_SPINNER", "Species list used: $speciesList")
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
 

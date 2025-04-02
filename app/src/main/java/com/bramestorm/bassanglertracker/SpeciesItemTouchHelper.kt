@@ -33,6 +33,8 @@ class SpeciesItemTouchHelperCallback(
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             viewHolder?.itemView?.setBackgroundResource(R.color.highlight_yellow) // same highlight
+        } else {
+            viewHolder?.itemView?.setBackgroundColor(viewHolder.itemView.context.getColor(android.R.color.transparent))
         }
     }
 

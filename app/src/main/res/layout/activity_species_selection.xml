@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:paddingBottom="8dp"
-            android:text="@string/arrange_the_listing_as_needed"
+            android:text="@string/move_the_species_up_down_as_needed"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />

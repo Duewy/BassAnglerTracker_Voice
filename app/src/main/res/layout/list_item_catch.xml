@@ -6,17 +6,17 @@
     android:gravity="center_vertical"
     android:background="@color/lite_grey">
 
-    <CheckBox
-        android:id="@+id/chkSelectSpecies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+    <ImageView
+        android:id="@+id/dragHandleListItem"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_drag_handle"
+        android:contentDescription="@string/drag_handle"
+        android:layout_marginStart="12dp"
+        android:layout_gravity="center_vertical"/>
 
     <ImageView
-        android:id="@+id/imgSpecies"
+        android:id="@+id/imgSpeciesListItem"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="12dp"
@@ -24,7 +24,7 @@
         android:contentDescription="@string/fish_species_image" />
 
     <TextView
-        android:id="@+id/txtSpeciesName"
+        android:id="@+id/txtSpeciesNameListItem"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +20,7 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AllSpeciesAdapter
     private lateinit var btnSave: Button
-    private lateinit var btnCancel:Button
+    private lateinit var btnCancel: Button
 
     private val allSpecies = mutableListOf<String>()
     private val selectedSpecies = mutableSetOf<String>() // max 8
@@ -36,14 +37,20 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
 
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-        // Load SharedPreferences safely off the main thread
         lifecycleScope.launch(Dispatchers.IO) {
             val savedSpecies = SharedPreferencesManager.getAllSavedSpecies(this@AllSpeciesSelectionActivity)
             val selected = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
 
+            Log.d("AllSpeciesSelection", "Loaded allSpecies: $savedSpecies")
+            Log.d("AllSpeciesSelection", "Loaded selectedSpecies: $selected")
+
             withContext(Dispatchers.Main) {
                 allSpecies.addAll(savedSpecies)
                 selectedSpecies.addAll(selected)
+
+                if (savedSpecies.isEmpty()) {
+                    Log.w("AllSpeciesSelection", "No saved species found! You may need to initialize defaults.")
+                }
 
                 adapter = AllSpeciesAdapter(allSpecies, selectedSpecies) { speciesName, isChecked ->
                     if (isChecked) {
@@ -63,15 +70,13 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
             }
         }
 
-        //------------------------ SAVE Button --------------------------
         btnSave.setOnClickListener {
             SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
+            Log.d("AllSpeciesSelection", "Saved selectedSpecies: $selectedSpecies")
             finish()
         }
 
-        //------------------------- CANCEL Button ------------------------------
         btnCancel.setOnClickListener {
-            SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
             finish()
         }
     }

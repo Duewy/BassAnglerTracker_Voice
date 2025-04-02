@@ -14,10 +14,11 @@ class SpeciesReorderAdapter(
     private val speciesList: MutableList<String>
 ) : RecyclerView.Adapter<SpeciesReorderAdapter.ViewHolder>() {
 
+    private var selectedPosition: Int = RecyclerView.NO_POSITION
+
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtSpeciesName: TextView = view.findViewById(R.id.txtSpeciesName)
         val imgSpecies: ImageView = view.findViewById(R.id.imgSpecies)
-        val dragHandle: ImageView = view.findViewById(R.id.dragHandle)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,17 +27,24 @@ class SpeciesReorderAdapter(
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = speciesList.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val species = speciesList[position]
-        holder.txtSpeciesName.text = species
-        holder.imgSpecies.setImageResource(getSpeciesImageResId(species))
+        val speciesName = speciesList[position]
+        holder.txtSpeciesName.text = speciesName
+        holder.imgSpecies.setImageResource(getSpeciesImageResId(speciesName))
+
+        if (position == selectedPosition) {
+            holder.itemView.setBackgroundResource(R.color.highlight_yellow)
+        } else {
+            holder.itemView.setBackgroundResource(android.R.color.transparent)
+        }
     }
+
+    override fun getItemCount(): Int = speciesList.size
 
     fun moveItem(from: Int, to: Int) {
         Collections.swap(speciesList, from, to)
         notifyItemMoved(from, to)
+        selectedPosition = to
     }
 
     fun getCurrentOrder(): List<String> = speciesList

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fillViewport="true"
-    android:contentDescription="@string/user_can">
->
+    android:contentDescription="@string/user_can" >
 
     <LinearLayout
         android:id="@+id/llSpeciesAddition"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/material_dynamic_primary70"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp" >
 
         <!-- Title -->
         <TextView
@@ -65,20 +64,18 @@
             android:paddingStart="10dp"
             android:paddingEnd="1dp"/>
 
-        <!-- Save Button -->
-
-        <!-- Add Custom Species -->
 
         <View
             android:id="@+id/divider16"
             android:layout_width="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_height="8dp"
+            android:layout_marginTop="10dp"
             android:background="@color/black"
-            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnSaveSpeciesList" />
+
+        <!-- Save Button -->
 
         <Button
             android:id="@+id/btnSaveSpeciesList"
@@ -95,6 +92,8 @@
             android:textSize="15sp"
             android:textStyle="bold" />
 
+        <!-- Add Custom Species Button -->
+
         <Button
             android:id="@+id/btnAddSpeciesToList"
             android:layout_width="wrap_content"
@@ -110,6 +109,8 @@
             android:textSize="15sp"
             android:textStyle="bold" />
 
+        <!-- CANCEL Button -->
+
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
@@ -122,5 +123,7 @@
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />
+
     </LinearLayout>
+
 </ScrollView>

@@ -53,7 +53,7 @@ class SetUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SharedPreferencesManager.clearSelectedSpecies(this)
+        SharedPreferencesManager.clearSpeciesPreferences(this)
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
         setContentView(R.layout.activity_set_up_event)
 

@@ -10,16 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 
-
 class AllSpeciesAdapter(
     private val speciesList: List<String>,
-    private val selectedSpecies: Set<String>,
+    private val initiallySelectedSpecies: Set<String>,
     private val onSelectionChanged: (String, Boolean) -> Unit
 ) : RecyclerView.Adapter<AllSpeciesAdapter.ViewHolder>() {
 
     private val selectedState = mutableMapOf<String, Boolean>().apply {
-        speciesList.forEach {
-            this[it] = selectedSpecies.contains(it)
+        speciesList.forEach { species ->
+            this[species] = initiallySelectedSpecies.contains(species)
         }
     }
 
@@ -29,9 +28,9 @@ class AllSpeciesAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val txtSpecies: TextView = itemView.findViewById(R.id.txtSpeciesName)
-        val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpecies)
-        val checkBox: CheckBox = itemView.findViewById(R.id.chkSelectSpecies)
+        val txtSpecies: TextView = itemView.findViewById(R.id.txtSpeciesNameSelect)
+        val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesSelect)
+        val chkSpecies: CheckBox = itemView.findViewById(R.id.chkSelectSpeciesNameSelect)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,14 +43,22 @@ class AllSpeciesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val species = speciesList[position]
-        holder.txtSpecies.text = species
-        holder.imgSpecies.setImageResource(getSpeciesImageResId(species))
-        holder.checkBox.isChecked = selectedState[species] == true
 
-        holder.checkBox.setOnCheckedChangeListener(null)
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+        holder.txtSpecies.text = species
+
+        val imageRes = getSpeciesImageResId(species)
+        holder.imgSpecies.setImageResource(if (imageRes != 0) imageRes else R.drawable.fish_default)
+
+        holder.chkSpecies.setOnCheckedChangeListener(null)
+        holder.chkSpecies.isChecked = selectedState[species] == true
+
+        holder.chkSpecies.setOnCheckedChangeListener { _, isChecked ->
             selectedState[species] = isChecked
             onSelectionChanged(species, isChecked)
         }
+    }
+
+    fun getSelectedSpecies(): List<String> {
+        return selectedState.filterValues { it }.keys.toList()
     }
 }

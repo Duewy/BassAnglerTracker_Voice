@@ -1,14 +1,21 @@
 package com.bramestorm.bassanglertracker.utils
 
+import android.util.Log
 import com.bramestorm.bassanglertracker.R
 
         //++++++++++++++++++++++ Pictures of the Fish Species +++++++++++++++++++++++++
 
 object SpeciesImageHelper {
+
+    // 🔒 Private helper to normalize species name
+    private fun normalizeSpeciesName(name: String): String {
+        return name.trim().lowercase()
+    }
+
     fun getSpeciesImageResId(speciesName: String): Int {
         return when (speciesName.trim().lowercase()) {
-            "largemouth", "largemouth bass" -> R.drawable.fish_large_mouth
-            "smallmouth", "smallmouth bass" -> R.drawable.fish_small_mouth
+            "large mouth", "largemouth" -> R.drawable.fish_large_mouth
+            "small mouth", "smallmouth"-> R.drawable.fish_small_mouth
             "crappie" -> R.drawable.fish_crappie
             "walleye" -> R.drawable.fish_walleye
             "perch" -> R.drawable.fish_perch
@@ -34,7 +41,11 @@ object SpeciesImageHelper {
             "tarpon"-> R.drawable.sw_fish_tarpon
             "grouper"-> R.drawable.sw_fish_grouper
             "red snapper" -> R.drawable.sw_fish_red_snapper
-            else -> R.drawable.fish_default
+            else -> {
+                Log.w("SpeciesImageHelper", "Unknown species image: $speciesName")
+                R.drawable.fish_default
+            }
+
         }
     }
 }
