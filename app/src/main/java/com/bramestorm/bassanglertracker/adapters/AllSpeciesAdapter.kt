@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
+import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
 
 class AllSpeciesAdapter(
     private val speciesList: List<String>,
@@ -45,7 +45,6 @@ class AllSpeciesAdapter(
         val species = speciesList[position]
 
         holder.txtSpecies.text = species
-
         val imageRes = getSpeciesImageResId(species)
         holder.imgSpecies.setImageResource(if (imageRes != 0) imageRes else R.drawable.fish_default)
 

@@ -16,33 +16,33 @@ class SpeciesSelectAdapter(
     var onDragHandleTouch: ((RecyclerView.ViewHolder) -> Unit)? = null
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val txtSpecies: TextView = itemView.findViewById(R.id.txtSpeciesNameSelect)
-        val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesSelect)
-        val dragHandle: ImageView = itemView.findViewById(R.id.imgSpeciesSelect) // You can use a real drag handle later
+        val txtSpecies: TextView = itemView.findViewById(R.id.txtSpeciesNameReorder)
+        val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesReorder)
+        val dragHandle: ImageView = itemView.findViewById(R.id.imgDragHandle)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_species_select, parent, false)
+            .inflate(R.layout.item_species_reorder, parent, false)
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = speciesList.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val species = speciesList[position]
-
         holder.txtSpecies.text = species
-        val imageRes = getSpeciesImageResId(species)
-        holder.imgSpecies.setImageResource(if (imageRes != 0) imageRes else R.drawable.fish_default)
 
-        holder.itemView.setBackgroundColor(holder.itemView.context.getColor(R.color.lite_grey))
+        val imageRes = getSpeciesImageResId(species)
+        holder.imgSpecies.setImageResource(
+            if (imageRes != 0) imageRes else R.drawable.fish_default
+        )
 
         holder.dragHandle.setOnTouchListener { _, _ ->
             onDragHandleTouch?.invoke(holder)
             false
         }
     }
+
+    override fun getItemCount(): Int = speciesList.size
 
     fun moveItem(from: Int, to: Int) {
         val item = speciesList.removeAt(from)

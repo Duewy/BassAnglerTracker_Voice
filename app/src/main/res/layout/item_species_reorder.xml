@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@color/lite_grey"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/imgDragHandle"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_drag_handle"
+    android:contentDescription="@string/drag_handle_for_user" />
+
+    <ImageView
+        android:id="@+id/imgSpeciesReorder"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/fish_image" />
+
+    <TextView
+        android:id="@+id/txtSpeciesNameReorder"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/species"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+</LinearLayout>
