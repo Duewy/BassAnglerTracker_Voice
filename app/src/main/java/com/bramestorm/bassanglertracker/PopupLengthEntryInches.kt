@@ -31,7 +31,7 @@ class PopupLengthEntryInches : Activity() {
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
         // Load species from SharedPreferences and map to SpeciesItem with correct image
-        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)

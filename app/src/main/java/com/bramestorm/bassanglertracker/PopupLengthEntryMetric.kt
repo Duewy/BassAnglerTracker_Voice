@@ -36,7 +36,7 @@ class PopupLengthEntryMetric : Activity() {
         // Load species list from strings.xml
         // Load species from SharedPreferences and map to SpeciesItem with default icon
 
-        val savedSpecies = SharedPreferencesManager.getOrderedSpeciesList(this)
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)

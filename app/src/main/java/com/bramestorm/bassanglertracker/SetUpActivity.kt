@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.models.SpeciesItem
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -166,12 +167,13 @@ class SetUpActivity : AppCompatActivity() {
 
 
                 // Load user-selected species list with icons
-        val savedSpecies = com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.getOrderedSpeciesList(this)
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
         }
+
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerTournamentSpecies.adapter = adapter
