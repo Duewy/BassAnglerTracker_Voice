@@ -127,6 +127,16 @@
     <string name="editable_species_list">Editable Species List</string>
     <string name="user_can">User can Select or Add Species to Target List</string>
     <string name="save_species_list">Save Species List</string>
+    <string name="add_species">Add Species</string>
+    <string name="error_recognizing_speech">Error recognizing speech.</string>
+    <string name="drag_handle_for_user">drag handle for user</string>
+    <string name="species_name">Species Name</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="species_image">species image</string>
+    <string name="species">Species</string>
+    <string name="arrange_the_listing_as_needed">Arrange the Listing As Needed</string>
+    <string name="drag_handle">Drag handle</string>
 
 
     //species

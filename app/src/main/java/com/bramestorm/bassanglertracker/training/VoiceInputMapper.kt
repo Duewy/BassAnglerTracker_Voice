@@ -14,10 +14,19 @@ object VoiceInputMapper {
         "Rock Bass" to listOf("rock bass", "rack bass", "rug bass"),
         "Bowfin" to listOf("bowfin", "bow fin", "bovine"),
         "Muskie" to listOf("muskie", "musky", "musky fish"),
+        "Walleye" to listOf("wall eye", "wallie", "walleye"),
+        "Pike" to listOf("pike", "northern pike"),
+        "Perch" to listOf("perch"),
+        "Cat Fish" to listOf("catfish","cat fish"),
         "Gar" to listOf("gar", "car", "guard"),
         "Bullhead" to listOf("bullhead", "bull head", "bald head"),
         "Red Drum" to listOf("red drum", "redrum", "red fish"),
-        "Carp" to listOf("carp", "cart", "cap")
+        "Carp" to listOf("carp", "cart", "cap"),
+        "Clear List" to listOf("clear list", "clearlist"),
+        "Save Catch" to listOf("Save Catch"),
+        "New Fish" to listOf("new fish"),
+        "Caught" to listOf("caught"),
+        "Log Entry" to listOf("log entry"),
         // Add more mappings as needed
     )
 

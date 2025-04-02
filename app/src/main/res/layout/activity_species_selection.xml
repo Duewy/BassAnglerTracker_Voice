@@ -23,7 +23,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="15dp"
             android:paddingBottom="8dp"
-            android:text="@string/select_8_species_to_target_today"
+            android:text="the Species List"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:paddingBottom="8dp"
-            android:text="@string/selected_0_8"
+            android:text="@string/arrange_the_listing_as_needed"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -56,7 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/btn_outline_blue"
             android:enabled="false"
             android:padding="15dp"
@@ -67,14 +67,14 @@
 
         <!-- Add Custom Species -->
         <Button
-            android:id="@+id/btnAddSpecies"
+            android:id="@+id/btnAdjustSpeciesList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:padding="15dp"
             android:background="@drawable/btn_outline_green"
-            android:text="Add Custom Species"
+            android:text="Adjust the Species List"
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />

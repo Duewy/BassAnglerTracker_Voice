@@ -1,121 +1,107 @@
 package com.bramestorm.bassanglertracker
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bramestorm.bassanglertracker.models.SpeciesItem
+import com.bramestorm.bassanglertracker.activities.AllSpeciesSelectionActivity
+import com.bramestorm.bassanglertracker.adapters.SpeciesSelectAdapter
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
-
 
 class SpeciesSelectionActivity : AppCompatActivity() {
 
-    private val allSpecies = mutableListOf(
-        "Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish",
-        "Perch", "Pike", "Bluegill", "Trout", "Salmon", "Carp", "Muskie",
-        "White Bass", "Rock Bass", "Bowfin", "Burbot", "Gar", "Sucker",
-        "Drum", "Goldeye", "Mooneye", "Shiner", "Chub", "Dace"
-    )
-
-
-    private lateinit var layoutSpeciesList: LinearLayout
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: SpeciesSelectAdapter
+    private lateinit var btnSave: Button
+    private lateinit var btnAddSpecies: Button
+    private lateinit var txtTitle: TextView
     private lateinit var txtSelectedCount: TextView
-    private lateinit var btnSaveSpecies: Button
-    private lateinit var btnAddSpecies :Button
-    private val maxSelection = 8
+
+    private var allSpecies = mutableListOf<String>()
+    private var selectedSpecies = mutableSetOf<String>() // Max 8
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_species_selection)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerSpecies)
+        recyclerView = findViewById(R.id.recyclerSpecies)
+        btnSave = findViewById(R.id.btnSaveSpecies)
+        btnAddSpecies = findViewById(R.id.btnAdjustSpeciesList)
+        txtTitle = findViewById(R.id.txtSpeciesTitle)
         txtSelectedCount = findViewById(R.id.txtSelectedCount)
-        btnSaveSpecies = findViewById(R.id.btnSaveSpecies)
-        btnAddSpecies = findViewById(R.id.btnAddSpecies)
 
-        val savedSpeciesNames = SharedPreferencesManager.getOrderedSpeciesList(this)
-        val speciesList = savedSpeciesNames.map { name ->
-            val icon = SpeciesImageHelper.getSpeciesImageResId(name)
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-            SpeciesItem(name, icon)
-        }.toMutableList()
 
-        val adapter = SpeciesReorderAdapter(speciesList)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        // Load all saved species and current selection
+        allSpecies = SharedPreferencesManager.getAllSavedSpecies(this).toMutableList()
+        selectedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).toMutableSet()
 
-        // Enable drag-and-drop
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                adapter.moveItem(viewHolder.adapterPosition, target.adapterPosition)
-                return true
+        // Adapter Setup
+        adapter = SpeciesSelectAdapter(allSpecies, selectedSpecies) { speciesName, isChecked ->
+            if (isChecked) {
+                if (selectedSpecies.size >= 8) {
+                    Toast.makeText(this, "Only 8 species allowed", Toast.LENGTH_SHORT).show()
+                    adapter.uncheckSpecies(speciesName)
+                } else {
+                    selectedSpecies.add(speciesName)
+                }
+            } else {
+                selectedSpecies.remove(speciesName)
             }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+            updateSelectedCount()
+            btnSave.isEnabled = selectedSpecies.isNotEmpty()
         }
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView)
 
-        updateSelectedCount(speciesList.size)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
 
-        // Save reordered list
-        btnSaveSpecies.setOnClickListener {
-            val newOrder = adapter.getOrderedList().map { it.name }
-            SharedPreferencesManager.saveOrderedSpeciesList(this, newOrder)
-            Toast.makeText(this, "Species selection saved!", Toast.LENGTH_SHORT).show()
+        // Save the selected species list
+        btnSave.setOnClickListener {
+            SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
+            Toast.makeText(this, "Species list saved!", Toast.LENGTH_SHORT).show()
             finish()
         }
 
-        // Add custom species
+        // Opens the adjust list page
         btnAddSpecies.setOnClickListener {
-            val input = EditText(this)
-            AlertDialog.Builder(this)
-                .setTitle("Add Custom Species")
-                .setMessage("Enter the species name:")
-                .setView(input)
-                .setPositiveButton("Add") { _, _ ->
-                    val newSpeciesName = input.text.toString().trim()
-                    // ⛔ Check species limit INSIDE this block
-                    if (speciesList.size >= maxSelection) {
-                        Toast.makeText(this, "You can only select up to $maxSelection species.", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-                    if (newSpeciesName.isNotEmpty() &&
-                        speciesList.none { it.name.equals(newSpeciesName, ignoreCase = true) }
-                    ) {
-                        val imageRes = SpeciesImageHelper.getSpeciesImageResId(newSpeciesName)
-                        val newSpecies = SpeciesItem(newSpeciesName, imageRes)
-                        speciesList.add(newSpecies)
-                        adapter.notifyItemInserted(speciesList.size - 1)
-                        updateSelectedCount(speciesList.size)
-                    } else {
-                        Toast.makeText(this, "Invalid or duplicate species", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                .setNegativeButton("Cancel", null)
-                .show()
+            val intent = Intent(this, AllSpeciesSelectionActivity::class.java)
+            startActivity(intent)
         }
-    }
-        //++++++++++++ END On Create +++++++++++++++++++++++++++++++
 
-
-    private fun updateSelectedCount(count: Int) {
-        txtSelectedCount.text = getString(R.string.selected_species_count, count, 8)
-        btnSaveSpecies.isEnabled = count > 0
+        updateSelectedCount()
+        btnSave.isEnabled = selectedSpecies.isNotEmpty()
     }
 
+    private fun updateSelectedCount() {
+        txtSelectedCount.text = "Selected: ${selectedSpecies.size}/8"
+    }
+
+
+    private fun showAddSpeciesDialog() {
+        val input = EditText(this)
+        input.hint = "Enter species name"
+
+        AlertDialog.Builder(this)
+            .setTitle("Add Custom Species")
+            .setView(input)
+            .setPositiveButton("Add") { _, _ ->
+                val newSpecies = input.text.toString().trim()
+                if (newSpecies.isNotEmpty() && !allSpecies.contains(newSpecies)) {
+                    allSpecies.add(newSpecies)
+                    SharedPreferencesManager.saveAllSpecies(this, allSpecies)
+                    adapter.notifyItemInserted(allSpecies.size - 1)
+                } else {
+                    Toast.makeText(this, "Species already exists or is empty", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 }

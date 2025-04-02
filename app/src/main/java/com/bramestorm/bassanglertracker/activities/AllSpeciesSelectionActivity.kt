@@ -1,114 +1,78 @@
-    package com.bramestorm.bassanglertracker.activities
+package com.bramestorm.bassanglertracker.activities
 
-    import android.os.Bundle
-    import android.widget.Button
-    import android.widget.EditText
-    import android.widget.TextView
-    import android.widget.Toast
-    import androidx.appcompat.app.AlertDialog
-    import androidx.appcompat.app.AppCompatActivity
-    import androidx.recyclerview.widget.LinearLayoutManager
-    import androidx.recyclerview.widget.RecyclerView
-    import com.bramestorm.bassanglertracker.R
-    import com.bramestorm.bassanglertracker.adapters.AllSpeciesAdapter
-    import com.bramestorm.bassanglertracker.models.SpeciesItem
-    import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-    import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bramestorm.bassanglertracker.R
+import com.bramestorm.bassanglertracker.adapters.AllSpeciesAdapter
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-    class AllSpeciesSelectionActivity : AppCompatActivity() {
+class AllSpeciesSelectionActivity : AppCompatActivity() {
 
-        private lateinit var recyclerView: RecyclerView
-        private lateinit var txtSelectedCount: TextView
-        private lateinit var btnSaveSpeciesList: Button
-        private lateinit var btnCancel: Button
-        private lateinit var btnAddSpecies: Button
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: AllSpeciesAdapter
+    private lateinit var btnSave: Button
+    private lateinit var btnCancel:Button
 
-        private lateinit var allSpeciesList: MutableList<SpeciesItem>
+    private val allSpecies = mutableListOf<String>()
+    private val selectedSpecies = mutableSetOf<String>() // max 8
 
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            setContentView(R.layout.activity_all_species_selection)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_all_species_selection)
 
-            recyclerView = findViewById(R.id.recyclerUserSpeciesAddition)
-            txtSelectedCount = findViewById(R.id.txtSelectedCount)
-            btnSaveSpeciesList = findViewById(R.id.btnSaveSpeciesList)
-            btnCancel = findViewById(R.id.btnCancel)
-            btnAddSpecies = findViewById(R.id.btnAddSpeciesToList)
+        recyclerView = findViewById(R.id.recyclerUserSpeciesAddition)
+        btnSave = findViewById(R.id.btnSaveSpeciesList)
+        btnCancel = findViewById(R.id.btnCancel)
 
-            // Load data
-            val fullList = SharedPreferencesManager.getFullSpeciesList(this).toMutableList()
-            val selectedSet = SharedPreferencesManager.getSelectedSpecies(this).toSet()
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-            allSpeciesList = fullList.map { name ->
-                SpeciesItem(name, SpeciesImageHelper.getSpeciesImageResId(name), isSelected = selectedSet.contains(name))
-            }.toMutableList()
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-            updateSelectedCount()
+        // Load SharedPreferences safely off the main thread
+        lifecycleScope.launch(Dispatchers.IO) {
+            val savedSpecies = SharedPreferencesManager.getAllSavedSpecies(this@AllSpeciesSelectionActivity)
+            val selected = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
 
-            val adapter = AllSpeciesAdapter(this, allSpeciesList) { selected ->
-                updateSelectedCount()
-                btnSaveSpeciesList.isEnabled = selected.size in 1..8
-            }
+            withContext(Dispatchers.Main) {
+                allSpecies.addAll(savedSpecies)
+                selectedSpecies.addAll(selected)
 
-            recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = adapter
-
-            btnSaveSpeciesList.setOnClickListener {
-                val selected = allSpeciesList.filter { it.isSelected }
-                if (selected.size > 8) {
-                    Toast.makeText(this, "Only 8 species can be selected!", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
+                adapter = AllSpeciesAdapter(allSpecies, selectedSpecies) { speciesName, isChecked ->
+                    if (isChecked) {
+                        if (selectedSpecies.size >= 8) {
+                            Toast.makeText(this@AllSpeciesSelectionActivity, "Only 8 species allowed!", Toast.LENGTH_SHORT).show()
+                            adapter.uncheckSpecies(speciesName)
+                        } else {
+                            selectedSpecies.add(speciesName)
+                        }
+                    } else {
+                        selectedSpecies.remove(speciesName)
+                    }
                 }
 
-                // Save 8 selected
-                SharedPreferencesManager.saveOrderedSpeciesList(this, selected.map { it.name })
-
-                // Save full list too
-                SharedPreferencesManager.saveFullSpeciesList(this, allSpeciesList.map { it.name })
-
-                Toast.makeText(this, "Species list saved", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-
-            btnCancel.setOnClickListener {
-                finish()
-            }
-
-            btnAddSpecies.setOnClickListener {
-                showAddSpeciesDialog()
+                recyclerView.adapter = adapter
+                btnSave.isEnabled = true
             }
         }
 
-        private fun updateSelectedCount() {
-            val count = allSpeciesList.count { it.isSelected }
-            txtSelectedCount.text = "Selected: $count / 8"
+        //------------------------ SAVE Button --------------------------
+        btnSave.setOnClickListener {
+            SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
+            finish()
         }
 
-        private fun showAddSpeciesDialog() {
-            val input = EditText(this)
-            AlertDialog.Builder(this)
-                .setTitle("Add Custom Species")
-                .setMessage("Enter a new fish species:")
-                .setView(input)
-                .setPositiveButton("Add") { _, _ ->
-                    val name = input.text.toString().trim()
-                    if (name.isEmpty()) {
-                        Toast.makeText(this, "Species name cannot be empty", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-
-                    val exists = allSpeciesList.any { it.name.equals(name, ignoreCase = true) }
-                    if (exists) {
-                        Toast.makeText(this, "Species already exists", Toast.LENGTH_SHORT).show()
-                        return@setPositiveButton
-                    }
-
-                    val newItem = SpeciesItem(name, SpeciesImageHelper.getSpeciesImageResId(name), isSelected = false)
-                    allSpeciesList.add(newItem)
-                    recyclerView.adapter?.notifyItemInserted(allSpeciesList.size - 1)
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+        //------------------------- CANCEL Button ------------------------------
+        btnCancel.setOnClickListener {
+            SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
+            finish()
         }
     }
-
+}

@@ -83,6 +83,8 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.support.annotations)
     implementation(libs.material)
+    implementation(libs.google.gson)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

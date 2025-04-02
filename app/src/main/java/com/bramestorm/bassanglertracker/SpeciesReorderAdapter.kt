@@ -36,7 +36,7 @@ class SpeciesReorderAdapter(
 
     inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val speciesName: TextView = itemView.findViewById(R.id.txtSpeciesName)
-        private val speciesIcon: ImageView = itemView.findViewById(R.id.imgSpeciesIcon)
+        private val speciesIcon: ImageView = itemView.findViewById(R.id.imgSpecies)
 
         fun bind(item: SpeciesItem) {
             speciesName.text = item.name
