@@ -54,8 +54,9 @@ class SetUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SharedPreferencesManager.clearSpeciesPreferences(this)
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
+
+
         setContentView(R.layout.activity_set_up_event)
 
 
@@ -172,33 +173,8 @@ class SetUpActivity : AppCompatActivity() {
 
 
         //----------  Load user-Selected SPECIES LIST with icons --------------
+        loadTournamentSpeciesSpinner()
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
-
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
-
-        val adapter = SpeciesSpinnerAdapter(this, speciesList)
-        spinnerTournamentSpecies.adapter = adapter
-
-
-        // ----------------- Update selectedSpecies when user picks an item -------------------
-        spinnerTournamentSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedSpecies = speciesList[position].name
-                selectedSpecies = normalizeSpeciesName(selectedSpecies) // ✅ Normalize here
-                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // You can leave this empty if you don’t need to handle it
-            }
-        }
 
         // Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
@@ -231,6 +207,40 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
     }//-------------- END of ON CREATE  _______________________
+
+
+    private fun loadTournamentSpeciesSpinner() {
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerTournamentSpecies)
+
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
+            SharedPreferencesManager.getMasterSpeciesList(this)
+        }
+
+        val speciesList = savedSpecies.map { speciesName ->
+            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
+            SpeciesItem(speciesName, imageRes)
+        }
+
+        val adapter = SpeciesSpinnerAdapter(this, speciesList)
+        spinnerSpecies.adapter = adapter
+
+        // Select first by default (normalized)
+        if (speciesList.isNotEmpty()) {
+            selectedSpecies = normalizeSpeciesName(speciesList[0].name)
+        }
+
+        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedSpecies = normalizeSpeciesName(speciesList[position].name)
+                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedSpecies = ""
+            }
+        }
+    }
+
 
 
     private fun checkAndRequestLocationPermission() {
@@ -275,4 +285,10 @@ class SetUpActivity : AppCompatActivity() {
         companion object {
             private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         }
+
+    override fun onResume() {
+        super.onResume()
+        loadTournamentSpeciesSpinner() // Refreshes list if species were updated
+    }
+
 }

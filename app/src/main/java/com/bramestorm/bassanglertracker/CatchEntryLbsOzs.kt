@@ -67,9 +67,6 @@ class CatchEntryLbsOzs : AppCompatActivity() {
             true
         }
 
-
-
-
     }//`````````` END ON-CREATE `````````````
 
 
@@ -241,10 +238,5 @@ class CatchEntryLbsOzs : AppCompatActivity() {
                     return sdf.format(Date())
                 }
 
-    // ??????????????????? TODAYS DATE  ?????????????????????????????????
-            private fun getTodaysDate(): String {
-                val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                return todaysDate.format(Date())
-            }
 
 }//+++++++++++++ END of CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++

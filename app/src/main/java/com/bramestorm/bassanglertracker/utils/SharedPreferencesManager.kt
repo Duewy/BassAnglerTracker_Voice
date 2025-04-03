@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken
 object SharedPreferencesManager {
 
     private const val PREFS_NAME = "SpeciesPrefs"
-    private const val KEY_SELECTED_SPECIES = "SELECTED_SPECIES_LIST"
+    private const val KEY_SELECTED_SPECIES_LIST = "SELECTED_SPECIES_LIST"
     private const val KEY_ALL_SPECIES = "ALL_SPECIES_LIST"
     private const val TAG = "SharedPreferencesManager"
 
@@ -25,7 +25,7 @@ object SharedPreferencesManager {
             prefs.edit().putString(KEY_ALL_SPECIES, jsonAll).apply()
 
             val jsonSelected = gson.toJson(defaultSpecies.take(8))
-            prefs.edit().putString(KEY_SELECTED_SPECIES, jsonSelected).apply()
+            prefs.edit().putString(KEY_SELECTED_SPECIES_LIST, jsonSelected).apply()
 
             Log.d("SharedPrefsInit", "Initialized master list and selected species.")
         }
@@ -37,32 +37,26 @@ object SharedPreferencesManager {
         return if (selected.isNotEmpty()) selected else SharedPreferencesManager.getAllSpecies(context)
     }
 
-    fun getMasterSpeciesList(context: Context): List<String> {
-        return getAllSavedSpecies(context)
-    }
-
-
     fun setMasterSpeciesList(context: Context, speciesList: List<String>) {
         saveAllSpecies(context, speciesList)
     }
 
 
+    fun getMasterSpeciesList(context: Context): List<String> {
+        return getAllSavedSpecies(context)
+    }
+
     fun getSelectedSpeciesList(context: Context): List<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(KEY_SELECTED_SPECIES, null)
+        val json = prefs.getString(KEY_SELECTED_SPECIES_LIST, null)
         return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type) else listOf()
     }
 
-    fun saveSelectedSpeciesList(context: Context, selected: List<String>) {
-        val normalized = selected.map { normalizeSpeciesName(it) }
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-        val json = Gson().toJson(normalized)
-        prefs.putString(KEY_SELECTED_SPECIES, json)
-        prefs.apply()
-        Log.d(TAG, "Saved selected species: $normalized")
+    fun saveSelectedSpeciesList(context: Context, speciesList: List<String>) {
+        val limited = speciesList.take(8).map { normalizeSpeciesName(it) }
+        val json = Gson().toJson(limited)
+        getPrefs(context).edit().putString(KEY_SELECTED_SPECIES_LIST, json).apply()
     }
-
-
 
     fun getAllSavedSpecies(context: Context): List<String> {
         val prefs = getPrefs(context)
@@ -78,8 +72,6 @@ object SharedPreferencesManager {
         Log.d(TAG, "Saved all species list: $allSpecies")
     }
 
-
-
     fun getUserAddedSpeciesList(context: Context): List<String> {
         val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
         val defaultSpecies = listOf("Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
@@ -88,23 +80,20 @@ object SharedPreferencesManager {
         return saved.filterNot { it in defaultSpecies }
     }
 
-
     fun getAllSpecies(context: Context): List<String> {
         val defaultSpecies = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
         val userAdded = getUserAddedSpeciesList(context)
         return (defaultSpecies + userAdded).distinct()
     }
 
-
-
     fun clearSelectedSpecies(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(KEY_SELECTED_SPECIES).remove(KEY_ALL_SPECIES).apply()
+        prefs.edit().remove(KEY_SELECTED_SPECIES_LIST).remove(KEY_ALL_SPECIES).apply()
     }
 
     fun clearSpeciesPreferences(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(KEY_SELECTED_SPECIES).remove(KEY_ALL_SPECIES).apply()
+        prefs.edit().remove(KEY_SELECTED_SPECIES_LIST).remove(KEY_ALL_SPECIES).apply()
     }
 
     private fun getPrefs(context: Context) =
@@ -112,7 +101,7 @@ object SharedPreferencesManager {
 
     fun getOrderedSelectedSpeciesList(context: Context): List<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(KEY_SELECTED_SPECIES, null)
+        val json = prefs.getString(KEY_SELECTED_SPECIES_LIST, null)
         return if (json != null) {
             Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
         } else {
@@ -129,5 +118,4 @@ object SharedPreferencesManager {
         getPrefs(context).edit().putBoolean("SPECIES_INITIALIZED", initialized).apply()
     }
 
-
-}
+}//------------- END -------------------------------------------

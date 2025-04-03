@@ -34,60 +34,17 @@ class PopupWeightEntryLbs : Activity() {
         val edtWeightOzs: EditText = findViewById(R.id.edtWeightOzs)
         val btnSaveWeight: Button = findViewById(R.id.btnSaveWeight)
         val btnCancel: Button = findViewById(R.id.btnCancel)
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerSpeciesPopUp)
 
-        // Load species list from strings.xml
-        // Load species from SharedPreferences and map to SpeciesItem with default icon
+        loadSpeciesSpinner() // Populates spinner and sets up listener
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
+        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99))
+        edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15))
 
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
-        Log.d("POPUP_SPINNER", "Species list used: $speciesList")
-        val adapter = SpeciesSpinnerAdapter(this, speciesList)
-        spinnerSpecies.adapter = adapter
-
-        // 👇 Set default selected species immediately
-        if (speciesList.isNotEmpty()) {
-            selectedSpecies = speciesList[0].name
-            Log.d("POPUP_SPINNER", "Default selected species: $selectedSpecies")
-        }
-
-
-
-// Update selectedSpecies when user picks an item
-        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                selectedSpecies = speciesList[position].name
-                Log.d("DB_DEBUG", "Species selected: $selectedSpecies") // Debugging log
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = "" // Reset if nothing is selected
-            }
-        }
-
-        // `````````````` Apply InputFilters to limit values  ````````````````````
-        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 1-99
-        edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs: 0-15
-
-
-        // ````````````````````` Save button functionality ````````````````````
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
-
             val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
             val weightOz = edtWeightOzs.text.toString().toIntOrNull() ?: 0
-            val totalWeightOz = ((weightLbs * 16) + weightOz)
+            val totalWeightOz = (weightLbs * 16) + weightOz
 
             if (totalWeightOz == 0) {
                 Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
@@ -101,21 +58,18 @@ class PopupWeightEntryLbs : Activity() {
             finish()
         }
 
-        // ~~~~~~~~~~~~~~~~ Cancel button functionality  ~~~~~~~~~~~~~~~~~~~~~
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
-        // Set focus to the inches field
         edtWeightLbs.requestFocus()
-
-// Delay to allow layout to render before requesting keyboard
         edtWeightLbs.post {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(edtWeightLbs, InputMethodManager.SHOW_IMPLICIT)
         }
     }
+//------------- END On Create ---------------------------------
 
  // -------------- Min & Max Input Filter to enforce value limits --------------------------
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
@@ -138,4 +92,47 @@ class PopupWeightEntryLbs : Activity() {
             return "" // Reject input if out of range
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        loadSpeciesSpinner()
+    }
+
+    private  fun loadSpeciesSpinner() {
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerSpeciesPopUp)
+
+        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
+            SharedPreferencesManager.getMasterSpeciesList(this)
+        }
+
+        val speciesList = savedSpecies.map { speciesName ->
+            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
+            SpeciesItem(speciesName, imageRes)
+        }
+
+        Log.d("POPUP_SPINNER", "Species list reloaded: $speciesList")
+
+        val adapter = SpeciesSpinnerAdapter(this, speciesList)
+        spinnerSpecies.adapter = adapter
+
+        if (speciesList.isNotEmpty()) {
+            selectedSpecies = speciesList[0].name
+        }
+
+        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                selectedSpecies = speciesList[position].name
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedSpecies = ""
+            }
+        }
+    }
+
 }

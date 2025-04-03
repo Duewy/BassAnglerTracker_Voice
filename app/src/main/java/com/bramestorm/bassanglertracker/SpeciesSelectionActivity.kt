@@ -21,6 +21,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var adapter: SpeciesSelectAdapter
     private lateinit var btnSaveSpecies: Button
     private lateinit var btnAdjustList: Button
+    private lateinit var btnResetSpecies:Button
     private lateinit var txtTitle: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +31,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerSpecies)
         btnSaveSpecies = findViewById(R.id.btnSaveSpecies)
         btnAdjustList = findViewById(R.id.btnAdjustSpeciesList)
+        btnResetSpecies = findViewById(R.id.btnResetSpecies)
         txtTitle = findViewById(R.id.txtSpeciesTitle)
 
         txtTitle.text = "The Species List"
@@ -72,5 +74,21 @@ class SpeciesSelectionActivity : AppCompatActivity() {
             val intent = Intent(this, AllSpeciesSelectionActivity::class.java)
             startActivity(intent)
         }
+
+        btnResetSpecies.setOnClickListener {
+            SharedPreferencesManager.clearSpeciesPreferences(this)
+            SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
+            loadRecyclerView() // or similar function to refresh adapter
+        }
+
+    }//-------------------- END On Create ---------------------------
+
+    //----------- RESET the Species List to Original State --------------------
+
+    private fun loadRecyclerView() {
+        val selectedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).toMutableList()
+        adapter = SpeciesSelectAdapter(selectedSpecies)
+        recyclerView.adapter = adapter
     }
+
 }
