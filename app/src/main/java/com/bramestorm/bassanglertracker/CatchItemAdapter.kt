@@ -22,8 +22,9 @@ class CatchItemAdapter(
             .inflate(R.layout.list_item_catch, parent, false)
 
         val catchItem = getItem(position)
-        val txtCatchInfo = view.findViewById<TextView>(R.id.txtSpeciesName)
-        val imgSpecies = view.findViewById<ImageView>(R.id.imgSpecies)
+        val txtCatchInfo = view.findViewById<TextView>(R.id.txtSpeciesNameListItem)
+        val imgSpecies = view.findViewById<ImageView>(R.id.imgSpeciesListItem)
+
 
         // Format time from dateTime string
         val timeFormatted = try {

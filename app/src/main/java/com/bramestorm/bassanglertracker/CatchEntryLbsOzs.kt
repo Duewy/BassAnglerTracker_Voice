@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -97,6 +98,8 @@ class CatchEntryLbsOzs : AppCompatActivity() {
 
             //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
             if (totalWeightOz > 0) {
+                selectedSpecies = normalizeSpeciesName(selectedSpecies)
+
                 saveCatch()
                 Log.d("DB_DEBUG", "✅ saveCatch is called")
             } else {
@@ -244,4 +247,4 @@ class CatchEntryLbsOzs : AppCompatActivity() {
                 return todaysDate.format(Date())
             }
 
-}//+++++++++++++ END  od CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++
+}//+++++++++++++ END of CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++

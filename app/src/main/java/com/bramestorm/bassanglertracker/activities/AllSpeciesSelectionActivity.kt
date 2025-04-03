@@ -38,18 +38,18 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val savedSpecies = SharedPreferencesManager.getAllSavedSpecies(this@AllSpeciesSelectionActivity)
-            val selected = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
+            val masterSpeciesList = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
+            val selectedList = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
 
-            Log.d("AllSpeciesSelection", "Loaded allSpecies: $savedSpecies")
-            Log.d("AllSpeciesSelection", "Loaded selectedSpecies: $selected")
+            Log.d("AllSpeciesSelection", "Loaded master species list: $masterSpeciesList")
+            Log.d("AllSpeciesSelection", "Loaded selected species list: $selectedList")
 
             withContext(Dispatchers.Main) {
-                allSpecies.addAll(savedSpecies)
-                selectedSpecies.addAll(selected)
+                allSpecies.addAll(masterSpeciesList)
+                selectedSpecies.addAll(selectedList)
 
-                if (savedSpecies.isEmpty()) {
-                    Log.w("AllSpeciesSelection", "No saved species found! You may need to initialize defaults.")
+                if (masterSpeciesList.isEmpty()) {
+                    Log.w("AllSpeciesSelection", "No master species found! Initialization may have failed.")
                 }
 
                 adapter = AllSpeciesAdapter(allSpecies, selectedSpecies) { speciesName, isChecked ->
@@ -70,14 +70,17 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
             }
         }
 
+        //------------- SAVE btn Saves User Addition to List ------------------------
         btnSave.setOnClickListener {
             SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
-            Log.d("AllSpeciesSelection", "Saved selectedSpecies: $selectedSpecies")
+            Log.d("AllSpeciesSelection", "Saved selected species: $selectedSpecies")
             finish()
         }
 
         btnCancel.setOnClickListener {
             finish()
         }
-    }
-}
+    }//-----------------END On Create --------------------
+
+}// ------------------- END ---------------------
+

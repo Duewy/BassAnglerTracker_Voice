@@ -32,6 +32,8 @@ class SpeciesSelectionActivity : AppCompatActivity() {
         btnAdjustList = findViewById(R.id.btnAdjustSpeciesList)
         txtTitle = findViewById(R.id.txtSpeciesTitle)
 
+        txtTitle.text = "The Species List"
+
         // Make sure defaults are set if missing
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
@@ -53,8 +55,9 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // Save reordered list
         btnSaveSpecies.setOnClickListener {
-            val reorderedList = adapter.getCurrentList()
-            SharedPreferencesManager.saveSelectedSpeciesList(this, reorderedList)
+            val newOrderedList = adapter.getCurrentList()
+            SharedPreferencesManager.saveSelectedSpeciesList(this, newOrderedList)
+            Log.d("SaveReorder", "Saved species order: $newOrderedList")
 
             Toast.makeText(this, "Species list saved!", Toast.LENGTH_SHORT).show()
 

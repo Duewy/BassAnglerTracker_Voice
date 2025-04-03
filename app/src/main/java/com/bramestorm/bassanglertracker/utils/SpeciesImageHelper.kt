@@ -7,13 +7,16 @@ import com.bramestorm.bassanglertracker.R
 
 object SpeciesImageHelper {
 
-    // 🔒 Private helper to normalize species name
-    private fun normalizeSpeciesName(name: String): String {
-        return name.trim().lowercase()
+    // -- 🔒 Private helper to normalize species name from various forms "Large Mouth, Largemouth, largemouth, large mouth" are now all the same
+
+    fun normalizeSpeciesName(name: String?): String {
+        return name?.trim()?.lowercase()?.replace("\\s+".toRegex(), " ") ?: ""
     }
 
-    fun getSpeciesImageResId(speciesName: String): Int {
-        return when (speciesName.trim().lowercase()) {
+
+    fun getSpeciesImageResId(species: String): Int {
+        val normalized = normalizeSpeciesName(species)
+        return when (normalized) {
             "large mouth", "largemouth" -> R.drawable.fish_large_mouth
             "small mouth", "smallmouth"-> R.drawable.fish_small_mouth
             "crappie" -> R.drawable.fish_crappie
@@ -42,7 +45,7 @@ object SpeciesImageHelper {
             "grouper"-> R.drawable.sw_fish_grouper
             "red snapper" -> R.drawable.sw_fish_red_snapper
             else -> {
-                Log.w("SpeciesImageHelper", "Unknown species image: $speciesName")
+                Log.w("SpeciesImageHelper", "Unknown species image: $species")
                 R.drawable.fish_default
             }
 

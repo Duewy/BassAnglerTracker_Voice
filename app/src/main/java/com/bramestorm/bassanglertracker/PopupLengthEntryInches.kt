@@ -34,8 +34,9 @@ class PopupLengthEntryInches : Activity() {
         // Load species from SharedPreferences and map to SpeciesItem with default icon
 
         val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getAllSpecies(this)
+            SharedPreferencesManager.getMasterSpeciesList(this)
         }
+
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
             SpeciesItem(speciesName, imageRes)
@@ -43,6 +44,12 @@ class PopupLengthEntryInches : Activity() {
         Log.d("POPUP_SPINNER", "Species list used: $speciesList")
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
+
+        // 👇 Set default selected species immediately
+        if (speciesList.isNotEmpty()) {
+            selectedSpecies = speciesList[0].name
+            Log.d("POPUP_SPINNER", "Default selected species: $selectedSpecies")
+        }
 
 
         spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

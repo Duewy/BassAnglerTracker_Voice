@@ -111,6 +111,7 @@ class CatchEntryTournament : AppCompatActivity() {
                 Log.d("DB_DEBUG", "✅ Received weightTotalOz: $weightTotalOz, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
 
                 if (weightTotalOz > 0) {
+
                     saveTournamentCatch(weightTotalOz, selectedSpecies, clipColor)
                 }
             }

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -165,7 +166,7 @@ class SetUpActivity : AppCompatActivity() {
         }
 
         btnCustomizeSpecies.setOnClickListener {
-            val intent = Intent(this, SpeciesSelectionActivity::class.java)
+            val intent = Intent(this,SpeciesSelectionActivity::class.java)
             startActivity(intent)
         }
 
@@ -173,9 +174,8 @@ class SetUpActivity : AppCompatActivity() {
         //----------  Load user-Selected SPECIES LIST with icons --------------
 
         val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getAllSpecies(this)
+            SharedPreferencesManager.getMasterSpeciesList(this)
         }
-
 
         val speciesList = savedSpecies.map { speciesName ->
             val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
@@ -188,12 +188,13 @@ class SetUpActivity : AppCompatActivity() {
 
         // ----------------- Update selectedSpecies when user picks an item -------------------
         spinnerTournamentSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedSpecies = speciesList[position].name
-
+                selectedSpecies = normalizeSpeciesName(selectedSpecies) // ✅ Normalize here
                 Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
-
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // You can leave this empty if you don’t need to handle it
             }

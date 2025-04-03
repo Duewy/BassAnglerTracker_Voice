@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,6 +87,7 @@ class CatchEntryMetric : AppCompatActivity() {
 
             //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
             if (totalLengthTenths > 0) {
+                selectedSpecies = normalizeSpeciesName(selectedSpecies)
                 saveCatch()
                 Log.d("DB_DEBUG", "✅ saveCatch is called")
             } else {
