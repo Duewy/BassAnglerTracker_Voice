@@ -241,6 +241,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val values = ContentValues().apply {
             put("latitude", lat)
             put("longitude", lon)
+            Log.e("GPS_DEBUG", "⚠️Latitude is $lat and Longitude is $lon")
         }
 
         val rowsUpdated = db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))

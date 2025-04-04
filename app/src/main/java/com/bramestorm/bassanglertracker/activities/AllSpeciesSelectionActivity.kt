@@ -23,8 +23,8 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnSave: Button
     private lateinit var btnCancel: Button
 
-    private val allSpecies = mutableListOf<String>()
-    private val selectedSpecies = mutableSetOf<String>() // Max 8 allowed
+    private val selectedSpecies = mutableSetOf<String>()
+    private val speciesItems = mutableListOf<SpeciesItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,36 +41,32 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val masterSpeciesRaw = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
-            val selectedListRaw = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
+            val masterList = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
+                .map { SharedPreferencesManager.normalizeSpeciesName(it) }
+            val selectedList = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
+                .map { SharedPreferencesManager.normalizeSpeciesName(it) }
 
-            val masterSpeciesList = masterSpeciesRaw.map { SharedPreferencesManager.normalizeSpeciesName(it) }.distinct()
-            val selectedList = selectedListRaw.map { SharedPreferencesManager.normalizeSpeciesName(it) }
+            Log.d("AllSpeciesSelection", "Loaded master: $masterList")
+            Log.d("AllSpeciesSelection", "Loaded selected: $selectedList")
 
-            Log.d("AllSpeciesSelection", "Loaded master species list: $masterSpeciesList")
-            Log.d("AllSpeciesSelection", "Loaded selected species list: $selectedList")
+            selectedSpecies.clear()
+            selectedSpecies.addAll(selectedList)
 
-            if (masterSpeciesList.isEmpty()) {
-                Log.w("AllSpeciesSelection", "No master species found! Initialization may have failed.")
-            }
+            speciesItems.clear()
+            speciesItems.addAll(masterList.map { name ->
+                SpeciesItem(name, selectedSpecies.contains(name))
+            })
 
             withContext(Dispatchers.Main) {
-                allSpecies.clear()
-                allSpecies.addAll(masterSpeciesList)
-                selectedSpecies.clear()
-                selectedSpecies.addAll(selectedList)
-
                 setupAdapter()
-
                 btnSave.isEnabled = true
                 btnCancel.isEnabled = true
             }
         }
 
         btnSave.setOnClickListener {
-            val finalList = adapter.getSelectedSpecies().map { SharedPreferencesManager.normalizeSpeciesName(it) }
+            val finalList = adapter.getSelectedSpecies()
             SharedPreferencesManager.saveSelectedSpeciesList(this, finalList)
-            Log.d("FinalSaveList", finalList.toString())
             finish()
         }
 
@@ -80,28 +76,20 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     }
 
     private fun setupAdapter() {
-        val speciesItems = allSpecies.map { speciesName ->
-            SpeciesItem(
-                name = speciesName,
-                isSelected = selectedSpecies.contains(SharedPreferencesManager.normalizeSpeciesName(speciesName))
-            )
-        }
-
-        adapter = AllSpeciesAdapter(speciesItems.toMutableList()) { speciesName, isChecked ->
-            val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(speciesName)
+        adapter = AllSpeciesAdapter(speciesItems) { speciesName, isChecked ->
+            val normalized = SharedPreferencesManager.normalizeSpeciesName(speciesName)
             if (isChecked) {
                 if (selectedSpecies.size >= 8) {
                     Toast.makeText(this, "Only 8 species allowed!", Toast.LENGTH_SHORT).show()
                     adapter.uncheckSpecies(speciesName)
                 } else {
-                    selectedSpecies.add(normalizedSpecies)
+                    selectedSpecies.add(normalized)
                 }
             } else {
-                selectedSpecies.remove(normalizedSpecies)
+                selectedSpecies.remove(normalized)
             }
         }
 
         recyclerView.adapter = adapter
     }
-
 }
