@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.adapters.AllSpeciesAdapter
+import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnCancel: Button
 
     private val allSpecies = mutableListOf<String>()
-    private val selectedSpecies = mutableSetOf<String>() // max 8
+    private val selectedSpecies = mutableSetOf<String>() // Max 8 allowed
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,53 +35,73 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+        btnSave.isEnabled = false
+        btnCancel.isEnabled = false
 
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val masterSpeciesList = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
-            val selectedList = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
+            val masterSpeciesRaw = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
+            val selectedListRaw = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
+
+            val masterSpeciesList = masterSpeciesRaw.map { SharedPreferencesManager.normalizeSpeciesName(it) }.distinct()
+            val selectedList = selectedListRaw.map { SharedPreferencesManager.normalizeSpeciesName(it) }
 
             Log.d("AllSpeciesSelection", "Loaded master species list: $masterSpeciesList")
             Log.d("AllSpeciesSelection", "Loaded selected species list: $selectedList")
 
+            if (masterSpeciesList.isEmpty()) {
+                Log.w("AllSpeciesSelection", "No master species found! Initialization may have failed.")
+            }
+
             withContext(Dispatchers.Main) {
+                allSpecies.clear()
                 allSpecies.addAll(masterSpeciesList)
+                selectedSpecies.clear()
                 selectedSpecies.addAll(selectedList)
 
-                if (masterSpeciesList.isEmpty()) {
-                    Log.w("AllSpeciesSelection", "No master species found! Initialization may have failed.")
-                }
+                setupAdapter()
 
-                adapter = AllSpeciesAdapter(allSpecies, selectedSpecies) { speciesName, isChecked ->
-                    if (isChecked) {
-                        if (selectedSpecies.size >= 8) {
-                            Toast.makeText(this@AllSpeciesSelectionActivity, "Only 8 species allowed!", Toast.LENGTH_SHORT).show()
-                            adapter.uncheckSpecies(speciesName)
-                        } else {
-                            selectedSpecies.add(speciesName)
-                        }
-                    } else {
-                        selectedSpecies.remove(speciesName)
-                    }
-                }
-
-                recyclerView.adapter = adapter
                 btnSave.isEnabled = true
+                btnCancel.isEnabled = true
             }
         }
 
-        //------------- SAVE btn Saves User Addition to List ------------------------
         btnSave.setOnClickListener {
-            SharedPreferencesManager.saveSelectedSpeciesList(this, selectedSpecies.toList())
-            Log.d("AllSpeciesSelection", "Saved selected species: $selectedSpecies")
+            val finalList = adapter.getSelectedSpecies().map { SharedPreferencesManager.normalizeSpeciesName(it) }
+            SharedPreferencesManager.saveSelectedSpeciesList(this, finalList)
+            Log.d("FinalSaveList", finalList.toString())
             finish()
         }
 
         btnCancel.setOnClickListener {
             finish()
         }
-    }//-----------------END On Create --------------------
+    }
 
-}// ------------------- END ---------------------
+    private fun setupAdapter() {
+        val speciesItems = allSpecies.map { speciesName ->
+            SpeciesItem(
+                name = speciesName,
+                isSelected = selectedSpecies.contains(SharedPreferencesManager.normalizeSpeciesName(speciesName))
+            )
+        }
 
+        adapter = AllSpeciesAdapter(speciesItems.toMutableList()) { speciesName, isChecked ->
+            val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(speciesName)
+            if (isChecked) {
+                if (selectedSpecies.size >= 8) {
+                    Toast.makeText(this, "Only 8 species allowed!", Toast.LENGTH_SHORT).show()
+                    adapter.uncheckSpecies(speciesName)
+                } else {
+                    selectedSpecies.add(normalizedSpecies)
+                }
+            } else {
+                selectedSpecies.remove(normalizedSpecies)
+            }
+        }
+
+        recyclerView.adapter = adapter
+    }
+
+}

@@ -39,7 +39,8 @@ class SpeciesSelectionActivity : AppCompatActivity() {
         // Make sure defaults are set if missing
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-        val selectedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).toMutableList()
+        val selectedSpecies = SharedPreferencesManager.getOrderedSelectedSpeciesList(this).toMutableList()
+
         Log.d("SpeciesSelectionActivity", "Loaded selectedSpecies: $selectedSpecies")
 
         adapter = SpeciesSelectAdapter(selectedSpecies)
@@ -72,7 +73,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
         // Open full list editor
         btnAdjustList.setOnClickListener {
             val intent = Intent(this, AllSpeciesSelectionActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, 101)
         }
 
         btnResetSpecies.setOnClickListener {
@@ -86,9 +87,20 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     //----------- RESET the Species List to Original State --------------------
 
     private fun loadRecyclerView() {
-        val selectedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).toMutableList()
+        val selectedSpecies = SharedPreferencesManager.getOrderedSelectedSpeciesList(this).toMutableList()
         adapter = SpeciesSelectAdapter(selectedSpecies)
         recyclerView.adapter = adapter
+    }
+
+
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 101) {
+            // Reload species list from SharedPreferences
+            loadRecyclerView()
+        }
     }
 
 }

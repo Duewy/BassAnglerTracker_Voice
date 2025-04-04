@@ -2,7 +2,6 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
 import android.util.Log
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -49,12 +48,18 @@ object SharedPreferencesManager {
     fun getSelectedSpeciesList(context: Context): List<String> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(KEY_SELECTED_SPECIES_LIST, null)
+
+        Log.d("SpeciesLoad", "Loaded selected species list: $json")
+
         return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type) else listOf()
     }
 
     fun saveSelectedSpeciesList(context: Context, speciesList: List<String>) {
         val limited = speciesList.take(8).map { normalizeSpeciesName(it) }
         val json = Gson().toJson(limited)
+
+        Log.d("SpeciesSave", "Saving normalized species list: $limited")
+
         getPrefs(context).edit().putString(KEY_SELECTED_SPECIES_LIST, json).apply()
     }
 
@@ -117,5 +122,10 @@ object SharedPreferencesManager {
     fun setSpeciesInitialized(context: Context, initialized: Boolean) {
         getPrefs(context).edit().putBoolean("SPECIES_INITIALIZED", initialized).apply()
     }
+
+    fun normalizeSpeciesName(name: String): String {
+        return name.trim().lowercase().replace(Regex("\\s+"), " ")
+    }
+
 
 }//------------- END -------------------------------------------

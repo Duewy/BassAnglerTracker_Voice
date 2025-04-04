@@ -139,6 +139,9 @@
     <string name="drag_handle">Drag handle</string>
     <string name="fish_species_image">Fish species image</string>
     <string name="move_the_species_up_down_as_needed">Move the Species Up / Down as Needed</string>
+    <string name="customize_species_list">Customize Species List</string>
+    <string name="start_fishing_event">Start Fishing Event</string>
+    <string name="select_the_type_of_fishig">Select the type of fishig event and what speices as well as gps</string>
 
 
     //species

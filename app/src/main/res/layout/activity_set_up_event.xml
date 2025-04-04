@@ -8,7 +8,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="#801976D2"
     tools:context=".SetUpActivity">
 
@@ -17,13 +17,14 @@
         android:id="@+id/imgVCC"
         android:layout_width="150dp"
         android:layout_height="70dp"
+        android:layout_gravity="center"
         android:layout_marginStart="5dp"
         android:contentDescription="@string/app_image_description"
+        android:scaleX="1.25"
         android:src="@drawable/catch_call_words_blue"
-        android:layout_gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/headerImagesLayout"
@@ -43,7 +44,7 @@
             android:layout_marginStart="20dp"
             android:adjustViewBounds="true"
             android:layout_gravity="center"
-            android:contentDescription="@string/gps_usage_permission"
+            android:contentDescription="@string/select_the_type_of_fishig"
             android:src="@drawable/set_up_word_stoked" />
 
     </LinearLayout>
@@ -115,7 +116,7 @@
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:text="Type of Units"
@@ -127,7 +128,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="2dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -162,7 +163,7 @@
                 android:id="@+id/textView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:text="Type of Fishing Day"
@@ -175,7 +176,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="2dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -194,7 +195,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/bright_red"
+                android:background="@color/very_bright_red"
                 android:drawableBottom="@drawable/button_outline"
                 android:text="Tournament"
                 android:textColor="@color/black"
@@ -226,7 +227,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="1dp"
                 android:layout_marginEnd="15dp"
                 android:gravity="center"
                 android:text="Culling Limit#"
@@ -238,10 +239,9 @@
                 android:id="@+id/tglCullingValue"
                 android:layout_width="65dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="2dp"
                 android:background="@color/Log_white"
                 android:shadowColor="@color/Log_red"
-                android:shadowDx="@dimen/material_emphasis_high_type"
                 android:textColor="@color/black"
                 android:textOff="4"
                 android:textOn="5"
@@ -260,14 +260,14 @@
             android:id="@+id/divider7"
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="2dp"
             android:background="@color/clip_blue" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="2dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -285,6 +285,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
+                android:scaleX="1.25"
                 android:text="- - "
                 android:textColor="@color/black"
                 android:textSize="25sp"
@@ -316,7 +317,7 @@
                 android:contentDescription="@string/gps_info"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="24dp"
-                android:paddingTop="12dp"
+                android:paddingTop="10dp"
                 android:paddingEnd="24dp"
                 android:paddingBottom="12dp"
                 android:textColor="@color/black"
@@ -369,15 +370,15 @@
                 android:id="@+id/btnStartFishing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/btn_outline_green"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="24dp"
-                android:paddingTop="12dp"
+                android:paddingTop="6dp"
                 android:paddingEnd="24dp"
-                android:paddingBottom="12dp"
-                android:text="Start Fishing Event"
+                android:paddingBottom="6dp"
+                android:text="@string/start_fishing_event"
                 android:textColor="@color/black"
                 android:textSize="22sp"
                 android:textStyle="bold"
@@ -391,14 +392,14 @@
             android:id="@+id/divider17"
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="2dp"
             android:background="@color/clip_blue" />
 
         <LinearLayout
             android:id="@+id/llMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:gravity="center"
             android:orientation="horizontal" >
 
@@ -418,8 +419,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                   android:padding="5dp"
-                android:text="Customize Species List"
+                android:padding="5dp"
+                android:text="@string/customize_species_list"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
