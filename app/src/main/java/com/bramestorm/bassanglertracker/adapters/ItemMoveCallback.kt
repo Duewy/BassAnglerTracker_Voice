@@ -1,27 +1,31 @@
-package com.bramestorm.bassanglertracker.adapters
+package com.bramestorm.bassanglertracker.utils
+
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemMoveCallback(
-    private val adapter: SpeciesSelectAdapter
-) : ItemTouchHelper.Callback() {
+class ItemMoveCallback(private val contract: ItemTouchHelperContract) : ItemTouchHelper.Callback() {
 
-    override fun isLongPressDragEnabled(): Boolean = false
-    override fun isItemViewSwipeEnabled(): Boolean = false
-
-    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
-        return makeMovementFlags(dragFlags, 0)
+    interface ItemTouchHelperContract {
+        fun onRowMoved(fromPosition: Int, toPosition: Int)
+        fun onRowSelected(viewHolder: RecyclerView.ViewHolder)
+        fun onRowClear(viewHolder: RecyclerView.ViewHolder)
     }
+
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int = makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
 
     override fun onMove(
         recyclerView: RecyclerView,
         source: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        adapter.moveItem(source.adapterPosition, target.adapterPosition)
+        contract.onRowMoved(source.adapterPosition, target.adapterPosition)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+
+    override fun isLongPressDragEnabled(): Boolean = true
 }

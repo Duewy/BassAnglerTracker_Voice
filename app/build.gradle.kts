@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
 }
 
 android {
@@ -84,6 +85,7 @@ dependencies {
     implementation(libs.support.annotations)
     implementation(libs.material)
     implementation(libs.google.gson)
+    implementation(libs.play.services.maps) // Google Maps SDK here
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

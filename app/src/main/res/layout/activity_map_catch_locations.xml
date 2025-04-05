@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mapContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The Google Map Fragment -->
+    <FrameLayout
+        android:id="@+id/mapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Filter UI Layered On Top -->
+    <LinearLayout
+        android:id="@+id/filterLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="@color/clip_blue"
+        android:layout_gravity="top">
+
+        <Spinner
+            android:id="@+id/spinnerSpecies"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/clip_yellow"/>
+
+        <Spinner
+            android:id="@+id/spinnerDateRange"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/clip_orange"/>
+
+        <Button
+            android:id="@+id/btnApplyFilters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:text="@string/apply_filters"
+            android:background="@drawable/btn_outline_blue"/>
+
+        <Button
+            android:id="@+id/btnMapSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/map_settings"
+            android:layout_gravity="top|end"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_outline_green"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+</FrameLayout>

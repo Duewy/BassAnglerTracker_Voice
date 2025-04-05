@@ -12,10 +12,11 @@ import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 class AllSpeciesAdapter(
-    private val speciesList: List<SpeciesItem>,
+    private var speciesList: MutableList<SpeciesItem>,
     private val initiallySelectedSpecies: Set<String>,
     private val onSelectionChanged: (String, Boolean) -> Unit
 ) : RecyclerView.Adapter<AllSpeciesAdapter.ViewHolder>() {
+
 
     private val selectedState = mutableMapOf<String, Boolean>().apply {
         speciesList.forEach { speciesItem ->
@@ -59,6 +60,12 @@ class AllSpeciesAdapter(
             selectedState[speciesItem.name] = isChecked
             onSelectionChanged(speciesItem.name, isChecked)
         }
+    }
+
+    fun updateList(newList: List<SpeciesItem>) {
+        speciesList.clear()
+        speciesList.addAll(newList)
+        notifyDataSetChanged()
     }
 
     fun getSelectedSpecies(): List<String> {

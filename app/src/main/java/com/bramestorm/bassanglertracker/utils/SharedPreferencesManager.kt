@@ -30,6 +30,19 @@ object SharedPreferencesManager {
         }
     }
 
+    fun resetToDefaultSpecies(context: Context) {
+        val defaultSpecies = FishSpecies.allSpeciesList
+        val jsonAll = Gson().toJson(defaultSpecies)
+        val jsonSelected = Gson().toJson(defaultSpecies.take(8))
+
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+        prefs.putString(KEY_ALL_SPECIES, jsonAll)
+        prefs.putString(KEY_SELECTED_SPECIES_LIST, jsonSelected)
+        prefs.apply()
+
+        Log.d(TAG, "Reset species to default.")
+    }
+
 
     fun getSafeSpeciesList(context: Context): List<String> {
         val selected = SharedPreferencesManager.getSelectedSpeciesList(context)

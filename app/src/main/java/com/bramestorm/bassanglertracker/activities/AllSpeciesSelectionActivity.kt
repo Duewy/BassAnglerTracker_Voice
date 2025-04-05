@@ -1,7 +1,6 @@
 package com.bramestorm.bassanglertracker.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +11,7 @@ import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.adapters.AllSpeciesAdapter
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,7 +23,9 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnSave: Button
     private lateinit var btnCancel: Button
 
+
     private val selectedSpecies = mutableSetOf<String>()
+    private val allSpecies = mutableListOf<String>()
     private val speciesItems = mutableListOf<SpeciesItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,20 +44,13 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             val masterList = SharedPreferencesManager.getMasterSpeciesList(this@AllSpeciesSelectionActivity)
-                .map { SharedPreferencesManager.normalizeSpeciesName(it) }
             val selectedList = SharedPreferencesManager.getSelectedSpeciesList(this@AllSpeciesSelectionActivity)
                 .map { SharedPreferencesManager.normalizeSpeciesName(it) }
 
-            Log.d("AllSpeciesSelection", "Loaded master: $masterList")
-            Log.d("AllSpeciesSelection", "Loaded selected: $selectedList")
-
+            allSpecies.clear()
+            allSpecies.addAll(masterList) // 💥 Actually fill the master list
             selectedSpecies.clear()
-            selectedSpecies.addAll(selectedList)
-
-            speciesItems.clear()
-            speciesItems.addAll(masterList.map { name ->
-                SpeciesItem(name, selectedSpecies.contains(name))
-            })
+            selectedSpecies.addAll(selectedList) // 💥 Actually fill selected species
 
             withContext(Dispatchers.Main) {
                 setupAdapter()
@@ -63,6 +58,7 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
                 btnCancel.isEnabled = true
             }
         }
+
 
         btnSave.setOnClickListener {
             val finalList = adapter.getSelectedSpecies()
@@ -76,7 +72,18 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     }
 
     private fun setupAdapter() {
-        adapter = AllSpeciesAdapter(speciesItems) { speciesName, isChecked ->
+        val speciesItemList = allSpecies.map { name ->
+            val normalizedName = SharedPreferencesManager.normalizeSpeciesName(name)
+            val isChecked = selectedSpecies.contains(normalizedName)
+            val imageResId = getSpeciesImageResId(name) // ✅ use raw name for image lookup
+            SpeciesItem(name = name, imageResId = imageResId, isSelected = isChecked)
+        }
+
+
+        adapter = AllSpeciesAdapter(
+            speciesItemList.toMutableList(),
+            selectedSpecies
+        ) { speciesName, isChecked ->
             val normalized = SharedPreferencesManager.normalizeSpeciesName(speciesName)
             if (isChecked) {
                 if (selectedSpecies.size >= 8) {
@@ -90,6 +97,9 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
             }
         }
 
+
         recyclerView.adapter = adapter
     }
+
+
 }

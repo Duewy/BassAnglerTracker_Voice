@@ -5,15 +5,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
@@ -74,8 +77,10 @@ class SetUpActivity : AppCompatActivity() {
         btnMainSetup = findViewById(R.id.btnMainSetup)
         btnCustomizeSpecies = findViewById(R.id.btnCustomizeSpecies)
 
-        tglCullingValue.visibility = View.INVISIBLE
-        spinnerTournamentSpecies.visibility = View.INVISIBLE
+        tglCullingValue.alpha = 0.3f
+        tglCullingValue.isEnabled=false
+        spinnerTournamentSpecies.alpha = 0.3f
+        spinnerTournamentSpecies.isEnabled = false
 
         // Toggle Weight Selection
         btnWeight.setOnClickListener {
@@ -128,8 +133,10 @@ class SetUpActivity : AppCompatActivity() {
             btnTournament.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             btnMetric.visibility = View.VISIBLE
-            tglCullingValue.visibility = View.INVISIBLE
-            spinnerTournamentSpecies.visibility = View.INVISIBLE
+            tglCullingValue.alpha = 0.3f
+            tglCullingValue.isEnabled=false
+            spinnerTournamentSpecies.alpha = 0.3f
+            spinnerTournamentSpecies.isEnabled = false
         }
 
         btnTournament.setOnClickListener {
@@ -141,8 +148,10 @@ class SetUpActivity : AppCompatActivity() {
             btnTournament.setBackgroundResource(R.color.clip_red)
             btnFunDay.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
-            tglCullingValue.visibility = View.VISIBLE
-            spinnerTournamentSpecies.visibility = View.VISIBLE
+            tglCullingValue.alpha = 1.0f
+            tglCullingValue.isEnabled = true
+            spinnerTournamentSpecies.alpha = 1.0f
+            spinnerTournamentSpecies.isEnabled = true
         }
 
         // Initialize GPS location client
@@ -274,12 +283,16 @@ class SetUpActivity : AppCompatActivity() {
 
     private fun enableGps() {
             sharedPreferences.edit().putBoolean("GPS_ENABLED", true).apply()
-            Toast.makeText(this, "GPS enabled", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "GPS is Enabled", Toast.LENGTH_SHORT).show()
         }
 
         private fun disableGps() {
             sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
-            Toast.makeText(this, "GPS disabled", Toast.LENGTH_SHORT).show()
+            val toast = Toast.makeText(this, "GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.", Toast.LENGTH_LONG)
+            toast.setGravity(Gravity.CENTER, 0, 0)
+            toast.view?.findViewById<TextView>(android.R.id.message)?.gravity = Gravity.CENTER
+            toast.show()
+
         }
 
         companion object {

@@ -13,6 +13,16 @@
     android:background="@color/Log_green_secondary"
     android:contentDescription="@string/app_image_description">
 
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:alpha=".2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="50dp"
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
 
     <ImageView
         android:id="@+id/imageView3"
@@ -28,7 +38,9 @@
         app:srcCompat="@drawable/catch_call_words_blue" />
 
 
-       <LinearLayout
+
+
+    <LinearLayout
         android:id="@+id/ManualMode1linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingVertical="20dp"
+            android:paddingVertical="10dp"
             android:text="@string/using_culling_app_in_manual_mode"
             android:textColor="@color/black"
             android:textSize="30sp"
@@ -124,7 +136,8 @@
             android:background="@color/clip_blue"
             android:text="@string/fun_day_weight"
             android:textColor="@color/clip_white"
-            android:textSize="20sp" />
+            android:textSize="19sp"
+            android:layout_gravity="top"/>
 
         <Button
             android:id="@+id/btnFundDayLength"
@@ -136,9 +149,10 @@
             android:layout_weight=".4"
             android:padding="2dp"
             android:background="@color/clip_blue"
-            android:text="@string/fund_day_length"
+            android:text="@string/fun_day_length"
             android:textColor="@color/clip_white"
-            android:textSize="20sp" />
+            android:textSize="19sp"
+            android:layout_gravity="top"/>
 
     </LinearLayout>
 
@@ -163,7 +177,8 @@
             android:background="@color/clip_orange"
             android:text="@string/tournament_weight"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_gravity="top"/>
 
         <Button
             android:id="@+id/btnTournamentLength"
@@ -175,7 +190,8 @@
             android:background="@color/clip_orange"
             android:text="@string/tournament_length"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_gravity="top"/>
     </LinearLayout>
 
     <View
@@ -194,8 +210,8 @@
         android:id="@+id/llGPS"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_weight="1"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -210,10 +226,12 @@
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/btn_outline_blue"
             android:padding="10dp"
             android:text="Set Up GPS"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_gravity="top"/>
 
         <Button
             android:id="@+id/btnMappingGPS"
@@ -223,10 +241,12 @@
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/btn_outline_blue"
             android:padding="10dp"
             android:text="Mapping GPS"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_gravity="top"/>
 
     </LinearLayout>
 

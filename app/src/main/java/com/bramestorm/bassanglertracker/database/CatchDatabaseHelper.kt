@@ -12,17 +12,15 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.CatchItem
+import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 6) {
 
-
     private val prefs by lazy { context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE) }
-
 
     companion object {
         private const val TABLE_NAME = "catches"
@@ -55,7 +53,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             $COLUMN_CATCH_TYPE TEXT NOT NULL,
             $COLUMN_MARKER_TYPE TEXT,
             $COLUMN_CLIP_COLOR TEXT
-
         )
     """.trimIndent()
         db.execSQL(createCatchesTable)
@@ -66,8 +63,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
         onCreate(db)
     }
-
-    // **************** - INSERT CATCH -  *****************************************
 
     fun insertCatch(catch: CatchItem): Boolean {
         val db = this.writableDatabase
@@ -84,7 +79,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_CATCH_TYPE, catch.catchType)
                 put(COLUMN_MARKER_TYPE, catch.markerType)
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
-                // GPS is added later, async
             }
 
             rowId = db.insert(TABLE_NAME, null, values)
@@ -96,83 +90,100 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
             Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
 
-            // Launch delayed GPS update in background
-            val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
-            if (gpsEnabled) {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    // ✅ Check permission here
-                    if (
-                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        val location = getLastKnownLocation()
-                        location?.let {
-                            updateCatchGPS(rowId.toInt(), it.latitude, it.longitude)
-                            // 🧃 Show GPS Toast for confirmation
-                            Toast.makeText(
-                                context,
-                                "📍 GPS Received: ${"%.5f".format(it.latitude)}, ${"%.5f".format(it.longitude)}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+            // Enable GPS automatically
+            prefs.edit().putBoolean("GPS_ENABLED", true).apply()
+            Log.d("GPS_DEBUG", "✅ GPS forced ON internally in insertCatch()")
+
+            // Try to get GPS after delay
+            Handler(Looper.getMainLooper()).postDelayed({
+                getLastKnownLocation { location ->
+                    if (location != null) {
+                        updateCatchGPS(rowId.toInt(), location.latitude, location.longitude)
+                        Toast.makeText(
+                            context,
+                            "📍 GPS Saved: ${"%.5f".format(location.latitude)}, ${"%.5f".format(location.longitude)}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
-                        Log.w("GPS_DEBUG", "⚠️ GPS permission not granted — skipping update")
+                        Toast.makeText(
+                            context,
+                            "⚠️ No GPS Location for that Catch.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Log.w("GPS_DEBUG", "⚠️ No location found to save for catch ID=$rowId")
                     }
-                }, 5000) // Wait 5 seconds to allow GPS to warm up
-            }
+                }
+            }, 3000)
 
             return true
-
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
             return false
         } finally {
+            Log.d("GPS_DEBUG", "GPS_ENABLED is ${prefs.getBoolean("GPS_ENABLED", false)}")
             db.close()
         }
     }
 
-
-    // ************ - GET ALL CATCHES FOR LIST VIEWS  *******************************
-
     fun getCatchesForToday(catchType: String, todaysDate: String): List<CatchItem> {
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
-
-        Log.d("DB_DEBUG", "🔍 This is todaysDate in CatchDatabase: $todaysDate")
-        Log.d("DB_DEBUG", "Fetching catches for today: $todaysDate, catchType: $catchType")
-
         val cursor: Cursor = db.rawQuery(
-            "SELECT * FROM catches WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ? AND $COLUMN_CATCH_TYPE = ? ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC",
+            "SELECT * FROM $TABLE_NAME WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ? AND $COLUMN_CATCH_TYPE = ? ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC",
             arrayOf(todaysDate, catchType)
         )
 
         if (cursor.moveToFirst()) {
             do {
-                val catch = CatchItem(
-                    id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
-                    species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
-                    totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),            //Weight in Lbs and ounces
-                    totalLengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_8THS)),        //Length in Inches and 8ths
-                    totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),    //Length in millimeters
-                    totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),   //Weight in 0.00 Kgs
-                    catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),                  // Lbs, Inches, Cms, Kgs
-                    markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),                //Tournament Culling Limits
-                    clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR))                   // Culling Clip colors from SoftLock
-                )
-
-                catchList.add(catch)
+                catchList.add(parseCatch(cursor))
             } while (cursor.moveToNext())
-        } else {
-            Log.d("DB_DEBUG", "No data found for today: $todaysDate")
         }
         cursor.close()
         db.close()
         return catchList
     }
 
+    fun getFilteredCatchesWithLocation(
+        species: String,
+        catchType: String,
+        minWeightOz: Int,
+        fromDate: String,
+        toDate: String
+    ): List<CatchItem> {
+        val db = readableDatabase
+        val catchList = mutableListOf<CatchItem>()
+        val cursor = db.rawQuery(
+            """
+            SELECT * FROM $TABLE_NAME
+            WHERE species = ?
+              AND catch_type = ?
+              AND total_weight_oz > ?
+              AND date_time BETWEEN ? AND ?
+              AND latitude IS NOT NULL
+              AND longitude IS NOT NULL
+        """.trimIndent(),
+            arrayOf(species, catchType, minWeightOz.toString(), fromDate, toDate)
+        )
 
-// ______________ EDIT Existing CATCH _______________________________
+        if (cursor.moveToFirst()) {
+            do {
+                catchList.add(parseCatch(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return catchList
+    }
+
+    fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_LATITUDE, lat)
+            put(COLUMN_LONGITUDE, lon)
+        }
+        db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
+        db.close()
+    }
 
     fun updateCatch(
         catchId: Int,
@@ -184,38 +195,14 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     ) {
         val db = writableDatabase
         val values = ContentValues()
-
-        values.put("species", species) // Always update species
-
-        // ✅ Update the correct weight/length field based on non-null values
-        if (newWeightOz != null) values.put("total_weight_oz", newWeightOz)
-        if (newWeightKg != null) values.put("total_weight_hundredth_kg", newWeightKg)
-        if (newLengthA8ths != null) values.put("total_length_8ths", newLengthA8ths)
-        if (newLengthCm != null) values.put("total_length_tenths", newLengthCm)
-
-        Log.d(
-            "DB_DEBUG",
-            "🔄 Updating ID=$catchId, " +
-                    "New WeightOz=${newWeightOz ?: "N/A"}, " +
-                    "New WeightKg=${newWeightKg ?: "N/A"}, " +
-                    "New LengthA8ths=${newLengthA8ths ?: "N/A"}, " +
-                    "New LengthCm=${newLengthCm ?: "N/A"}, " +
-                    "New Species=$species"
-        )
-
-        val rowsUpdated = db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
-
-        if (rowsUpdated > 0) {
-            Log.d("DB_DEBUG", "✅ Catch Updated Successfully: ID=$catchId")
-        } else {
-            Log.e("DB_DEBUG", "⚠️ Update FAILED for ID=$catchId")
-        }
-
+        values.put(COLUMN_SPECIES, species)
+        if (newWeightOz != null) values.put(COLUMN_TOTAL_WEIGHT_OZ, newWeightOz)
+        if (newWeightKg != null) values.put(COLUMN_TOTAL_WEIGHT_KG, newWeightKg)
+        if (newLengthA8ths != null) values.put(COLUMN_TOTAL_LENGTH_8THS, newLengthA8ths)
+        if (newLengthCm != null) values.put(COLUMN_TOTAL_LENGTH_TENTHS, newLengthCm)
+        db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
     }
-
-
-    //_______________ DELETE CATCH FROM DATA BASE  _______________________
 
     fun deleteCatch(catchId: Int) {
         val db = writableDatabase
@@ -223,65 +210,74 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.close()
     }
 
-    private var resetPoint: String? = null
-
-    fun setTournamentResetPoint() {
-        resetPoint = getCurrentDateTime() // Store current timestamp
-        Log.d("DB_DEBUG", "✅ Tournament Reset Point Set: $resetPoint")
+    private fun parseCatch(cursor: Cursor): CatchItem {
+        return CatchItem(
+            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+            dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
+            species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
+            totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
+            totalLengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_8THS)),
+            totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
+            totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
+            catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),
+            markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),
+            clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR)),
+            latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUDE)),
+            longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUDE))
+        )
     }
 
-    fun getTournamentResetPoint(): String? {
-        return resetPoint
-    }
+    private fun getLastKnownLocation(callback: (android.location.Location?) -> Unit) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    //++++++++++++ UPDATE GPS  ++++++++++++++++++++++++++++++++++
-
-   private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
-        val db = writableDatabase
-        val values = ContentValues().apply {
-            put("latitude", lat)
-            put("longitude", lon)
-            Log.e("GPS_DEBUG", "⚠️Latitude is $lat and Longitude is $lon")
+        if (
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("GPS_DEBUG", "❌ Location permission not granted")
+            callback(null)
+            return
         }
 
-        val rowsUpdated = db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
-        db.close()
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    Log.d("GPS_DEBUG", "✅ Got fused location: ${location.latitude}, ${location.longitude}")
+                    callback(location)
+                } else {
+                    val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
+                        priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+                        interval = 1000
+                        fastestInterval = 500
+                        numUpdates = 1
+                    }
 
-        if (rowsUpdated > 0) {
-            Log.d("DB_DEBUG", "📍 GPS updated for catch ID=$catchId")
-        } else {
-            Log.e("DB_ERROR", "⚠️ Failed to update GPS for catch ID=$catchId")
-        }
-    }
-
-
-    // $$$$$$$$$$$$ Get Last Known Location  $$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-    private fun getLastKnownLocation(): android.location.Location? {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
-        val providers = locationManager.getProviders(true)
-        for (provider in providers.reversed()) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e("GPS_DEBUG", "❌ Location permission not granted")
-                return null
+                    fusedLocationClient.requestLocationUpdates(
+                        locationRequest,
+                        object : com.google.android.gms.location.LocationCallback() {
+                            override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
+                                val freshLocation = result.lastLocation
+                                Log.d("GPS_DEBUG", "📡 Fresh location received: ${freshLocation?.latitude}, ${freshLocation?.longitude}")
+                                callback(freshLocation)
+                                fusedLocationClient.removeLocationUpdates(this)
+                            }
+                        },
+                        Looper.getMainLooper()
+                    )
+                }
             }
-            val location = locationManager.getLastKnownLocation(provider)
-            if (location != null) {
-                Log.d("GPS_DEBUG", "✅ Got location from $provider: ${location.latitude}, ${location.longitude}")
-                return location
+            .addOnFailureListener {
+                Log.e("GPS_DEBUG", "❌ Failed to get fused location: ${it.message}")
+                callback(null)
             }
-        }
-
-        Log.w("GPS_DEBUG", "⚠️ No location found from any provider")
-        return null
     }
 
-    //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
-    private fun getCurrentDateTime(): String {
+    fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
     }
 
-
-}//~~~~~~~~~~~~~~~~~ END of CatchDatabaseHelper.kt ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    fun enableGps() {
+        prefs.edit().putBoolean("GPS_ENABLED", true).apply()
+    }
+}

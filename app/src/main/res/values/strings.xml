@@ -83,18 +83,18 @@
     <string name="select_clip_color">Select Clip Color</string>
     <string name="kgs">Kgs</string>
     <string name="x_00">X.00</string>
-    <string name="_0_7_8ths">0-7 8ths</string>
+    <string name="_0_7_8ths">0–7 8ths</string>
     <string name="_8ths">8ths</string>
     <string name="enter_catch_details_kgs">Enter Catch Details Kgs</string>
     <string name="enter_catch_details_inches_8ths">Enter Catch Details Inches</string>
-    <string name="_0_99_cms">0-99 Cms</string>
+    <string name="_0_99_cms">0–99 Cms</string>
     <string name="cms">Cms</string>
-    <string name="_0_9_mm">0-9 mm</string>
+    <string name="_0_9_mm">0–9 mm</string>
     <string name="enter_catch_details_cms">Enter Catch Details -Cms-</string>
     <string name="mm">mm</string>
     <string name="menu">menu</string>
     <string name="fun_day_weight">Fun Day Weight</string>
-    <string name="fund_day_length">Fund Day Length</string>
+    <string name="fun_day_length">Fun Day Length</string>
     <string name="tournament_weight">Tournament Weight</string>
     <string name="tournament_length">Tournament Length</string>
     <string name="weight_kgs">WEIGHT Kgs</string>
@@ -142,6 +142,32 @@
     <string name="customize_species_list">Customize Species List</string>
     <string name="start_fishing_event">Start Fishing Event</string>
     <string name="select_the_type_of_fishig">Select the type of fishig event and what speices as well as gps</string>
+    <string name="look_up_map">Look-Up Map</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="map_settings">Map Settings</string>
+    <string name="learn_about_voice_controls">Learn About Voice Controls</string>
+    <string name="manual_controls">Manual Controls</string>
+    <string name="check_out_the_how_to_pages">Check out the How To Pages</string>
+    <string name="look_up_your_catches_on_google_maps">Look Up Your Catches on Google Maps</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+    <string name="spacers">--</string>
+    <string name="gps">GPS</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="culling_limit">Culling\n Limit #</string>
+    <string name="tournament">Tournament</string>
+    <string name="fun_day">Fun Day</string>
+    <string name="type_of_fishing_day">Type of Fishing Day</string>
+    <string name="metric">Metric</string>
+    <string name="imperial">Imperial</string>
+    <string name="type_of_units">Type of Units</string>
+    <string name="length">Length</string>
+    <string name="weight">Weight</string>
+    <string name="type_of_measuring">Type of Measuring</string>
+    <string name="disabled">Disabled</string>
+    <string name="enabled">Enabled</string>
+    <string name="log_catch_location">Log Catch Location</string>
 
 
     //species

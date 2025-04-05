@@ -8,8 +8,8 @@
 
     <CheckBox
         android:id="@+id/chkSelectSpeciesNameSelect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:focusable="false"
@@ -19,7 +19,8 @@
         android:id="@+id/imgSpeciesSelect"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/fish_image"/>
 
     <TextView
         android:id="@+id/txtSpeciesNameSelect"

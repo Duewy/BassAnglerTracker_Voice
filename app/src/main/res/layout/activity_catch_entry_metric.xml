@@ -9,6 +9,16 @@
     android:layout_height="match_parent"
     tools:context=".CatchEntryMetric">
 
+
+    <ImageView
+        android:id="@+id/imgBassCatchMetric"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:alpha="0.25"
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
     <!-- Page Label -->
     <TextView
         android:id="@+id/txtTodaysLogCms"

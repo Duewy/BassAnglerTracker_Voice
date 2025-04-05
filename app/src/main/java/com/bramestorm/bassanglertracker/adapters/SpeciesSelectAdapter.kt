@@ -8,14 +8,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
+import com.bramestorm.bassanglertracker.utils.ItemMoveCallback.ItemTouchHelperContract
 
 class SpeciesSelectAdapter(
-    val speciesList: MutableList<SpeciesItem>,
-    private val onStartDrag: (RecyclerView.ViewHolder) -> Unit
-) : RecyclerView.Adapter<SpeciesSelectAdapter.SpeciesViewHolder>() {
+    private val speciesList: MutableList<SpeciesItem>
+) : RecyclerView.Adapter<SpeciesSelectAdapter.SpeciesViewHolder>(), ItemTouchHelperContract {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpeciesViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_species_drag, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_species_reorder, parent, false)
         return SpeciesViewHolder(view)
     }
 
@@ -29,22 +30,30 @@ class SpeciesSelectAdapter(
         return speciesList.map { it.name }
     }
 
-    fun onItemMove(fromPosition: Int, toPosition: Int) {
+    override fun onRowMoved(fromPosition: Int, toPosition: Int) {
         val movedItem = speciesList.removeAt(fromPosition)
         speciesList.add(toPosition, movedItem)
         notifyItemMoved(fromPosition, toPosition)
     }
 
+    // ✅ Proper interface implementation using RecyclerView.ViewHolder
+    override fun onRowSelected(viewHolder: RecyclerView.ViewHolder) {
+        // You can change background color or highlight if you like
+        viewHolder.itemView.alpha = 0.6f
+    }
+
+    override fun onRowClear(viewHolder: RecyclerView.ViewHolder) {
+        viewHolder.itemView.alpha = 1.0f
+    }
+
     inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val txtSpeciesName: TextView = itemView.findViewById(R.id.txtSpeciesName)
+        private val txtSpeciesName: TextView = itemView.findViewById(R.id.txtSpeciesNameReorder)
+        private val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesReorder)
         private val imgDragHandle: ImageView = itemView.findViewById(R.id.imgDragHandle)
 
         fun bind(speciesItem: SpeciesItem) {
             txtSpeciesName.text = speciesItem.name
-            imgDragHandle.setOnTouchListener { _, _ ->
-                onStartDrag(this)
-                false
-            }
+            imgSpecies.setImageResource(speciesItem.imageResId)
         }
     }
 }

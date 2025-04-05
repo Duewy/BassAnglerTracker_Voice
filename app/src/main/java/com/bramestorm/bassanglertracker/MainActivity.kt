@@ -41,6 +41,16 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, UserTrainingVoiceCommands::class.java)
             startActivity(intent)
         }
+
+        //-------------------------- Open the Google MAPS ------------------------
+        val btnLookUpMap = findViewById<Button>(R.id.btnLookUpMap)
+        btnLookUpMap.setOnClickListener {
+            val intent = Intent(this, MapCatchLocationsActivity::class.java)
+            startActivity(intent)
+        }
+
+
+
         // ---------------- Open Set-Up page --------------------------------
         val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)
         openSetUpActivity.setOnClickListener {

@@ -20,7 +20,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BassAnglerTracker">
 
-            <!-- All Activities here -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDk_AhWI1MnCwFWAVfowN_KlwdV592LtPc" />
+
+
+
+        <!-- All Activities here -->
 
         <activity
             android:name=".IntroPage"
@@ -40,7 +46,9 @@
         <activity android:name=".SetUpActivity"/>
 
         <activity android:name=".activities.AllSpeciesSelectionActivity" />
-        <activity android:name=".SpeciesSelectionActivity" />
+        <activity android:name=".activities.SpeciesSelectionActivity" />
+
+        <activity android:name=".MapCatchLocationsActivity" />
 
 
         <activity android:name=".CatchEntryLbsOzs"/>
