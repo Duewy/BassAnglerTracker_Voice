@@ -24,7 +24,7 @@ class CatchItemAdapter(
         val catchItem = getItem(position)
         val txtCatchInfo = view.findViewById<TextView>(R.id.txtSpeciesNameListItem)
         val imgSpecies = view.findViewById<ImageView>(R.id.imgSpeciesListItem)
-
+        val imgGpsPin = view.findViewById<ImageView>(R.id.imgGpsPin) // <-- NEW LINE
 
         // Format time from dateTime string
         val timeFormatted = try {
@@ -63,8 +63,17 @@ class CatchItemAdapter(
 
             txtCatchInfo.text = infoText
             imgSpecies.setImageResource(SpeciesImageHelper.getSpeciesImageResId(speciesName))
+
+            // 🧭 Show pin icon if lat/lng is available
+            if (it.latitude != 0.0 && it.longitude != 0.0) {
+                imgGpsPin.setImageResource(R.drawable.icon_pin)
+                imgGpsPin.visibility = View.VISIBLE
+            } else {
+                imgGpsPin.visibility = View.GONE
+            }
         }
 
         return view
-    }
-}
+    }//------- END of getView -------------------
+
+}//----------- END ---------------------

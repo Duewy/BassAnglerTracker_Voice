@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.GpsUtils
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -78,6 +79,8 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var totalRealWeight: TextView
     private lateinit var totalDecWeight: TextView
 
+    private lateinit var txtGPSNotice: TextView
+
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
 
@@ -127,6 +130,7 @@ class CatchEntryTournament : AppCompatActivity() {
         btnMenu = findViewById(R.id.btnMenu)
         btnMainPg = findViewById(R.id.btnMainPg)
         btnAlarm = findViewById(R.id.btnAlarm)
+        txtGPSNotice = findViewById(R.id.txtGPSNotice)
 
         // Assign TextViews
         firstRealWeight = findViewById(R.id.firstRealWeight)
@@ -174,17 +178,26 @@ class CatchEntryTournament : AppCompatActivity() {
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
         val dbHelper = CatchDatabaseHelper(this)
 
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+
         updateTournamentList()
         handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-        flashHandler.removeCallbacksAndMessages(null)
-        mediaPlayer?.release()
-    }
+        // ------------- On RESUME --------- Check GPS  Statues --------------
+        override fun onResume() {
+            super.onResume()
+            GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+        }
+
+    //------------- ON DESTROY ----- Disarm the ALARM -----------------
+        override fun onDestroy() {
+            super.onDestroy()
+            handler.removeCallbacksAndMessages(null)
+            flashHandler.removeCallbacksAndMessages(null)
+            mediaPlayer?.release()
+        }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -206,6 +219,7 @@ class CatchEntryTournament : AppCompatActivity() {
 
         weightEntryLauncher.launch(intent)
     }
+
 
     // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     private fun saveTournamentCatch(weightTotalOz: Int, bassType: String, clipColor: String) {

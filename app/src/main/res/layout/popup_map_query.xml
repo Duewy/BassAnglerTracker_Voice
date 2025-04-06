@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/very_lite_grey"
+    android:fillViewport="true"
+    android:scrollIndicators="right"
+    android:scrollbarStyle="outsideOverlay"
+    android:scrollbars="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/very_lite_grey"
+        tools:context=".PopupMapQuery">
+
+        <!-- Header Images -->
+        <ImageView
+            android:id="@+id/imgMapQueryBass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:alpha="0.20"
+            android:background="@color/very_lite_grey"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/bass_jumping_boater" />
+
+        <ImageView
+            android:id="@+id/imgVCC"
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="5dp"
+            android:background="@color/very_lite_grey"
+            android:contentDescription="@string/app_image_description"
+            android:scaleX="2.5"
+            android:src="@drawable/catch_call_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/llHeaderMapQuery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imgVCC">
+
+
+            <TextView
+                android:id="@+id/txtMapQuestHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingHorizontal="15dp"
+                android:text="Select the logged field data of your catches to see on the map"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divMapQuery1"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llHeaderMapQuery" />
+
+        <!-- Main Content LinearLayout -->
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="1dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divMapQuery1">
+
+
+            <!-- Date Selection Buttons -->
+            <LinearLayout
+                android:id="@+id/llTextDates"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divMapQuery1">
+
+                <TextView
+                    android:id="@+id/lblDatesMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Dates of Query"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llDatesMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnDateMap"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight=".5"
+                    android:background="@drawable/btn_outline_green"
+                    android:text="Date"
+                    android:textColor="@color/clip_blue"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtDatesMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@color/clip_white"
+                    android:gravity="center"
+                    android:hint="Dates of Query"
+                    android:textColor="@color/clip_blue"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+            <!-- Type of Units Header -->
+
+            <!-- Imperial & Metric Buttons -->
+            <LinearLayout
+                android:id="@+id/llSpeciesMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="5dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lblSpeciesMapQuery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="Species of Query"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llBtnSpeciesMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSpeciesMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/btn_outline_yellow"
+                    android:text="Species"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtSpeciesMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@color/clip_white"
+                    android:gravity="center"
+                    android:hint="Species of Query"
+                    android:textColor="@color/clip_blue"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+            <!-- Fun Day & Tournament Buttons -->
+            <LinearLayout
+                android:id="@+id/llTypeOfDayMapQuest"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="5dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lblTypeofDayMapQuest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
+                    android:gravity="center"
+                    android:text="Event Type of Query"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llEventTypeBtnMapQuest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnTypeOfDayMapQuest"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/btn_outline_blue"
+                    android:text="Events"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtTypeofDayMapQuest"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@color/clip_white"
+                    android:gravity="center"
+                    android:hint="Events of Query"
+                    android:textColor="@color/clip_blue"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/llSizeMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="5dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lblSizeMapQuery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="Sizes of Query"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llBtnSizeMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSizesMapQuest"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/btn_outline_red"
+                    android:text="Sizes"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/txtSizesOfMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@color/clip_white"
+                    android:gravity="center"
+                    android:hint="Sizes of Query"
+                    android:textColor="@color/clip_blue"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llTextMeasurement"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="5dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:gravity="center" >
+
+
+                <TextView
+                    android:id="@+id/lblMeasurementsMapQuery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="Measurements of Query"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llBtnMeasurementMapQuery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnMeasurementMapQuest"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/btn_outline_red"
+                    android:text="Measurement"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/txtMeasurementTypeMapQuery"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@color/clip_white"
+                    android:gravity="center"
+                    android:hint="Measurement of Query"
+                    android:textColor="@color/clip_blue"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divMapQuery2"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/clip_blue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/llStartFishing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- Go to Catch Page Button -->
+                <Button
+                    android:id="@+id/btnGetQueryMap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginBottom="7dp"
+                    android:background="@drawable/btn_outline_green"
+                    android:fontFamily="sans-serif-medium"
+                    android:padding="7dp"
+                    android:text="Get Map"
+                    android:textColor="@color/black"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/btnTournament" />
+
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/divMapQuery3"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginTop="2dp"
+                android:background="@color/clip_blue" />
+
+            <LinearLayout
+                android:id="@+id/llMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- MAIN Menu Page  -->
+                <Button
+                    android:id="@+id/btnMainPgMapQuery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_outline_blue"
+                    android:padding="5dp"
+                    android:text="@string/menu"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

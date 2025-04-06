@@ -6,9 +6,7 @@
     android:layout_height="wrap_content"
     android:fillViewport="true"
     xmlns:android="http://schemas.android.com/apk/res/android">
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/Log_red_secondary"
@@ -499,6 +497,23 @@
         app:layout_constraintTop_toBottomOf="@id/total_LengthView"
         app:layout_constraintWidth_percent="0.2" />
 
+
+    <TextView
+        android:id="@+id/txtGPSNotice"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/gps_on"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/totalRealLengthInches"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealLengthInches"
+        app:layout_constraintEnd_toStartOf="@id/totalRealLengthInches"
+        android:layout_marginEnd="15dp" />
+
     <TextView
         android:id="@+id/txtLbHolder"
         android:layout_width="wrap_content"
@@ -574,7 +589,6 @@
         app:layout_constraintStart_toStartOf="@id/totalDecLengthInches"
         app:layout_constraintTop_toBottomOf="@id/totalRealLengthInches"
         app:layout_constraintWidth_percent="0.25" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

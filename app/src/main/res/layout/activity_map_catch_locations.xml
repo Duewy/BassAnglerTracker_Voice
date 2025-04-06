@@ -1,59 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mapContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- The Google Map Fragment -->
-    <FrameLayout
+    <!-- ✅ The Google Map Fragment -->
+    <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Filter UI Layered On Top -->
+    <!-- Filter UI on Bottom of Page -->
     <LinearLayout
-        android:id="@+id/filterLayout"
+        android:id="@+id/llFilterLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_gravity="bottom"
         android:gravity="center"
-        android:padding="8dp"
-        android:background="@color/clip_blue"
-        android:layout_gravity="top">
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <Spinner
-            android:id="@+id/spinnerSpecies"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@color/clip_yellow"/>
-
-        <Spinner
-            android:id="@+id/spinnerDateRange"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@color/clip_orange"/>
-
+        <!-- Get Filter for Query -->
         <Button
             android:id="@+id/btnApplyFilters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top|end"
-            android:padding="8dp"
             android:layout_margin="8dp"
-            android:text="@string/apply_filters"
-            android:background="@drawable/btn_outline_blue"/>
+            android:background="@drawable/btn_outline_blue"
+            android:padding="8dp"
+            android:text="@string/select_query_fields_for_map"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btnMapSettings"
+        <View
+            android:id="@+id/divider11"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/clip_white" />
+
+        <LinearLayout
+            android:id="@+id/llBtnSelectionMap"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/map_settings"
-            android:layout_gravity="top|end"
-            android:padding="8dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/btn_outline_green"
-            android:gravity="center"/>
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!-- Close Map -->
+            <Button
+                android:id="@+id/btnCloseMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="25dp"
+                android:background="@drawable/btn_outline_red"
+                android:padding="8dp"
+                android:text="@string/close_map"
+                android:textColor="@color/clip_blue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            />
+
+            <!-- Get Map Settings for User -->
+            <Button
+                android:id="@+id/btnMapSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/btn_outline_green"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/map_settings"
+                android:textColor="@color/clip_blue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 

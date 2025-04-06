@@ -486,6 +486,22 @@
         app:layout_constraintTop_toBottomOf="@id/sixthRealWeight" />
 
     <TextView
+        android:id="@+id/txtGPSNotice"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/gps_on"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/totalRealWeight"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"
+        app:layout_constraintEnd_toStartOf="@id/totalRealWeight"
+        android:layout_marginEnd="15dp"/>
+
+    <TextView
         android:id="@+id/totalRealWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -575,7 +591,6 @@
         app:layout_constraintEnd_toEndOf="@+id/firstDecWeight"
         app:layout_constraintTop_toBottomOf="@id/totalRealWeight"
  />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

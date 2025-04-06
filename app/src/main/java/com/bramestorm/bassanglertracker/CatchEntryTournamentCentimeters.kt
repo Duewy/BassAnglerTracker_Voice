@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.GpsUtils
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -80,6 +81,8 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private lateinit var totalRealLengthCms: TextView
         private lateinit var totalDecLengthCms: TextView
 
+        private lateinit var txtGPSNotice: TextView
+
         private var availableClipColors: List<ClipColor> = emptyList()
         private val flashHandler = Handler(Looper.getMainLooper())
 
@@ -127,6 +130,7 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             btnMainCms = findViewById(R.id.btnMainCms)
             btnSetUpCms = findViewById(R.id.btnSetUpCms)
             btnAlarmCms = findViewById(R.id.btnAlarmCms)
+            txtGPSNotice = findViewById(R.id.txtGPSNotice)
 
             // Assign TextViews
             firstRealLengthCms = findViewById(R.id.firstRealLengthCms)
@@ -181,10 +185,18 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             btnAlarmCms.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
             val dbHelper = CatchDatabaseHelper(this)
 
+            GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+
             updateTournamentList()
             handler.postDelayed(checkAlarmRunnable, 60000)
         }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // ------------- On RESUME --------- Check GPS  Statues --------------
+        override fun onResume() {
+            super.onResume()
+            GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+        }
 
       // +++++++++++++ On-Destroy +++++++++++++++++++
 
