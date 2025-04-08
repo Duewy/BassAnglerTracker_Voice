@@ -113,7 +113,8 @@
     <string name="voice_controls">Voice Controls</string>
     <string name="set_up">Set_Up</string>
     <string name="teach_the_computer">Teach the computer. \n\ You will teach the computer to recognize the key words that are used with this Catch and Call Tracker app. The better the computer recognizes your words the easier the commands will be followed. Your time on the water is precious so lets make the best of it.</string>
-    <string name="say_the_key_words">Say the Key Words</string>
+    <string name="say_the_words">Say the Words</string>
+    <string name="say_the_key_words">Say the Words</string>
     <string name="what_computer_heard">What Computer Heard</string>
     <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
     <string name="list_of_species_for_your_fishing_day">List of Species for your fishing day</string>
@@ -121,9 +122,9 @@
     <string name="save_selection">Save Selection</string>
     <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
     <string name="selected_species_count">Selected: %1$d / %2$d</string>
-    <string name="voice_commands_or_manual_input">Voice Commands \n\ or \n\ Manual Input</string>
-    <string name="user_can_add_your_own_species_to_the_list">User Can Add Your Own Species to the List</string>
-    <string name="select_up_to_8_species">Select up to 8 Species</string>
+    <string name="voice_commands_or_manual_input">Manual Input \n\ or \n\With the Full Version \n\ Voice Commands </string>
+    <string name="you_can_add_your_own_species_to_the_list">You Can Add Your Own Species to the List</string>
+    <string name="select_up_to_8_species">Select up to 8 Species\n\For the Main Species List</string>
     <string name="editable_species_list">Editable Species List</string>
     <string name="user_can">User can Select or Add Species to Target List</string>
     <string name="save_species_list">Save Species List</string>
@@ -138,10 +139,10 @@
     <string name="arrange_the_listing_as_needed">Arrange the Listing As Needed</string>
     <string name="drag_handle">Drag handle</string>
     <string name="fish_species_image">Fish species image</string>
-    <string name="move_the_species_up_down_as_needed">Move the Species Up / Down as Needed</string>
+    <string name="move_the_species_up_down_as_needed">Move the Species Up/Down as Needed</string>
     <string name="customize_species_list">Customize Species List</string>
     <string name="start_fishing_event">Start Fishing Event</string>
-    <string name="select_the_type_of_fishig">Select the type of fishig event and what speices as well as gps</string>
+    <string name="select_the_type_of_fishing">Select the type of fishing event and what species as well as gps</string>
     <string name="look_up_map">Look-Up Map</string>
     <string name="apply_filters">Apply Filters</string>
     <string name="map_settings">Map Settings</string>
@@ -155,7 +156,7 @@
     <string name="gps">GPS</string>
     <string name="_4">4</string>
     <string name="_5">5</string>
-    <string name="culling_limit">Culling\n Limit #</string>
+    <string name="culling_limit">Culling #</string>
     <string name="tournament">Tournament</string>
     <string name="fun_day">Fun Day</string>
     <string name="type_of_fishing_day">Type of Fishing Day</string>
@@ -173,6 +174,31 @@
     <string name="gps_off">GPS\nOFF</string>
     <string name="close_map">Close Map</string>
     <string name="select_query_fields_for_map">Select Query Fields for Map</string>
+    <string name="bass_fighting">bass jumping fighting the angler in boat</string>
+    <string name="training_voice_commands">Training Voice Commands</string>
+    <string name="words_to_practice">Words to Practice</string>
+    <string name="select_data_to_share">Select Data to Share</string>
+    <string name="include_date_and_time">Include Date and Time</string>
+    <string name="include_species">Include Species</string>
+    <string name="include_weight">Include Weight</string>
+    <string name="include_length">Include Length</string>
+    <string name="include_gps_coordinates">Include GPS Coordinates</string>
+    <string name="include_day">Include Day Type\n(Fun Day/Tournament)</string>
+    <string name="generate_csv_file">Generate CSV File</string>
+    <string name="share_csv">Share CSV</string>
+    <string name="goto_setup_page">GoTo SetUp Page</string>
+    <string name="top_5">Top 5</string>
+    <string name="find_your_top_5">Find Your Top 5</string>
+    <string name="share_fishing_logs">Share Fishing Logs</string>
+    <string name="share_your_fishing_logs">Share Your Fishing Logs</string>
+    <string name="different_ways_to_look_up_your_catch_log">Different Ways to Look Up Your Catch Log</string>
+    <string name="max_weight_lbs">Max Weight (lbs)</string>
+    <string name="min_weight_lbs">Min Weight (lbs)</string>
+    <string name="search">Search</string>
+    <string name="share_results">Share Results</string>
+    <string name="top_5_catches_this_month"><u>Top 5 Catches This Month</u></string>
+    <string name="max_weight">Max Weight</string>
+    <string name="min_weight">Min Weight</string>
 
 
     //species

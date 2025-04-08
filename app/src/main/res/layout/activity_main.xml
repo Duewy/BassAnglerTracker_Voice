@@ -5,12 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fillViewport="true"
+    android:background="#801976D2"
+    android:layout_marginBottom="15dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#801976D2"
+    android:layout_marginBottom="15dp"
     android:contentDescription="@string/tournament_activity_description">
 
 
@@ -81,17 +84,21 @@
         app:layout_constraintTop_toBottomOf="@id/divider6"/>
 
     <Button
-        android:id="@+id/btnLookUpMap"
+        android:id="@+id/btnLookUpShareData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
         android:background="@drawable/btn_outline_yellow"
         android:gravity="center"
         android:paddingHorizontal="10dp"
-        android:text="@string/look_up_map"
+        android:text="See and Share Catches"
         android:textColor="@color/clip_blue"
         android:textSize="28sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/divider10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtGoogleMap" />
@@ -105,8 +112,7 @@
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLookUpMap"
-        />
+        app:layout_constraintTop_toBottomOf="@id/btnLookUpShareData" />
 
     <TextView
         android:id="@+id/textView17"
@@ -177,7 +183,16 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView15" />
+        app:layout_constraintTop_toBottomOf="@id/textView15"
+        android:layout_marginBottom="15dp"/>
+
+    <TextView
+        android:id="@+id/txtSpaceHolder"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnVCC" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,7 +14,7 @@
             android:id="@+id/imageView7"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="15dp"
             app:srcCompat="@drawable/catch_call_tracker_angler_main"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imageView7">
@@ -41,7 +41,7 @@
             android:textColor="@color/clip_blue"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="5dp"/>
 
         <TextView
             android:id="@+id/textView12"
@@ -52,8 +52,7 @@
             android:layout_gravity="center"
             android:textColor="@color/clip_blue"
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView13"
@@ -64,8 +63,7 @@
             android:layout_gravity="center"
             android:textColor="@color/clip_blue"
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView14"
@@ -76,8 +74,7 @@
             android:layout_gravity="center"
             android:textColor="@color/clip_blue"
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView7"
@@ -88,8 +85,7 @@
             android:layout_gravity="center"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
-            android:textStyle="italic"
-            android:layout_marginTop="10dp" />
+            android:textStyle="italic" />
 
     </LinearLayout>
 

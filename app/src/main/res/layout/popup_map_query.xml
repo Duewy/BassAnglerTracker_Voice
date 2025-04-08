@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/very_lite_grey"
-        tools:context=".PopupMapQuery">
+        tools:context=".mappopups.PopupMapQuery">
 
         <!-- Header Images -->
         <ImageView
@@ -55,7 +55,7 @@
 
 
             <TextView
-                android:id="@+id/txtMapQuestHeader"
+                android:id="@+id/txtMapQueryHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
@@ -123,7 +123,7 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btnDateMap"
+                    android:id="@+id/btnDateMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight=".5"
@@ -207,7 +207,7 @@
 
             <!-- Fun Day & Tournament Buttons -->
             <LinearLayout
-                android:id="@+id/llTypeOfDayMapQuest"
+                android:id="@+id/llTypeOfDayMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingVertical="5dp"
@@ -215,7 +215,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/lblTypeofDayMapQuest"
+                    android:id="@+id/lblTypeofDayMapQuery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -228,7 +228,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llEventTypeBtnMapQuest"
+                android:id="@+id/llEventTypeBtnMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -236,7 +236,7 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btnTypeOfDayMapQuest"
+                    android:id="@+id/btnTypeOfDayMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
@@ -246,7 +246,7 @@
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/txtTypeofDayMapQuest"
+                    android:id="@+id/txtTypeofDayMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center"
@@ -290,11 +290,11 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btnSizesMapQuest"
+                    android:id="@+id/btnSizesMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
-                    android:background="@drawable/btn_outline_red"
+                    android:background="@drawable/btn_outline_orange"
                     android:text="Sizes"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
@@ -344,7 +344,7 @@
                 android:gravity="center">
 
                 <Button
-                    android:id="@+id/btnMeasurementMapQuest"
+                    android:id="@+id/btnMeasurementMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
@@ -430,7 +430,26 @@
                     android:text="@string/menu"
                     android:textColor="@color/black"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_marginEnd="25dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <Button
+                    android:id="@+id/btnResetFilters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginBottom="7dp"
+                    android:background="@drawable/btn_outline_orange"
+                    android:fontFamily="sans-serif-medium"
+                    android:padding="7dp"
+                    android:text="RESET FILTERS"
+                    android:textColor="@color/black"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
 
             </LinearLayout>
 

@@ -25,6 +25,19 @@ class ItemMoveCallback(private val contract: ItemTouchHelperContract) : ItemTouc
         return true
     }
 
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE && viewHolder != null) {
+            contract.onRowSelected(viewHolder)
+        }
+        super.onSelectedChanged(viewHolder, actionState)
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        contract.onRowClear(viewHolder)
+    }
+
+
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
     override fun isLongPressDragEnabled(): Boolean = true

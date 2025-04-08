@@ -7,7 +7,7 @@ package com.bramestorm.bassanglertracker.utils
                "Perch", "Pike", "Bluegill",
                 "Rainbow Trout", "Brook Trout", "Brown Trout", "Lake Trout",
                 "Salmon", "Carp", "Muskie", "White Bass", "Rock Bass",
-                "Bowfin", "Ling", "Sucker", "Drum", "striped bass",
+                "Bowfin", "Ling", "Sucker", "Drum", "Striped bass",
                 "Saugeye", "Sunfish", "Gar", " Bull Head",
                 "Tarpon", "Grouper", "Red Snapper"
             )

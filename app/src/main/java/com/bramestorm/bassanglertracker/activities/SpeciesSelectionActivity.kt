@@ -2,9 +2,8 @@ package com.bramestorm.bassanglertracker.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.Gravity
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -26,20 +25,19 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnAdjustSpeciesList: Button
     private lateinit var btnResetSpecies: Button
     private lateinit var adapter: SpeciesSelectAdapter
-    private lateinit var txtSelectedCount: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_species_selection)
 
-        txtSelectedCount = findViewById(R.id.txtSelectedCount)
-
+        //______________ FIND ID BY _____________________
         recyclerView = findViewById(R.id.recyclerSpecies)
         btnSaveSpecies = findViewById(R.id.btnSaveSpecies)
         btnAdjustSpeciesList = findViewById(R.id.btnAdjustSpeciesList)
         btnResetSpecies = findViewById(R.id.btnResetSpecies)
         btnCancel = findViewById(R.id.btnCancelSpecies)
+
 
         val selectedSpeciesNames = SharedPreferencesManager.getSelectedSpeciesList(this)
         val speciesItems = selectedSpeciesNames.map { name ->
@@ -52,9 +50,6 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
 
         adapter = SpeciesSelectAdapter(speciesItems)
-        updateSelectedCount(speciesItems.size)
-
-
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -64,11 +59,13 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // SAVE button → save reordered list to SharedPreferences
         btnSaveSpecies.setOnClickListener {
-            Toast.makeText(this, "⚠️ Species List SAVED", Toast.LENGTH_SHORT).show()
+            val toast = Toast.makeText(this, "⚠️ Species List SAVED", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER, 0, 0)
+            toast.show()
+
             val ordered = adapter.getOrderedSpeciesNames()
             SharedPreferencesManager.saveSelectedSpeciesList(this, ordered)
 
-            Log.d("SpeciesSelection", "Saved species list: $ordered")
             val intent = Intent(this, SetUpActivity::class.java)
             startActivity(intent)
             finish()
@@ -89,8 +86,11 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // RESET button → restore default species list
         btnResetSpecies.setOnClickListener {
-            Toast.makeText(this, "⚠️ Species List RESET to Starting 8", Toast.LENGTH_SHORT).show()
-            SharedPreferencesManager.resetToDefaultSpecies(this)
+            val toast = Toast.makeText(this, "⚠️ Species List RESET to Starting 8", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER, 0, 0)
+            toast.show()
+
+                  SharedPreferencesManager.resetToDefaultSpecies(this)
             val defaultSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)
             val updatedSpecies = defaultSpecies.map {
                 SpeciesItem(it, getSpeciesImageResId(it), true)
@@ -99,35 +99,11 @@ class SpeciesSelectionActivity : AppCompatActivity() {
             adapter = SpeciesSelectAdapter(updatedSpecies)
             recyclerView.adapter = adapter
 
-            updateSelectedCount(updatedSpecies.size)
 
         }
 
 
-
     }//--------- END On Create -------------------------
-
-    private fun updateSelectedCount(count: Int) {
-        txtSelectedCount.text = "Species Selected: $count"
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val selectedSpeciesNames = SharedPreferencesManager.getSelectedSpeciesList(this)
-        val speciesItems = selectedSpeciesNames.map { name ->
-            SpeciesItem(
-                name = name,
-                imageResId = getSpeciesImageResId(name),
-                isSelected = true
-            )
-        }.toMutableList()
-
-        adapter = SpeciesSelectAdapter(speciesItems)
-        recyclerView.adapter = adapter
-
-        updateSelectedCount(speciesItems.size)
-    }
 
 
 }//-------END ------------------

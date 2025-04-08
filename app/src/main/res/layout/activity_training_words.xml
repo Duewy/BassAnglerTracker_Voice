@@ -7,11 +7,11 @@
     android:fillViewport="true"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/clip_orange">
+    android:layout_height="wrap_content"
+    android:background="@color/clip_orange"
+    android:paddingBottom="25dp">
 
 
     <ImageView
@@ -20,11 +20,27 @@
         android:layout_height="55dp"
         android:layout_marginTop="12dp"
         android:contentDescription="@string/app_image_description"
+        android:scaleX="1.25"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/catch_call_words_blue" />
+
+    <ImageView
+        android:id="@+id/imgJumpingBass"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHorizontal_weight="1"
+        android:layout_marginTop="62dp"
+        android:alpha="0.10"
+        android:scaleY="1.55"
+        app:layout_constraintBottom_toTopOf="@+id/txtWhatComputerHeard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgVCC"
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing"
+        android:contentDescription="@string/fish_image"/>
 
     <LinearLayout
             android:id="@+id/ManualMode1linearLayout"
@@ -36,13 +52,13 @@
             app:layout_constraintTop_toBottomOf="@id/imgVCC">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/txtTrainingVoiceHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:paddingHorizontal="25dp"
                 android:layout_marginTop="10dp"
-                android:text="Training Voice Commands"
+                android:text="@string/training_voice_commands"
                 android:textColor="@color/black"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -112,41 +128,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider2"/>
 
+
     <TextView
         android:id="@+id/txtSayThis"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:padding="15dp"
-        android:text="Select a Word"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:typeface="serif"
         android:background="@color/clip_yellow"
         android:clickable="true"
         android:focusable="true"
+        android:padding="15dp"
+        android:text="@string/words_to_practice"
+        android:textColor="@color/clip_blue"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="serif"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtYouSay" />
-
-
 
     <Button
         android:id="@+id/btnUserTalk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/btn_outline_blue"
+        android:drawableStart="@drawable/ic_mic"
+        android:drawableEnd="@drawable/ic_mic"
         android:padding="15dp"
-        android:text="@string/say_the_key_words"
+        android:text="@string/say_the_words"
         android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="serif"
-        android:drawableStart="@drawable/ic_mic"
-        android:drawableEnd="@drawable/ic_mic"
-        android:background="@drawable/btn_outline_blue"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtSayThis" />
 
@@ -155,16 +171,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:padding="15dp"
+        android:background="@color/material_dynamic_neutral90"
         android:hint="@string/what_computer_heard"
+        android:padding="15dp"
         android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="serif"
-        android:background="@color/clip_white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnUserTalk"/>
+        app:layout_constraintTop_toBottomOf="@id/btnUserTalk" />
     <View
         android:id="@+id/divider9"
         android:layout_width="0dp"

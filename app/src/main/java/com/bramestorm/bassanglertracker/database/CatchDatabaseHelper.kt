@@ -280,4 +280,282 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     fun enableGps() {
         prefs.edit().putBoolean("GPS_ENABLED", true).apply()
     }
-}
+
+    fun getFilteredCatchesWithLocationAdvanced(
+        species: String,
+        catchType: String,
+        measurementType: String,
+        minValue: Float,
+        maxValue: Float,
+        fromDate: String,
+        toDate: String
+    ): List<CatchItem> {
+        val catches = mutableListOf<CatchItem>()
+        val db = readableDatabase
+
+        val whereClauses = mutableListOf<String>()
+        val args = mutableListOf<String>()
+
+        // Only include catches with GPS
+        whereClauses.add("latitude IS NOT NULL AND longitude IS NOT NULL")
+
+        // Optional species filter
+        if (species.lowercase() != "all") {
+            whereClauses.add("REPLACE(LOWER(species), ' ', '') = ?")
+            args.add(species.lowercase().replace(" ", ""))
+        }
+
+        // Optional catchType filter
+        if (catchType.isNotEmpty()) {
+            whereClauses.add("LOWER(catchType) = ?")
+            args.add(catchType.lowercase())
+        }
+
+        // Date filter
+        whereClauses.add("$COLUMN_DATE_TIME BETWEEN ? AND ?")
+        args.add(fromDate)
+        args.add(toDate)
+
+        // Measurement filter
+        when (measurementType.lowercase()) {
+            "weight" -> {
+                if (measurementType.contains("kg", true)) {
+                    whereClauses.add("$COLUMN_TOTAL_WEIGHT_KG BETWEEN ? AND ?")
+                    args.add((minValue * 100).toInt().toString())
+                    args.add((maxValue * 100).toInt().toString())
+                } else {
+                    whereClauses.add("$COLUMN_TOTAL_WEIGHT_OZ BETWEEN ? AND ?")
+                    args.add((minValue * 16).toInt().toString()) // Convert lbs to oz
+                    args.add((maxValue * 16).toInt().toString())
+                }
+            }
+            "length" -> {
+                if (measurementType.contains("cm", true)) {
+                    whereClauses.add("$COLUMN_TOTAL_LENGTH_TENTHS BETWEEN ? AND ?")
+                    args.add((minValue * 10).toInt().toString())
+                    args.add((maxValue * 10).toInt().toString())
+                } else {
+                    whereClauses.add("$COLUMN_TOTAL_LENGTH_8THS BETWEEN ? AND ?")
+                    args.add((minValue * 8).toInt().toString())
+                    args.add((maxValue * 8).toInt().toString())
+                }
+            }
+        }
+
+        val query = """
+        SELECT * FROM $TABLE_NAME
+        WHERE ${whereClauses.joinToString(" AND ")}
+        ORDER BY $COLUMN_DATE_TIME DESC
+    """.trimIndent()
+
+        val cursor = db.rawQuery(query, args.toTypedArray())
+
+        while (cursor.moveToNext()) {
+            val catch = parseCatch(cursor)
+            catches.add(catch)
+        }
+
+        Log.d("DB_QUERY", "WHERE: ${whereClauses.joinToString(" AND ")}")
+        Log.d("DB_QUERY", "ARGS: ${args.joinToString()}")
+
+        cursor.close()
+        db.close()
+
+        return catches
+
+        Log.d("MapCatch", "Query returned ${catches.size} rows")
+        catches.forEach {
+            Log.d("MapCatch", "${it.species} @ ${it.latitude}, ${it.longitude}")
+        }
+
+    }
+
+    // for Map Searches TOP 5 of Length or Weight in set Species...
+    fun getTopCatchesForSpeciesThisMonth(
+        species: String,
+        minOz: Int,
+        maxOz: Int,
+        limit: Int
+    ): List<CatchItem> {
+        val db = readableDatabase
+        val list = mutableListOf<CatchItem>()
+        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+
+        val cursor = db.rawQuery(
+            """
+            SELECT * FROM $TABLE_NAME
+            WHERE LOWER(species) = ?
+              AND total_weight_oz BETWEEN ? AND ?
+              AND strftime('%Y-%m', $COLUMN_DATE_TIME) = ?
+            ORDER BY total_weight_oz DESC
+            LIMIT ?
+            """.trimIndent(),
+            arrayOf(
+                species.lowercase(),
+                minOz.toString(),
+                maxOz.toString(),
+                monthPrefix,
+                limit.toString()
+            )
+        )
+
+        while (cursor.moveToNext()) {
+            list.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+    fun insertFakeCatchesForTesting() {
+        val db = writableDatabase
+        val currentTime = System.currentTimeMillis()
+        val testSpeciesList = listOf("Bass", "Walleye", "Pike", "Crappie", "Catfish")
+
+        for (i in 1..20) {
+            val values = ContentValues().apply {
+                put("date_time", currentTime - (i * 3600000L)) // spread across time
+                put("species", "TEST_${testSpeciesList.random()}")
+                put("total_weight_oz", (64..120).random())  // 4–7.5 lbs
+                put("total_length_8ths", (96..160).random()) // 12–20 inches
+                put("total_length_tenths", 0) // unused here
+                put("total_weight_hundredth_kg", 0) // unused here
+                put("catch_type", "TEST_FAKE")
+                put("marker_type", "")
+                put("clip_color", "")
+                put("latitude", 43.12 + (0..30).random() / 1000.0)
+                put("longitude", -79.32 - (0..30).random() / 1000.0)
+            }
+            db.insert("catches", null, values)
+        }
+    }
+
+    fun logAllCatches() {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT species, date_time, latitude, longitude FROM $TABLE_NAME", null)
+        while (cursor.moveToNext()) {
+            val species = cursor.getString(0)
+            val date = cursor.getString(1)
+            val lat = cursor.getDouble(2)
+            val lon = cursor.getDouble(3)
+            Log.d("CatchLog", "$species @ $date - ($lat, $lon)")
+        }
+        cursor.close()
+        db.close()
+    }
+
+    fun getTopCatchesByKgForSpeciesThisMonth(
+        species: String,
+        minHundredthsKg: Int,
+        maxHundredthsKg: Int,
+        limit: Int
+    ): List<CatchItem> {
+        val db = readableDatabase
+        val list = mutableListOf<CatchItem>()
+        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM catches
+        WHERE LOWER(species) = ?
+          AND total_weight_hundredth_kg BETWEEN ? AND ?
+          AND strftime('%Y-%m', date_time) = ?
+        ORDER BY total_weight_hundredth_kg DESC
+        LIMIT ?
+        """.trimIndent(),
+            arrayOf(
+                species.lowercase(),
+                minHundredthsKg.toString(),
+                maxHundredthsKg.toString(),
+                monthPrefix,
+                limit.toString()
+            )
+        )
+
+        while (cursor.moveToNext()) {
+            list.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+// ------------------ TOP 5 Look UP -------------------------
+
+    fun getTopCatchesByInchesForSpeciesThisMonth(
+        species: String,
+        min8ths: Int,
+        max8ths: Int,
+        limit: Int
+    ): List<CatchItem> {
+        val db = readableDatabase
+        val list = mutableListOf<CatchItem>()
+        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM catches
+        WHERE LOWER(species) = ?
+          AND total_length_8ths BETWEEN ? AND ?
+          AND strftime('%Y-%m', date_time) = ?
+        ORDER BY total_length_8ths DESC
+        LIMIT ?
+        """.trimIndent(),
+            arrayOf(
+                species.lowercase(),
+                min8ths.toString(),
+                max8ths.toString(),
+                monthPrefix,
+                limit.toString()
+            )
+        )
+
+        while (cursor.moveToNext()) {
+            list.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+    fun getTopCatchesByCmForSpeciesThisMonth(
+        species: String,
+        minTenths: Int,
+        maxTenths: Int,
+        limit: Int
+    ): List<CatchItem> {
+        val db = readableDatabase
+        val list = mutableListOf<CatchItem>()
+        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM catches
+        WHERE LOWER(species) = ?
+          AND total_length_tenths BETWEEN ? AND ?
+          AND strftime('%Y-%m', date_time) = ?
+        ORDER BY total_length_tenths DESC
+        LIMIT ?
+        """.trimIndent(),
+            arrayOf(
+                species.lowercase(),
+                minTenths.toString(),
+                maxTenths.toString(),
+                monthPrefix,
+                limit.toString()
+            )
+        )
+
+        while (cursor.moveToNext()) {
+            list.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+
+}//----------------- END ---------------------

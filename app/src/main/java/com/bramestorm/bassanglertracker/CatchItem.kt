@@ -19,3 +19,30 @@ data class CatchItem(
     val markerType: String? = null,     // # of Tournament fish to set Culling Limits
     val clipColor: String? = null       // color for Tournament clips
 )
+
+
+fun formatWeightOzToLbsOz(totalOz: Int): String {
+    val lbs = totalOz / 16
+    val oz = totalOz % 16
+    return "${lbs} lbs ${oz} oz"
+}
+
+fun formatLengthA8thToInches(lengthA8ths: Int): String {
+    val inches = lengthA8ths / 8
+    val eighths = lengthA8ths % 8
+    return if (eighths == 0) {
+        "$inches in"
+    } else {
+        "$inches ${eighths}/8 in"
+    }
+}
+
+fun formatWeightKg(hundredthKg: Int): String {
+    val kg = hundredthKg / 100.0
+    return String.format("%.2f kg", kg)
+}
+
+fun formatLengthCm(tenthCm: Int): String {
+    val cm = tenthCm / 10.0
+    return String.format("%.1f cm", cm)
+}

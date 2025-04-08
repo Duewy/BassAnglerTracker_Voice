@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/popup_background">
+
+
+    <Button
+        android:id="@+id/btnEditSpeciesPopup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="Edit Species"
+        android:textSize="20sp"
+        android:textColor="@color/clip_blue"
+        android:background="@drawable/btn_outline_blue"/>
+
+    <Button
+        android:id="@+id/btnDeleteSpeciesPopup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Species"
+        android:layout_marginTop="10dp"
+        android:padding="7dp"
+        android:textSize="20sp"
+        android:textColor="@color/clip_blue"
+        android:background="@drawable/btn_outline_orange"/>
+
+    <Button
+        android:id="@+id/btnCancelPopup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="Cancel"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"
+        android:textColor="@color/clip_blue"
+        android:background="@drawable/btn_outline_red"/>
+</LinearLayout>

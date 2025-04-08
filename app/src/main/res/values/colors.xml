@@ -34,6 +34,7 @@
     <color name="secondary_variant">#41B4E1</color>
     <color name="third_variant">#B263C8EF</color>
 
+
             <!-- SoftLock Culling Clip Colors -->
     <color name="clip_red">#D50019</color>
     <color name="clip_yellow">#FEFE20</color>
@@ -47,6 +48,11 @@
                      <!-- SoftLock Label colors-->
     <color name="softlock_blue">#00007E</color>
     <color name="softlock_green">#21CF33</color>
+
+    <color name="complementary_softlock_green">#d214eb</color>
+    <color name="lite_complementary_softlock_green">#E9BB20CF</color>
+    <color name="complementary_softlock_blue">#ffff81</color>
+
     <!-- Logging Page colors-->
 
     <color name="Log_red">#C3D50011</color>
@@ -57,7 +63,7 @@
     <color name="Log_green">#8000800D</color>
     <color name="Log_green_secondary">#806EA603</color>
     <color name="Log_blue">#9F0505E8</color>
-    <color name="Log_blue_secondary">#6D03258A</color>
+    <color name="Log_blue_secondary">#8B41589C</color>
     <color name="Log_white">#85FDFDFD</color>
     <color name="Log_orange">#80FE671E</color>
 
@@ -66,7 +72,9 @@
     <color name="selected_2_background">#CCFF90</color> <!-- Light green -->
 
     <color name="material_dynamic_primary70">#72B0D1</color>
+    <color name="material_dynamic_neutral90">#9CA1EC</color>
     <color name="highlight_yellow">#F6DF0E</color>
+    <color name="selection_list">#EAB383</color>
 
     <color name="ic_launcher_background">#FFBB00</color>
 

@@ -31,6 +31,8 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var btnLength: Button
     private lateinit var btnImperial: Button
     private lateinit var btnMetric: Button
+    private lateinit var txtLimitMarker :TextView
+    private lateinit var txtSpeciesSelector :TextView
     private lateinit var btnFunDay: Button
     private lateinit var btnTournament: Button
     private lateinit var btnStartFishing: Button
@@ -59,6 +61,24 @@ class SetUpActivity : AppCompatActivity() {
 
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
+        //------------------- Ensures that the GPS must be Enabled Every Day --------------------
+
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val today = android.text.format.DateFormat.format("yyyy-MM-dd", java.util.Date()).toString()
+        val lastDate = prefs.getString("GPS_LAST_DATE", "")
+
+        if (today != lastDate) {
+            // New day → reset GPS to disabled
+            prefs.edit()
+                .putBoolean("GPS_ENABLED", false)
+                .putString("GPS_LAST_DATE", today)
+                .apply()
+            val toast = Toast.makeText(this, "📍 GPS logging has been reset.\nEnable it manually if needed.", Toast.LENGTH_LONG)
+            toast.setGravity(Gravity.CENTER, 0, 0)
+            toast.show()
+        }
+        android.util.Log.d("SetUpActivity", "Checked GPS reset: today=$today, last=$lastDate")
+
 
         setContentView(R.layout.activity_set_up_event)
 
@@ -71,7 +91,9 @@ class SetUpActivity : AppCompatActivity() {
         btnFunDay = findViewById(R.id.btnFunDay)
         btnTournament = findViewById(R.id.btnTournament)
         btnStartFishing = findViewById(R.id.btnStartFishing)
+        txtLimitMarker = findViewById(R.id.txtLimitMarker)
         tglCullingValue = findViewById(R.id.tglCullingValue)
+        txtSpeciesSelector = findViewById(R.id.txtSpeciesSelector)
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
         btnMainSetup = findViewById(R.id.btnMainSetup)
@@ -79,6 +101,9 @@ class SetUpActivity : AppCompatActivity() {
 
         tglCullingValue.alpha = 0.3f
         tglCullingValue.isEnabled=false
+        txtSpeciesSelector.alpha = 0.3f
+        txtLimitMarker.alpha = 0.3f
+        tglCullingValue.alpha = 0.3f
         spinnerTournamentSpecies.alpha = 0.3f
         spinnerTournamentSpecies.isEnabled = false
 
@@ -133,6 +158,8 @@ class SetUpActivity : AppCompatActivity() {
             btnTournament.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             btnMetric.visibility = View.VISIBLE
+            txtLimitMarker.alpha = 0.3f
+            txtSpeciesSelector.alpha = 0.3f
             tglCullingValue.alpha = 0.3f
             tglCullingValue.isEnabled=false
             spinnerTournamentSpecies.alpha = 0.3f
@@ -149,6 +176,8 @@ class SetUpActivity : AppCompatActivity() {
             btnFunDay.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             tglCullingValue.alpha = 1.0f
+            txtLimitMarker.alpha = 1.0f
+            txtSpeciesSelector.alpha = 1.0f
             tglCullingValue.isEnabled = true
             spinnerTournamentSpecies.alpha = 1.0f
             spinnerTournamentSpecies.isEnabled = true
@@ -159,8 +188,15 @@ class SetUpActivity : AppCompatActivity() {
 
         // |||||||||||||| Load saved GPS state ||||||||||||||||||||||||||||||||||
 
-        val isGpsEnabled = sharedPreferences.getBoolean("GPS_ENABLED", false)
-        tglGPS.isChecked = isGpsEnabled
+// ✅ Check both: saved state AND permission
+        val isGpsEnabledInPrefs = sharedPreferences.getBoolean("GPS_ENABLED", false)
+        val hasLocationPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        tglGPS.isChecked = isGpsEnabledInPrefs && hasLocationPermission
+
 
         tglGPS.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -212,7 +248,10 @@ class SetUpActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "⚠️ Please select a Measurement and Unit Type!", Toast.LENGTH_SHORT).show()
+                val toast = Toast.makeText(this, "⚠️ Please select a Measurement and Unit Type!", Toast.LENGTH_SHORT)
+                toast.setGravity(Gravity.CENTER, 0, 0)
+                toast.show()
+
             }
         }
     }//-------------- END of ON CREATE  _______________________
@@ -275,7 +314,9 @@ class SetUpActivity : AppCompatActivity() {
             } else {
                 tglGPS.isChecked = false
                 disableGps()  // Ensure GPS is disabled if permissions are denied.
-                Toast.makeText(this, "GPS permission denied", Toast.LENGTH_SHORT).show()
+                val toast = Toast.makeText(this, "GPS permission denied", Toast.LENGTH_SHORT)
+                toast.setGravity(Gravity.CENTER, 0, 0)
+                toast.show()
             }
         }
     }
@@ -283,7 +324,9 @@ class SetUpActivity : AppCompatActivity() {
 
     private fun enableGps() {
             sharedPreferences.edit().putBoolean("GPS_ENABLED", true).apply()
-            Toast.makeText(this, "GPS is Enabled", Toast.LENGTH_SHORT).show()
+        val toast = Toast.makeText(this, "GPS is Enabled", Toast.LENGTH_SHORT)
+        toast.setGravity(Gravity.CENTER, 0, 0)
+        toast.show()
         }
 
         private fun disableGps() {

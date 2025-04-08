@@ -10,8 +10,8 @@
         android:id="@+id/speciesSelectionLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/material_dynamic_primary70"
         android:orientation="vertical"
-        android:background="@color/design_default_color_secondary"
         android:padding="16dp"
         tools:context=".SpeciesSelectionActivity">
 
@@ -21,11 +21,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:paddingBottom="8dp"
-            android:text="the Species List"
-            android:textColor="@color/black"
-            android:textSize="20sp"
+            android:text="Main Species List"
+            android:textColor="@color/clip_blue"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <!-- Selected Count -->
@@ -54,20 +54,20 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="center">
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnSaveSpecies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="7dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:background="@drawable/btn_outline_blue"
-                android:enabled="false"
-                android:padding="5dp"
+                android:padding="7dp"
                 android:text="@string/save_selection"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -78,13 +78,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/btn_outline_green"
-                android:padding="5dp"
-                android:text="Adjust Species List"
+                android:background="@drawable/btn_outline_orange"
+                android:padding="7dp"
+                android:text="Alter Species List"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
+
         </LinearLayout>
 
         <!-- Add Custom Species -->
@@ -92,19 +92,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="center">
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnResetSpecies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/btn_outline_red"
-                android:padding="5dp"
                 android:layout_marginEnd="10dp"
+                android:background="@drawable/btn_outline_red"
+                android:padding="7dp"
                 android:text="Reset the Species List"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -115,13 +115,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="7dp"
-                android:background="@drawable/btn_outline_grey"
+                android:background="@drawable/btn_outline_yellow"
                 android:padding="15dp"
                 android:text="@string/cancel"
                 android:textColor="@color/clip_blue"
                 android:textSize="16sp"
                 android:textStyle="bold" />
+
         </LinearLayout>
 
     </LinearLayout>

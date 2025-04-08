@@ -2,18 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/selection_list"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@color/lite_grey"
-    android:gravity="center_vertical">
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/imgDragHandle"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/ic_drag_handle"
-    android:contentDescription="@string/drag_handle_for_user" />
+        android:contentDescription="@string/drag_handle_for_user"
+        android:src="@drawable/ic_drag_handle" />
 
     <ImageView
         android:id="@+id/imgSpeciesReorder"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/species"
+        android:textColor="@color/black"
         android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"/>
+        android:textStyle="bold" />
 </LinearLayout>

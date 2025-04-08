@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -43,11 +44,69 @@ object SharedPreferencesManager {
         Log.d(TAG, "Reset species to default.")
     }
 
+    fun removeUserSpecies(context: Context, speciesName: String) {
+        val normalized = normalizeSpeciesName(speciesName)
 
-    fun getSafeSpeciesList(context: Context): List<String> {
-        val selected = SharedPreferencesManager.getSelectedSpeciesList(context)
-        return if (selected.isNotEmpty()) selected else SharedPreferencesManager.getAllSpecies(context)
+        val currentAll = getAllSavedSpecies(context).toMutableList()
+        val updatedAll = currentAll.filterNot { normalizeSpeciesName(it) == normalized }
+        saveAllSpecies(context, updatedAll)
+
+        // Also remove from selected species if it was selected
+        val currentSelected = getSelectedSpeciesList(context).toMutableList()
+        val updatedSelected = currentSelected.filterNot { normalizeSpeciesName(it) == normalized }
+        saveSelectedSpeciesList(context, updatedSelected)
+
+        Log.d(TAG, "Removed species: $speciesName")
     }
+
+
+    fun getAllSavedSpecies(context: Context): List<String> {
+        val prefs = getPrefs(context)
+        val json = prefs.getString(KEY_ALL_SPECIES, null)
+        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type) else listOf()
+    }
+
+
+    fun updateUserSpeciesName(context: Context, oldName: String, newName: String) {
+        val normalizedOld = normalizeSpeciesName(oldName)
+        val normalizedNew = normalizeSpeciesName(newName)
+
+        if (normalizedNew.isEmpty()) {
+            Log.w(TAG, "New name is empty. Update aborted.")
+            Toast.makeText(context, "Species name cannot be empty.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val allSpecies = getAllSavedSpecies(context)
+        val nameExists = allSpecies.any {
+            normalizeSpeciesName(it) == normalizedNew && normalizeSpeciesName(it) != normalizedOld
+        }
+
+        if (nameExists) {
+            Log.w(TAG, "Species name '$newName' already exists. Update aborted.")
+            Toast.makeText(context, "A species with this name already exists.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Update in ALL species
+        val updatedAll = allSpecies.toMutableList()
+        val indexInAll = updatedAll.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
+        if (indexInAll != -1) {
+            updatedAll[indexInAll] = newName
+            saveAllSpecies(context, updatedAll)
+        }
+
+        // Update in SELECTED species
+        val selectedSpecies = getSelectedSpeciesList(context).toMutableList()
+        val indexInSelected = selectedSpecies.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
+        if (indexInSelected != -1) {
+            selectedSpecies[indexInSelected] = newName
+            saveSelectedSpeciesList(context, selectedSpecies)
+        }
+
+        Log.d(TAG, "Updated species from '$oldName' to '$newName'")
+    }
+
 
     fun setMasterSpeciesList(context: Context, speciesList: List<String>) {
         saveAllSpecies(context, speciesList)
@@ -76,11 +135,6 @@ object SharedPreferencesManager {
         getPrefs(context).edit().putString(KEY_SELECTED_SPECIES_LIST, json).apply()
     }
 
-    fun getAllSavedSpecies(context: Context): List<String> {
-        val prefs = getPrefs(context)
-        val json = prefs.getString(KEY_ALL_SPECIES, null)
-        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type) else listOf()
-    }
 
     fun saveAllSpecies(context: Context, allSpecies: List<String>) {
         val prefs = getPrefs(context).edit()
@@ -109,10 +163,6 @@ object SharedPreferencesManager {
         prefs.edit().remove(KEY_SELECTED_SPECIES_LIST).remove(KEY_ALL_SPECIES).apply()
     }
 
-    fun clearSpeciesPreferences(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(KEY_SELECTED_SPECIES_LIST).remove(KEY_ALL_SPECIES).apply()
-    }
 
     private fun getPrefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/selection_list"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingVertical="12dp"
+        android:text="@string/top_5_catches_this_month"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="@color/clip_blue"/>
+
+    <!-- Species Spinner -->
+
+    <Spinner
+        android:id="@+id/spinnerSpeciesSummary"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:background="@color/Log_yellow_secondary"
+        android:textAlignment="center" />
+
+    <!-- Min/Max Weight Input -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/edtMinWeight"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:hint="@string/min_weight"
+            android:inputType="numberDecimal"
+            android:textSize="20sp"
+            android:textColor="@color/clip_blue"
+            android:textStyle="bold"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="2dp"/>
+
+        <TextView
+            android:id="@+id/txtMinUnits"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Lbs"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/edtMaxWeight"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:hint="@string/max_weight"
+            android:inputType="numberDecimal"
+            android:textSize="20sp"
+            android:textColor="@color/clip_blue"
+            android:textStyle="bold"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="2dp"/>
+
+        <TextView
+            android:id="@+id/txtMaxUnits"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+             android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Lbs"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioGroup
+            android:id="@+id/radioGroupUnits"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            >
+
+            <RadioButton
+                android:id="@+id/radioLbs"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:checked="true"
+                android:text="@string/lbs"
+                android:layout_marginEnd="5dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/clip_blue"/>
+
+            <RadioButton
+                android:id="@+id/radioKgs"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/kgs"
+                android:layout_marginEnd="5dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/clip_blue"/>
+
+            <RadioButton
+                android:id="@+id/radioInches"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/inches"
+                android:layout_marginEnd="5dp"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/clip_blue" />
+
+            <RadioButton
+                android:id="@+id/radioCm"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/cms"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/clip_blue"/>
+        </RadioGroup>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="12dp">
+
+        <Button
+            android:id="@+id/btnGetTop5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/search"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_outline_green"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"/>
+
+        <Button
+            android:id="@+id/btnShareResults"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/share_results"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/btn_outline_orange"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCancelSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="@drawable/btn_outline_grey"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"/>
+
+        <!-- Results -->
+
+    <ListView
+        android:id="@+id/listTopCatches"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp"/>
+
+</LinearLayout>

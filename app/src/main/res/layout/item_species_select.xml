@@ -34,4 +34,14 @@
         android:textColor="@color/black"/>
 
 
+    <ImageButton
+        android:id="@+id/btnEditSpeciesNameSelect"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:contentDescription="Edit Users Species"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_edit"
+        android:visibility="gone" />
+
+
 </LinearLayout>

@@ -28,6 +28,13 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "Species already initialized. Loaded selected: $selected")
         }
 
+        // ---------------- Open Set-Up page --------------------------------
+        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)
+        openSetUpActivity.setOnClickListener {
+            val intent = Intent(this,SetUpActivity::class.java)
+            startActivity(intent)
+        }
+
     //-------------------------- Open the Manual TRAINING INDEX ------------------------
         val btnManualControls = findViewById<Button>(R.id.btnManualControls)
         btnManualControls.setOnClickListener{
@@ -43,21 +50,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         //-------------------------- Open the Google MAPS ------------------------
-        val btnLookUpMap = findViewById<Button>(R.id.btnLookUpMap)
-        btnLookUpMap.setOnClickListener {
-            val intent = Intent(this, MapCatchLocationsActivity::class.java)
+        val btnLookUpShareData = findViewById<Button>(R.id.btnLookUpShareData)
+        btnLookUpShareData.setOnClickListener {
+            val intent = Intent(this, LookUpShareDataActivity::class.java)
             startActivity(intent)
         }
-
-
-
-        // ---------------- Open Set-Up page --------------------------------
-        val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)
-        openSetUpActivity.setOnClickListener {
-            val intent = Intent(this,SetUpActivity::class.java)
-            startActivity(intent)
-        }
-
 
     }// `````````` END On Create  ``````````````````````
 

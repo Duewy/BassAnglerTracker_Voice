@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.ItemMoveCallback.ItemTouchHelperContract
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 class SpeciesSelectAdapter(
     private val speciesList: MutableList<SpeciesItem>
@@ -38,13 +39,20 @@ class SpeciesSelectAdapter(
 
     // ✅ Proper interface implementation using RecyclerView.ViewHolder
     override fun onRowSelected(viewHolder: RecyclerView.ViewHolder) {
-        // You can change background color or highlight if you like
+        viewHolder.itemView.setBackgroundResource(R.drawable.selected_background)
         viewHolder.itemView.alpha = 0.6f
     }
 
     override fun onRowClear(viewHolder: RecyclerView.ViewHolder) {
+        viewHolder.itemView.setBackgroundResource(R.color.lite_grey)
         viewHolder.itemView.alpha = 1.0f
+
+        // Save reordered list here
+        val newOrder = getOrderedSpeciesNames()
+        SharedPreferencesManager.saveSelectedSpeciesList(viewHolder.itemView.context, newOrder)
     }
+
+
 
     inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val txtSpeciesName: TextView = itemView.findViewById(R.id.txtSpeciesNameReorder)
