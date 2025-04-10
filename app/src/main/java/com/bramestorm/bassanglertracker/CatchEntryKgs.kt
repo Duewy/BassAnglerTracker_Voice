@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -211,21 +212,25 @@ class CatchEntryKgs : AppCompatActivity() {
         val edtWeightGrams = dialogView.findViewById<EditText>(R.id.edtDialogWeightGrams)
         val spinnerSpecies = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditKgs)
 
-        // Load species list from strings.xml
-        val speciesArray = resources.getStringArray(R.array.species_list)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
+        // --- 1. Load user-selected species list ---
+        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
+        val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = adapter
 
-        // Set current values
+        // --- 2. Set current values ---
         val totalWeightKgs = catchItem.totalWeightHundredthKg ?: 0 // Default to 0 if null
         edtWeightKgs.setText((totalWeightKgs / 100).toString())
         edtWeightGrams.setText((totalWeightKgs % 100).toString())
 
-        // Set spinner selection to the current species
-        val speciesIndex = speciesArray.indexOf(catchItem.species)
-        spinnerSpecies.setSelection(if (speciesIndex != -1) speciesIndex else 0) // ✅ Default to first species
+        // --- 3. Set spinner selection based on normalized match ---
+        val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
+        spinnerSpecies.setSelection(if (speciesIndex != -1) speciesIndex else 0)
 
+        // --- 4. Show dialog and handle save ---
         AlertDialog.Builder(this)
             .setTitle("Edit Catch")
             .setView(dialogView)
@@ -237,13 +242,12 @@ class CatchEntryKgs : AppCompatActivity() {
 
                 val dbHelper = CatchDatabaseHelper(this)
 
-                // ✅ Call updateCatch() with all required parameters
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
                     newWeightOz = null,
-                    newWeightKg = totalWeightHundredthKg,  // Since this is Lbs/Oz mode, set Kg to null
-                    newLengthA8ths = null,  // No length update
-                    newLengthCm = null,  // No length update
+                    newWeightKg = totalWeightHundredthKg,
+                    newLengthA8ths = null,
+                    newLengthCm = null,
                     species = species
                 )
 
@@ -255,6 +259,7 @@ class CatchEntryKgs : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
 
     // ############## GET DATE and TIME  ############################
 

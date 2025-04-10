@@ -20,7 +20,7 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/enter_catch_details_cm"
+            android:text="Fun Day Catch Cms"
             android:textSize="25sp"
             android:layout_gravity="center"
             android:gravity="center"
@@ -145,7 +145,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingVertical="5dp">
 
             <!-- Lbs and Ozs labels  -->
             <TextView

@@ -76,16 +76,49 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
 
         // Load default map with current month's catches
-        val filters = MapQueryFilters(
-            dateRange = "${getFirstDayOfMonth()} to ${getTodayAsString()}",
-            species = "All",
-            eventType = "Both",
-            sizeType = "Weight",
-            sizeRange = "0 - 9999",
-            measurementType = "Imperial (lbs/oz, inches)"
-        )
+        val db = CatchDatabaseHelper(this)
+        val recentCatches = db.getLastNCatchesWithLocation(5)
 
-        applyMapFilters(filters)
+        if (recentCatches.isEmpty()) {
+            val fallbackLocation = LatLng(44.43342, -76.34939) // Gilmour Point
+            map.addMarker(
+                MarkerOptions()
+                    .position(fallbackLocation)
+                    .icon(getResizedMapIcon(R.drawable.map_icon_fall_back, 64, 64))
+                    .title("No GPS data found")
+                    .snippet("Default location")
+            )
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(fallbackLocation, 10f))
+            Toast.makeText(
+                this,
+                "⚠️ No recent GPS-tagged catches.\nShowing default location.",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            for (catch in recentCatches) {
+                if (catch.latitude != null && catch.longitude != null) {
+                    val position = LatLng(catch.latitude!!, catch.longitude!!)
+                    val markerIcon = if (catch.catchType.lowercase() == "tournament") {
+                        BitmapDescriptorFactory.fromResource(R.drawable.map_icon_tournament)
+                    } else {
+                        BitmapDescriptorFactory.fromResource(R.drawable.map_icon_fun_day)
+                    }
+
+                    map.addMarker(
+                        MarkerOptions()
+                            .position(position)
+                            .icon(markerIcon)
+                            .title("${catch.species}")
+                            .snippet("Caught: ${catch.dateTime}")
+                    )
+                }
+            }
+
+            // Move camera to the first recent catch
+            val first = recentCatches.first()
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(first.latitude!!, first.longitude!!), 9f))
+        }
+
     }
 
     fun applyMapFilters(filters: MapQueryFilters) {

@@ -214,6 +214,8 @@
     <string name="select_measurement_type"><u>Select Measurement Type</u></string>
     <string name="you_said">You said: %1$s</string>
     <string name="start_the_fishing_day">Start the Fishing Day</string>
+    <string name="tournament_catch_kgs">Tournament Catch Kgs</string>
+    <string name="tournament_catch_cms">Tournament Catch Cms</string>
 
 
     //species

@@ -24,7 +24,7 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/title_weight_lbs_oz"
+            android:text="Fun Day Catch Lbs"
             android:textSize="25sp"
             android:layout_gravity="center"
             android:gravity="center"
@@ -40,8 +40,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:layout_gravity="left"
-            android:gravity="left">
+            android:layout_gravity="start"
+            android:gravity="start">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -50,7 +50,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginEnd="10dp"
-                android:gravity="left"
+                android:gravity="start"
                 android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="19sp"
@@ -58,7 +58,7 @@
 
             <Spinner
                 android:id="@+id/spinnerSpeciesPopUp"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:dropDownSelector="@color/clip_yellow"
@@ -92,15 +92,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:layout_marginHorizontal="10dp"
             android:visibility="visible">
 
             <!-- ENTER Lbs and Ozs  -->
             <EditText
                 android:id="@+id/edtWeightLbs"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="-Lbs-  0 to 99 Lbs"
+                android:layout_height="50dp"
+                android:layout_weight="0.3"
+                android:hint="0 to 99"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -109,12 +110,23 @@
                 android:textStyle="bold"
                 android:background="@color/very_lite_grey"/>
 
+            <TextView
+                android:id="@+id/txt9CatchLbs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="bottom"
+                android:text="@string/lbs"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
             <EditText
                 android:id="@+id/edtWeightOzs"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="-Ozs-  0 to 15 Ozs"
+                android:layout_height="50dp"
+                android:layout_weight="0.3"
+                android:hint="0 to 15"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -122,6 +134,16 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:background="@color/very_lite_grey"/>
+            <TextView
+                android:id="@+id/txt9CatchOzs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="bottom"
+                android:text="@string/ozs"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
         </LinearLayout>
 
@@ -169,10 +191,10 @@
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/Log_green_secondary"
-                android:text="Cancel"
                 android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_green"
+                android:text="Cancel"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -183,11 +205,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/Log_green"
+                android:background="@drawable/btn_outline_blue"
                 android:text="Save Catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
         </LinearLayout>
 

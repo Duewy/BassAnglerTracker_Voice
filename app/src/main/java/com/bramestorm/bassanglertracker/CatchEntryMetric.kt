@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -196,21 +197,25 @@ class CatchEntryMetric : AppCompatActivity() {
         val edtLengthDecimal = dialogView.findViewById<EditText>(R.id.edtLengthDecimal)
         val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditCms)
 
-        // Load species list from strings.xml
-        val speciesArray = resources.getStringArray(R.array.species_list)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
+        // --- 1. Load user-selected species list ---
+        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
+        val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesLbs.adapter = adapter
 
-        // Set current values
-        val totalLengthTenths = catchItem.totalLengthTenths ?: 0 // Default to 0 if null
+        // --- 2. Set current values ---
+        val totalLengthTenths = catchItem.totalLengthTenths ?: 0
         edtLengthCms.setText((totalLengthTenths / 10).toString())
         edtLengthDecimal.setText((totalLengthTenths % 10).toString())
 
-        // Set spinner selection to the current species
-        val speciesIndex = speciesArray.indexOf(catchItem.species)
-        spinnerSpeciesLbs.setSelection(if (speciesIndex != -1) speciesIndex else 0) // ✅ Default to first species
+        // --- 3. Set spinner selection based on normalized match ---
+        val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
+        spinnerSpeciesLbs.setSelection(if (speciesIndex != -1) speciesIndex else 0)
 
+        // --- 4. Show dialog and handle Save ---
         AlertDialog.Builder(this)
             .setTitle("Edit Catch")
             .setView(dialogView)
@@ -222,17 +227,16 @@ class CatchEntryMetric : AppCompatActivity() {
 
                 val dbHelper = CatchDatabaseHelper(this)
 
-                // ✅ Call updateCatch() with all required parameters
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
-                    newWeightOz= null,
+                    newWeightOz = null,
                     newWeightKg = null,
                     newLengthA8ths = null,
                     newLengthCm = totalLengthTenths,
                     species = species
                 )
 
-                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Weight=$totalLengthTenths, New Species=$species")
+                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Length=$totalLengthTenths, New Species=$species")
 
                 updateListViewCm()
                 Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
@@ -240,6 +244,7 @@ class CatchEntryMetric : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
 
     // ############## GET DATE and TIME  ############################
 

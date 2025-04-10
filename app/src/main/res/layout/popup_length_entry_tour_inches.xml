@@ -21,9 +21,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/enter_catch_details_inches_8ths"
+            android:text="Tournament Catch Inches"
             android:textColor="@color/clip_white"
-            android:background="@color/clip_green"
+            android:background="@color/clip_red"
             android:textSize="22sp"
             android:textStyle="bold"
             android:padding="5dp"/>

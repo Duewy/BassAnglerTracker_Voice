@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -202,43 +203,46 @@ class CatchEntryInches : AppCompatActivity() {
         val edtLengthEntry8ths = dialogView.findViewById<EditText>(R.id.edtLength8ths)
         val spinnerSpeciesEditInches = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditInches)
 
-        // Load species list from strings.xml
-        val speciesArray = resources.getStringArray(R.array.species_list)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesArray)
+        // --- 1. Load user-selected species list ---
+        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
+        val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesEditInches.adapter = adapter
 
-        // Set current values
-        val newLengthA8ths= catchItem.totalLengthA8th ?: 0 // Default to 0 if null
+        // --- 2. Set current values ---
+        val newLengthA8ths = catchItem.totalLengthA8th ?: 0
         edtLengthInches.setText((newLengthA8ths / 8).toString())
         edtLengthEntry8ths.setText((newLengthA8ths % 8).toString())
 
-        // Set spinner selection to the current species
-        val speciesIndex = speciesArray.indexOf(catchItem.species)
-        spinnerSpeciesEditInches.setSelection(if (speciesIndex != -1) speciesIndex else 0) // ✅ Default to first species
+        // --- 3. Set spinner selection based on normalized match ---
+        val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
+        spinnerSpeciesEditInches.setSelection(if (speciesIndex != -1) speciesIndex else 0)
 
+        // --- 4. Show dialog and handle save ---
         AlertDialog.Builder(this)
             .setTitle("Edit Catch")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
                 val newInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
                 val new8ths = edtLengthEntry8ths.text.toString().toIntOrNull() ?: 0
-                val totalLengthA8th= (newInches * 16) + new8ths
+                val totalLengthA8th = (newInches * 8) + new8ths
                 val species = spinnerSpeciesEditInches.selectedItem.toString()
 
                 val dbHelper = CatchDatabaseHelper(this)
 
-                // ✅ Call updateCatch() with all required parameters
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
                     newWeightOz = null,
-                    newWeightKg = null,  // Since this is Lbs/Oz mode, set Kg to null
-                    newLengthA8ths = totalLengthA8th,  // No length update
-                    newLengthCm = null,  // No length update
+                    newWeightKg = null,
+                    newLengthA8ths = totalLengthA8th,
+                    newLengthCm = null,
                     species = species
                 )
 
-                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Weight=$totalLengthA8th, New Species=$species")
+                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Length=$totalLengthA8th, New Species=$species")
 
                 updateListViewInch()
                 Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
@@ -246,6 +250,7 @@ class CatchEntryInches : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
 
     // ############## GET DATE and TIME  ############################
 

@@ -370,6 +370,30 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catches
     } // END getFilteredCatchesWithLocationAdvanced
 
+    fun getLastNCatchesWithLocation(limit: Int): List<CatchItem> {
+        val db = readableDatabase
+        val list = mutableListOf<CatchItem>()
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM $TABLE_NAME
+        WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+        ORDER BY $COLUMN_DATE_TIME DESC
+        LIMIT ?
+        """.trimIndent(),
+            arrayOf(limit.toString())
+        )
+
+        while (cursor.moveToNext()) {
+            list.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return list
+    }
+
+
     // for Map Searches TOP 5 of Length or Weight in set Species...
     fun getTopCatchesForSpeciesThisMonth(
         species: String,

@@ -15,23 +15,26 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <!-- Popup Title -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/enter_catch_details_kgs"
-            android:textColor="@color/black"
-            android:gravity="center"
             android:layout_gravity="center"
-            android:textSize="22sp"
             android:background="@color/clip_orange"
-            android:textStyle="bold"
-            android:padding="5dp"/>
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="@string/tournament_catch_kgs"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:gravity="left"
+            android:paddingVertical="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 

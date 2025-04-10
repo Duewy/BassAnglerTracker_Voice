@@ -17,17 +17,19 @@
         <!-- Popup Title -->
 
         <!-- Species Spinner -->
+
         <TextView
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Enter Catch Details  - Lbs Ozs -"
+            android:background="@color/clip_blue"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="10dp"
+            android:text="Tournament Catch Lbs"
             android:textColor="@color/clip_white"
-            android:background="@color/clip_green"
             android:textSize="22sp"
-            android:textStyle="bold"
-            android:padding="5dp"/>
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -113,7 +115,7 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:hint="0-99 Lbs"
+                android:hint="0-99"
                 android:textColorHint="@color/grey"
                 android:background="@color/very_lite_grey"
                 android:inputType="number"
@@ -138,7 +140,7 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:hint="0-15 Oz"
+                android:hint="0-15"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:textColorHint="@color/grey"
