@@ -1,5 +1,5 @@
 // 📂 utils/VoiceHelper.kt
-package com.bramestorm.bassanglertracker.utils
+package com.bramestorm.bassanglertracker.training
 
 import android.content.Context
 import android.os.Bundle
@@ -24,7 +24,7 @@ object VoiceHelper {
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val spokenText = matches?.firstOrNull()?.trim() ?: "Nothing heard"
-                txtResult.text = "You said: \"$spokenText\""
+                txtResult.text = "Heard $spokenText"
                 // Add more logic here if needed
             }
 

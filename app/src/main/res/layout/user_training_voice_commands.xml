@@ -4,13 +4,13 @@
 <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:fillViewport="true"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/softlock_green">
 
 
@@ -18,10 +18,11 @@
             android:id="@+id/imgBassVoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0.20"
+            android:contentDescription="@string/catch_and_call_logo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:alpha="0.25"
             app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
 
         <ImageView
@@ -104,9 +105,11 @@
             android:layout_width="0dp"
             android:layout_height="5dp"
             android:layout_marginVertical="15dp"
+            android:layout_marginTop="12dp"
             android:background="@color/black"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llSelect" />
 
@@ -117,7 +120,7 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/btn_outline_green"
             android:padding="15dp"
-            android:text="What is Voice Command Control"
+            android:text="@string/what_is_voice_command_control"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -138,6 +141,36 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnWhatIsVCC" />
+        <View
+            android:id="@+id/divider19"
+            android:layout_width="0dp"
+            android:layout_height="5dp"
+            android:layout_marginVertical="15dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/black"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnEnableVCC" />
+
+        <TextView
+            android:id="@+id/txtTeachVoice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintHorizontal_weight="0.6"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:text="@string/teach_the_application_your_voice_and_how_you_say_words_phrases"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:typeface="serif"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider19" />
 
         <Button
             android:id="@+id/btnTeachVCC"
@@ -146,12 +179,12 @@
             android:layout_marginTop="15dp"
             android:background="@drawable/btn_outline_blue"
             android:padding="15dp"
-            android:text="Teaching Voice Control"
+            android:text="@string/teaching_voice_control"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnEnableVCC" />
+            app:layout_constraintTop_toBottomOf="@id/txtTeachVoice" />
 
         <View
             android:id="@+id/divider9"
@@ -175,6 +208,7 @@
             android:layout_weight="1"
             android:orientation="horizontal"
             android:paddingVertical="20dp"
+            android:layout_marginBottom="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider9">
@@ -185,6 +219,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginBottom="30dp"
                 android:layout_weight=".4"
                 android:background="@drawable/btn_outline_red"
                 android:text="@string/menu"

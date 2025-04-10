@@ -5,10 +5,10 @@
     android:layout_height="wrap_content"
     android:paddingStart="16dp"
     android:paddingEnd="1dp"
-    android:background="@color/very_lite_grey"
+    android:background="@color/selection_list"
     android:textColor="@color/black"
     android:textStyle="bold"
     android:textSize="22sp"
-    android:gravity="center_vertical"
+    android:gravity="center"
     android:ellipsize="end"
     android:maxLines="1" />

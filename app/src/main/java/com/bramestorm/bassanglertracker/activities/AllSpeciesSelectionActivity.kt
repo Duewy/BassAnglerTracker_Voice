@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.activities
 
 import android.os.Bundle
+import android.view.Gravity
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -94,12 +95,16 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
                     val normalized = SharedPreferencesManager.normalizeSpeciesName(input)
 
                     if (input.isBlank()) {
-                        Toast.makeText(this, "⚠️ Please enter a species name.", Toast.LENGTH_SHORT).show()
+                        val toast = Toast.makeText(this, "⚠️ Please enter a species name.", Toast.LENGTH_SHORT)
+                        toast.setGravity(Gravity.CENTER, 0, 0)
+                        toast.show()
                         return@setPositiveButton
                     }
 
                     if (allSpecies.any { SharedPreferencesManager.normalizeSpeciesName(it) == normalized }) {
-                        Toast.makeText(this, "⚠️ Species already exists!", Toast.LENGTH_SHORT).show()
+                        val toast = Toast.makeText(this, "⚠️ Species already exists!", Toast.LENGTH_SHORT)
+                        toast.setGravity(Gravity.CENTER, 0, 0)
+                        toast.show()
                         return@setPositiveButton
                     }
 
@@ -109,8 +114,9 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
 
                     // ✅ Refresh full species list and adapter
                     setupAdapter()
-
-                    Toast.makeText(this, "✅ '$input' added to species list.", Toast.LENGTH_SHORT).show()
+                    val toast = Toast.makeText(this, "added to species list.", Toast.LENGTH_SHORT)
+                    toast.setGravity(Gravity.CENTER, 0, 0)
+                    toast.show()
                     dialogInterface.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialogInterface, _ ->
@@ -144,7 +150,9 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
             val normalized = SharedPreferencesManager.normalizeSpeciesName(speciesName)
             if (isChecked) {
                 if (selectedSpecies.size >= 8) {
-                    Toast.makeText(this, "Only 8 species allowed!", Toast.LENGTH_SHORT).show()
+                    val toast = Toast.makeText(this,  "❌ Only 8 Species Allowed\nDeselect a Species First", Toast.LENGTH_SHORT)
+                    toast.setGravity(Gravity.CENTER, 0, 0)
+                    toast.show()
                     adapter.uncheckSpecies(speciesName)
                 } else {
                     selectedSpecies.add(normalized)

@@ -76,6 +76,9 @@
     <color name="highlight_yellow">#F6DF0E</color>
     <color name="selection_list">#EAB383</color>
 
+    <color name="lt_brown">#BF8D60</color>
+    <color name="mid_brown">#8C623D</color>
+
     <color name="ic_launcher_background">#FFBB00</color>
 
 </resources>

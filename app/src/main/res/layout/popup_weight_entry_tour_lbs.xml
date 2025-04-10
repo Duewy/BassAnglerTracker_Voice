@@ -103,17 +103,19 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:visibility="visible"
+            android:layout_marginTop="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <EditText
                 android:id="@+id/edtWeightTourLbs"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:hint="0-99 Lbs"
-                android:textColorHint="@color/lite_grey"
+                android:textColorHint="@color/grey"
+                android:background="@color/very_lite_grey"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -124,20 +126,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_gravity="bottom"
                 android:text="Lbs"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
             <EditText
                 android:id="@+id/edtWeightTourOz"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:hint="0-15 Oz"
                 android:inputType="number"
                 android:textColor="@color/black"
-                android:textColorHint="@color/lite_grey"
+                android:textColorHint="@color/grey"
+                android:background="@color/very_lite_grey"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -146,11 +151,44 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_gravity="bottom"
                 android:text="Ozs"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <!-- Kgs labels  -->
+            <TextView
+                android:id="@+id/textKgsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lbs"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/textDecKgsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Ozs"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
 
         <!-- Save and Cancel Buttons -->
         <LinearLayout

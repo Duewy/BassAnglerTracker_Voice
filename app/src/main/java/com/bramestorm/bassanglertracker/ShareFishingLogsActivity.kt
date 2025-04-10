@@ -40,16 +40,18 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         btnShareCSV = findViewById(R.id.btnShareCSV)
         btnSetUpSFLogs= findViewById(R.id.btnSetUpSFLogs)
 
+        //------------- Create Data into CSV -------------------
         btnGenerateCSV.setOnClickListener {
             generatedCsvFile = generateDummyCatchLogCsv()
 
             if (generatedCsvFile != null) {
                 Toast.makeText(this, "CSV generated to cache!", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Failed to generate CSV", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "⚠️ Warning: Failed to generate CSV", Toast.LENGTH_SHORT).show()
             }
         }
 
+        //--------------- Share the Data with CSV ----------------------
         btnShareCSV.setOnClickListener {
             generatedCsvFile?.let { file ->
                 val uri = FileProvider.getUriForFile(
@@ -65,10 +67,11 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                 }
                 startActivity(Intent.createChooser(shareIntent, "Share fishing log via:"))
             } ?: run {
-                Toast.makeText(this, "Please generate the CSV first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,  "⚠️ Warning: Please generate the CSV first", Toast.LENGTH_SHORT).show()
             }
         }
 
+        //-------------- Goto SetUp page ---------------------
         btnSetUpSFLogs.setOnClickListener {
             val intent = Intent(this, SetUpActivity::class.java)
             startActivity(intent)
@@ -76,6 +79,20 @@ class ShareFishingLogsActivity : AppCompatActivity() {
 
 
     }//----------------- END OnCreate -------------------------------
+
+
+    override fun onResume() {
+        super.onResume()
+        //------------ Clear all the Checked Values to Start Fresh ---------------------
+        chkIncludeDate.isChecked = false
+        chkIncludeSpecies.isChecked = false
+        chkIncludeWeight.isChecked = false
+        chkIncludeLength.isChecked = false
+        chkIncludeGPS.isChecked = false
+        chkIncludeCatchType.isChecked = false
+
+    }//-------------- END onResume --------------------
+
 
     private fun generateDummyCatchLogCsv(): File? {
         return try {

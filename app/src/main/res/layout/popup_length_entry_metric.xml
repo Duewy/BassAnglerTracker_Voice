@@ -68,17 +68,19 @@
             android:layout_width="match_parent"
             android:layout_height="5dp"
             android:background="@color/black"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- WEIGHT KGS GRAMS  -->
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enter_cm_and_mm"
-            android:textColor="@color/black"
+            android:layout_marginTop="2dp"
             android:gravity="center"
-            android:layout_marginTop="10dp"/>
-        <!-- WEIGHT KGS GRAMS  -->
+            android:text="@string/enter_cm_and_mm"
+            android:textColor="@color/black" />
 
         <LinearLayout
             android:id="@+id/layoutWeightLbsOzs"
@@ -90,26 +92,83 @@
             <EditText
                 android:id="@+id/edtLengthCms"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/very_lite_grey"
                 android:hint="@string/cms_0_to_99"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold"  />
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="bottom"
+                android:text="@string/cms"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
             <EditText
                 android:id="@+id/edtLengthDecimal"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
+                android:background="@color/very_lite_grey"
                 android:hint="@string/_0_to_9_mm"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold"  />
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="bottom"
+                android:text="@string/mm"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <!-- Lbs and Ozs labels  -->
+            <TextView
+                android:id="@+id/textLbsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="Centimeters"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/textOzsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="millimeter"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
 
         </LinearLayout>
 
@@ -123,26 +182,25 @@
 
             <Button
                 android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/Log_green_secondary"
-                android:text="Cancel"
                 android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_grey"
+                android:text="@string/cancel"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnSaveLength"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/Log_green"
-                android:text="Save Catch"
+                android:text="@string/save_catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:background="@drawable/btn_outline_orange" />
 
         </LinearLayout>
 

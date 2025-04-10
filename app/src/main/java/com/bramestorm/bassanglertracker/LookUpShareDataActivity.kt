@@ -31,7 +31,7 @@ class LookUpShareDataActivity : AppCompatActivity() {
         // ------------ GoTo Top 5 Page button -------------------
         val btnGoToTop5Page= findViewById<Button>(R.id.btnGoToTop5Page)
         btnGoToTop5Page.setOnClickListener {
-            val intent = Intent(this, SummaryActivity::class.java)
+            val intent = Intent(this, TopFiveCatchesActivity::class.java)
             startActivity(intent)
         }
 
@@ -44,8 +44,14 @@ class LookUpShareDataActivity : AppCompatActivity() {
 
         //--- FAKE DATA For TESTING ONLY ------   REMOVE For Real App !!!!!
         val dbHelper = CatchDatabaseHelper(this)
-        dbHelper.insertFakeCatchesForTesting()
-        Toast.makeText(this, "20 test catches added", Toast.LENGTH_SHORT).show()
+        dbHelper.insertFakeCatchesForTesting(dbHelper.writableDatabase)
+
+
+
+        val toast = Toast.makeText(this, "20 test catches added", Toast.LENGTH_SHORT)
+        toast.setGravity(android.view.Gravity.CENTER, 0, 0)
+        toast.show()
+
 
     }//----------------- END OnCreate ------------------
 

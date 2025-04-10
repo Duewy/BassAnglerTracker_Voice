@@ -103,41 +103,48 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:visibility="visible"
+            android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <EditText
                 android:id="@+id/edtLengthTourCms"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:layout_gravity="center"
+                android:background="@color/very_lite_grey"
                 android:hint="@string/_0_99_cms"
-                android:textColorHint="@color/lite_grey"
                 android:inputType="number"
                 android:textColor="@color/black"
+                android:textColorHint="@color/grey"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:gravity="center"
                 android:text="@string/cms"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
 
             <EditText
                 android:id="@+id/edtLengthTourDec"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:layout_gravity="center"
+                android:background="@color/very_lite_grey"
                 android:hint="@string/_0_9_mm"
                 android:inputType="number"
                 android:textColor="@color/black"
-                android:textColorHint="@color/lite_grey"
+                android:textColorHint="@color/grey"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -146,9 +153,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_gravity="bottom"
                 android:text="@string/mm"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <!-- Lbs and Ozs labels  -->
+            <TextView
+                android:id="@+id/textLbsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="Centimeters"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/textOzsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="millimeter"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
 
         </LinearLayout>
 

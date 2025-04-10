@@ -82,15 +82,22 @@ class TrainingWords : AppCompatActivity() {
         //~~~~~~~~~~ Opens the Mic for User ~~~~~~~~~~~~~~~~~~~~
         btnUserTalk.setOnClickListener {
             val phraseToSay = txtSayThis.text.toString().replace("Say This: ", "").trim()
-            val prompt = if (phraseToSay.isNotEmpty()) {
-                "Say: \"$phraseToSay\""
-            } else {
-                "Say a command or practice phrase"
+
+            // Check if selected phrase exists in the list
+            val isValidPhrase = phraseList.any { it.text.equals(phraseToSay, ignoreCase = true) }
+
+            if (!isValidPhrase) {
+                Toast.makeText(this, "Please select a word to practice.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+            val prompt = "Say: \"$phraseToSay\""
+
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
+                putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+            }
 
             try {
                 startActivityForResult(intent, SPEECH_REQUEST_CODE)
@@ -98,6 +105,7 @@ class TrainingWords : AppCompatActivity() {
                 Toast.makeText(this, "Your device doesn't support speech input", Toast.LENGTH_SHORT).show()
             }
         }
+
 
 
 
@@ -201,9 +209,9 @@ class TrainingWords : AppCompatActivity() {
         val normalizedTarget = currentPhrase.replace("\\s|-".toRegex(), "").lowercase()
 
         if (normalizedSpoken == normalizedTarget) {
-            txtWhatComputerHeard.text = "You said: \"$spoken\"\n✔ That is a match!"
+            txtWhatComputerHeard.text = "You said:$spoken\n✔ That is a match!"
         } else {
-            txtWhatComputerHeard.text = "You said: \"$spoken\"\n❌ That does not match \"$currentPhrase\""
+            txtWhatComputerHeard.text = "You said: $spoken\n❌ That does not match $currentPhrase"
         }
     }
 

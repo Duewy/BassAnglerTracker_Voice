@@ -25,6 +25,8 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnAdjustSpeciesList: Button
     private lateinit var btnResetSpecies: Button
     private lateinit var adapter: SpeciesSelectAdapter
+    private val speciesList = mutableListOf<SpeciesItem>()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +61,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // SAVE button → save reordered list to SharedPreferences
         btnSaveSpecies.setOnClickListener {
-            val toast = Toast.makeText(this, "⚠️ Species List SAVED", Toast.LENGTH_SHORT)
+            val toast = Toast.makeText(this,   "👍 Species List Saved Successfully", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.CENTER, 0, 0)
             toast.show()
 
@@ -86,7 +88,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // RESET button → restore default species list
         btnResetSpecies.setOnClickListener {
-            val toast = Toast.makeText(this, "⚠️ Species List RESET to Starting 8", Toast.LENGTH_SHORT)
+            val toast = Toast.makeText(this, "🐟 Species List RESET to Starting 8", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.CENTER, 0, 0)
             toast.show()
 
@@ -105,5 +107,18 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
     }//--------- END On Create -------------------------
 
+    override fun onResume() {
+        super.onResume()
+        val selectedSpeciesNames = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val speciesItems = selectedSpeciesNames.map { name ->
+            SpeciesItem(
+                name = name,
+                imageResId = getSpeciesImageResId(name),
+                isSelected = true
+            )
+        }.toMutableList()
+
+        adapter.updateList(speciesItems)
+    }
 
 }//-------END ------------------

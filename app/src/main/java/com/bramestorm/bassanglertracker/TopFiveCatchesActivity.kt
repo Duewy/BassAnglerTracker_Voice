@@ -17,7 +17,7 @@ import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.io.File
 import java.io.FileOutputStream
 
-class SummaryActivity : AppCompatActivity() {
+class TopFiveCatchesActivity : AppCompatActivity() {
 
     private lateinit var spinnerSpecies: Spinner
     private lateinit var edtMinWeight: EditText
@@ -41,7 +41,7 @@ class SummaryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_summary)
+        setContentView(R.layout.activity_top_five_catches)
 
         spinnerSpecies = findViewById(R.id.spinnerSpeciesSummary)
         edtMinWeight = findViewById(R.id.edtMinWeight)
@@ -214,7 +214,7 @@ class SummaryActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/csv"
             putExtra(Intent.EXTRA_STREAM, androidx.core.content.FileProvider.getUriForFile(
-                this@SummaryActivity,
+                this@TopFiveCatchesActivity,
                 "$packageName.fileprovider",
                 file
             ))

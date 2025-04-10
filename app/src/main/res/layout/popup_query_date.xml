@@ -4,50 +4,68 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/very_lite_grey">
+    android:background="@color/lt_brown">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select Date Range"
-        android:textSize="20sp"
+        android:text="@string/select_date_range"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:paddingBottom="12dp" />
 
     <Button
         android:id="@+id/btnFromDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="From Date" />
+        android:text="From Date"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:background="@drawable/btn_outline_green"/>
 
     <Button
         android:id="@+id/btnToDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="To Date" />
+        android:text="To Date"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:background="@drawable/btn_outline_blue"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        android:padding="5dp">
 
         <Button
             android:id="@+id/btnCancelDateQuery"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:layout_marginEnd="10dp"
+            android:text="Cancel"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:background="@drawable/btn_outline_grey"/>
 
         <Button
             android:id="@+id/btnConfirmDateQuery"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Confirm" />
+            android:layout_marginEnd="10dp"
+            android:text="Confirm"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:background="@drawable/btn_outline_orange"/>
     </LinearLayout>
 
 </LinearLayout>

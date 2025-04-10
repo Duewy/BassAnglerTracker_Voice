@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:fillViewport="true">
 
     <LinearLayout
@@ -23,12 +23,26 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:paddingBottom="8dp"
-            android:text="Main Species List"
+            android:text="@string/main_species_list"
             android:textColor="@color/clip_blue"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <!-- Selected Count -->
+        <TextView
+            android:id="@+id/txtPurposeOfMainSpeciesList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:paddingBottom="8dp"
+            android:text="@string/this_is_where_you_arrange_the_species_on_the_list_for_all_of_the_species_listings_throughout_the_catch_and_call_app"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
         <TextView
             android:id="@+id/txtSelectedCount"
             android:layout_width="wrap_content"
@@ -57,6 +71,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
+            android:padding="10dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -93,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_marginTop="5dp"
+            android:padding="5dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -102,10 +117,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@drawable/btn_outline_red"
                 android:padding="7dp"
-                android:text="Reset the Species List"
+                android:text="@string/reset_species_list"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -115,7 +132,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/btn_outline_yellow"
+                android:layout_marginBottom="15dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/btn_outline_lt_brown"
                 android:padding="15dp"
                 android:text="@string/cancel"
                 android:textColor="@color/clip_blue"

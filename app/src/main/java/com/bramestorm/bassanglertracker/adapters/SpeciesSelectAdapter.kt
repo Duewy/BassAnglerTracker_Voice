@@ -64,4 +64,10 @@ class SpeciesSelectAdapter(
             imgSpecies.setImageResource(speciesItem.imageResId)
         }
     }
+    fun updateList(newList: List<SpeciesItem>) {
+        speciesList.clear()
+        speciesList.addAll(newList)
+        notifyDataSetChanged() // This should now work!
+    }
+
 }

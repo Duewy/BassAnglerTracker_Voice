@@ -104,8 +104,10 @@
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:background="@color/very_lite_grey"/>
 
             <EditText
                 android:id="@+id/edtWeightOzs"
@@ -116,8 +118,10 @@
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:background="@color/very_lite_grey"/>
 
         </LinearLayout>
 

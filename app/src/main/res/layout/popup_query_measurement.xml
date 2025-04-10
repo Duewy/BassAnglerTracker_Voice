@@ -4,34 +4,49 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/very_lite_grey">
+    android:background="@color/Log_orange">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Select Measurement Format"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
-        android:paddingBottom="12dp" />
+        android:paddingBottom="12dp"
+        android:layout_gravity="center"
+        android:gravity="center"/>
 
     <RadioGroup
         android:id="@+id/radioGroupMeasurementType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginHorizontal="10dp">
 
         <RadioButton
             android:id="@+id/radioImperialLbsOz"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Imperial (lbs / oz, inches)" />
+            android:layout_width= "match_parent"
+            android:layout_height="50dp"
+            android:text="Imperial (lbs / oz, inches)"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="5dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_outline_lt_brown" />
 
         <RadioButton
             android:id="@+id/radioMetric"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Metric (kg, cm)" />
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Metric (kg, cm)"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="5dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_outline_lt_brown" />
 
     </RadioGroup>
 
@@ -40,21 +55,31 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="10dp">
 
         <Button
             android:id="@+id/btnCancelMeasurement"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:layout_marginEnd="10dp"
+            android:text="@string/cancel"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:background="@drawable/btn_outline_grey" />
 
         <Button
             android:id="@+id/btnConfirmMeasurement"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Confirm" />
+            android:text="@string/confirm"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:background="@drawable/btn_outline_orange"  />
+
     </LinearLayout>
 
 </LinearLayout>

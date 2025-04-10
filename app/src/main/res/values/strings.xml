@@ -12,7 +12,7 @@
     <string name="canam_Image">Canadian American Flag Image</string>
     <string name="goto_Tournament_description">Goto_To_Tournament</string>
     <string name="goto_DayCatch_description">Goto_To_DayCatch</string>
-    <string name="goto_SetUp_description">Goto_To_Set_Up</string>
+    <string name="goto_SetUp_description">Set_Up</string>
     <string name="setup_Events_page">Set_Up_the_days_Event</string>
     <string name="goto_Catch_page">Enter_Catch_Page</string>
     <string name="todays_Fishing_Log">Fishing_Log</string>
@@ -115,7 +115,7 @@
     <string name="teach_the_computer">Teach the computer. \n\ You will teach the computer to recognize the key words that are used with this Catch and Call Tracker app. The better the computer recognizes your words the easier the commands will be followed. Your time on the water is precious so lets make the best of it.</string>
     <string name="say_the_words">Say the Words</string>
     <string name="say_the_key_words">Say the Words</string>
-    <string name="what_computer_heard">What Computer Heard</string>
+    <string name="what_computer_heard">What The Computer Heard</string>
     <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
     <string name="list_of_species_for_your_fishing_day">List of Species for your fishing day</string>
     <string name="selected_0_8">Selected: 0 / 8</string>
@@ -123,9 +123,9 @@
     <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
     <string name="selected_species_count">Selected: %1$d / %2$d</string>
     <string name="voice_commands_or_manual_input">Manual Input \n\ or \n\With the Full Version \n\ Voice Commands </string>
-    <string name="you_can_add_your_own_species_to_the_list">You Can Add Your Own Species to the List</string>
-    <string name="select_up_to_8_species">Select up to 8 Species\n\For the Main Species List</string>
-    <string name="editable_species_list">Editable Species List</string>
+    <string name="you_can_add_your_own_species_to_the_list">You Can Add Your Own Species to the List\n\ And You Can Edit or Delete Your Added Species</string>
+    <string name="select_up_to_8_species">Select Up To 8 Species\n\For the Main Species List</string>
+    <string name="editable_species_list"><u>Editable Species List</u></string>
     <string name="user_can">User can Select or Add Species to Target List</string>
     <string name="save_species_list">Save Species List</string>
     <string name="add_species">Add Species</string>
@@ -199,6 +199,21 @@
     <string name="top_5_catches_this_month"><u>Top 5 Catches This Month</u></string>
     <string name="max_weight">Max Weight</string>
     <string name="min_weight">Min Weight</string>
+    <string name="catch_and_call_logo">Catch and Call Logo</string>
+    <string name="what_is_voice_command_control">What is Voice Command Control</string>
+    <string name="teach_the_application_your_voice_and_how_you_say_words_phrases">Teach the application your voice and how you say words / phrases</string>
+    <string name="teaching_voice_control">Teaching Voice Control</string>
+    <string name="see_and_share_catches">See and Share\n\ Catches</string>
+    <string name="reset_species_list">Reset Species List</string>
+    <string name="main_species_list"><u>Main Species List</u></string>
+    <string name="this_is_where_you_arrange_the_species_on_the_list_for_all_of_the_species_listings_throughout_the_catch_and_call_app">This is where you arrange the Species on the List for all of the Species Listings throughout the Catch_and_Call app</string>
+    <string name="select_date_range"><u> Select Date Range </u></string>
+    <string name="confirm">Confirm</string>
+    <string name="select_event_type"><u> Select Event Type </u></string>
+    <string name="both">Both</string>
+    <string name="select_measurement_type"><u>Select Measurement Type</u></string>
+    <string name="you_said">You said: %1$s</string>
+    <string name="start_the_fishing_day">Start the Fishing Day</string>
 
 
     //species
