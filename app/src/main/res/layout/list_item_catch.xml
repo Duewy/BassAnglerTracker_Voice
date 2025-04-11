@@ -5,7 +5,8 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:background="@drawable/box_outline">
+    android:background="@drawable/box_outline"
+    android:backgroundTint="@color/very_lite_grey" >
 
     <!-- Pin Icon -->
 

@@ -44,17 +44,17 @@
     <color name="clip_orange">#FE671E</color>
     <color name="clip_grey">#817E7D</color>
 
-
+    <color name="main_background">#5196DB</color>
 
     <!-- Brand Colors -->
-    <color name="softlock_blue">#00007E</color>       <!-- Deep navy blue (primary brand color) -->
+    <color name="softlock_blue">#3C3F41</color>       <!-- Deep navy blue (primary brand color) -->
     <color name="softlock_green">#21CF33</color>     <!-- Vivid green (secondary brand color) -->
     <!-- Extended Palette -->
     <color name="softlock_sand">#FAE8B4</color>      <!-- Warm sand-beige for natural backgrounds -->
     <color name="softlock_charcoal">#333333</color>  <!-- Charcoal dark grey for text or contrast -->
     <color name="softlock_orange">#FFA500</color>    <!-- Bold orange for warnings/accents -->
-    <color name="softlock_teal">#008080</color>      <!-- Teal for secondary buttons and highlights -->
-
+    <color name="softlock_teal">#0EAEAE</color>      <!-- Teal for secondary buttons and highlights -->
+    <color name="softlock_brown">#B57604</color>
 
     <color name="complementary_softlock_green">#d214eb</color>
     <color name="lite_complementary_softlock_green">#E9BB20CF</color>
@@ -95,9 +95,10 @@
     <color name="material_dynamic_primary70">#72B0D1</color>
     <color name="material_dynamic_neutral90">#9CA1EC</color>
     <color name="highlight_yellow">#F6DF0E</color>
+    <color name="golden">#FFB700</color>
     <color name="selection_list">#EAB383</color>
 
-    <color name="lt_brown">#BF8D60</color>
+    <color name="lt_brown">#C19268</color>
     <color name="mid_brown">#8C623D</color>
 
     <color name="ic_launcher_background">#FFBB00</color>

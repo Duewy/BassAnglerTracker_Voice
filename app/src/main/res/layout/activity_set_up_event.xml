@@ -10,7 +10,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#801976D2"
+    android:background="@color/main_background"
     tools:context=".SetUpActivity">
 
     <!-- Header Images -->
@@ -104,18 +104,18 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/softlock_green"
+                android:background="@drawable/btn_outline_blue"
                 android:text="@string/weight"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnLength"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/clip_yellow"
+                android:background="@drawable/btn_outline_dk_blue"
                 android:text="@string/length"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -157,7 +157,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/Log_blue_secondary"
+                android:background="@drawable/btn_outline_green"
                 android:shadowDx="1"
                 android:text="@string/imperial"
                 android:textColor="@color/black"
@@ -170,7 +170,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/bright_green"
+                android:background="@drawable/btn_mid_green"
                 android:text="@string/metric"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -209,7 +209,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/clip_orange"
+                android:background="@drawable/btn_outline_gold"
                 android:text="@string/fun_day"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -220,8 +220,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/olive"
-                android:drawableBottom="@drawable/button_outline"
+                android:background="@drawable/btn_outline_lt_brown"
                 android:text="@string/tournament"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -234,6 +233,7 @@
             android:id="@+id/divider8"
             android:layout_width="match_parent"
             android:layout_height="5dp"
+           android:layout_marginTop="5dp"
             android:background="@color/clip_blue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -243,7 +243,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -277,6 +277,7 @@
                 android:id="@+id/txtSpeciesSelector"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
                 android:text="@string/tournament_species"
                 android:textColor="@color/black"
                 android:textSize="22sp"
@@ -365,6 +366,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:background="@drawable/btn_outline_orange"
                 android:contentDescription="@string/gps_info"
                 android:fontFamily="sans-serif-medium"
@@ -404,7 +407,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
                 android:layout_marginBottom="7dp"
-                android:background="@drawable/btn_outline_green"
+                android:background="@drawable/btn_outline_dk_yellow"
                 android:fontFamily="sans-serif-medium"
                 android:padding="7dp"
                 android:text="@string/start_fishing_event"
@@ -433,34 +436,41 @@
             android:orientation="horizontal" >
 
             <!-- MAIN Menu Page  -->
+
+            <!-- Customize Species Pages  -->
             <Button
                 android:id="@+id/btnMainSetup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="10dp"
+                android:background="@drawable/btn_outline_gold"
+                android:padding="8dp"
                 android:paddingHorizontal="10dp"
-                android:background="@drawable/btn_outline_blue"
                 android:text="@string/main_page"
+                android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
+                android:textStyle="bold" />
 
-            <!-- Customize Species Pages  -->
-               <Button
+            <Button
                 android:id="@+id/btnCustomizeSpecies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="10dp"
-                android:paddingHorizontal="10dp"
                 android:background="@drawable/btn_outline_lt_brown"
+                android:padding="8dp"
+                android:paddingHorizontal="10dp"
                 android:text="@string/customize_species_list"
+                android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textStyle="bold" />
 
         </LinearLayout>
 

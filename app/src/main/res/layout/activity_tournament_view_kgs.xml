@@ -9,7 +9,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/clip_orange"
+    android:background="@color/secondary_variant"
     tools:context=".CatchEntryTournamentKgs">
 
     <TextClock
@@ -566,7 +566,7 @@
         android:paddingHorizontal="10dp"
         android:text="@string/main_page"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintStart_toStartOf="@id/firstRealWeightKgs"
         app:layout_constraintTop_toBottomOf="@id/totalRealWeightKgs" />
 
@@ -580,7 +580,7 @@
         android:background="@drawable/btn_outline_blue"
         android:text="@string/setup"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="@id/fifthDecWeightKgs"
         app:layout_constraintTop_toBottomOf="@id/totalRealWeightKgs" />
 

@@ -177,7 +177,7 @@
     <string name="bass_fighting">bass jumping fighting the angler in boat</string>
     <string name="training_voice_commands">Training Voice Commands</string>
     <string name="words_to_practice">Words to Practice</string>
-    <string name="select_data_to_share">Select Data to Share</string>
+    <string name="select_data_to_share"><u>Select Data to Share</u></string>
     <string name="include_date_and_time">Include Date and Time</string>
     <string name="include_species">Include Species</string>
     <string name="include_weight">Include Weight</string>
@@ -218,6 +218,16 @@
     <string name="tournament_catch_cms">Tournament Catch Cms</string>
     <string name="_3_lbs">3 Lbs</string>
     <string name="dot">.</string>
+    <string name="todays_fishing_log">todays fishing log</string>
+    <string name="add_catch">Add Catch:</string>
+    <string name="fun_day_catch_cms">Fun Day Catch Cms</string>
+    <string name="species_and_length_cms">Species and Length -Cms-</string>
+    <string name="fun_day_catch_kgs">Fun Day Catch -Kgs-</string>
+    <string name="_0_xx">0.XX</string>
+    <string name="_0_to_99">0 to 99</string>
+    <string name="_0_to_15">0 to 15</string>
+    <string name="centimeters">Centimeters</string>
+    <string name="_0_99_inches">0-99 Inches</string>
 
 
     //species

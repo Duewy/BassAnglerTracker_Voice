@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/popup_background"
+    android:background="@drawable/popup_background_lbs"
     android:orientation="vertical"
     android:padding="20dp" >
 
@@ -18,7 +18,7 @@
         android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:background="@color/yellow"/>
+        android:background="@color/golden"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,9 +31,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginStart="0dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginStart="0dp"
             android:gravity="center"
             android:text="@string/select_species"
             android:textColor="@color/black"
@@ -71,6 +71,7 @@
             android:textColor="@color/black"
             android:background="@color/lite_grey"
             android:gravity="center"
+            android:layout_gravity="center"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginEnd="10dp"/>
@@ -80,11 +81,12 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"
+            android:background="@color/lite_grey"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:hint=" -Ozs-  0 to 99Ozs"
             android:inputType="number"
             android:textColor="@color/black"
-            android:background="@color/lite_grey"
-            android:gravity="center"
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>

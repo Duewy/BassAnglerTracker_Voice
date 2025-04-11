@@ -4,13 +4,13 @@
      android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:contentDescription="@string/user_can" >
+    android:contentDescription="@string/user_can"
+    android:background="@color/material_dynamic_primary70">
 
     <LinearLayout
         android:id="@+id/llSpeciesAddition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/material_dynamic_primary70"
         android:orientation="vertical"
         android:paddingLeft="16dp"
         android:paddingRight="16dp" >
@@ -100,12 +100,13 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
             android:padding="5dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="1dp">
 
             <Button
                 android:id="@+id/btnCancel"
@@ -113,22 +114,19 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_marginTop="15dp"
                 android:background="@drawable/btn_outline_green"
                 android:padding="10dp"
                 android:text="@string/cancel"
                 android:textColor="@color/black"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:layout_marginEnd="20dp"
-                android:layout_marginBottom="5dp"/>
+                android:layout_marginEnd="20dp" />
 
             <Button
                 android:id="@+id/btnAddSpeciesToList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
                 android:background="@drawable/btn_outline_red"
                 android:enabled="false"
                 android:fadeScrollbars="true"
@@ -136,8 +134,7 @@
                 android:text="@string/add_species"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="5dp"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 

@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background"
+        android:background="@drawable/popup_background_inches"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,20 +20,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:background="@color/golden"
             android:gravity="center"
-            android:text="@string/enter_catch_details_inches"
-            android:textColor="@color/clip_white"
-            android:textSize="25sp"
-            android:textStyle="bold"
             android:padding="5dp"
-            android:background="@color/clip_red"/>
+            android:text="@string/enter_catch_details_inches"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="left">
+            android:gravity="start">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="5dp"
-                android:gravity="left"
+                android:gravity="start"
                 android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="19sp"
@@ -84,6 +84,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:outlineProvider="background"
             android:paddingVertical="10dp"
             android:visibility="visible">
@@ -92,15 +94,15 @@
                 android:id="@+id/edtLengthInches"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@color/very_lite_grey"
+                android:gravity="center"
                 android:hint="0-99"
                 android:inputType="number"
                 android:textColor="@color/black"
-                android:gravity="center"
-                android:layout_gravity="center"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textView9"
@@ -184,7 +186,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/Log_green_secondary"
+                android:background="@drawable/btn_outline_gold"
                 android:text="Cancel"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/black"
@@ -196,7 +198,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/Log_green"
+                android:background="@drawable/btn_add_catch"
                 android:text="Save Catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"

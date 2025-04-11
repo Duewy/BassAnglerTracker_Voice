@@ -4,7 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/clip_orange"
+    android:background="@color/secondary_variant"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CatchEntryKgs">
@@ -31,7 +31,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log"
+        android:text="@string/todays_Fishing_Log"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -44,7 +44,7 @@
         android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0.00 Kgs "
+        android:text="@string/kgs"
         android:textColor="@color/black"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -81,7 +81,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
-            android:text="Add Catch:"
+            android:text="@string/add_catch"
             android:gravity="center"
             android:textSize="24sp"
             android:textColor="@color/black"
@@ -93,11 +93,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_weight=".5"
+            android:background="@drawable/btn_add_catch"
             android:text="@string/addCatchBtn"
-            android:textSize="24sp"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:background="@color/clip_blue"/>
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

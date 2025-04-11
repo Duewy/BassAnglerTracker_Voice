@@ -58,6 +58,36 @@ class TopFiveCatchesActivity : AppCompatActivity() {
         txtMaxUnits = findViewById(R.id.txtMaxUnits)
         btnCancelSummary = findViewById(R.id.btnCancelSummary)
 
+// When user presses "Done" on edtMinWeight, move to edtMaxWeight
+        edtMinWeight.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                edtMaxWeight.requestFocus()
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+
+// When user presses "Done" on edtMaxWeight, hide keyboard
+        edtMaxWeight.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                edtMaxWeight.clearFocus()
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+
+// Hide keyboard when search button clicked
+        btnGetTop5.setOnClickListener {
+            hideKeyboard()
+            loadTopCatches()
+        }
+
+// Also hide for Share Results
+        btnShareResults.setOnClickListener {
+            hideKeyboard()
+            shareResultsAsCsv()
+        }
 
 
 
@@ -88,6 +118,13 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             finish()
         }
     }//----------- END OnCreate --------------------
+
+    //------------ Hide # Key Pad ---------------
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        val view = currentFocus ?: return
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
 
 
     //------------ LOAD TOP CATCHES -------------------

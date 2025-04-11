@@ -10,7 +10,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/clip_yellow"
+    android:background="@color/softlock_orange"
     tools:context=".CatchEntryTournamentCentimeters">
 
 
@@ -570,7 +570,7 @@
         android:background="@drawable/btn_outline_blue"
         android:text="@string/setup"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="@id/fifthDecLengthCms"
         app:layout_constraintTop_toBottomOf="@id/totalRealLengthCms"  />
 
@@ -583,7 +583,7 @@
         android:paddingHorizontal="10dp"
         android:text="@string/main_page"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="@id/totalRealLengthCms"
         app:layout_constraintTop_toBottomOf="@id/totalRealLengthCms" />
 

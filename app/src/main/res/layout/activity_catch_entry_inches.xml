@@ -31,7 +31,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log"
+        android:text="@string/todays_fishing_log"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -44,7 +44,7 @@
         android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0 - 0/8 Inches"
+        android:text="@string/inches"
         android:textColor="@color/black"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -60,7 +60,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
         android:text="@string/goto_SetUp_description"
-        android:background="@drawable/btn_outline_green"
+        android:background="@drawable/btn_menu_setup"
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
@@ -80,7 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
-            android:text="Add Catch:"
+            android:text="@string/add_catch"
             android:gravity="center"
             android:textSize="24sp"
             android:textColor="@color/black"
@@ -96,7 +96,7 @@
             android:textSize="24sp"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:background="@color/clip_blue"/>
+            android:background="@drawable/btn_add_catch"/>
 
     </LinearLayout>
 

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/clip_yellow"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/softlock_sand"
     tools:context=".CatchEntryMetric">
 
 
@@ -32,13 +31,14 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
         android:text="todays fishing log"
-        android:textColor="@color/black"
         android:textAllCaps="true"
+        android:textColor="@color/black"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
@@ -56,11 +56,11 @@
         android:id="@+id/btnSetUp3Cm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
-        android:text="@string/goto_SetUp_description"
-        android:background="@drawable/btn_outline_red"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/btn_menu_setup"
         android:padding="10dp"
+        android:text="@string/goto_SetUp_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtTodaysLog" />
 
@@ -69,8 +69,8 @@
         android:id="@+id/llAddCatch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         android:paddingVertical="20dp"
         app:layout_constraintTop_toBottomOf="@id/btnSetUp3Cm">
 
@@ -79,10 +79,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
-            android:text="Add Catch:"
             android:gravity="center"
-            android:textSize="24sp"
+            android:text="Add Catch:"
             android:textColor="@color/black"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <Button
@@ -91,11 +91,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_weight=".5"
+            android:background="@drawable/btn_add_catch"
             android:text="@string/addCatchBtn"
-            android:textSize="24sp"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:background="@color/clip_green"/>
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

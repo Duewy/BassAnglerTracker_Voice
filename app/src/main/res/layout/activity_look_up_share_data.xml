@@ -5,13 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/purple_200"
+    android:background="@color/softlock_teal"
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/complementary_softlock_green"
         android:contentDescription="@string/tournament_activity_description">
 
 
@@ -46,12 +45,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:alpha="0.50"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imgShare"
-            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/google_map_icon" />
 
         <View
@@ -84,8 +81,8 @@
             android:id="@+id/btnShareLogs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/btn_outline_blue"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_outline_gold"
             android:gravity="center"
             android:paddingHorizontal="15dp"
             android:text="@string/share_fishing_logs"
@@ -93,6 +90,7 @@
             android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtShareLogs" />
 
@@ -125,8 +123,8 @@
             android:id="@+id/btnLookUpMap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/btn_outline_yellow"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_outline_lt_brown"
             android:gravity="center"
             android:paddingHorizontal="10dp"
             android:text="@string/look_up_map"
@@ -167,7 +165,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/btn_outline_red"
+            android:background="@drawable/btn_outline_dk_yellow"
             android:gravity="center"
             android:paddingHorizontal="15dp"
             android:text="@string/top_5"
@@ -207,7 +205,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/btn_outline_green"
+            android:background="@drawable/btn_menu_setup"
             android:gravity="center"
             android:paddingHorizontal="15dp"
             android:text="@string/set_up"

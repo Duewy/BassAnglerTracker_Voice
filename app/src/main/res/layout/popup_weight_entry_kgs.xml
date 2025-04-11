@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background"
+        android:background="@drawable/popup_background_kgs"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,7 +20,7 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fun Day Catch Kgs"
+            android:text="@string/fun_day_catch_kgs"
             android:textSize="25sp"
             android:layout_gravity="center"
             android:gravity="center"
@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="left">
+            android:gravity="start">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginEnd="10dp"
-                android:gravity="left"
+                android:gravity="start"
                 android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="19sp"
@@ -146,7 +146,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Kgs"
+                android:padding="5dp"
+                android:text="@string/kgs"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -157,7 +158,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="0.XX Kgs"
+                android:padding="5dp"
+                android:text="@string/_0_xx"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -178,7 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_grey"
+                android:background="@drawable/btn_outline_gold"
                 android:text="@string/cancel"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -192,7 +194,7 @@
                 android:text="@string/save_catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:background="@drawable/btn_outline_orange" />
+                android:background="@drawable/btn_add_catch" />
 
         </LinearLayout>
 

@@ -61,7 +61,8 @@
             android:inputType="numberDecimal"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:imeOptions="actionDone" />
 
         <TextView
             android:id="@+id/txtMinUnits"
@@ -87,7 +88,8 @@
             android:textColor="@color/clip_blue"
             android:textStyle="bold"
             android:layout_marginStart="15dp"
-            android:layout_marginEnd="2dp"/>
+            android:layout_marginEnd="2dp"
+            android:imeOptions="actionDone" />
 
         <TextView
             android:id="@+id/txtMaxUnits"
@@ -175,13 +177,13 @@
             android:id="@+id/btnGetTop5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
             android:layout_weight="1"
+            android:background="@drawable/btn_outline_green"
             android:text="@string/search"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_outline_green"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="5dp"/>
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnShareResults"

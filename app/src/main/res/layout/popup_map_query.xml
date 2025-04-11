@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/very_lite_grey"
+    android:background="@color/secondary_variant"
     android:fillViewport="true"
     android:scrollIndicators="right"
     android:scrollbarStyle="outsideOverlay"
@@ -13,8 +13,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/very_lite_grey"
-        tools:context=".mappopups.PopupMapQuery">
+        tools:context=".mappopups.PopupMapQuery"
+        >
 
         <!-- Header Images -->
         <ImageView
@@ -22,8 +22,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:alpha="0.20"
-            android:background="@color/very_lite_grey"
             android:scaleY="1.5"
+            android:background="@color/secondary_variant"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llHeaderMapQuery"
@@ -35,7 +35,7 @@
             android:layout_height="70dp"
             android:layout_gravity="center"
             android:layout_marginStart="5dp"
-            android:background="@color/very_lite_grey"
+            android:background="@color/secondary_variant"
             android:contentDescription="@string/app_image_description"
             android:scaleX="2."
             android:src="@drawable/catch_call_logo"
@@ -127,7 +127,7 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight=".5"
-                    android:background="@drawable/btn_outline_green"
+                    android:background="@drawable/btn_lbs"
                     android:text="Date"
                     android:textColor="@color/clip_blue"
                     android:textSize="18sp"
@@ -185,7 +185,7 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
-                    android:background="@drawable/btn_outline_yellow"
+                    android:background="@drawable/btn_kgs"
                     android:text="Species"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
@@ -240,7 +240,7 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
-                    android:background="@drawable/btn_outline_blue"
+                    android:background="@drawable/btn_inches"
                     android:text="Events"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
@@ -294,7 +294,7 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
-                    android:background="@drawable/btn_outline_orange"
+                    android:background="@drawable/btn_cms"
                     android:text="Sizes"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
@@ -348,10 +348,10 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
-                    android:background="@drawable/btn_outline_red"
+                    android:background="@drawable/btn_outline_green"
                     android:text="Measurement"
                     android:textColor="@color/black"
-                    android:textSize="18sp"/>
+                    android:textSize="16sp"/>
 
                 <TextView
                     android:id="@+id/txtMeasurementTypeMapQuery"
@@ -391,7 +391,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="7dp"
                     android:layout_marginBottom="7dp"
-                    android:background="@drawable/btn_outline_green"
+                    android:background="@drawable/btn_outline_lt_brown"
                     android:fontFamily="sans-serif-medium"
                     android:padding="7dp"
                     android:text="Get Map"

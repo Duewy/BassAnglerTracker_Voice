@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background"
+        android:background="@drawable/popup_background_kgs"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,6 +114,7 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:layout_gravity="center"
                 android:hint="00.XX"
                 android:inputType="number"
                 android:textColor="@color/black"
@@ -135,9 +136,10 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:hint="@string/x_00"
                 android:inputType="number"
-                android:gravity="center"
                 android:background="@color/very_lite_grey"/>
 
             <TextView
@@ -198,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_green"
+                android:background="@drawable/btn_outline_grey"
                 android:text="Cancel"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -209,7 +211,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_blue"
+                android:background="@drawable/btn_menu_setup"
                 android:text="Save Catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"

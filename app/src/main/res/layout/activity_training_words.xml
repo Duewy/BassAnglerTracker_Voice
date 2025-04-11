@@ -10,7 +10,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/clip_orange"
+    android:background="@color/softlock_orange"
     android:paddingBottom="25dp">
 
     <ImageView
@@ -134,7 +134,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="13dp"
-        android:background="@color/green"
+        android:background="@drawable/btn_outline_green"
         android:clickable="true"
         android:focusable="true"
         android:padding="15dp"
@@ -215,7 +215,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@drawable/btn_outline_red"
+            android:background="@drawable/btn_menu_setup"
             android:text="@string/menu"
             android:textAllCaps="true"
             android:textColor="@color/black"
@@ -229,7 +229,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight=".4"
-            android:background="@drawable/btn_outline_green"
+            android:background="@drawable/btn_outline_blue"
             android:text="@string/img_setup"
             android:textColor="@color/black"
             android:textSize="20sp"

@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/complementary_softlock_green">
+    android:background="@color/secondary">
 
     <LinearLayout
         android:id="@+id/llShareData1"
@@ -11,84 +11,86 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Options -->
+
         <TextView
             android:id="@+id/txtShareHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
             android:text="@string/select_data_to_share"
-            android:textSize="25sp"
-            android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_gravity="center_horizontal" />
+            android:textSize="27sp"
+            android:textStyle="bold" />
 
-        <!-- Options -->
         <CheckBox
             android:id="@+id/chkIncludeDate"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_date_and_time"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp" />
+            android:text="@string/include_date_and_time"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
         <CheckBox
             android:id="@+id/chkIncludeSpecies"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_species"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp" />
+            android:text="@string/include_species"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
         <CheckBox
             android:id="@+id/chkIncludeWeight"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_weight"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp" />
+            android:text="@string/include_weight"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
         <CheckBox
             android:id="@+id/chkIncludeLength"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_length"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp" />
+            android:text="@string/include_length"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
         <CheckBox
             android:id="@+id/chkIncludeGPS"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_gps_coordinates"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp"/>
+            android:text="@string/include_gps_coordinates"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
         <CheckBox
             android:id="@+id/chkIncludeCatchType"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="@string/include_day"
-            android:textSize="20sp"
-            android:textColor="@color/clip_blue"
+            android:layout_marginTop="10dp"
             android:background="@color/lite_grey"
-            android:layout_marginTop="10dp"/>
+            android:text="@string/include_day"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp" />
 
 
         <View
             android:id="@+id/divider8"
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:background="@color/clip_blue"
-            android:layout_marginTop="20sp"/>
+            android:layout_marginTop="20sp"
+            android:background="@color/clip_blue" />
 
         <!-- Generate CSV Button -->
         <Button
@@ -99,8 +101,8 @@
             android:background="@drawable/btn_outline_blue"
             android:text="@string/generate_csv_file"
             android:textColor="@color/clip_blue"
-            android:textStyle="bold"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <!-- Share Button -->
         <Button
@@ -111,43 +113,57 @@
             android:background="@drawable/btn_outline_yellow"
             android:text="@string/share_csv"
             android:textColor="@color/clip_blue"
-            android:textStyle="bold"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <View
             android:id="@+id/divider9"
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:background="@color/clip_blue"
-            android:layout_marginTop="20sp"/>
+            android:layout_marginTop="20sp"
+            android:background="@color/clip_blue" />
 
-        <TextView
-            android:id="@+id/txtGoToSetUPSFLogs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
             android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_marginTop="10dp"
-            android:text="@string/goto_setup_page"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/btnMainDataShare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="18dp"
+                android:layout_marginEnd="15dp"
+                android:background="@drawable/btn_menu_setup"
+                android:gravity="center"
+                android:paddingHorizontal="15dp"
+                android:text="@string/main_page"
+                android:textColor="@color/black"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSetUpSFLogs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="18dp"
+                android:background="@drawable/btn_menu_setup"
+                android:gravity="center"
+                android:paddingHorizontal="15dp"
+                android:text="Set Up"
+                android:textColor="@color/clip_blue"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
 
-        <Button
-            android:id="@+id/btnSetUpSFLogs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="18dp"
-            android:background="@drawable/btn_outline_green"
-            android:gravity="center"
-            android:paddingHorizontal="15dp"
-            android:text="Set Up"
-            android:textColor="@color/clip_blue"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

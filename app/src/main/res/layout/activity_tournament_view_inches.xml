@@ -9,7 +9,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/Log_red_secondary"
+    android:background="@color/lt_brown"
     tools:context=".CatchEntryTournamentInches">
 
 
@@ -72,7 +72,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
-        android:background="@color/softlock_blue"
+        android:background="@drawable/btn_add_catch"
         android:gravity="center"
         android:shadowColor="#8FC16D"
         android:text="@string/addCatchBtn"
@@ -575,7 +575,7 @@
         android:paddingHorizontal="10dp"
         android:text="@string/main_page"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintStart_toStartOf="@id/firstRealLengthInches"
         app:layout_constraintTop_toBottomOf="@id/totalRealLengthInches"  />
 
@@ -589,7 +589,7 @@
         android:background="@drawable/btn_outline_blue"
         android:text="@string/setup"
         android:textAlignment="gravity"
-        android:textSize="25sp"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="@id/fifthDecLengthInches"
         app:layout_constraintTop_toBottomOf="@id/totalRealLengthInches" />
 

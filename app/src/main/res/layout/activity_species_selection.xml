@@ -76,26 +76,26 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnSaveSpecies"
+                android:id="@+id/btnAdjustSpeciesList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginEnd="15dp"
-                android:background="@drawable/btn_outline_blue"
+                android:background="@drawable/btn_outline_orange"
                 android:padding="7dp"
-                android:text="@string/save_selection"
+                android:text="Alter Species List"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnAdjustSpeciesList"
+                android:id="@+id/btnSaveSpecies"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/btn_outline_orange"
+                android:background="@drawable/btn_outline_blue"
                 android:padding="7dp"
-                android:text="Alter Species List"
+                android:text="@string/save_selection"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -120,7 +120,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="15dp"
-                android:background="@drawable/btn_outline_red"
+                android:background="@drawable/btn_outline_gold"
                 android:padding="7dp"
                 android:text="@string/reset_species_list"
                 android:textColor="@color/black"

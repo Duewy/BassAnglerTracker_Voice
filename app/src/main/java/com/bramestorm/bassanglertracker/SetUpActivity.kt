@@ -115,7 +115,7 @@ class SetUpActivity : AppCompatActivity() {
             isValMeasuring = true
             btnImperial.text = "Lbs Ozs"
             btnMetric.text = " Kgs"
-            btnWeight.setBackgroundResource(R.color.clip_red)
+            btnWeight.setBackgroundResource(R.color.bright_green)
             btnLength.setBackgroundResource(R.color.lite_grey)
         }
 
@@ -126,7 +126,7 @@ class SetUpActivity : AppCompatActivity() {
             isValMeasuring = true
             btnImperial.text = "Inches 8ths"
             btnMetric.text = "Cms"
-            btnLength.setBackgroundResource(R.color.clip_red)
+            btnLength.setBackgroundResource(R.color.bright_green)
             btnWeight.setBackgroundResource(R.color.lite_grey)
         }
 
@@ -136,7 +136,7 @@ class SetUpActivity : AppCompatActivity() {
             isImperialSelected = true
             isMetricSelected = false
             isValUnits = true
-            btnImperial.setBackgroundResource(R.color.clip_red)
+            btnImperial.setBackgroundResource(R.color.bright_green)
             btnMetric.setBackgroundResource(R.color.lite_grey)
         }
 
@@ -145,7 +145,7 @@ class SetUpActivity : AppCompatActivity() {
             isMetricSelected = true
             isImperialSelected = false
             isValUnits = true
-            btnMetric.setBackgroundResource(R.color.clip_red)
+            btnMetric.setBackgroundResource(R.color.bright_green)
             btnImperial.setBackgroundResource(R.color.lite_grey)
         }
 
@@ -154,7 +154,7 @@ class SetUpActivity : AppCompatActivity() {
             Log.d("DEBUG", "FunDay Is Selected ")
             isFunDaySelected = true
             isTournamentSelected = false
-            btnFunDay.setBackgroundResource(R.color.clip_red)
+            btnFunDay.setBackgroundResource(R.color.bright_green)
             btnTournament.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             btnMetric.visibility = View.VISIBLE
@@ -172,7 +172,7 @@ class SetUpActivity : AppCompatActivity() {
             isFunDaySelected = false
           //  isLengthSelected = false
           //  isWeightSelected = true
-            btnTournament.setBackgroundResource(R.color.clip_red)
+            btnTournament.setBackgroundResource(R.color.bright_green)
             btnFunDay.setBackgroundResource(R.color.lite_grey)
             btnLength.visibility = View.VISIBLE
             tglCullingValue.alpha = 1.0f
@@ -197,14 +197,25 @@ class SetUpActivity : AppCompatActivity() {
 
         tglGPS.isChecked = isGpsEnabledInPrefs && hasLocationPermission
 
+        // Immediately set background based on initial state
+        if (tglGPS.isChecked || tglGPS.text == "Enabled") {
+            tglGPS.setBackgroundResource(R.drawable.btn_outline_green)
+        } else {
+            tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
+        }
 
         tglGPS.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 checkAndRequestLocationPermission()
+                // ✅ Change background to green
+                tglGPS.setBackgroundResource(R.drawable.btn_outline_green)
             } else {
                 disableGps()
+                // 🔄 Revert background to orange
+                tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
             }
         }
+
 
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)

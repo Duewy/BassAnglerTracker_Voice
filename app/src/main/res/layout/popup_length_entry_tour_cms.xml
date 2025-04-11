@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background"
+        android:background="@drawable/popup_background_cms"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,8 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/tournament_catch_cms"
-            android:textColor="@color/clip_white"
-            android:background="@color/clip_green"
+            android:textColor="@color/black"
+            android:background="@color/lt_brown"
             android:textSize="22sp"
             android:textStyle="bold"
             android:padding="5dp"/>
@@ -164,7 +164,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_gravity="start"
+            android:gravity="start">
 
             <!-- Lbs and Ozs labels  -->
             <TextView
@@ -172,8 +174,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
-                android:text="Centimeters"
-                android:gravity="center"
+                android:layout_marginBottom="2dp"
+                android:text="@string/centimeters"
+                android:gravity="start"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
@@ -183,8 +186,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
-                android:text="millimeter"
-                android:gravity="center"
+                android:layout_marginBottom="2dp"
+                android:text="@string/mm"
+                android:gravity="start"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"/>

@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background"
+        android:background="@drawable/popup_background_inches"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,10 +20,11 @@
             android:id="@+id/txtPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="center"
             android:text="Tournament Catch Inches"
-            android:textColor="@color/clip_white"
-            android:background="@color/clip_red"
+            android:textColor="@color/clip_blue"
+            android:background="@color/golden"
             android:textSize="22sp"
             android:textStyle="bold"
             android:padding="5dp"/>
@@ -113,16 +114,16 @@
                 android:id="@+id/edtLengthTourInches"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_gravity="center"
-                android:hint="0-99 Inches"
-                android:textColorHint="@color/grey"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:background="@color/very_lite_grey"
+                android:hint="@string/_0_99_inches"
                 android:inputType="number"
                 android:textColor="@color/black"
+                android:textColorHint="@color/grey"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:background="@color/very_lite_grey"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textView9"
@@ -167,7 +168,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginHorizontal="10dp">
 
             <!-- Lbs and Ozs labels  -->
             <TextView
@@ -176,7 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
                 android:text="@string/inches"
-                android:gravity="center"
+                android:gravity="start"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
