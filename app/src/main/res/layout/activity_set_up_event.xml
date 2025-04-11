@@ -220,7 +220,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@color/very_bright_red"
+                android:background="@color/olive"
                 android:drawableBottom="@drawable/button_outline"
                 android:text="@string/tournament"
                 android:textColor="@color/black"
@@ -365,7 +365,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:background="@drawable/btn_outline_red"
+                android:background="@drawable/btn_outline_orange"
                 android:contentDescription="@string/gps_info"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="24dp"
@@ -429,7 +429,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="25dp"
             android:gravity="center"
             android:orientation="horizontal" >
 
@@ -438,12 +437,15 @@
                 android:id="@+id/btnMainSetup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:paddingHorizontal="10dp"
                 android:background="@drawable/btn_outline_blue"
-                android:text="@string/menu"
+                android:text="@string/main_page"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
-                android:padding="5dp"/>
+                android:textColor="@color/black"/>
 
             <!-- Customize Species Pages  -->
                <Button
@@ -451,12 +453,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:padding="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:paddingHorizontal="10dp"
+                android:background="@drawable/btn_outline_lt_brown"
                 android:text="@string/customize_species_list"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
-                android:background="@drawable/btn_outline_red" />
+                android:textColor="@color/black" />
 
         </LinearLayout>
 

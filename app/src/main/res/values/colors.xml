@@ -45,13 +45,34 @@
     <color name="clip_grey">#817E7D</color>
 
 
-                     <!-- SoftLock Label colors-->
-    <color name="softlock_blue">#00007E</color>
-    <color name="softlock_green">#21CF33</color>
+
+    <!-- Brand Colors -->
+    <color name="softlock_blue">#00007E</color>       <!-- Deep navy blue (primary brand color) -->
+    <color name="softlock_green">#21CF33</color>     <!-- Vivid green (secondary brand color) -->
+    <!-- Extended Palette -->
+    <color name="softlock_sand">#FAE8B4</color>      <!-- Warm sand-beige for natural backgrounds -->
+    <color name="softlock_charcoal">#333333</color>  <!-- Charcoal dark grey for text or contrast -->
+    <color name="softlock_orange">#FFA500</color>    <!-- Bold orange for warnings/accents -->
+    <color name="softlock_teal">#008080</color>      <!-- Teal for secondary buttons and highlights -->
+
 
     <color name="complementary_softlock_green">#d214eb</color>
     <color name="lite_complementary_softlock_green">#E9BB20CF</color>
     <color name="complementary_softlock_blue">#ffff81</color>
+
+
+    <!-- res/values-night/colors.xml (Dark theme) -->
+
+    <!-- Brand Colors (modified for visibility on dark backgrounds) -->
+    <color name="softlock_blue_n">#2979FF</color>       <!-- Brightened blue for dark mode (more visible on dark backgrounds) -->
+    <color name="softlock_green_n">#21CF33</color>      <!-- Same green (already bright enough for dark mode) -->
+    <!-- Extended Palette (inverted or adjusted for dark theme) -->
+    <color name="softlock_sand_n">#1E1E1E</color>       <!-- Near-black background (dark equivalent of “sand”) -->
+    <color name="softlock_charcoal_n">#DDDDDD</color>   <!-- Light grey for contrast (e.g. text on dark background) -->
+    <color name="softlock_orange_n">#FFA500</color>     <!-- Same orange (high contrast on dark background) -->
+    <color name="softlock_teal_n">#008080</color>       <!-- Same teal (medium contrast on dark background) -->
+
+
 
     <!-- Logging Page colors-->
 
@@ -82,3 +103,4 @@
     <color name="ic_launcher_background">#FFBB00</color>
 
 </resources>
+

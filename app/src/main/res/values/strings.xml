@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Catch Call</string>
     <string name="app_image_description">SoftLock Culling System with Voice Controlled Culling</string>
-    <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and Ozs)</string>
+    <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and ozs)</string>
     <string name="enter_catch_kgs">Enter Catch (Kgs)</string>
     <string name="img_setup">Set Up Page</string>
     <string name="addCatchBtn">Add a Catch</string>
-    <string name="timer_place_holder">Time Remaining</string>
+    <string name="timer_place_holder">Time Now</string>
     <string name="tournament_activity_description">enter the weights of the catch and the app suggests the fish to cull and gives the total weight</string>
     <string name="total_value">Total Weight</string>
     <string name="save_catch">Save_Catch</string>
@@ -22,8 +22,8 @@
     <string name="edit_catch">Edit Catch</string>
     <string name="tournament_Day">Tournament</string>
     <string name="lbl_Type_of_Fishing_Day">Type of Fishing Day</string>
-    <string name="lb_values">Lbs  0 to 99 Lbs</string>
-    <string name="ozs_values">Ozs  0 to 15 Ozs</string>
+    <string name="lb_values">0 to 99 Lbs</string>
+    <string name="ozs_values">0 to 15 ozs</string>
     <string name="kg_values"> Kgs  0 to 99 Kgs</string>
     <string name="gram_values"> Grams  0 to 99 0.XXKgs</string>
     <string name="inch_values">Inches 0 to 99 " </string>
@@ -41,7 +41,7 @@
     <string name="enter_catch_details_inches">Species and Length -Inches-</string>
     <string name="enter_catch_details_cm">Species and Length -Cms-</string>
     <string name="inches">Inches</string>
-    <string name="_8ths_of_inch">8ths of inch</string>
+    <string name="_8ths_of_inch">/8ths of inch</string>
     <string name="select_species">Select Species</string>
     <string name="log_catches_inches">Log Catches Inches</string>
     <string name="todays_log_centimeters">Log Catches Centimeters</string>
@@ -68,23 +68,23 @@
     <string name="using_the_voice_commands">Using The Voice Commands</string>
     <string name="goto_setup">Goto setup</string>
     <string name="user_training_page">User Training Page</string>
-    <string name="weight_lbs_ozs">Weight Lbs/Ozs</string>
+    <string name="weight_lbs_ozs">Weight Lbs/ozs</string>
     <string name="alarm">ALARM</string>
     <string name="letter_of_color_clip_for_color_blind">Letter of Color Clip for Color Blind</string>
     <string name="catch_weight">Catch Weight</string>
     <string name="train_voice_commands">Train VCC</string>
     <string name="main_page">main Page</string>
     <string name="setup">SetUp</string>
-    <string name="ozs">Ozs</string>
+    <string name="ozs">ozs</string>
     <string name="lbs">Lbs</string>
-    <string name="lbs_ozs">Lbs Ozs</string>
+    <string name="lbs_ozs">Lbs ozs</string>
     <string name="tournament_species">Tournament Species</string>
     <string name="fish_image">Fish Image</string>
     <string name="select_clip_color">Select Clip Color</string>
     <string name="kgs">Kgs</string>
     <string name="x_00">X.00</string>
-    <string name="_0_7_8ths">0–7 8ths</string>
-    <string name="_8ths">8ths</string>
+    <string name="_0_7_8ths">0–7 /8ths</string>
+    <string name="_8ths">/8ths</string>
     <string name="enter_catch_details_kgs">Enter Catch Details Kgs</string>
     <string name="enter_catch_details_inches_8ths">Enter Catch Details Inches</string>
     <string name="_0_99_cms">0–99 Cms</string>
@@ -216,6 +216,8 @@
     <string name="start_the_fishing_day">Start the Fishing Day</string>
     <string name="tournament_catch_kgs">Tournament Catch Kgs</string>
     <string name="tournament_catch_cms">Tournament Catch Cms</string>
+    <string name="_3_lbs">3 Lbs</string>
+    <string name="dot">.</string>
 
 
     //species

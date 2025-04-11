@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:background="@drawable/popup_background"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
 
 
     <!-- Time Picker -->
@@ -15,36 +15,41 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:timePickerMode="spinner"
-        android:background="@color/very_lite_grey"/>
+        android:background="@color/lt_brown"/>
 
-           <!-- Set Alarm Button -->
+    <!-- Set Alarm Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp">
 
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="@color/Log_blue_secondary"
-            android:padding="10dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/btn_outline_grey"
+            android:paddingHorizontal="10dp"
             android:text="@string/cancel"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textAlignment="gravity"
+            android:textSize="25sp"
+            android:layout_marginBottom="10dp"/>
 
         <Button
             android:id="@+id/btnSetAlarm"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="@color/primary"
-            android:padding="10dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_outline_green"
+            android:paddingHorizontal="10dp"
             android:text="@string/set_alarm"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+            android:textAlignment="gravity"
+            android:textSize="25sp"
+            android:layout_marginBottom="10dp"/>
 
     </LinearLayout>
 
