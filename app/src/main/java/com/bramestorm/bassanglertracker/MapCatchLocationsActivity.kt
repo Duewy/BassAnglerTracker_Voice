@@ -121,7 +121,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    fun applyMapFilters(filters: MapQueryFilters) {
+  private fun applyMapFilters(filters: MapQueryFilters) {
         val db = CatchDatabaseHelper(this)
         db.logAllCatches()
         // Parse date range
@@ -206,7 +206,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val info = when {
                     filters.sizeType.equals("weight", ignoreCase = true) -> {
                         if (filters.measurementType.contains("kg", true)) {
-                            catch.totalWeightHundredthKg?.let { formatWeightKg(it) } ?: "No weight"
+                            catch.totalWeightHundredthKg?.let { formatWeightKg(this, it) } ?: "No weight"
                         } else {
                             catch.totalWeightOz?.let { formatWeightOzToLbsOz(it) } ?: "No weight"
                         }
@@ -214,7 +214,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                     filters.sizeType.equals("length", ignoreCase = true) -> {
                         if (filters.measurementType.contains("cm", true)) {
-                            catch.totalLengthTenths?.let { formatLengthCm(it) } ?: "No length"
+                            catch.totalLengthTenths?.let { formatLengthCm(this, it) } ?: "No length"
                         } else {
                             catch.totalLengthA8th?.let { formatLengthA8thToInches(it) }
                                 ?: "No length"
@@ -253,19 +253,6 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
         return BitmapDescriptorFactory.fromBitmap(resized)
     }
 
-    private fun getSpeciesCode(species: String): String {
-        return when (species.uppercase()) {
-            "LARGE MOUTH" -> "LM"
-            "SMALL MOUTH" -> "SM"
-            "WALLEYE"     -> "WE"
-            "PIKE"        -> "PK"
-            "PERCH"       -> "PH"
-            "PANFISH"     -> "PF"
-            "CATFISH"     -> "CF"
-            "CRAPPIE"     -> "CP"
-            else          -> "--"
-        }
-    }
 
     private fun getFirstDayOfMonth(): String {
         val sdf = SimpleDateFormat("yyyy-MM-01", Locale.getDefault())

@@ -21,7 +21,7 @@
         android:id="@+id/btnFromDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="From Date"
+        android:text="@string/from_date"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:background="@drawable/btn_outline_green"/>
@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="To Date"
+        android:text="@string/to_date"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:background="@drawable/btn_outline_blue"/>
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:textColor="@color/black"
             android:textStyle="bold"
             android:textSize="20sp"
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
-            android:text="Confirm"
+            android:text="@string/confirm"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:background="@drawable/btn_outline_orange"/>

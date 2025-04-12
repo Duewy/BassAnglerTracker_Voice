@@ -39,7 +39,7 @@
         android:id="@+id/btnEditSpeciesNameSelect"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:contentDescription="Edit Users Species"
+        android:contentDescription="@string/edit_users_species"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_edit"
         android:visibility="gone" />

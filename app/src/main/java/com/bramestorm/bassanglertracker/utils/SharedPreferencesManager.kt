@@ -60,7 +60,7 @@ object SharedPreferencesManager {
     }
 
 
-    fun getAllSavedSpecies(context: Context): List<String> {
+   private fun getAllSavedSpecies(context: Context): List<String> {
         val prefs = getPrefs(context)
         val json = prefs.getString(KEY_ALL_SPECIES, null)
         return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type) else listOf()
@@ -108,10 +108,6 @@ object SharedPreferencesManager {
     }
 
 
-    fun setMasterSpeciesList(context: Context, speciesList: List<String>) {
-        saveAllSpecies(context, speciesList)
-    }
-
 
     fun getMasterSpeciesList(context: Context): List<String> {
         return getAllSavedSpecies(context)
@@ -144,7 +140,7 @@ object SharedPreferencesManager {
         Log.d(TAG, "Saved all species list: $allSpecies")
     }
 
-    fun getUserAddedSpeciesList(context: Context): List<String> {
+    private fun getUserAddedSpeciesList(context: Context): List<String> {
         val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
         val defaultSpecies = listOf("Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
             .map { normalizeSpeciesName(it) }
@@ -158,25 +154,10 @@ object SharedPreferencesManager {
         return (defaultSpecies + userAdded).distinct()
     }
 
-    fun clearSelectedSpecies(context: Context) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(KEY_SELECTED_SPECIES_LIST).remove(KEY_ALL_SPECIES).apply()
-    }
-
 
     private fun getPrefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getOrderedSelectedSpeciesList(context: Context): List<String> {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(KEY_SELECTED_SPECIES_LIST, null)
-        return if (json != null) {
-            Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
-        } else {
-            // Fallback to all or default
-            getAllSavedSpecies(context).take(8)
-        }
-    }
 
     fun isSpeciesInitialized(context: Context): Boolean {
         return getPrefs(context).getBoolean("SPECIES_INITIALIZED", false)

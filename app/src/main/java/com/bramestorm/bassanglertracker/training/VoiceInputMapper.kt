@@ -35,7 +35,7 @@ object VoiceInputMapper {
         .flatMap { (canonical, aliases) -> aliases.map { it.lowercase() to canonical } }
         .toMap()
 
-    fun getSpeciesFromVoice(input: String): String? {
+    fun getSpeciesFromVoice(input: String): String {
         return voiceToSpecies[input.trim().lowercase()] ?: "Unrecognized"
     }
 

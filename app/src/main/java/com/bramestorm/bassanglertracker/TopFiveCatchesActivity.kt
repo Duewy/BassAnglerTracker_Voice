@@ -224,12 +224,22 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
         results.forEach {
             val weightLbs = formatWeightOzToLbsOz(it.totalWeightOz ?: 0)
-            val weightKg = if ((it.totalWeightHundredthKg ?: 0) > 0) formatWeightKg(it.totalWeightHundredthKg!!) else ""
-            val lengthIn = if ((it.totalLengthA8th ?: 0) > 0) formatLengthA8thToInches(it.totalLengthA8th!!) else ""
-            val lengthCm = if ((it.totalLengthTenths ?: 0) > 0) formatLengthCm(it.totalLengthTenths!!) else ""
+
+            val weightKg = it.totalWeightHundredthKg?.let { kg ->
+                if (kg > 0) formatWeightKg(this@TopFiveCatchesActivity, kg) else ""
+            } ?: ""
+
+            val lengthIn = it.totalLengthA8th?.let { a8th ->
+                if (a8th > 0) formatLengthA8thToInches(a8th) else ""
+            } ?: ""
+
+            val lengthCm = it.totalLengthTenths?.let { cm ->
+                if (cm > 0) formatLengthCm(this@TopFiveCatchesActivity, cm) else ""
+            } ?: ""
 
             csvBuilder.append(
-                "${it.dateTime}," +
+                csvBuilder.append(
+                    "${it.dateTime}," +
                         "${it.species}," +
                         "$weightLbs," +
                         "$weightKg," +
@@ -239,7 +249,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                         "${it.markerType ?: ""}," +
                         "${it.latitude ?: ""}," +
                         "${it.longitude ?: ""}\n"
-            )
+            ))
         }
 
         val fileName = "Top5Catches_${System.currentTimeMillis()}.csv"

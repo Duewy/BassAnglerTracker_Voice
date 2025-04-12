@@ -16,7 +16,6 @@
     <!-- Header Images -->
 
     <ImageView
-        android:id="@+id/imageView6"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0.10"
@@ -55,7 +54,6 @@
 
 
         <ImageView
-            android:id="@+id/imgSetUp"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:layout_gravity="center"
@@ -70,7 +68,6 @@
 
     <!-- Main Content LinearLayout -->
     <LinearLayout
-        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -82,7 +79,6 @@
 
         <!-- Measurement Type Header -->
         <TextView
-            android:id="@+id/txtTypeOfMeasuring"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp"
@@ -133,7 +129,6 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -184,7 +179,6 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/textView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -230,7 +224,6 @@
 
 
         <View
-            android:id="@+id/divider8"
             android:layout_width="match_parent"
             android:layout_height="5dp"
            android:layout_marginTop="5dp"
@@ -239,7 +232,6 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
-            android:id="@+id/llCulling"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -286,7 +278,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/llValues"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
@@ -385,7 +376,6 @@
         </LinearLayout>
 
         <View
-            android:id="@+id/divider3"
             android:layout_width="match_parent"
             android:layout_height="5dp"
             android:layout_marginTop="5dp"
@@ -393,7 +383,6 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
-            android:id="@+id/llStartFishing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
@@ -421,14 +410,12 @@
 
         </LinearLayout>
         <View
-            android:id="@+id/divider17"
             android:layout_width="match_parent"
             android:layout_height="5dp"
             android:layout_marginTop="2dp"
             android:background="@color/clip_blue" />
 
         <LinearLayout
-            android:id="@+id/llMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"

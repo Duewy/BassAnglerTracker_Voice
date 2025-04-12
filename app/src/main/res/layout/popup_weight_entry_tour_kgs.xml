@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:gravity="left"
+            android:gravity="start"
             android:paddingVertical="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -45,7 +45,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="15dp"
-                android:text="Select Species"
+                android:text="@string/select_species"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -115,7 +115,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:hint="00.XX"
+                android:hint="@string/_00_xx"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:background="@color/very_lite_grey"/>
@@ -164,7 +164,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Kgs"
+                android:text="@string/kgs"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -175,7 +175,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="0.XX Kgs"
+                android:text="@string/_0_xx_kgs"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -201,7 +201,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/btn_outline_grey"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -212,7 +212,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_menu_setup"
-                android:text="Save Catch"
+                android:text="@string/save_catch"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />

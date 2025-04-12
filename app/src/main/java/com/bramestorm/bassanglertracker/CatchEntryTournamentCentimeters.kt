@@ -20,17 +20,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
+import java.util.Locale.getDefault
 
 
 class CatchEntryTournamentCentimeters : AppCompatActivity() {
 
 
         // Buttons
-        private lateinit var btnStartFishingCms: Button
         private lateinit var btnTournamentCatch:Button
         private lateinit var btnMainCms: Button
         private lateinit var btnAlarmCms: Button
@@ -60,8 +60,6 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private lateinit var fifthDecLengthCms: TextView
         private lateinit var sixthDecLengthCms: TextView
 
-        private lateinit var decimalTextViews: List<TextView>
-        private lateinit var speciesLetters: List<TextView>
 
         private lateinit var txtTypeLetter1:TextView
         private lateinit var txtTypeLetter2:TextView
@@ -96,9 +94,9 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private var isCullingEnabled: Boolean = false
         private var typeOfMarkers: String = "Color"
         private var tournamentSpecies: String = "Unknown"
+        private var lastTournamentCatch: CatchItem? = null
 
         // Request Codes
-        private val requestLengthENTRY = 1008
         private val requestAlarmSET = 1009
 
 
@@ -261,14 +259,11 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             )
             val result = dbHelper.insertCatch(catch)
             Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
+            // ✅ Save the most recent catch for motivational messaging
+            if (result) {
+                lastTournamentCatch = catch
+            }
             updateTournamentList()
-        }
-//+++++++++++++++ Get Top Catches  ++++++++++++++++++++++
-
-        private fun getTopTournamentCatches(): List<CatchItem> {
-            val allCatches = dbHelper.getCatchesForToday("metric", getCurrentDate())
-            val sorted = allCatches.sortedByDescending { it.totalLengthTenths ?: 0 }
-            return if (isCullingEnabled) sorted.take(tournamentCatchLimit) else sorted
         }
 
 
@@ -277,7 +272,7 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private fun updateTotalLength(tournamentCatches: List<CatchItem>) {
             // Always sort and limit to top N
             val catchesToUse = tournamentCatches
-                .sortedByDescending { it.totalLengthTenths?: 0 }
+                .sortedByDescending { it.totalLengthTenths ?: 0 }
                 .take(tournamentCatchLimit)  // ✅ Apply limit always
 
             val totalLengthCms = catchesToUse.sumOf { it.totalLengthTenths ?: 0 }
@@ -287,15 +282,20 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             totalRealLengthCms.text = totalCms.toString()
             totalDecLengthCms.text = totalDec.toString()
 
-            // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
             val currentCount = dbHelper
                 .getCatchesForToday("metric", getCurrentDate())
                 .sortedByDescending { it.totalLengthTenths ?: 0 }
                 .take(tournamentCatchLimit)
                 .size
+
             if (currentCount >= 2) {
-                val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                lastTournamentCatch?.let {
+                    val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "cms")
+                    if (message != null) {
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -305,12 +305,12 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
 
         private fun updateTournamentList() {
             val formattedDate = getCurrentDate()
-            val RealLengthCms = listOf(
+            val realLengthCms = listOf(
                 firstRealLengthCms, secondRealLengthCms, thirdRealLengthCms,
                 fourthRealLengthCms, fifthRealLengthCms, sixthRealLengthCms
             )
 
-            val DecLengthCms = listOf(
+            val decLengthCms = listOf(
                 firstDecLengthCms, secondDecLengthCms, thirdDecLengthCms,
                 fourthDecLengthCms, fifthDecLengthCms, sixthDecLengthCms
             )
@@ -337,7 +337,7 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
 
             runOnUiThread {
                 for (i in tournamentCatches.indices) {
-                    if (i >= RealLengthCms.size || i >= DecLengthCms.size) continue
+                    if (i >= realLengthCms.size) continue
 
                     val catch = tournamentCatches[i]
                     val totalLengthCms= catch.totalLengthTenths?: 0
@@ -350,18 +350,18 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                         ClipColor.RED
                     }
 
-                    RealLengthCms[i].text = lengthCms.toString()
-                    DecLengthCms[i].text =lengthDec.toString()
+                    realLengthCms[i].text = lengthCms.toString()
+                    decLengthCms[i].text =lengthDec.toString()
 
 // ✅ First set the clip color background
-                    RealLengthCms[i].setBackgroundResource(clipColor.resId)
-                    DecLengthCms[i].setBackgroundResource(clipColor.resId)
+                    realLengthCms[i].setBackgroundResource(clipColor.resId)
+                    decLengthCms[i].setBackgroundResource(clipColor.resId)
 
 // ✅ Then layer on a black border to improve visibility
                     val baseColor = ContextCompat.getColor(this, clipColor.resId)
                     val layeredDrawable = createLayeredDrawable(baseColor)
-                    RealLengthCms[i].background = layeredDrawable
-                    DecLengthCms[i].background = layeredDrawable
+                    realLengthCms[i].background = layeredDrawable
+                    decLengthCms[i].background = layeredDrawable
 
 
 
@@ -370,11 +370,11 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                     else
                         resources.getColor(R.color.black, theme)
 
-                    RealLengthCms[i].setTextColor(textColor)
-                    DecLengthCms[i].setTextColor(textColor)
+                    realLengthCms[i].setTextColor(textColor)
+                    decLengthCms[i].setTextColor(textColor)
 
-                    RealLengthCms[i].invalidate()
-                    DecLengthCms[i].invalidate()
+                    realLengthCms[i].invalidate()
+                    decLengthCms[i].invalidate()
                 }
                 // 👇 ADD THIS FOR COLORBLIND ACCESSIBILITY 👇
                 val colorLetters = listOf(
@@ -545,27 +545,6 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             }
         }
 
-//!!!!!!!!!!!!!!!!! MOTIVATIONAL MESSAGES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        private fun getMotivationalMessage(currentCount: Int, totalNeeded: Int): String {
-            val remaining = totalNeeded - currentCount
-
-            val messages = listOf(
-                "🔥 You're on fire!",
-                "🎣 Keep casting, you're almost there!",
-                "💪 One catch at a time!",
-                "🏆 That one’s a game-changer!",
-                "👏 Nice pull! You're stacking ‘em!",
-                "🚀 You're climbing that leaderboard!",
-                "🌊 The lake is yours today!",
-                "💯 Crushing it, keep going!",
-                "🎉 You’ve got $currentCount so far — only $remaining to go!",
-                "💥 That puts you at $currentCount — get that next one!"
-            )
-            return messages.random()
-        }
-
-
         // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
         private val checkAlarmRunnable = object : Runnable {
@@ -632,26 +611,30 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
                 if (alarmHour != -1 && alarmMinute != -1) {
                     val amPm = if (alarmHour >= 12) "PM" else "AM"
                     val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                    val formattedMinute = String.format("%02d", alarmMinute)
+                    val formattedMinute = String.format(getDefault(), "%02d", alarmMinute)
+
 
                     val timeString = "$displayHour:$formattedMinute $amPm"
-                    btnAlarmCms.text = "⏰ $timeString"
 
-                    Toast.makeText(this, "Alarm Set for $timeString", Toast.LENGTH_SHORT).show()
+                    btnAlarmCms.text = getString(R.string.alarm_set_to, timeString)
+
+                    val toastMessage = getString(R.string.alarm_toast_message, timeString)
+                    Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
                 }
+
             }
         }
 
 
         //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
         private fun getCurrentDateTime(): String {
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", getDefault())
             return sdf.format(Date())
         }
 
         //************** DATE *****************************
         private fun getCurrentDate(): String {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val sdf = SimpleDateFormat("yyyy-MM-dd", getDefault())
             return sdf.format(Date())
         }
 

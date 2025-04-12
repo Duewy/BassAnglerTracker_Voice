@@ -18,7 +18,6 @@
 
         <!-- Header Images -->
         <ImageView
-            android:id="@+id/imgMapQueryBass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:alpha="0.20"
@@ -27,7 +26,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llHeaderMapQuery"
-            app:srcCompat="@drawable/bass_jumping_boater" />
+            app:srcCompat="@drawable/bass_jumping_boater"
+            android:contentDescription="@string/bass_fighting" />
 
         <ImageView
             android:id="@+id/imgVCC"
@@ -55,13 +55,12 @@
 
 
             <TextView
-                android:id="@+id/txtMapQueryHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:paddingHorizontal="15dp"
-                android:text="Select the logged field data of your catches to see on the map"
+                android:text="@string/select_the_logged_field_data_of_your_catches_to_see_on_the_map"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -93,7 +92,6 @@
 
             <!-- Date Selection Buttons -->
             <LinearLayout
-                android:id="@+id/llTextDates"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
@@ -103,12 +101,11 @@
                 app:layout_constraintTop_toBottomOf="@id/divMapQuery1">
 
                 <TextView
-                    android:id="@+id/lblDatesMapQuery"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="Dates of Query"
+                    android:text="@string/dates_of_query"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -116,7 +113,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llDatesMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -128,7 +124,7 @@
                     android:layout_height="50dp"
                     android:layout_weight=".5"
                     android:background="@drawable/btn_lbs"
-                    android:text="Date"
+                    android:text="@string/date"
                     android:textColor="@color/clip_blue"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -141,7 +137,7 @@
                     android:layout_weight="1"
                     android:background="@color/clip_white"
                     android:gravity="center"
-                    android:hint="Dates of Query"
+                    android:hint="@string/dates_of_query"
                     android:textColor="@color/clip_blue"
                     android:textStyle="bold" />
 
@@ -152,7 +148,6 @@
 
             <!-- Imperial & Metric Buttons -->
             <LinearLayout
-                android:id="@+id/llSpeciesMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingVertical="5dp"
@@ -160,12 +155,11 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/lblSpeciesMapQuery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Species of Query"
+                    android:text="@string/species_of_query"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -173,7 +167,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llBtnSpeciesMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -186,7 +179,7 @@
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
                     android:background="@drawable/btn_kgs"
-                    android:text="Species"
+                    android:text="@string/species"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
 
@@ -198,7 +191,7 @@
                     android:layout_weight="1"
                     android:background="@color/clip_white"
                     android:gravity="center"
-                    android:hint="Species of Query"
+                    android:hint="@string/species_of_query"
                     android:textColor="@color/clip_blue"
                     android:textStyle="bold" />
 
@@ -207,7 +200,6 @@
 
             <!-- Fun Day & Tournament Buttons -->
             <LinearLayout
-                android:id="@+id/llTypeOfDayMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingVertical="5dp"
@@ -215,20 +207,18 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/lblTypeofDayMapQuery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:text="Event Type of Query"
+                    android:text="@string/event_type_of_query"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llEventTypeBtnMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -241,7 +231,7 @@
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
                     android:background="@drawable/btn_inches"
-                    android:text="Events"
+                    android:text="@string/events"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
 
@@ -253,7 +243,7 @@
                     android:layout_weight="1"
                     android:background="@color/clip_white"
                     android:gravity="center"
-                    android:hint="Events of Query"
+                    android:hint="@string/events_of_query"
                     android:textColor="@color/clip_blue"
                     android:textStyle="bold" />
 
@@ -262,7 +252,6 @@
 
 
             <LinearLayout
-                android:id="@+id/llSizeMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingVertical="5dp"
@@ -270,19 +259,17 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/lblSizeMapQuery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Sizes of Query"
+                    android:text="@string/sizes_of_query"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llBtnSizeMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -295,7 +282,7 @@
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
                     android:background="@drawable/btn_cms"
-                    android:text="Sizes"
+                    android:text="@string/sizes"
                     android:textColor="@color/black"
                     android:textSize="18sp" />
 
@@ -307,13 +294,12 @@
                     android:layout_weight="1"
                     android:background="@color/clip_white"
                     android:gravity="center"
-                    android:hint="Sizes of Query"
+                    android:hint="@string/sizes_of_query"
                     android:textColor="@color/clip_blue"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llTextMeasurement"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingVertical="5dp"
@@ -323,19 +309,17 @@
 
 
                 <TextView
-                    android:id="@+id/lblMeasurementsMapQuery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="Measurements of Query"
+                    android:text="@string/measurements_of_query"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold"/>
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llBtnMeasurementMapQuery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="2dp"
@@ -349,7 +333,7 @@
                     android:layout_height="50dp"
                     android:layout_weight="0.5"
                     android:background="@drawable/btn_outline_green"
-                    android:text="Measurement"
+                    android:text="@string/measurement"
                     android:textColor="@color/black"
                     android:textSize="16sp"/>
 
@@ -361,14 +345,13 @@
                     android:layout_weight="1"
                     android:background="@color/clip_white"
                     android:gravity="center"
-                    android:hint="Measurement of Query"
+                    android:hint="@string/measurements_of_query"
                     android:textColor="@color/clip_blue"
                     android:textStyle="bold" />
 
             </LinearLayout>
 
             <View
-                android:id="@+id/divMapQuery2"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:layout_marginTop="15dp"
@@ -394,7 +377,7 @@
                     android:background="@drawable/btn_outline_lt_brown"
                     android:fontFamily="sans-serif-medium"
                     android:padding="7dp"
-                    android:text="Get Map"
+                    android:text="@string/get_map"
                     android:textColor="@color/black"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -406,7 +389,6 @@
             </LinearLayout>
 
             <View
-                android:id="@+id/divMapQuery3"
                 android:layout_width="match_parent"
                 android:layout_height="5dp"
                 android:layout_marginTop="2dp"
@@ -444,7 +426,7 @@
                     android:background="@drawable/btn_outline_orange"
                     android:fontFamily="sans-serif-medium"
                     android:padding="7dp"
-                    android:text="RESET FILTERS"
+                    android:text="@string/reset_filters"
                     android:textColor="@color/black"
                     android:textSize="22sp"
                     android:textStyle="bold"

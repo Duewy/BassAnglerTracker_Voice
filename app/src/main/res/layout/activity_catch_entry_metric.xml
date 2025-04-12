@@ -10,7 +10,6 @@
 
 
     <ImageView
-        android:id="@+id/imgBassCatchMetric"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:alpha="0.25"
@@ -19,7 +18,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.50"
-        app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing"
+        android:contentDescription="@string/bass_fighting"/>
 
     <!-- Page Label -->
     <TextView
@@ -30,7 +30,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log"
+        android:text="@string/todays_Fishing_Log"
         android:textAllCaps="true"
         android:textColor="@color/black"
         android:textSize="30sp"
@@ -43,7 +43,7 @@
         android:id="@+id/txtTodaysLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00.0 Cms"
+        android:text="@string/_00_0_cms"
         android:textColor="@color/black"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -75,12 +75,11 @@
         app:layout_constraintTop_toBottomOf="@id/btnSetUp3Cm">
 
         <TextView
-            android:id="@+id/txtAddCatchCm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:gravity="center"
-            android:text="Add Catch:"
+            android:text="@string/add_catch"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />

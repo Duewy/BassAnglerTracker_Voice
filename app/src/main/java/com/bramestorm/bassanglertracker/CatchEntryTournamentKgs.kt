@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -57,9 +58,6 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
     private lateinit var fifthDecWeightKgs: TextView
     private lateinit var sixthDecWeightKgs: TextView
 
-    private lateinit var decimalTextViews: List<TextView>
-    private lateinit var speciesLetters: List<TextView>
-
     private lateinit var txtTypeLetter1:TextView
     private lateinit var txtTypeLetter2:TextView
     private lateinit var txtTypeLetter3:TextView
@@ -91,9 +89,11 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
     private var isCullingEnabled: Boolean = false
     private var typeOfMarkers: String = "Color"
     private var tournamentSpecies: String = "Unknown"
+    private var lastTournamentCatch: CatchItem? = null
+
+
 
     // Request Codes
-    private val requestWeightENTRY = 1007
     private val requestAlarmSET = 1008
 
 
@@ -165,6 +165,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
+
 
         btnStartFishingKgs.setOnClickListener { showWeightPopup() }
         btnSetUpKgs.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
@@ -241,19 +242,18 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         Log.d("DB_DEBUG", "✅ Catch Insert Result: $result, Stored Clip Color: ${catch.clipColor}")
 
         Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
-
+        // ✅ Save the most recent catch for motivational messaging
+        if (result) {
+            lastTournamentCatch = catch
+        }
 
         updateTournamentList()
     }
 
-    private fun getTopTournamentCatches(): List<CatchItem> {
-        val allCatches = dbHelper.getCatchesForToday("Kgs", getCurrentDate())
-        val sorted = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
-        return if (isCullingEnabled) sorted.take(tournamentCatchLimit) else sorted
-    }
 
 
     // ``````````````` UPDATE TOTAL WEIGHT ``````````````````````
+// ``````````````` UPDATE TOTAL WEIGHT ```````````````````````
     private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
         // Always sort and limit to top N
         val catchesToUse = tournamentCatches
@@ -269,15 +269,21 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
         // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
         val currentCount = dbHelper
-            .getCatchesForToday("LbsOzs", getCurrentDate())
-            .sortedByDescending { it.totalWeightOz ?: 0 }
+            .getCatchesForToday("kgs", getCurrentDate())
+            .sortedByDescending { it.totalWeightHundredthKg ?: 0 }
             .take(tournamentCatchLimit)
             .size
+
         if (currentCount >= 2) {
-            val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            lastTournamentCatch?.let {
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "kgs")
+                if (message != null) {
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
+
 
 
 
@@ -317,7 +323,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
         runOnUiThread {
             for (i in tournamentCatches.indices) {
-                if (i >= realWeightKgs.size || i >= decWeightKgs.size) continue
+                if (i >= realWeightKgs.size) continue
 
                 val catch = tournamentCatches[i]
                 val totalWeightKgs = catch.totalWeightHundredthKg ?: 0
@@ -523,28 +529,6 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         }
     }
 
-//!!!!!!!!!!!!!!!!! MOTIVATIONAL MESSAGES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    private fun getMotivationalMessage(currentCount: Int, totalNeeded: Int): String {
-        val remaining = totalNeeded - currentCount
-
-        val messages = listOf(
-            "🔥 You're on fire!",
-            "🎣 Keep casting, you're almost there!",
-            "💪 One catch at a time!",
-            "🏆 That one’s a game-changer!",
-            "👏 Nice pull! You're stacking ‘em!",
-            "🚀 You're climbing that leaderboard!",
-            "🌊 The lake is yours today!",
-            "💯 Crushing it, keep going!",
-            "🎉 You’ve got $currentCount so far — only $remaining to go!",
-            "💥 That puts you at $currentCount — get that next one!"
-        )
-
-        return messages.random()
-    }
-
-
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
     private val checkAlarmRunnable = object : Runnable {
@@ -609,13 +593,15 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
             if (alarmHour != -1 && alarmMinute != -1) {
                 val amPm = if (alarmHour >= 12) "PM" else "AM"
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                val formattedMinute = String.format("%02d", alarmMinute)
-
+                val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
-                btnAlarmKgs.text = "⏰ $timeString"
 
-                Toast.makeText(this, "Alarm Set for $timeString", Toast.LENGTH_SHORT).show()
+                btnAlarmKgs.text = getString(R.string.alarm_set_to, timeString)
+
+                val toastMessage = getString(R.string.alarm_toast_message, timeString)
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
+
         }
     }
 

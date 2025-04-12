@@ -12,7 +12,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.widget.Button
 import android.widget.ListView
@@ -35,10 +34,9 @@ class TrainingWords : AppCompatActivity() {
     private lateinit var btnUserTalk: Button
     private lateinit var txtWhatComputerHeard : TextView
     private lateinit var txtSayThis : TextView
-    private val speechRecognizer by lazy { SpeechRecognizer.createSpeechRecognizer(this) }
     private lateinit var speechIntent: Intent
     private val phraseList: MutableList<PracticePhrase> = VoiceCommandList.phraseList
-    private val SPEECH_REQUEST_CODE = 1001
+    private val speechRequestCode = 1001
     private val recordAudioRequestCode = 101
     private lateinit var textToSpeech: TextToSpeech
 
@@ -100,7 +98,7 @@ class TrainingWords : AppCompatActivity() {
             }
 
             try {
-                startActivityForResult(intent, SPEECH_REQUEST_CODE)
+                startActivityForResult(intent, speechRequestCode)
             } catch (e: ActivityNotFoundException) {
                 Toast.makeText(this, "Your device doesn't support speech input", Toast.LENGTH_SHORT).show()
             }
@@ -199,32 +197,11 @@ class TrainingWords : AppCompatActivity() {
         txtSayThis.setBackgroundColor(bgColor)
     }
 
-    //???????????????? CHECK if WORDS MATCH ???????????????????????
 
-    private fun checkPhraseMatch(spoken: String) {
-        val currentPhrase = txtSayThis.text.toString().replace("Say This: ", "").trim()
-
-        // Normalize both strings
-        val normalizedSpoken = spoken.replace("\\s|-".toRegex(), "").lowercase()
-        val normalizedTarget = currentPhrase.replace("\\s|-".toRegex(), "").lowercase()
-
-        if (normalizedSpoken == normalizedTarget) {
-            txtWhatComputerHeard.text = "You said:$spoken\n✔ That is a match!"
-        } else {
-            txtWhatComputerHeard.text = "You said: $spoken\n❌ That does not match $currentPhrase"
-        }
-    }
-
-
-
-
-
-
-
-    //_________________ Get DAta from Microphone _______________
+    //_________________ Get Data from Microphone _______________
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == speechRequestCode && resultCode == RESULT_OK) {
             val resultList = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = resultList?.firstOrNull()
 
@@ -237,7 +214,7 @@ class TrainingWords : AppCompatActivity() {
 
 
 
-    fun handleVoiceInput(rawInput: String) {
+ private fun handleVoiceInput(rawInput: String) {
         val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
 
         if (matchedSpecies != null) {

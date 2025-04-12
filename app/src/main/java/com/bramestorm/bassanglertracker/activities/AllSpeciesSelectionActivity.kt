@@ -29,7 +29,6 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
 
     private val selectedSpecies = mutableSetOf<String>()
     private val allSpecies = mutableListOf<String>()
-    private val speciesItems = mutableListOf<SpeciesItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

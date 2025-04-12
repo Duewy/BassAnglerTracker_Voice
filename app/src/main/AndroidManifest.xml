@@ -41,6 +41,7 @@
         <!-- All Activities Here -->
 
         <!-- Splash Page with Catch and Call Logo -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity
             android:name=".IntroPage"
             android:exported="true">
@@ -51,6 +52,7 @@
         </activity>
 
         <!-- Directory of All Activities  -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -60,89 +62,111 @@
 
 
         <!-- Set Up Days Fishing Activity -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".SetUpActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- User can select species for list and can add species to list -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".activities.AllSpeciesSelectionActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Users can arrange the positioning of the 8 on the species list -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".activities.SpeciesSelectionActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Fun Day Catch Entry Pages -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryLbsOzs"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryKgs"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryInches"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryMetric"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Tournament Fishing Activity -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryTournament"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryTournamentKgs"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryTournamentInches"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryTournamentCentimeters"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Referral to web PDF How To Pages -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.UserTrainingIndex"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.UserTrainingVoiceCommands"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.TrainingWords"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Tournament Popups for User Input -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupWeightEntryTourKgs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupWeightEntryTourLbs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupLengthEntryTourInches"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupLengthEntryTourCms"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Fun Day Popups for User Input -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupWeightEntryKgs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupWeightEntryLbs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupLengthEntryInches"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopupLengthEntryMetric"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
@@ -150,18 +174,22 @@
 
 
         <!-- Looking Up Catch Locations -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".MapCatchLocationsActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Share all Catch Data  -->
-        <activity android:name=".share.ShareFishingLogsActivity"
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".ShareFishingLogsActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Get the Top 5 Catches -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".TopFiveCatchesActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Share Specific Data with CSV files -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".LookUpShareDataActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
@@ -169,6 +197,7 @@
 
 
         <!-- For all ALARMS of Tournament pages -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".PopUpAlarm"
             android:theme="@style/Theme.BassAnglerTracker"
             android:windowSoftInputMode="adjustResize"

@@ -1,5 +1,7 @@
 package com.bramestorm.bassanglertracker
 
+import android.content.Context
+
 data class CatchItem(
 
     val id: Int,
@@ -20,11 +22,23 @@ data class CatchItem(
     val clipColor: String? = null       // color for Tournament clips
 )
 
+//------------- for MOTIVATIONAL MESSAGES ----------------------
+fun CatchItem.getComparisonValueByMode(mode: String): Float {
+    return when (mode.lowercase()) {
+        "lbs" -> (this.totalWeightOz ?: 0).toFloat()
+        "kgs" -> (this.totalWeightHundredthKg ?: 0) / 100f
+        "inches" -> (this.totalLengthA8th ?: 0) / 8f
+        "cms" -> (this.totalLengthTenths ?: 0) / 10f
+        else -> 0f
+    }
+}
+
+
 
 fun formatWeightOzToLbsOz(totalOz: Int): String {
     val lbs = totalOz / 16
     val oz = totalOz % 16
-    return "${lbs} lbs ${oz} oz"
+    return "$lbs lbs $oz oz"
 }
 
 fun formatLengthA8thToInches(lengthA8ths: Int): String {
@@ -37,12 +51,13 @@ fun formatLengthA8thToInches(lengthA8ths: Int): String {
     }
 }
 
-fun formatWeightKg(hundredthKg: Int): String {
+fun formatWeightKg(context: Context, hundredthKg: Int): String {
     val kg = hundredthKg / 100.0
-    return String.format("%.2f kg", kg)
+    return context.getString(R.string.weight_format_kg, kg)
 }
 
-fun formatLengthCm(tenthCm: Int): String {
+fun formatLengthCm(context: Context, tenthCm: Int): String {
     val cm = tenthCm / 10.0
-    return String.format("%.1f cm", cm)
+    return context.getString(R.string.length_format_cm, cm)
 }
+

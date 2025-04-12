@@ -7,7 +7,6 @@
     android:background="@color/softlock_sand">
 
     <TextView
-        android:id="@+id/txtMeasurementLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/select_measurement_type"
@@ -30,7 +29,7 @@
             android:id="@+id/radioWeight"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:text="Weight"
+            android:text="@string/weight"
             android:textSize="22sp"
             android:textColor="@color/black"
             android:textStyle="bold"
@@ -42,7 +41,7 @@
             android:id="@+id/radioLength"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:text="Length"
+            android:text="@string/length"
             android:textSize="22sp"
             android:textColor="@color/black"
             android:textStyle="bold"
@@ -56,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:inputType="numberDecimal"
-        android:hint="Min Size"
+        android:hint="@string/min_size"
         android:textSize="20sp"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -70,7 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:inputType="numberDecimal"
-        android:hint="Max Size"
+        android:hint="@string/max_size"
         android:textSize="20sp"
         android:textColor="@color/black"
         android:textStyle="bold"

@@ -11,7 +11,6 @@
 
 
     <ImageView
-        android:id="@+id/imgBassCatchLbs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:alpha="0.25"
@@ -20,7 +19,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.50"
-        app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing"
+        android:contentDescription="@string/bass_fighting"/>
 
     <!-- Page Label -->
     <TextView
@@ -31,7 +31,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="26dp"
-        android:text="todays fishing log"
+        android:text="@string/todays_Fishing_Log"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -44,7 +44,7 @@
         android:id="@+id/txtLbs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lbs , Ozs"
+        android:text="@string/lbs_ozs"
         android:textColor="@color/black"
         android:textAllCaps="true"
         android:textSize="30sp"
@@ -77,11 +77,10 @@
         app:layout_constraintTop_toBottomOf="@id/btnSetUp3">
 
         <TextView
-            android:id="@+id/txtAddCatchLbs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
-            android:text="Add Catch:"
+            android:text="@string/add_catch"
             android:gravity="center"
             android:textSize="24sp"
             android:textColor="@color/black"

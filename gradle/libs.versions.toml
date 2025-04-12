@@ -2,17 +2,18 @@
 agp = "8.5.2"
 gsonVersion = "2.12.1"
 kotlin = "1.9.0"
-coreKtx = "1.15.0"
+core = "1.15.0"
+core-ktx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinSymbolProcessingApi = "1.4.0-rc-dev-experimental-20200828"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.03.01"
+composeBom = "2025.04.00"
 playServicesAuth = "21.3.0"
-roomCommon = "2.6.1"
-roomKtx = "2.6.1"
+roomCommon = "2.7.0"
+roomKtx = "2.7.0"
 appcompat = "1.7.0"
 constraintlayout = "2.2.1"
 playServicesLocation = "21.3.0"
@@ -22,7 +23,8 @@ playServicesMaps = "19.1.0"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core = { module = "androidx.core:core", version.ref = "core" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

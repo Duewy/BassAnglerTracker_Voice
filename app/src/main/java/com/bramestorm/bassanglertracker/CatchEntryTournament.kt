@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -58,9 +59,6 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var fifthDecWeight: TextView
     private lateinit var sixthDecWeight: TextView
 
-    private lateinit var decimalTextViews: List<TextView>
-    private lateinit var speciesLetters: List<TextView>
-
     private lateinit var txtTypeLetter1:TextView
     private lateinit var txtTypeLetter2:TextView
     private lateinit var txtTypeLetter3:TextView
@@ -95,9 +93,9 @@ class CatchEntryTournament : AppCompatActivity() {
     private var isCullingEnabled: Boolean = false
     private var typeOfMarkers: String = "Color"
     private var tournamentSpecies: String = "Unknown"
+    private var lastTournamentCatch: CatchItem? = null
 
     // Request Codes
-    private val requestWeightENTRY = 1005
     private val requestAlarmSET = 1006
 
 
@@ -253,15 +251,10 @@ class CatchEntryTournament : AppCompatActivity() {
         Log.d("DB_DEBUG", "✅ Catch Insert Result: $result, Stored Clip Color: ${catch.clipColor}")
 
         Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
-
-
+        if (result) {
+            lastTournamentCatch = catch
+        }
         updateTournamentList()
-    }
-
-    private fun getTopTournamentCatches(): List<CatchItem> {
-        val allCatches = dbHelper.getCatchesForToday("LbsOzs", getCurrentDate())
-        val sorted = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
-        return if (isCullingEnabled) sorted.take(tournamentCatchLimit) else sorted
     }
 
 
@@ -287,8 +280,12 @@ class CatchEntryTournament : AppCompatActivity() {
             .size
 
         if (currentCount >= 2) {
-            val message = getMotivationalMessage(currentCount, tournamentCatchLimit)
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            lastTournamentCatch?.let {
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "lbs")
+                if (message != null) {
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -330,7 +327,7 @@ class CatchEntryTournament : AppCompatActivity() {
 
         runOnUiThread {
             for (i in tournamentCatches.indices) {
-                if (i >= realWeights.size || i >= decWeights.size) continue
+                if (i >= realWeights.size) continue
 
                 val catch = tournamentCatches[i]
                 val totalWeightOz = catch.totalWeightOz ?: 0
@@ -536,26 +533,7 @@ class CatchEntryTournament : AppCompatActivity() {
         }
     }
 
-//!!!!!!!!!!!!!!!!! MOTIVATIONAL MESSAGES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    private fun getMotivationalMessage(currentCount: Int, totalNeeded: Int): String {
-        val remaining = totalNeeded - currentCount
-
-        val messages = listOf(
-            "🔥 You're on fire!",
-            "🎣 Keep casting, you're almost there!",
-            "💪 One catch at a time!",
-            "🏆 That one’s a game-changer!",
-            "👏 Nice pull! You're stacking ‘em!",
-            "🚀 You're climbing that leaderboard!",
-            "🌊 The lake is yours today!",
-            "💯 Crushing it, keep going!",
-            "🎉 You’ve got $currentCount so far — only $remaining to go!",
-            "💥 That puts you at $currentCount — get that next one!"
-        )
-
-        return messages.random()
-    }
 
 
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
@@ -622,13 +600,16 @@ class CatchEntryTournament : AppCompatActivity() {
             if (alarmHour != -1 && alarmMinute != -1) {
                 val amPm = if (alarmHour >= 12) "PM" else "AM"
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                val formattedMinute = String.format("%02d", alarmMinute)
-
+                val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
-                btnAlarm.text = "⏰ $timeString"
 
-                Toast.makeText(this, "Alarm Set for $timeString", Toast.LENGTH_SHORT).show()
+                btnAlarm.text = getString(R.string.alarm_set_to, timeString)
+
+                val toastMessage = getString(R.string.alarm_toast_message, timeString)
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
             }
+
+
         }
     }
 

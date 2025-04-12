@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress XmlUnusedNamespaceDeclaration -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -22,7 +23,6 @@
     <!-- Species Spinner -->
 
     <TextView
-        android:id="@+id/txtSelectSpeciesTop5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="5dp"
@@ -70,7 +70,7 @@
             android:layout_height="55dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="Lbs"
+            android:text="@string/lbs"
             android:textSize="20sp"
             android:textColor="@color/black"
             android:textStyle="bold"/>
@@ -97,7 +97,7 @@
             android:layout_height="55dp"
              android:layout_gravity="center"
             android:gravity="center"
-            android:text="Lbs"
+            android:text="@string/lbs"
             android:textSize="20sp"
             android:textColor="@color/black"
             android:textStyle="bold" />
@@ -119,8 +119,7 @@
             android:layout_marginBottom="8dp"
             android:gravity="center"
             android:layout_gravity="center"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal" >
 
             <RadioButton
                 android:id="@+id/radioLbs"

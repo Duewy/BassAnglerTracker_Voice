@@ -46,6 +46,5 @@ class SpeciesReorderAdapter(
         notifyItemMoved(from, to)
         selectedPosition = to
     }
-
-    fun getCurrentOrder(): List<String> = speciesList
 }
+

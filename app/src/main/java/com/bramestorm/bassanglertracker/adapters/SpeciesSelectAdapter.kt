@@ -8,12 +8,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.utils.ItemMoveCallback.ItemTouchHelperContract
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 class SpeciesSelectAdapter(
     private val speciesList: MutableList<SpeciesItem>
-) : RecyclerView.Adapter<SpeciesSelectAdapter.SpeciesViewHolder>(), ItemTouchHelperContract {
+) : RecyclerView.Adapter<SpeciesSelectAdapter.SpeciesViewHolder>(),
+    ItemMoveCallback.ItemTouchHelperContract {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SpeciesViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -57,7 +57,6 @@ class SpeciesSelectAdapter(
     inner class SpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val txtSpeciesName: TextView = itemView.findViewById(R.id.txtSpeciesNameReorder)
         private val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesReorder)
-        private val imgDragHandle: ImageView = itemView.findViewById(R.id.imgDragHandle)
 
         fun bind(speciesItem: SpeciesItem) {
             txtSpeciesName.text = speciesItem.name
@@ -67,7 +66,7 @@ class SpeciesSelectAdapter(
     fun updateList(newList: List<SpeciesItem>) {
         speciesList.clear()
         speciesList.addAll(newList)
-        notifyDataSetChanged() // This should now work!
+        notifyDataSetChanged()
     }
 
 }

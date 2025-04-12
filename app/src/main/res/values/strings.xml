@@ -2,49 +2,22 @@
     <string name="app_name">Catch Call</string>
     <string name="app_image_description">SoftLock Culling System with Voice Controlled Culling</string>
     <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and ozs)</string>
-    <string name="enter_catch_kgs">Enter Catch (Kgs)</string>
     <string name="img_setup">Set Up Page</string>
     <string name="addCatchBtn">Add a Catch</string>
     <string name="timer_place_holder">Time Now</string>
     <string name="tournament_activity_description">enter the weights of the catch and the app suggests the fish to cull and gives the total weight</string>
-    <string name="total_value">Total Weight</string>
     <string name="save_catch">Save_Catch</string>
-    <string name="canam_Image">Canadian American Flag Image</string>
-    <string name="goto_Tournament_description">Goto_To_Tournament</string>
-    <string name="goto_DayCatch_description">Goto_To_DayCatch</string>
     <string name="goto_SetUp_description">Set_Up</string>
-    <string name="setup_Events_page">Set_Up_the_days_Event</string>
-    <string name="goto_Catch_page">Enter_Catch_Page</string>
     <string name="todays_Fishing_Log">Fishing_Log</string>
-    <string name="type_of_Day">Fun Day or Tournament</string>
     <string name="days_End_time">End Time</string>
     <string name="fun_Day">Fun Day</string>
-    <string name="edit_catch">Edit Catch</string>
-    <string name="tournament_Day">Tournament</string>
-    <string name="lbl_Type_of_Fishing_Day">Type of Fishing Day</string>
-    <string name="lb_values">0 to 99 Lbs</string>
-    <string name="ozs_values">0 to 15 ozs</string>
-    <string name="kg_values"> Kgs  0 to 99 Kgs</string>
-    <string name="gram_values"> Grams  0 to 99 0.XXKgs</string>
-    <string name="inch_values">Inches 0 to 99 " </string>
-    <string name="eight_values">X/8"  0 to 7 8ths</string>
-    <string name="cm_values">Metric 0 to 99 Cm</string>
-    <string name="milli_values">millimeters  0 to 99 mm</string>
-    <string name="txtType_of_Measurement">Type of Measurement Units</string>
     <string name="gps_info">GPS will be ON only to get location of your catch</string>
-    <string name="gps_usage_permission">Record GPS?</string>
     <string name="set_alarm">Set Alarm</string>
     <string name="cancel">Cancel</string>
-    <string name="title_enter_catch">Enter Catch:</string>
-    <string name="title_weight_lbs_oz">Species and Weight -Lbs/Oz-</string>
-    <string name="title_weight_kgs">Species and Weight -Kgs-</string>
     <string name="enter_catch_details_inches">Species and Length -Inches-</string>
-    <string name="enter_catch_details_cm">Species and Length -Cms-</string>
     <string name="inches">Inches</string>
     <string name="_8ths_of_inch">/8ths of inch</string>
     <string name="select_species">Select Species</string>
-    <string name="log_catches_inches">Log Catches Inches</string>
-    <string name="todays_log_centimeters">Log Catches Centimeters</string>
     <string name="edit_catch_entry_lbs">Edit Catch Entry Lbs</string>
     <string name="edit_catch_entry_kgs">Edit Catch Kgs</string>
     <string name="edit_catch_entry_inches">Edit Catch Inches</string>
@@ -53,26 +26,15 @@
     <string name="enter_cm_and_mm">Enter Cm and mm</string>
     <string name="cms_0_to_99">Cms 0 to 99</string>
     <string name="_0_to_9_mm">0 to 9 mm</string>
-    <string name="enter_length_centimeters">Enter Length -Centimeters-</string>
     <string name="enter_inches_and_8ths">Enter Inches and 8ths</string>
     <string name="kgs_100_0_to_99">Kgs/100 0 to 99</string>
     <string name="kgs_0_to_99kgs">-Kgs- 0 to 99Kgs</string>
     <string name="using_culling_app_in_manual_mode"><u>Using App in Manual Mode</u></string>
     <string name="select_the_button_for_each_topic">Select the button for each topic</string>
-    <string name="catch_kgs">Catch Kgs</string>
-    <string name="catch_lbs">Catch Lbs</string>
-    <string name="catch_inch">Catch Inch</string>
-    <string name="catch_cms">Catch Cms</string>
-    <string name="teach_vcc">Teach VCC</string>
-    <string name="what_is_vcc">What is VCC</string>
-    <string name="using_the_voice_commands">Using The Voice Commands</string>
     <string name="goto_setup">Goto setup</string>
-    <string name="user_training_page">User Training Page</string>
     <string name="weight_lbs_ozs">Weight Lbs/ozs</string>
     <string name="alarm">ALARM</string>
     <string name="letter_of_color_clip_for_color_blind">Letter of Color Clip for Color Blind</string>
-    <string name="catch_weight">Catch Weight</string>
-    <string name="train_voice_commands">Train VCC</string>
     <string name="main_page">main Page</string>
     <string name="setup">SetUp</string>
     <string name="ozs">ozs</string>
@@ -85,12 +47,9 @@
     <string name="x_00">X.00</string>
     <string name="_0_7_8ths">0–7 /8ths</string>
     <string name="_8ths">/8ths</string>
-    <string name="enter_catch_details_kgs">Enter Catch Details Kgs</string>
-    <string name="enter_catch_details_inches_8ths">Enter Catch Details Inches</string>
     <string name="_0_99_cms">0–99 Cms</string>
     <string name="cms">Cms</string>
     <string name="_0_9_mm">0–9 mm</string>
-    <string name="enter_catch_details_cms">Enter Catch Details -Cms-</string>
     <string name="mm">mm</string>
     <string name="menu">menu</string>
     <string name="fun_day_weight">Fun Day Weight</string>
@@ -104,24 +63,15 @@
     <string name="cancel_out">Cancel out</string>
     <string name="_18_ozs">18 ozs</string>
     <string name="using_voice_controls"><u>Using Voice Controls</u></string>
-    <string name="gps_mapping">GPS Mapping</string>
-    <string name="selecting_gps">Selecting GPS</string>
     <string name="enabling_voice_controls">Enabling Voice Controls</string>
     <string name="the_hands_free_fishing_log">Your Hands-Free Fishing Log</string>
-    <string name="user_manual_manual">User Manual Manual</string>
-    <string name="user_voice_manual">User Voice Manual</string>
     <string name="voice_controls">Voice Controls</string>
     <string name="set_up">Set_Up</string>
     <string name="teach_the_computer">Teach the computer. \n\ You will teach the computer to recognize the key words that are used with this Catch and Call Tracker app. The better the computer recognizes your words the easier the commands will be followed. Your time on the water is precious so lets make the best of it.</string>
     <string name="say_the_words">Say the Words</string>
-    <string name="say_the_key_words">Say the Words</string>
     <string name="what_computer_heard">What The Computer Heard</string>
     <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
-    <string name="list_of_species_for_your_fishing_day">List of Species for your fishing day</string>
-    <string name="selected_0_8">Selected: 0 / 8</string>
     <string name="save_selection">Save Selection</string>
-    <string name="select_8_species_to_target_today">Select 8 Species to Target Today</string>
-    <string name="selected_species_count">Selected: %1$d / %2$d</string>
     <string name="voice_commands_or_manual_input">Manual Input \n\ or \n\With the Full Version \n\ Voice Commands </string>
     <string name="you_can_add_your_own_species_to_the_list">You Can Add Your Own Species to the List\n\ And You Can Edit or Delete Your Added Species</string>
     <string name="select_up_to_8_species">Select Up To 8 Species\n\For the Main Species List</string>
@@ -131,29 +81,19 @@
     <string name="add_species">Add Species</string>
     <string name="error_recognizing_speech">Error recognizing speech.</string>
     <string name="drag_handle_for_user">drag handle for user</string>
-    <string name="species_name">Species Name</string>
-    <string name="edit">Edit</string>
-    <string name="delete">Delete</string>
-    <string name="species_image">species image</string>
     <string name="species">Species</string>
-    <string name="arrange_the_listing_as_needed">Arrange the Listing As Needed</string>
-    <string name="drag_handle">Drag handle</string>
     <string name="fish_species_image">Fish species image</string>
     <string name="move_the_species_up_down_as_needed">Move the Species Up/Down as Needed</string>
     <string name="customize_species_list">Customize Species List</string>
     <string name="start_fishing_event">Start Fishing Event</string>
     <string name="select_the_type_of_fishing">Select the type of fishing event and what species as well as gps</string>
     <string name="look_up_map">Look-Up Map</string>
-    <string name="apply_filters">Apply Filters</string>
     <string name="map_settings">Map Settings</string>
     <string name="learn_about_voice_controls">Learn About Voice Controls</string>
     <string name="manual_controls">Manual Controls</string>
     <string name="check_out_the_how_to_pages">Check out the How To Pages</string>
     <string name="look_up_your_catches_on_google_maps">Look Up Your Catches on Google Maps</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
     <string name="spacers">--</string>
-    <string name="gps">GPS</string>
     <string name="_4">4</string>
     <string name="_5">5</string>
     <string name="culling_limit">Culling #</string>
@@ -186,14 +126,11 @@
     <string name="include_day">Include Day Type\n(Fun Day/Tournament)</string>
     <string name="generate_csv_file">Generate CSV File</string>
     <string name="share_csv">Share CSV</string>
-    <string name="goto_setup_page">GoTo SetUp Page</string>
     <string name="top_5">Top 5</string>
     <string name="find_your_top_5">Find Your Top 5</string>
     <string name="share_fishing_logs">Share Fishing Logs</string>
     <string name="share_your_fishing_logs">Share Your Fishing Logs</string>
     <string name="different_ways_to_look_up_your_catch_log">Different Ways to Look Up Your Catch Log</string>
-    <string name="max_weight_lbs">Max Weight (lbs)</string>
-    <string name="min_weight_lbs">Min Weight (lbs)</string>
     <string name="search">Search</string>
     <string name="share_results">Share Results</string>
     <string name="top_5_catches_this_month"><u>Top 5 Catches This Month</u></string>
@@ -212,7 +149,6 @@
     <string name="select_event_type"><u> Select Event Type </u></string>
     <string name="both">Both</string>
     <string name="select_measurement_type"><u>Select Measurement Type</u></string>
-    <string name="you_said">You said: %1$s</string>
     <string name="start_the_fishing_day">Start the Fishing Day</string>
     <string name="tournament_catch_kgs">Tournament Catch Kgs</string>
     <string name="tournament_catch_cms">Tournament Catch Cms</string>
@@ -220,7 +156,6 @@
     <string name="dot">.</string>
     <string name="todays_fishing_log">todays fishing log</string>
     <string name="add_catch">Add Catch:</string>
-    <string name="fun_day_catch_cms">Fun Day Catch Cms</string>
     <string name="species_and_length_cms">Species and Length -Cms-</string>
     <string name="fun_day_catch_kgs">Fun Day Catch -Kgs-</string>
     <string name="_0_xx">0.XX</string>
@@ -228,6 +163,56 @@
     <string name="_0_to_15">0 to 15</string>
     <string name="centimeters">Centimeters</string>
     <string name="_0_99_inches">0-99 Inches</string>
+    <string name="_00_0_cms">00.0 Cms</string>
+    <string name="alter_species_list">Alter Species List</string>
+    <string name="just_say_the_word">Just Say the Word</string>
+    <string name="and_you_can">and you can</string>
+    <string name="track_your_catch">Track Your Catch</string>
+    <string name="edit_users_species">Edit Users Species</string>
+    <string name="tournament_catch_inches">Tournament Catch Inches</string>
+    <string name="select_the_logged_field_data_of_your_catches_to_see_on_the_map">Select the logged field data of your catches to see on the map</string>
+    <string name="dates_of_query">Dates of Query</string>
+    <string name="date">Date</string>
+    <string name="species_of_query">Species of Query</string>
+    <string name="event_type_of_query">Event Type of Query</string>
+    <string name="events">Events</string>
+    <string name="events_of_query">Events of Query</string>
+    <string name="sizes_of_query">Sizes of Query</string>
+    <string name="sizes">Sizes</string>
+    <string name="measurements_of_query">Measurements of Query</string>
+    <string name="measurement">Measurement</string>
+    <string name="get_map">Get Map</string>
+    <string name="reset_filters">RESET FILTERS</string>
+    <string name="from_date">From Date</string>
+    <string name="to_date">To Date</string>
+    <string name="select_measurement_format">Select Measurement Format</string>
+    <string name="imperial_lbs_oz_inches">Imperial (lbs / oz, inches)</string>
+    <string name="metric_kg_cm">Metric (kg, cm)</string>
+    <string name="min_size">Min Size</string>
+    <string name="max_size">Max Size</string>
+    <string name="xx_0_kgs">XX.0 Kgs</string>
+    <string name="_0_xx_kgs">0.XX Kgs</string>
+    <string name="fun_day_catch_lbs">Fun Day Catch -Lbs-</string>
+    <string name="_00_xx">00.XX</string>
+    <string name="tournament_catch_lbs">Tournament Catch Lbs</string>
+    <string name="_0_99">0-99</string>
+    <string name="_0_15">0-15</string>
+    <string name="color_patch">Color Patch</string>
+    <string name="set_up_gps">Set Up GPS</string>
+    <string name="mapping_gps">Mapping GPS</string>
+
+    <string name="heard">Heard: %1$s</string>
+
+
+    <string name="nothing_heard">Nothing heard</string>
+    <string name="place_marker">place marker</string>
+
+    <string name="alarm_set_to">⏰ %1$s</string>
+    <string name="alarm_toast_message">Alarm Set for %1$s</string>
+
+    <string name="weight_format_kg">%.2f kg</string>
+    <string name="length_format_cm">%.1f cm</string>
+    <string name="date_iso"> %1$04d-%2$02d-%3$02d</string>
 
 
     //species
@@ -254,17 +239,5 @@
 
 
     //dec_values
-    <string-array name="dec_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-     </string-array>
 
 </resources>

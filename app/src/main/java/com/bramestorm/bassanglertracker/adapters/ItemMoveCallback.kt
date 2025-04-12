@@ -1,4 +1,4 @@
-package com.bramestorm.bassanglertracker.utils
+package com.bramestorm.bassanglertracker.adapters
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView

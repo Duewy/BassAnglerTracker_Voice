@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress XmlUnusedNamespaceDeclaration -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,9 +8,8 @@
     android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/speciesSelectionLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/material_dynamic_primary70"
         android:orientation="vertical"
         android:padding="16dp"
@@ -30,7 +30,6 @@
 
         <!-- Selected Count -->
         <TextView
-            android:id="@+id/txtPurposeOfMainSpeciesList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -83,7 +82,7 @@
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/btn_outline_orange"
                 android:padding="7dp"
-                android:text="Alter Species List"
+                android:text="@string/alter_species_list"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />

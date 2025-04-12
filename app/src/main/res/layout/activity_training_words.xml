@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--suppress XmlUnusedNamespaceDeclaration -->
 <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -27,7 +28,6 @@
         app:srcCompat="@drawable/catch_call_words_blue" />
 
     <ImageView
-        android:id="@+id/imgJumpingBass"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintHorizontal_weight="1"
@@ -51,7 +51,6 @@
             app:layout_constraintTop_toBottomOf="@id/imgVCC">
 
             <TextView
-                android:id="@+id/txtTrainingVoiceHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -88,7 +87,6 @@
         app:layout_constraintTop_toBottomOf="@+id/divider">
 
         <TextView
-            android:id="@+id/textView8"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -198,7 +196,6 @@
 
     <LinearLayout
 
-        android:id="@+id/llButtons7"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

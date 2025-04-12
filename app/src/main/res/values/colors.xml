@@ -3,46 +3,23 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="red">#FF0000</color>
-    <color name="bright_red">#F0FA2323</color>
-    <color name="very_bright_red">#F0EC3D3D</color>
-    <color name="lime">#00FF00</color>
-    <color name="blue">#0000FF</color>
-    <color name="yellow">#FFFF00</color>
-    <color name="cyan_aqua">#00FFFF</color>
-    <color name="magenta_fuchsia">#FF00FF</color>
-    <color name="silver">#C0C0C0</color>
     <color name="grey">#808080</color>
     <color name="lite_grey">#DFAEACAC</color>
     <color name="very_lite_grey">#B0AEACAC</color>
-    <color name="maroon">#800000</color>
-    <color name="olive">#808000</color>
-    <color name="green">#008000</color>
     <color name="bright_green">#EB24A108</color>
-    <color name="purple">#800080</color>
-    <color name="teal">#008080</color>
-    <color name="navy">#000080</color>
-    <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
 
-    <color name="primary">#0000CD</color>
-    <color name="primary_variant">#6A5ACD</color>
     <color name="secondary">#4169E1</color>
     <color name="secondary_variant">#41B4E1</color>
-    <color name="third_variant">#B263C8EF</color>
 
 
-            <!-- SoftLock Culling Clip Colors -->
+    <!-- SoftLock Culling Clip Colors -->
     <color name="clip_red">#D50019</color>
     <color name="clip_yellow">#FEFE20</color>
     <color name="clip_green">#00800D</color>
     <color name="clip_blue">#00007F</color>
     <color name="clip_white">#FDFDFD</color>
     <color name="clip_orange">#FE671E</color>
-    <color name="clip_grey">#817E7D</color>
 
     <color name="main_background">#5196DB</color>
 
@@ -51,46 +28,34 @@
     <color name="softlock_green">#21CF33</color>     <!-- Vivid green (secondary brand color) -->
     <!-- Extended Palette -->
     <color name="softlock_sand">#FAE8B4</color>      <!-- Warm sand-beige for natural backgrounds -->
-    <color name="softlock_charcoal">#333333</color>  <!-- Charcoal dark grey for text or contrast -->
+    <!-- Charcoal dark grey for text or contrast -->
     <color name="softlock_orange">#FFA500</color>    <!-- Bold orange for warnings/accents -->
     <color name="softlock_teal">#0EAEAE</color>      <!-- Teal for secondary buttons and highlights -->
-    <color name="softlock_brown">#B57604</color>
-
-    <color name="complementary_softlock_green">#d214eb</color>
-    <color name="lite_complementary_softlock_green">#E9BB20CF</color>
-    <color name="complementary_softlock_blue">#ffff81</color>
 
 
     <!-- res/values-night/colors.xml (Dark theme) -->
 
     <!-- Brand Colors (modified for visibility on dark backgrounds) -->
-    <color name="softlock_blue_n">#2979FF</color>       <!-- Brightened blue for dark mode (more visible on dark backgrounds) -->
-    <color name="softlock_green_n">#21CF33</color>      <!-- Same green (already bright enough for dark mode) -->
+    <!-- Brightened blue for dark mode (more visible on dark backgrounds) -->
+    <!-- Same green (already bright enough for dark mode) -->
     <!-- Extended Palette (inverted or adjusted for dark theme) -->
-    <color name="softlock_sand_n">#1E1E1E</color>       <!-- Near-black background (dark equivalent of “sand”) -->
-    <color name="softlock_charcoal_n">#DDDDDD</color>   <!-- Light grey for contrast (e.g. text on dark background) -->
-    <color name="softlock_orange_n">#FFA500</color>     <!-- Same orange (high contrast on dark background) -->
-    <color name="softlock_teal_n">#008080</color>       <!-- Same teal (medium contrast on dark background) -->
+    <!-- Near-black background (dark equivalent of “sand”) -->
+    <!-- Light grey for contrast (e.g. text on dark background) -->
+    <!-- Same orange (high contrast on dark background) -->
+    <!-- Same teal (medium contrast on dark background) -->
 
 
 
     <!-- Logging Page colors-->
 
     <color name="Log_red">#C3D50011</color>
-    <color name="Selected_red">#EC1414</color>
     <color name="Log_red_secondary">#F41631</color>
-    <color name="Log_yellow">#80FEFE20</color>
     <color name="Log_yellow_secondary">#80DACF05</color>
-    <color name="Log_green">#8000800D</color>
     <color name="Log_green_secondary">#806EA603</color>
-    <color name="Log_blue">#9F0505E8</color>
-    <color name="Log_blue_secondary">#8B41589C</color>
     <color name="Log_white">#85FDFDFD</color>
     <color name="Log_orange">#80FE671E</color>
 
-    <color name="selected_background">#FFDDFF</color>
-    <color name="unselected_background">#FFFFFF</color>
-    <color name="selected_2_background">#CCFF90</color> <!-- Light green -->
+    <!-- Light green -->
 
     <color name="material_dynamic_primary70">#72B0D1</color>
     <color name="material_dynamic_neutral90">#9CA1EC</color>
@@ -99,9 +64,7 @@
     <color name="selection_list">#EAB383</color>
 
     <color name="lt_brown">#C19268</color>
-    <color name="mid_brown">#8C623D</color>
 
-    <color name="ic_launcher_background">#FFBB00</color>
 
 </resources>
 

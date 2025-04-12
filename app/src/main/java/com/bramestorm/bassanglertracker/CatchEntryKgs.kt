@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
+import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -138,6 +139,17 @@ class CatchEntryKgs : AppCompatActivity() {
         if (success) {
             totalWeightHundredthKg = 0 // ✅ Move this after successful save
         }
+        // ✅ MOTIVATIONAL TOAST FOR FUN DAY - Kilograms
+        if (catchList.size >= 2) {
+            val lastCatch = catchList.firstOrNull() // Most recent (sorted by dateTime)
+            lastCatch?.let {
+                val message = getMotivationalMessage(this, it.id, catchList.size, "kgs")
+                if (message != null) {
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         updateListViewKgs()  // ✅ Now only updates the UI, no extra insert
     }
 
@@ -268,10 +280,6 @@ class CatchEntryKgs : AppCompatActivity() {
         return sdf.format(Date())
     }
 
-    // ??????????????????? TODAYS DATE  ?????????????????????????????????
-    private fun getTodaysDate(): String {
-        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return todaysDate.format(Date())
-    }
+
 
 }//+++++++++++++ END  od CATCH ENTRY Kgs ++++++++++++++++++++++++++++++++++++++++

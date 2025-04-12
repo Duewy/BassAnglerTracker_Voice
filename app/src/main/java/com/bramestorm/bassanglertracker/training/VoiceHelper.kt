@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.training
 
 import android.content.Context
 import android.os.Bundle
+import android.provider.Settings.Global.getString
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
 import android.widget.TextView
@@ -23,8 +24,9 @@ object VoiceHelper {
 
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val spokenText = matches?.firstOrNull()?.trim() ?: "Nothing heard"
-                txtResult.text = "Heard $spokenText"
+                val spokenText = matches?.firstOrNull()?.trim() ?: context.getString(R.string.nothing_heard)
+                txtResult.text = context.getString(R.string.heard, spokenText)
+
                 // Add more logic here if needed
             }
 

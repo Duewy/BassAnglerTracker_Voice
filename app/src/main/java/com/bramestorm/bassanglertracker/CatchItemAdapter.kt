@@ -14,8 +14,9 @@ import java.util.Locale
 
 class CatchItemAdapter(
     context: Context,
-    private val catches: MutableList<CatchItem>,
-) : ArrayAdapter<CatchItem>(context, 0, catches) {
+    catches: MutableList<CatchItem>,
+) : ArrayAdapter<CatchItem>(context, 0, catches)
+{
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context)

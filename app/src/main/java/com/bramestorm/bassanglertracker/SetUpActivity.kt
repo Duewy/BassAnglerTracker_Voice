@@ -43,7 +43,6 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var btnMainSetup:Button
     private lateinit var btnCustomizeSpecies :Button
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
-    private val prefs by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
 
     private var isWeightSelected = false
     private var isLengthSelected = false

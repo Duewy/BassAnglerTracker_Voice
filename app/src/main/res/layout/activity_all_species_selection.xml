@@ -8,7 +8,6 @@
     android:background="@color/material_dynamic_primary70">
 
     <LinearLayout
-        android:id="@+id/llSpeciesAddition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -17,7 +16,6 @@
 
         <!-- Title -->
         <TextView
-            android:id="@+id/textView16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -29,7 +27,6 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtSpeciesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -43,7 +40,6 @@
 
         <!-- Selected Count -->
         <TextView
-            android:id="@+id/txtSelectedCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -70,7 +66,6 @@
 
 
         <View
-            android:id="@+id/divider16"
             android:layout_width="wrap_content"
             android:layout_height="8dp"
             android:layout_marginTop="10dp"

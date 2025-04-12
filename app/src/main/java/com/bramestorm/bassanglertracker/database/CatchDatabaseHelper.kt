@@ -89,6 +89,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             }
 
             Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
+            updateLastCatchTime()
 
             // Enable GPS automatically
             prefs.edit().putBoolean("GPS_ENABLED", true).apply()
@@ -125,6 +126,18 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         }
     }
 
+    private fun updateLastCatchTime() {
+        val prefs = context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putLong("LAST_CATCH_TIME", System.currentTimeMillis()).apply()
+    }
+
+    fun getLastCatchTimeMillis(): Long {
+        val prefs = context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
+        return prefs.getLong("LAST_CATCH_TIME", System.currentTimeMillis())
+    }
+
+
+
     fun getCatchesForToday(catchType: String, todaysDate: String): List<CatchItem> {
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
@@ -143,39 +156,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catchList
     }
 
-    fun getFilteredCatchesWithLocation(
-        species: String,
-        catchType: String,
-        minWeightOz: Int,
-        fromDate: String,
-        toDate: String
-    ): List<CatchItem> {
-        val db = readableDatabase
-        val catchList = mutableListOf<CatchItem>()
-        val cursor = db.rawQuery(
-            """
-            SELECT * FROM $TABLE_NAME
-            WHERE species = ?
-              AND catch_type = ?
-              AND total_weight_oz > ?
-              AND date_time BETWEEN ? AND ?
-              AND latitude IS NOT NULL
-              AND longitude IS NOT NULL
-        """.trimIndent(),
-            arrayOf(species, catchType, minWeightOz.toString(), fromDate, toDate)
-        )
-
-        if (cursor.moveToFirst()) {
-            do {
-                catchList.add(parseCatch(cursor))
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        db.close()
-        return catchList
-    }
-
-    fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
+ private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, lat)
@@ -272,13 +253,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             }
     }
 
-    fun getCurrentDateTime(): String {
+   private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
-    }
-
-    fun enableGps() {
-        prefs.edit().putBoolean("GPS_ENABLED", true).apply()
     }
 
     //---------- Google Map Query for Pins on map ------------
@@ -432,7 +409,54 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return list
     }
 
+    //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
+    fun getCatchById(catchId: Int): CatchItem? {
+        val db = readableDatabase
+        val cursor = db.query(
+            "catches",
+            null,
+            "id = ?",
+            arrayOf(catchId.toString()),
+            null,
+            null,
+            null
+        )
 
+        var catchItem: CatchItem? = null
+        if (cursor.moveToFirst()) {
+            catchItem = parseCatch(cursor)
+        }
+
+        cursor.close()
+        return catchItem
+    }
+    //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
+    fun getTopTournamentCatches(limit: Int): List<CatchItem> {
+        val db = readableDatabase
+        val catchList = mutableListOf<CatchItem>()
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM $TABLE_NAME 
+        WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ?
+          AND $COLUMN_CATCH_TYPE = ?
+        ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC
+        LIMIT ?
+        """.trimIndent(),
+            arrayOf(today, "Tournament", limit.toString())
+        )
+
+        while (cursor.moveToNext()) {
+            catchList.add(parseCatch(cursor))
+        }
+
+        cursor.close()
+        db.close()
+        return catchList
+    }
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO BE REMOVED FOR FULL RELEASE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     fun insertFakeCatchesForTesting(db: SQLiteDatabase) {
         val testCatches = listOf(
             // ----- February 2025 -----

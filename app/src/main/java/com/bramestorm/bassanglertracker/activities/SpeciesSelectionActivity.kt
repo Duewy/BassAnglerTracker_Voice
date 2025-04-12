@@ -13,7 +13,7 @@ import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
 import com.bramestorm.bassanglertracker.adapters.SpeciesSelectAdapter
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.utils.ItemMoveCallback
+import com.bramestorm.bassanglertracker.adapters.ItemMoveCallback
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 
@@ -25,9 +25,6 @@ class SpeciesSelectionActivity : AppCompatActivity() {
     private lateinit var btnAdjustSpeciesList: Button
     private lateinit var btnResetSpecies: Button
     private lateinit var adapter: SpeciesSelectAdapter
-    private val speciesList = mutableListOf<SpeciesItem>()
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

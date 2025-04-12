@@ -84,7 +84,6 @@
         <!-- WEIGHT KGS GRAMS  -->
 
         <LinearLayout
-            android:id="@+id/layoutWeightKgs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -97,7 +96,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="15dp"
                 android:background="@color/very_lite_grey"
-                android:hint="XX.0 Kgs"
+                android:hint="@string/xx_0_kgs"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -106,7 +105,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textView9Grams"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -122,7 +120,7 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/very_lite_grey"
-                android:hint="0.XX Kgs"
+                android:hint="@string/_0_xx_kgs"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -142,7 +140,6 @@
 
             <!-- Kgs labels  -->
             <TextView
-                android:id="@+id/textKgsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -154,7 +151,6 @@
                 android:textStyle="bold"/>
 
             <TextView
-                android:id="@+id/textDecKgsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

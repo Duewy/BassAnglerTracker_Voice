@@ -76,7 +76,7 @@ class PopupQueryDate(
         DatePickerDialog(
             context,
             { _, year, month, day ->
-                val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
+                val selectedDate = context.getString(R.string.date_iso, year, month + 1, day)
                 onDateSelected(selectedDate)
             },
             cal.get(Calendar.YEAR),

@@ -1,4 +1,4 @@
-package com.bramestorm.bassanglertracker.share
+package com.bramestorm.bassanglertracker
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,8 +7,6 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.bramestorm.bassanglertracker.R
-import com.bramestorm.bassanglertracker.SetUpActivity
 import java.io.File
 
 class ShareFishingLogsActivity : AppCompatActivity() {
@@ -112,7 +110,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                     val row = mutableListOf<String>()
                     if (chkIncludeDate.isChecked) row.add("2025-04-0$i 07:00")
                     if (chkIncludeSpecies.isChecked) row.add("Bass")
-                    if (chkIncludeWeight.isChecked) row.add("${4 + i} lbs ${i} oz")
+                    if (chkIncludeWeight.isChecked) row.add("${4 + i} lbs $i oz")
                     if (chkIncludeLength.isChecked) row.add("${15 + i}\"")
                     if (chkIncludeGPS.isChecked) row.add("Lat: 43.12$i, Lng: -79.32$i")
                     if (chkIncludeCatchType.isChecked) row.add(if (i % 2 == 0) "Fun Day" else "Tournament")
