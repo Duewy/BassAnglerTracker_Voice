@@ -1,15 +1,19 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -25,6 +29,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.Locale.getDefault
 
 
 class CatchEntryTournament : AppCompatActivity() {
@@ -32,7 +37,7 @@ class CatchEntryTournament : AppCompatActivity() {
     // Buttons
     private lateinit var btnTournamentCatch: Button
     private lateinit var btnMenu: Button
-    private lateinit var btnMainPg:Button
+    private lateinit var btnMainPg: Button
     private lateinit var btnAlarm: Button
 
 
@@ -41,7 +46,6 @@ class CatchEntryTournament : AppCompatActivity() {
     private var alarmMinute: Int = -1
     private var alarmTriggered: Boolean = false
 
-    private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
 
     // Weight Display TextViews
@@ -59,19 +63,19 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var fifthDecWeight: TextView
     private lateinit var sixthDecWeight: TextView
 
-    private lateinit var txtTypeLetter1:TextView
-    private lateinit var txtTypeLetter2:TextView
-    private lateinit var txtTypeLetter3:TextView
-    private lateinit var txtTypeLetter4:TextView
-    private lateinit var txtTypeLetter5:TextView
-    private lateinit var txtTypeLetter6:TextView
+    private lateinit var txtTypeLetter1: TextView
+    private lateinit var txtTypeLetter2: TextView
+    private lateinit var txtTypeLetter3: TextView
+    private lateinit var txtTypeLetter4: TextView
+    private lateinit var txtTypeLetter5: TextView
+    private lateinit var txtTypeLetter6: TextView
 
-    private lateinit var txtColorLetter1:TextView
-    private lateinit var txtColorLetter2:TextView
-    private lateinit var txtColorLetter3:TextView
-    private lateinit var txtColorLetter4:TextView
-    private lateinit var txtColorLetter5:TextView
-    private lateinit var txtColorLetter6:TextView
+    private lateinit var txtColorLetter1: TextView
+    private lateinit var txtColorLetter2: TextView
+    private lateinit var txtColorLetter3: TextView
+    private lateinit var txtColorLetter4: TextView
+    private lateinit var txtColorLetter5: TextView
+    private lateinit var txtColorLetter6: TextView
 
 
     private lateinit var totalRealWeight: TextView
@@ -99,23 +103,26 @@ class CatchEntryTournament : AppCompatActivity() {
 
 
     // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
-        private val weightEntryLauncher = registerForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                val weightTotalOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
-                val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
-                val clipColor = data?.getStringExtra("clip_color") ?: ""
+    private val weightEntryLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val weightTotalOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
+            val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
+            val clipColor = data?.getStringExtra("clip_color") ?: ""
 
-                Log.d("DB_DEBUG", "✅ Received weightTotalOz: $weightTotalOz, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
+            Log.d(
+                "DB_DEBUG",
+                "✅ Received weightTotalOz: $weightTotalOz, selectedSpecies: $selectedSpecies, clip_color: $clipColor"
+            )
 
-                if (weightTotalOz > 0) {
+            if (weightTotalOz > 0) {
 
-                    saveTournamentCatch(weightTotalOz, selectedSpecies, clipColor)
-                }
+                saveTournamentCatch(weightTotalOz, selectedSpecies, clipColor)
             }
         }
+    }
 
     //================ ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -171,30 +178,34 @@ class CatchEntryTournament : AppCompatActivity() {
 
         btnTournamentCatch.setOnClickListener { showWeightPopup() }
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
-        btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
-        btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
+        btnMainPg.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        btnAlarm.setOnClickListener {
+            startActivityForResult(
+                Intent(this, PopUpAlarm::class.java),
+                requestAlarmSET
+            )
+        }
         val dbHelper = CatchDatabaseHelper(this)
 
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
-        handler.postDelayed(checkAlarmRunnable, 60000)
+
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // ------------- On RESUME --------- Check GPS  Statues --------------
-        override fun onResume() {
-            super.onResume()
-            GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
-        }
+    // ------------- On RESUME --------- Check GPS  Statues --------------
+    override fun onResume() {
+        super.onResume()
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+    }
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
-        override fun onDestroy() {
-            super.onDestroy()
-            handler.removeCallbacksAndMessages(null)
-            flashHandler.removeCallbacksAndMessages(null)
-            mediaPlayer?.release()
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        flashHandler.removeCallbacksAndMessages(null)
+        mediaPlayer?.release()
+    }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -202,11 +213,19 @@ class CatchEntryTournament : AppCompatActivity() {
         val intent = Intent(this, PopupWeightEntryTourLbs::class.java)
         intent.putExtra("isTournament", true)
 
-        if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
+        if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals(
+                "Largemouth",
+                true
+            )
+        ) {
             intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-        } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
+        } else if (tournamentSpecies.equals(
+                "Small Mouth",
+                true
+            ) || tournamentSpecies.equals("Smallmouth", true)
+        ) {
             intent.putExtra("tournamentSpecies", "Small Mouth Bass")
-        } else{
+        } else {
             intent.putExtra("tournamentSpecies", tournamentSpecies)
         }
 
@@ -287,7 +306,6 @@ class CatchEntryTournament : AppCompatActivity() {
             }
         }
     }
-
 
 
     //################## UPDATE TOURNAMENT LIST   ###################################
@@ -396,10 +414,12 @@ class CatchEntryTournament : AppCompatActivity() {
                             blinkTextViewTwice(fourthRealWeight)
                             blinkTextViewTwice(fourthDecWeight)
                         }
+
                         5 -> {
                             blinkTextViewTwice(fifthRealWeight)
                             blinkTextViewTwice(fifthDecWeight)
                         }
+
                         6 -> {
                             blinkTextViewTwice(sixthRealWeight)
                             blinkTextViewTwice(sixthDecWeight)
@@ -409,7 +429,6 @@ class CatchEntryTournament : AppCompatActivity() {
             }
         }
     }
-
 
 
     //########### Clear Tournament Text Views  ########################
@@ -458,13 +477,16 @@ class CatchEntryTournament : AppCompatActivity() {
 
         val usedColors = topCatches.mapNotNull { it.clipColor }
             .mapNotNull {
-                try { ClipColor.valueOf(it.uppercase()) } catch (_: Exception) { null }
+                try {
+                    ClipColor.valueOf(it.uppercase())
+                } catch (_: Exception) {
+                    null
+                }
             }
             .toSet()
 
         return ClipColor.entries.filter { it !in usedColors }
     }
-
 
 
     // ~~~~~~~~~~~~~ ADJUST TEXT VIEW VIABILITY for culling values ~~~~~~~~~~~~~
@@ -478,6 +500,7 @@ class CatchEntryTournament : AppCompatActivity() {
                 sixthRealWeight.visibility = View.INVISIBLE
                 sixthDecWeight.visibility = View.INVISIBLE
             }
+
             5 -> {
                 sixthRealWeight.alpha = 0.3f
                 sixthDecWeight.alpha = 0.3f
@@ -485,6 +508,7 @@ class CatchEntryTournament : AppCompatActivity() {
                 sixthDecWeight.isEnabled = false
                 txtTypeLetter6.isEnabled = false
             }
+
             else -> {
                 fifthRealWeight.alpha = 1.0f
                 fifthDecWeight.alpha = 1.0f
@@ -506,95 +530,80 @@ class CatchEntryTournament : AppCompatActivity() {
         return when (species.uppercase()) {
             "LARGE MOUTH" -> "LM"
             "SMALL MOUTH" -> "SM"
-            "WALLEYE"     -> "WE"
-            "PIKE"        -> "PK"
-            "PERCH"       -> "PH"
-            "PANFISH"     -> "PF"
-            "CATFISH"     -> "CF"
-            "CRAPPIE"     -> "CP"
-            else          -> "--"
+            "WALLEYE" -> "WE"
+            "PIKE" -> "PK"
+            "PERCH" -> "PH"
+            "PANFISH" -> "PF"
+            "CATFISH" -> "CF"
+            "CRAPPIE" -> "CP"
+            else -> "--"
         }
     }
-
-
 
 
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
-    private val checkAlarmRunnable = object : Runnable {
-        override fun run() {
-            val calendar = Calendar.getInstance()
-            val nowHour = calendar.get(Calendar.HOUR_OF_DAY)
-            val nowMinute = calendar.get(Calendar.MINUTE)
-
-            Log.d("ALARM_DEBUG", "🕒 Checking alarm... Now: $nowHour:$nowMinute, Set: $alarmHour:$alarmMinute")
-
-            if (!alarmTriggered && nowHour == alarmHour && nowMinute == alarmMinute) {
-                alarmTriggered = true
-                Log.d("ALARM_DEBUG", "🔔 Alarm triggered!")
-                startAlarm()
-            }
-
-            if (!alarmTriggered) {
-                handler.postDelayed(this, 60000)
-            }
-        }
-    }
-
-
-    // Start Alarm
-    private fun startAlarm() {
-        // ✅ Ensure raw file exists
-        mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound)
-        mediaPlayer?.start()
-
-        val flashHandler = Handler()
-        var isRed = true
-        val flashRunnable = object : Runnable {
-            override fun run() {
-                btnAlarm.setBackgroundColor(if (isRed) Color.RED else Color.WHITE)
-                isRed = !isRed
-                flashHandler.postDelayed(this, 500)
-            }
-        }
-
-        flashHandler.post(flashRunnable)
-
-        handler.postDelayed({
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-            btnAlarm.setBackgroundColor(Color.TRANSPARENT)
-            flashHandler.removeCallbacks(flashRunnable)
-        }, 4000)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        Log.d("ALARM_DEBUG", "📥 onActivityResult triggered with requestCode=$requestCode")
 
         if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
             alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
             alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
-            alarmTriggered = false // ✅ reset so the alarm can trigger again
-
-            Log.d("ALARM_DEBUG", "✅ Alarm Set - hour=$alarmHour, minute=$alarmMinute")
+            alarmTriggered = false
 
             if (alarmHour != -1 && alarmMinute != -1) {
                 val amPm = if (alarmHour >= 12) "PM" else "AM"
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
+                val formattedMinute = String.format(getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
 
                 btnAlarm.text = getString(R.string.alarm_set_to, timeString)
-
                 val toastMessage = getString(R.string.alarm_toast_message, timeString)
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
+
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, alarmHour)
+                    set(Calendar.MINUTE, alarmMinute)
+                    set(Calendar.SECOND, 0)
+                }
+
+                val alarmIntent =
+                    Intent(this, com.bramestorm.bassanglertracker.alarm.AlarmReceiver::class.java)
+                val pendingIntent =
+                    PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE)
+
+                val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                    Toast.makeText(this, "⚠️ Please enable exact alarm permission in settings.", Toast.LENGTH_LONG).show()
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                    return  // Exit early — no point in scheduling
+                }
+                Log.d("ALARM_DEBUG", "⏱ Attempting to schedule alarm at: ${calendar.time}")
+                Log.d("ALARM_DEBUG", "🔍 System time now is: ${System.currentTimeMillis()}")
+
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                    Log.d("ALARM_DEBUG", "⏱ Attempting to schedule alarm at: ${calendar.time}")
+                    Log.d("ALARM_DEBUG", "🔍 System time now is: ${System.currentTimeMillis()}")
+
+                                   } catch (e: SecurityException) {
+                    Log.e("ALARM_DEBUG", "❌ Cannot schedule exact alarm. SecurityException.", e)
+                    Toast.makeText(this, "Exact alarm could not be scheduled (permissions)", Toast.LENGTH_SHORT).show()
+                }
+
             }
-
-
         }
     }
+
+//----------- END onActivityResult   (alarm) -------------------------------
 
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
@@ -644,5 +653,5 @@ class CatchEntryTournament : AppCompatActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
-
-}//################## END  ################################
+}
+//################## END  ################################

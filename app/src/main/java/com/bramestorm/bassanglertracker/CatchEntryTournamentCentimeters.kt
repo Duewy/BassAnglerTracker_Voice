@@ -1,15 +1,19 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -42,7 +46,6 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
         private var alarmMinute: Int = -1
         private var alarmTriggered: Boolean = false
 
-        private val handler = Handler(Looper.getMainLooper())
         private var mediaPlayer: MediaPlayer? = null
 
         // Weight Display TextViews
@@ -186,7 +189,6 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
             updateTournamentList()
-            handler.postDelayed(checkAlarmRunnable, 60000)
         }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -202,7 +204,6 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             super.onDestroy()
 
             // Clean up all handlers and media players
-            handler.removeCallbacksAndMessages(null)
             flashHandler.removeCallbacksAndMessages(null)
             mediaPlayer?.stop()
             mediaPlayer?.release()
@@ -527,88 +528,71 @@ class CatchEntryTournamentCentimeters : AppCompatActivity() {
             }
         }
 
-        // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
-        private val checkAlarmRunnable = object : Runnable {
-            override fun run() {
-                val calendar = Calendar.getInstance()
-                val nowHour = calendar.get(Calendar.HOUR_OF_DAY)
-                val nowMinute = calendar.get(Calendar.MINUTE)
 
-                Log.d("ALARM_DEBUG", "🕒 Checking alarm... Now: $nowHour:$nowMinute, Set: $alarmHour:$alarmMinute")
+   //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
 
-                if (!alarmTriggered && nowHour == alarmHour && nowMinute == alarmMinute) {
-                    alarmTriggered = true
-                    Log.d("ALARM_DEBUG", "🔔 Alarm triggered!")
-                    startAlarm()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
+            alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
+            alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
+            alarmTriggered = false
+
+            if (alarmHour != -1 && alarmMinute != -1) {
+                val amPm = if (alarmHour >= 12) "PM" else "AM"
+                val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
+                val formattedMinute = String.format(getDefault(), "%02d", alarmMinute)
+                val timeString = "$displayHour:$formattedMinute $amPm"
+
+                btnAlarmCms.text = getString(R.string.alarm_set_to, timeString)
+                val toastMessage = getString(R.string.alarm_toast_message, timeString)
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
+
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, alarmHour)
+                    set(Calendar.MINUTE, alarmMinute)
+                    set(Calendar.SECOND, 0)
                 }
 
-                if (!alarmTriggered) {
-                    handler.postDelayed(this, 60000)
+                val alarmIntent = Intent(this, com.bramestorm.bassanglertracker.alarm.AlarmReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    System.currentTimeMillis().toInt(), // unique ID
+                    alarmIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
+                val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+
+                // ✅ First: Check exact alarm permission
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                    Toast.makeText(this, "⚠️ Please enable exact alarm permission in settings.", Toast.LENGTH_LONG).show()
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                    return  // ❌ Stop here — don't schedule if not allowed
+                }
+
+                // ✅ Then try to schedule
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                    Log.d("ALARM_DEBUG", "✅ Alarm scheduled for ${calendar.time}")
+                } catch (e: SecurityException) {
+                    Log.e("ALARM_DEBUG", "❌ Cannot schedule exact alarm. SecurityException.", e)
+                    Toast.makeText(this, "Exact alarm could not be scheduled (permissions)", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
 
 
-        // --------- Start Alarm ------------------------
-        private fun startAlarm() {
-            // ✅ Ensure raw file exists
-            mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound)
-            mediaPlayer?.start()
 
-            val flashHandler = Handler()
-            var isRed = true
-            val flashRunnable = object : Runnable {
-                override fun run() {
-                    btnAlarmCms.setBackgroundColor(if (isRed) Color.RED else Color.WHITE)
-                    isRed = !isRed
-                    flashHandler.postDelayed(this, 500)
-                }
-            }
-
-            flashHandler.post(flashRunnable)
-
-            handler.postDelayed({
-                mediaPlayer?.stop()
-                mediaPlayer?.release()
-                btnAlarmCms.setBackgroundColor(Color.TRANSPARENT)
-                flashHandler.removeCallbacks(flashRunnable)
-            }, 4000)
-        }
-
-//@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
-
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode, data)
-
-            Log.d("ALARM_DEBUG", "📥 onActivityResult triggered with requestCode=$requestCode")
-
-            if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
-                alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
-                alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
-                alarmTriggered = false // ✅ reset so the alarm can trigger again
-
-                Log.d("ALARM_DEBUG", "✅ Alarm Set - hour=$alarmHour, minute=$alarmMinute")
-
-                if (alarmHour != -1 && alarmMinute != -1) {
-                    val amPm = if (alarmHour >= 12) "PM" else "AM"
-                    val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                    val formattedMinute = String.format(getDefault(), "%02d", alarmMinute)
-
-
-                    val timeString = "$displayHour:$formattedMinute $amPm"
-
-                    btnAlarmCms.text = getString(R.string.alarm_set_to, timeString)
-
-                    val toastMessage = getString(R.string.alarm_toast_message, timeString)
-                    Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
-                }
-
-            }
-        }
-
-
-        //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
+    //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
         private fun getCurrentDateTime(): String {
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", getDefault())
             return sdf.format(Date())
