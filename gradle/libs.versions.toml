@@ -20,6 +20,7 @@ playServicesLocation = "21.3.0"
 supportAnnotations = "28.0.0"
 material = "1.12.0"
 playServicesMaps = "19.1.0"
+porcupine = "3.0.3"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
@@ -49,6 +50,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 support-annotations = { group = "com.android.support", name = "support-annotations", version.ref = "supportAnnotations" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+picovoice-porcupine = { group = "ai.picovoice", name = "porcupine-android", version.ref = "porcupine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

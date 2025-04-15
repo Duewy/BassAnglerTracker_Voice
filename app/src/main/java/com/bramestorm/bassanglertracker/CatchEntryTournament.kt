@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -20,9 +21,12 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.VoiceInputHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -39,6 +43,8 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var btnMenu: Button
     private lateinit var btnMainPg: Button
     private lateinit var btnAlarm: Button
+    private lateinit var tglVoiceOnLbs:ToggleButton
+    private var voiceHelper: VoiceInputHelper? = null
 
 
     // Alarm Variables
@@ -135,6 +141,7 @@ class CatchEntryTournament : AppCompatActivity() {
         btnMainPg = findViewById(R.id.btnMainPg)
         btnAlarm = findViewById(R.id.btnAlarm)
         txtGPSNotice = findViewById(R.id.txtGPSNotice)
+        tglVoiceOnLbs = findViewById(R.id.tglVoiceOnLbs)
 
         // Assign TextViews
         firstRealWeight = findViewById(R.id.firstRealWeight)
@@ -177,8 +184,61 @@ class CatchEntryTournament : AppCompatActivity() {
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
 
         btnTournamentCatch.setOnClickListener { showWeightPopup() }
+
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
+
         btnMainPg.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+
+        tglVoiceOnLbs.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                Toast.makeText(this, "🎙️ Voice Mode Enabled", Toast.LENGTH_SHORT).show()
+
+                // 🔧 Add delay before first start
+                Handler(Looper.getMainLooper()).postDelayed({
+                    voiceHelper?.startListening()
+                }, 2000L)
+
+            } else {
+                Toast.makeText(this, "🛑 Voice Mode Disabled", Toast.LENGTH_SHORT).show()
+                voiceHelper?.stopListening()
+            }
+        }
+
+
+
+        voiceHelper = VoiceInputHelper(
+            context = this,
+            onResult = { phrase ->
+                Log.d("VOICE_RESULT", "📣 Heard: $phrase")
+                runOnUiThread {
+                    Toast.makeText(this, "📣 Heard: $phrase", Toast.LENGTH_SHORT).show()
+                }
+                // TODO: Parse voice commands here
+            },
+            onWakeUp = {
+                runOnUiThread {
+                    Toast.makeText(this, "🎤 Casper is listening!", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onFinish = {
+                runOnUiThread {
+                    Toast.makeText(this, "🔇 Casper signing off.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.RECORD_AUDIO),
+                1001
+            )
+        }
+
+
+
         btnAlarm.setOnClickListener {
             startActivityForResult(
                 Intent(this, PopUpAlarm::class.java),
@@ -197,15 +257,33 @@ class CatchEntryTournament : AppCompatActivity() {
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
         super.onResume()
+
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+
+        // ✅ Start listening only if voice is enabled
+        if (isVoiceModeEnabled()) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                Log.d("VoiceInput", "✅ Resuming voice listening")
+                voiceHelper?.startListening()
+            }, 5000) // ⏳ delay to 5sec to give activity time to settle
+        }
     }
+
+
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
+        voiceHelper?.destroy()
     }
+
+    private fun isVoiceModeEnabled(): Boolean {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+        return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+    }
+
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 

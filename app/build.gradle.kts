@@ -8,6 +8,9 @@ android {
     namespace = "com.bramestorm.bassanglertracker"
     compileSdk = 35
 
+    sourceSets {
+        getByName("main").jniLibs.srcDirs("libs")
+    }
 
     defaultConfig {
         applicationId = "com.bramestorm.bassanglertracker"
@@ -28,9 +31,6 @@ android {
                 isUniversalApk = true
             }
         }
-
-
-
     }
 
     buildTypes {
@@ -68,7 +68,7 @@ android {
 
 dependencies {
 
-
+    implementation(libs.picovoice.porcupine)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlin.symbol.processing.api)
@@ -86,7 +86,7 @@ dependencies {
     implementation(libs.support.annotations)
     implementation(libs.material)
     implementation(libs.google.gson)
-    implementation(libs.play.services.maps) // Google Maps SDK here
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
