@@ -9,7 +9,9 @@ android {
     compileSdk = 35
 
     sourceSets {
-        getByName("main").jniLibs.srcDirs("libs")
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
     }
 
     defaultConfig {
@@ -68,7 +70,9 @@ android {
 
 dependencies {
 
-    implementation(libs.picovoice.porcupine)
+
+    implementation(files("libs/porcupine_binding_real.jar"))
+
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlin.symbol.processing.api)

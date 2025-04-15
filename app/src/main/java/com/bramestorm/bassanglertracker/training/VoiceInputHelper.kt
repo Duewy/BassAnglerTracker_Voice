@@ -11,6 +11,10 @@ import android.util.Log
 import android.os.Bundle
 import ai.picovoice.porcupine.PorcupineManager
 
+import android.content.pm.PackageManager
+import android.widget.Toast
+
+
 class VoiceInputHelper(
     private val context: Context,
     private val onResult: (String) -> Unit,
@@ -33,11 +37,12 @@ class VoiceInputHelper(
 
     private var porcupineManager: PorcupineManager? = null
 
+
     fun initWakeWordDetection() {
         try {
             porcupineManager = PorcupineManager.Builder()
-                .setAccessKey("YOUR_ACCESS_KEY")  // Replace with your real key
-                .setKeywordPath("wake_up_casper_android.ppn") // Ensure this is in assets/
+                .setAccessKey("6jSwOwgQR/mFYJJz4pAF7qhGvDV9Aonyr2FJJyh63FFBPFhoCPSikA==")
+                .setKeywordPath("wake_up_casper_android.ppn")
                 .build(context) { _ ->
                     Log.d("VoiceInput", "🎤 Wake word detected!")
                     isActiveMode = true
@@ -52,6 +57,20 @@ class VoiceInputHelper(
             Log.e("VoiceInput", "❌ Error initializing Porcupine: ${e.message}")
         }
     }
+
+    fun stopListening() {
+        speechRecognizer?.stopListening()
+        speechRecognizer?.cancel()
+        isListening = false
+    }
+
+    fun destroy() {
+        shutdownWakeWordDetection()
+        speechRecognizer?.destroy()
+        speechRecognizer = null
+        isListening = false
+    }
+
 
     fun shutdownWakeWordDetection() {
         porcupineManager?.stop()

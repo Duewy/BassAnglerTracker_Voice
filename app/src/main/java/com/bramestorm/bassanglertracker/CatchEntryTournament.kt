@@ -1,5 +1,6 @@
 package com.bramestorm.bassanglertracker
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -44,15 +45,17 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var btnMainPg: Button
     private lateinit var btnAlarm: Button
     private lateinit var tglVoiceOnLbs:ToggleButton
-    private var voiceHelper: VoiceInputHelper? = null
+
 
 
     // Alarm Variables
     private var alarmHour: Int = -1
     private var alarmMinute: Int = -1
     private var alarmTriggered: Boolean = false
-
+    // Audio Variables
     private var mediaPlayer: MediaPlayer? = null
+    private var voiceHelper: VoiceInputHelper? = null
+    private val REQUEST_MIC_PERMISSION = 1001
 
     // Weight Display TextViews
     private lateinit var firstRealWeight: TextView
@@ -193,10 +196,12 @@ class CatchEntryTournament : AppCompatActivity() {
             if (isChecked) {
                 Toast.makeText(this, "🎙️ Voice Mode Enabled", Toast.LENGTH_SHORT).show()
 
-                // 🔧 Add delay before first start
+                voiceHelper?.initWakeWordDetection()
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     voiceHelper?.startListening()
                 }, 2000L)
+
 
             } else {
                 Toast.makeText(this, "🛑 Voice Mode Disabled", Toast.LENGTH_SHORT).show()
@@ -282,6 +287,24 @@ class CatchEntryTournament : AppCompatActivity() {
     private fun isVoiceModeEnabled(): Boolean {
         val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
         return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+    }
+
+    private fun checkMicPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                REQUEST_MIC_PERMISSION
+            )
+        } else {
+            // Permission granted — start Porcupine
+            voiceHelper?.let {
+                it.initWakeWordDetection()
+                it.startListening()
+            }
+        }
     }
 
 
