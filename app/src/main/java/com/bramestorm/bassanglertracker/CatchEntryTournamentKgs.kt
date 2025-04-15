@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -76,6 +77,8 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
     private lateinit var totalRealWeightKgs: TextView
     private lateinit var totalDecWeightKgs: TextView
 
+    private lateinit var txtGPSNotice: TextView
+
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
 
@@ -125,6 +128,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         btnSetUpKgs = findViewById(R.id.btnSetUpKgs)
         btnMainKgs = findViewById(R.id.btnMainKgs)
         btnAlarmKgs = findViewById(R.id.btnAlarmKgs)
+        txtGPSNotice = findViewById(R.id.txtGPSNotice)
 
         // Assign TextViews
         firstRealWeightKgs = findViewById(R.id.firstRealWeightKgs)
@@ -173,11 +177,21 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         btnAlarmKgs.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
         val dbHelper = CatchDatabaseHelper(this)
 
+
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+
         updateTournamentList()
         handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // ------------- On RESUME --------- Check GPS  Statues --------------
+    override fun onResume() {
+        super.onResume()
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+    }
+
+    //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
 
@@ -291,6 +305,7 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
     private fun updateTournamentList() {
         val formattedDate = getCurrentDate()
+
         val realWeightKgs = listOf(
             firstRealWeightKgs, secondRealWeightKgs, thirdRealWeightKgs,
             fourthRealWeightKgs, fifthRealWeightKgs, sixthRealWeightKgs
@@ -300,15 +315,26 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
             firstDecWeightKgs, secondDecWeightKgs, thirdDecWeightKgs,
             fourthDecWeightKgs, fifthDecWeightKgs, sixthDecWeightKgs
         )
+
+        val colorLetters = listOf(
+            txtKgsColorLetter1, txtKgsColorLetter2, txtKgsColorLetter3,
+            txtKgsColorLetter4, txtKgsColorLetter5, txtKgsColorLetter6
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
         val allCatches = dbHelper.getCatchesForToday(catchType = "Kgs", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
+
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
         } else {
             sortedCatches
         }
 
-        // ✨ Clean way to update available clip colors
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
             catchType = "Kgs",
@@ -322,10 +348,12 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            for (i in tournamentCatches.indices) {
+            val loopLimit = minOf(sortedCatches.size, 6)
+
+            for (i in 0 until loopLimit) {
                 if (i >= realWeightKgs.size) continue
 
-                val catch = tournamentCatches[i]
+                val catch = sortedCatches[i]
                 val totalWeightKgs = catch.totalWeightHundredthKg ?: 0
                 val weightKgs = totalWeightKgs / 100
                 val weightDec = totalWeightKgs % 100
@@ -339,15 +367,10 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
                 realWeightKgs[i].text = weightKgs.toString()
                 decWeightKgs[i].text = weightDec.toString()
 
-                realWeightKgs[i].setBackgroundResource(clipColor.resId)
-                decWeightKgs[i].setBackgroundResource(clipColor.resId)
-
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
                 val layeredDrawable = createLayeredDrawable(baseColor)
                 realWeightKgs[i].background = layeredDrawable
                 decWeightKgs[i].background = layeredDrawable
-
-
 
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
@@ -359,20 +382,8 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
 
                 realWeightKgs[i].invalidate()
                 decWeightKgs[i].invalidate()
-            }
-            // 👇 ADD THIS FOR COLORBLIND ACCESSIBILITY 👇
-            val colorLetters = listOf(
-                txtKgsColorLetter1, txtKgsColorLetter2, txtKgsColorLetter3,
-                txtKgsColorLetter4, txtKgsColorLetter5, txtKgsColorLetter6
-            )
 
-            colorLetters.forEach { it.text = "" } // Clear first
-
-            for (i in tournamentCatches.indices) {
-                if (i >= tournamentCatchLimit || i >= colorLetters.size) break
-
-                val catch = tournamentCatches[i]
-                val colorInitial = when (catch.clipColor?.uppercase()) {
+                colorLetters[i].text = when (clipColor.name) {
                     "BLUE" -> "B"
                     "RED" -> "R"
                     "GREEN" -> "G"
@@ -381,47 +392,32 @@ class CatchEntryTournamentKgs : AppCompatActivity() {
                     "WHITE" -> "W"
                     else -> "?"
                 }
-                colorLetters[i].text = colorInitial
 
-                val speciesCode = getSpeciesCode(catch.species ?: "")
-                when (i) {
-                    0 -> txtTypeLetter1.text = speciesCode
-                    1 -> txtTypeLetter2.text = speciesCode
-                    2 -> txtTypeLetter3.text = speciesCode
-                    3 -> txtTypeLetter4.text = speciesCode
-                    4 -> txtTypeLetter5.text = speciesCode
-                    5 -> txtTypeLetter6.text = speciesCode
-                }
-
+                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
             }
 
+            updateTotalWeight(tournamentCatches)
+            adjustTextViewVisibility()
+
+            if (tournamentCatches.size >= tournamentCatchLimit) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    when (tournamentCatchLimit) {
+                        4 -> {
+                            blinkTextViewTwice(fourthRealWeightKgs)
+                            blinkTextViewTwice(fourthDecWeightKgs)
+                        }
+                        5 -> {
+                            blinkTextViewTwice(fifthRealWeightKgs)
+                            blinkTextViewTwice(fifthDecWeightKgs)
+                        }
+                        6 -> {
+                            blinkTextViewTwice(sixthRealWeightKgs)
+                            blinkTextViewTwice(sixthDecWeightKgs)
+                        }
+                    }
+                }, 300)
+            }
         }
-
-        updateTotalWeight(tournamentCatches)
-        adjustTextViewVisibility()
-
-        if (tournamentCatches.size >= tournamentCatchLimit) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                when (tournamentCatchLimit) {
-                    4 -> {
-                        blinkTextViewTwice(fourthRealWeightKgs)
-                        blinkTextViewTwice(fourthDecWeightKgs)
-                    }
-
-                    5 -> {
-                        blinkTextViewTwice(fifthRealWeightKgs)
-                        blinkTextViewTwice(fifthDecWeightKgs)
-                    }
-
-                    6 -> {
-                        blinkTextViewTwice(sixthRealWeightKgs)
-                        blinkTextViewTwice(sixthDecWeightKgs)
-                    }
-                }
-            }, 300) // Wait
-        }
-
-
     }
 
 

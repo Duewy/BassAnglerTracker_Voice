@@ -13,12 +13,12 @@ class UserTrainingIndex : AppCompatActivity() {
 
     private lateinit var btnSetUpUser:Button
     private lateinit var btnMenuUser:Button
-    private lateinit var btnFunDayWeight:Button
-    private lateinit var btnFunDayLength:Button
-    private lateinit var btnTournamentWeight:Button
-    private lateinit var btnTournamentLength:Button
+    private lateinit var btnFunDayFishing:Button
+    private lateinit var btnTournamentFishing:Button
     private lateinit var btnWhatIsGPS:Button
     private lateinit var btnMappingGPS:Button
+    private lateinit var btnShareTop5:Button
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,12 +27,11 @@ class UserTrainingIndex : AppCompatActivity() {
 
         btnSetUpUser = findViewById(R.id.btnSetUpUser)
         btnMenuUser = findViewById(R.id.btnMenuUser)
-        btnFunDayWeight = findViewById(R.id.btnFundDayWeight)
-        btnFunDayLength = findViewById(R.id.btnFundDayLength)
-        btnTournamentWeight = findViewById(R.id.btnTournamentWeight)
-        btnTournamentLength = findViewById(R.id.btnTournamentLength)
+        btnFunDayFishing = findViewById(R.id.btnFunDayFishing)
+        btnTournamentFishing = findViewById(R.id.btnTournamentFishing)
         btnWhatIsGPS = findViewById(R.id.btnWhatIsGPS)
         btnMappingGPS = findViewById(R.id.btnMappingGPS)
+        btnShareTop5 = findViewById(R.id.btnShareTop5)
 
 
 
@@ -47,36 +46,42 @@ class UserTrainingIndex : AppCompatActivity() {
         }
 
 
-        // GOOGLE DRIVE to save files on...
+        // GitHub Repository has all saved files on...
 
-        btnFunDayWeight.setOnClickListener {
-            val pdfUrl = "https://drive.google.com/file/d/1vya_3-wf4B0FXad4jZ8N0SvXWQLBwKww/view?usp=sharing"
+        btnFunDayFishing.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/funday_how_to.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
-            startActivity(intent)
-
-        }
-
-        btnFunDayLength.setOnClickListener{
-            val pdfUrl = "https://drive.google.com/file/d/1nMVrC_QPpsHdZiOIF3RXUyc6-8QtDVZ0/view?usp=sharing"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
-        btnTournamentWeight.setOnClickListener{
-            val pdfUrl = "https://drive.google.com/file/d/1qmCiOOKdNhDi3-siebhOze3CUvBWGqvM/view?usp=sharing"
+        btnTournamentFishing.setOnClickListener{
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Tournament_HowTo.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
-        btnTournamentLength.setOnClickListener {
-            val pdfUrl = "https://drive.google.com/file/d/1NyX9nR2BIc5kqcSQ467QkYDvfcyZHt9k/view?usp=sharing"
+        btnShareTop5.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Find%20Top%205%20Catches.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
-        btnWhatIsGPS.setOnClickListener {  }        //FILL in with Google Drive Docs
+        btnWhatIsGPS.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Setup%20GPS.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
 
-        btnMappingGPS.setOnClickListener {  }
+        btnMappingGPS.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Share%20Catches%20As%20CSV%20File-1.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
 
     }
 }

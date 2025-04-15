@@ -126,33 +126,22 @@
         app:layout_constraintTop_toBottomOf="@+id/divider2">
 
         <Button
-            android:id="@+id/btnFundDayWeight"
+            android:id="@+id/btnFunDayFishing"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginVertical="5dp"
+            android:padding="5dp"
             android:layout_weight=".4"
             android:background="@drawable/btn_lbs"
-            android:text="@string/fun_day_weight"
+            android:text="@string/fun_day_fishing"
             android:textColor="@color/clip_white"
             android:textSize="19sp"
             android:layout_gravity="top"/>
 
-        <Button
-            android:id="@+id/btnFundDayLength"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight=".4"
-            android:padding="2dp"
-            android:background="@drawable/btn_kgs"
-            android:text="@string/fun_day_length"
-            android:textColor="@color/clip_white"
-            android:textSize="19sp"
-            android:layout_gravity="top"/>
+
 
     </LinearLayout>
 
@@ -168,30 +157,21 @@
         app:layout_constraintTop_toBottomOf="@id/llButtons">
 
         <Button
-            android:id="@+id/btnTournamentWeight"
+            android:id="@+id/btnTournamentFishing"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginVertical="5dp"
+            android:padding="5dp"
             android:layout_weight=".4"
             android:background="@drawable/btn_inches"
-            android:text="@string/tournament_weight"
+            android:text="Tournament Fishing"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:layout_gravity="top"/>
 
-        <Button
-            android:id="@+id/btnTournamentLength"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight=".4"
-            android:background="@drawable/btn_cms"
-            android:text="@string/tournament_length"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:layout_gravity="top"/>
+
     </LinearLayout>
 
     <View
@@ -250,6 +230,34 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/llGPSTop5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llGPS">
+
+        <Button
+            android:id="@+id/btnShareTop5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_outline_orange"
+            android:padding="10dp"
+            android:text="Top 5 Catches"
+            android:textSize="20sp"
+            android:layout_gravity="top"/>
+    </LinearLayout>
+
     <View
         android:id="@+id/divider5"
         android:layout_width="0dp"
@@ -259,7 +267,7 @@
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/llGPS" />
+        app:layout_constraintTop_toBottomOf="@id/llGPSTop5" />
 
     <LinearLayout
 

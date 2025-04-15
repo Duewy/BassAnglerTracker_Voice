@@ -213,6 +213,7 @@
     <string name="weight_format_kg">%.2f kg</string>
     <string name="length_format_cm">%.1f cm</string>
     <string name="date_iso"> %1$04d-%2$02d-%3$02d</string>
+    <string name="fun_day_fishing">Fun Day Fishing</string>
 
 
     //species

@@ -306,9 +306,9 @@ class CatchEntryTournamentInches : AppCompatActivity() {
 
 
     //################## UPDATE TOURNAMENT LIST   ###################################
-
     private fun updateTournamentList() {
         val formattedDate = getCurrentDate()
+
         val realLengthInches = listOf(
             firstRealLengthInches, secondRealLengthInches, thirdRealLengthInches,
             fourthRealLengthInches, fifthRealLengthInches, sixthRealLengthInches
@@ -318,15 +318,26 @@ class CatchEntryTournamentInches : AppCompatActivity() {
             firstDecLengthInches, secondDecLengthInches, thirdDecLengthInches,
             fourthDecLengthInches, fifthDecLengthInches, sixthDecLengthInches
         )
+
+        val colorLetters = listOf(
+            txtInchesColorLetter1, txtInchesColorLetter2, txtInchesColorLetter3,
+            txtInchesColorLetter4, txtInchesColorLetter5, txtInchesColorLetter6
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetterInches1, txtTypeLetterInches2, txtTypeLetterInches3,
+            txtTypeLetterInches4, txtTypeLetterInches5, txtTypeLetterInches6
+        )
+
         val allCatches = dbHelper.getCatchesForToday(catchType = "inches", formattedDate)
-        val sortedCatches = allCatches.sortedByDescending { it.totalLengthA8th?: 0 }
+        val sortedCatches = allCatches.sortedByDescending { it.totalLengthA8th ?: 0 }
+
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
         } else {
             sortedCatches
         }
 
-        // ✨ Clean way to update available clip colors
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
             catchType = "inches",
@@ -340,13 +351,15 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            for (i in tournamentCatches.indices) {
+            val loopLimit = minOf(sortedCatches.size, 6)
+
+            for (i in 0 until loopLimit) {
                 if (i >= realLengthInches.size) continue
 
-                val catch = tournamentCatches[i]
-                val totalLengthInches= catch.totalLengthA8th?: 0
-                val lengthInches = (totalLengthInches / 8)
-                val lengthDec = (totalLengthInches % 8)
+                val catch = sortedCatches[i]
+                val totalLengthInches = catch.totalLengthA8th ?: 0
+                val lengthInches = totalLengthInches / 8
+                val lengthDec = totalLengthInches % 8
 
                 val clipColor = try {
                     ClipColor.valueOf(catch.clipColor?.uppercase() ?: "")
@@ -355,19 +368,12 @@ class CatchEntryTournamentInches : AppCompatActivity() {
                 }
 
                 realLengthInches[i].text = lengthInches.toString()
-                decLengthInches[i].text ="$lengthDec /8"
+                decLengthInches[i].text = "$lengthDec /8"
 
-// ✅ First set the clip color background
-                realLengthInches[i].setBackgroundResource(clipColor.resId)
-                decLengthInches[i].setBackgroundResource(clipColor.resId)
-
-// ✅ Then layer on a black border to improve visibility
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
                 val layeredDrawable = createLayeredDrawable(baseColor)
                 realLengthInches[i].background = layeredDrawable
                 decLengthInches[i].background = layeredDrawable
-
-
 
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
@@ -379,20 +385,8 @@ class CatchEntryTournamentInches : AppCompatActivity() {
 
                 realLengthInches[i].invalidate()
                 decLengthInches[i].invalidate()
-            }
-            // 👇 ADD THIS FOR COLORBLIND ACCESSIBILITY 👇
-            val colorLetters = listOf(
-                txtInchesColorLetter1, txtInchesColorLetter2, txtInchesColorLetter3,
-                txtInchesColorLetter4, txtInchesColorLetter5, txtInchesColorLetter6
-            )
 
-            colorLetters.forEach { it.text = "" } // Clear first
-
-            for (i in tournamentCatches.indices) {
-                if (i >= tournamentCatchLimit || i >= colorLetters.size) break
-
-                val catch = tournamentCatches[i]
-                val colorInitial = when (catch.clipColor?.uppercase()) {
+                colorLetters[i].text = when (clipColor.name) {
                     "BLUE" -> "B"
                     "RED" -> "R"
                     "GREEN" -> "G"
@@ -401,47 +395,34 @@ class CatchEntryTournamentInches : AppCompatActivity() {
                     "WHITE" -> "W"
                     else -> "?"
                 }
-                colorLetters[i].text = colorInitial
 
-                val speciesCode = getSpeciesCode(catch.species ?: "")
-                when (i) {
-                    0 -> txtTypeLetterInches1.text = speciesCode
-                    1 -> txtTypeLetterInches2.text = speciesCode
-                    2 -> txtTypeLetterInches3.text = speciesCode
-                    3 -> txtTypeLetterInches4.text = speciesCode
-                    4 -> txtTypeLetterInches5.text = speciesCode
-                    5 -> txtTypeLetterInches6.text = speciesCode
-                }
-
+                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
             }
 
+            updateTotalLength(tournamentCatches)
+            adjustTextViewVisibility()
+
+            if (tournamentCatches.size >= tournamentCatchLimit) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    when (tournamentCatchLimit) {
+                        4 -> {
+                            blinkTextViewTwice(fourthRealLengthInches)
+                            blinkTextViewTwice(fourthDecLengthInches)
+                        }
+                        5 -> {
+                            blinkTextViewTwice(fifthRealLengthInches)
+                            blinkTextViewTwice(fifthDecLengthInches)
+                        }
+                        6 -> {
+                            blinkTextViewTwice(sixthRealLengthInches)
+                            blinkTextViewTwice(sixthDecLengthInches)
+                        }
+                    }
+                }, 300)
+            }
         }
-
-        updateTotalLength(tournamentCatches)
-        adjustTextViewVisibility()
-
-        if (tournamentCatches.size >= tournamentCatchLimit) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                when (tournamentCatchLimit) {
-                    4 -> {
-                        blinkTextViewTwice(fourthRealLengthInches)
-                        blinkTextViewTwice(fourthDecLengthInches)
-                    }
-                    5 -> {
-                        blinkTextViewTwice(fifthRealLengthInches)
-                        blinkTextViewTwice(fifthDecLengthInches)
-                    }
-                    6 -> {
-                        blinkTextViewTwice(sixthRealLengthInches)
-                        blinkTextViewTwice(sixthDecLengthInches)
-                    }
-                }
-            }, 300)
-        }
-
-
-
     }
+
 
 
     //########### Clear Tournament Text Views  ########################

@@ -13,7 +13,9 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -39,6 +41,8 @@ class TrainingWords : AppCompatActivity() {
     private val speechRequestCode = 1001
     private val recordAudioRequestCode = 101
     private lateinit var textToSpeech: TextToSpeech
+    private var selectedPhrase: PracticePhrase? = null
+
 
 
 
@@ -83,6 +87,7 @@ class TrainingWords : AppCompatActivity() {
 
             // Check if selected phrase exists in the list
             val isValidPhrase = phraseList.any { it.text.equals(phraseToSay, ignoreCase = true) }
+            loadPhraseStatsFromPrefs()
 
             if (!isValidPhrase) {
                 Toast.makeText(this, "Please select a word to practice.", Toast.LENGTH_SHORT).show()
@@ -115,6 +120,32 @@ class TrainingWords : AppCompatActivity() {
 
 
     }// ================== END On Create ===================================
+
+    private fun savePhraseStatsToPrefs() {
+        val prefs = getSharedPreferences("PhraseTrainingPrefs", MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        for (phrase in phraseList) {
+            val keyBase = phrase.text.lowercase().replace(" ", "_")
+            editor.putInt("${keyBase}_success", phrase.successCount)
+            editor.putInt("${keyBase}_failure", phrase.failureCount)
+            editor.putBoolean("${keyBase}_mastered", phrase.isMastered)
+        }
+
+        editor.apply()
+    }
+
+    private fun loadPhraseStatsFromPrefs() {
+        val prefs = getSharedPreferences("PhraseTrainingPrefs", MODE_PRIVATE)
+
+        for (phrase in phraseList) {
+            val keyBase = phrase.text.lowercase().replace(" ", "_")
+            phrase.successCount = prefs.getInt("${keyBase}_success", 0)
+            phrase.failureCount = prefs.getInt("${keyBase}_failure", 0)
+            phrase.isMastered = prefs.getBoolean("${keyBase}_mastered", false)
+        }
+    }
+
 
     private fun checkAudioPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -158,29 +189,57 @@ class TrainingWords : AppCompatActivity() {
 
     private fun showPhrasePopup() {
         val builder = AlertDialog.Builder(this)
-        val listView = ListView(this)
-        val adapter = PhraseListAdapter(this, phraseList)
 
-        listView.adapter = adapter
+        // Create a container layout to hold the ListView
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 16, 16, 16)
+        }
 
+        // Dynamically sized ListView
+        val listView = ListView(this).apply {
+            val screenHeight = resources.displayMetrics.heightPixels
+            val maxListHeight = (screenHeight * 0.5).toInt()
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                maxListHeight
+            )
+
+            adapter = PhraseListAdapter(this@TrainingWords, phraseList)
+        }
+
+        // Handle phrase selection
         listView.setOnItemClickListener { _, _, position, _ ->
-            // Clear previous selection
             phraseList.forEach { it.isMastered = false }
 
-            // Set only the selected item as mastered
-            phraseList[position].isMastered = true
+            // ✅ Track which phrase is selected
+            selectedPhrase = phraseList[position]
+            selectedPhrase!!.isMastered = true
+            savePhraseStatsToPrefs()
 
-            val selected = phraseList[position]
-            txtSayThis.text = "Say This: ${selected.text}"
-            adapter.notifyDataSetChanged()
+            Log.d("PhrasePopup", "Selected: ${selectedPhrase!!.text}")
+            Toast.makeText(this, "Selected: ${selectedPhrase!!.text}", Toast.LENGTH_SHORT).show()
+
+            txtSayThis.text = "Say This: ${selectedPhrase!!.text}"
+            txtSayThis.requestLayout()
+            txtSayThis.invalidate()
+
+            // Update UI visuals
+            (listView.adapter as PhraseListAdapter).notifyDataSetChanged()
             updateSayThisUI()
         }
 
-        builder.setTitle("Practice Phrases")
-        builder.setView(listView)
-        builder.setPositiveButton("Done", null)
-        builder.show()
+
+        container.addView(listView)
+
+        builder.setTitle("Practice Words/Phrases")
+            .setView(container)
+            .setPositiveButton("Done", null)
+            .show()
     }
+
+
 
 
     //~~~~~~~~~~~ Say THIS  ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -214,16 +273,30 @@ class TrainingWords : AppCompatActivity() {
 
 
 
- private fun handleVoiceInput(rawInput: String) {
-        val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
+    private fun handleVoiceInput(rawInput: String) {
+        val normalizedInput = rawInput.lowercase().replace(" ", "").trim()
+        val currentPhraseTextRaw = txtSayThis.text.toString().replace("Say This: ", "").trim()
+        val currentPhraseText = currentPhraseTextRaw.lowercase().replace(" ", "")
 
-        if (matchedSpecies != null) {
-            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n✔ That is a match for \"$matchedSpecies\"!"
-            // You could also set a spinner value or pass species to the next function here
+        val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
+        val matchedNormalized = matchedSpecies.lowercase().replace(" ", "")
+
+            // Find the matching phrase object
+        val phrase = phraseList.find {
+            it.text.lowercase().replace(" ", "") == currentPhraseText
+        }
+
+        if (matchedNormalized == currentPhraseText && phrase != null) {
+            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n✔ That is a match for \"${phrase.text}\"!"
+            phrase.successCount++
         } else {
             txtWhatComputerHeard.text = "You said: \"$rawInput\"\n❌ Species not recognized."
+            phrase?.failureCount = (phrase?.failureCount ?: 0) + 1
         }
+        savePhraseStatsToPrefs()
+        updateSayThisUI()
     }
+
 
 
 }// +++++++++++ END Training-Words ++++++++++++++++++++++++

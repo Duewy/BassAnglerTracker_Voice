@@ -12,8 +12,8 @@ object VoiceInputMapper {
         "Caught" to listOf("caught"),
         "Log Entry" to listOf("log entry"),
 
-        "Large Mouth" to listOf("large mouth", "largemouth", "lard mouth", "large moth"), //-- Species
-        "Small Mouth" to listOf("small mouth", "smallmouth", "smile mouth"),
+        "Large Mouth" to listOf("Largemouth","large mouth", "largemouth", "lard mouth", "large moth"), //-- Species
+        "Small Mouth" to listOf("Smallmouth","small mouth", "smallmouth", "smile mouth"),
         "Crappie" to listOf("crappie", "crap pie", "crappy", "crop e"),
         "Sunfish" to listOf("sunfish", "sun fish", "some fish"),
         "White Bass" to listOf("white bass", "why bass", "wide bass"),
@@ -24,7 +24,7 @@ object VoiceInputMapper {
         "Pike" to listOf("pike", "northern pike"),
         "Perch" to listOf("perch"),
         "Cat Fish" to listOf("catfish", "cat fish"),
-        "Gar" to listOf("gar", "car", "guard"),
+        "Gar Pike" to listOf("gar pike", "gor pike", "guard pike"),
         "Bullhead" to listOf("bullhead", "bull head", "bald head"),
         "Red Drum" to listOf("red drum", "redrum", "red fish"),
         "Carp" to listOf("carp", "cart"),

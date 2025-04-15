@@ -7,7 +7,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.bramestorm.bassanglertracker.R
+    import androidx.core.content.ContextCompat
+    import com.bramestorm.bassanglertracker.R
 
 
     class PhraseListAdapter(
@@ -28,9 +29,23 @@ import com.bramestorm.bassanglertracker.R
             val phrase = phrases[position]
             txtPhrase.text = phrase.text
 
+            // 🟢 Highlight selected phrase in softlock_teal
+            val bgColor = if (phrase.isMastered) {
+                ContextCompat.getColor(context, R.color.softlock_teal)
+            } else {
+                ContextCompat.getColor(context, R.color.softlock_sand)
+            }
+            rowView.setBackgroundColor(bgColor)
+
             // Change color based on mastered status
-            val bgColor = if (phrase.isMastered) R.color.clip_green else R.color.clip_yellow
-            imgProgress.setBackgroundResource(bgColor)
+            val colorRes = when (phrase.successCount) {
+                0 -> R.color.clip_yellow
+                1, 2 -> R.color.dark_yellow
+                3, 4 -> R.color.clip_bright_green
+                else -> R.color.clip_green
+            }
+            imgProgress.setBackgroundResource(colorRes)
+
 
             return rowView
         }

@@ -83,7 +83,6 @@ class CatchEntryTournament : AppCompatActivity() {
     private val flashHandler = Handler(Looper.getMainLooper())
 
 
-
     // Database Helper
     private lateinit var dbHelper: CatchDatabaseHelper
 
@@ -295,6 +294,7 @@ class CatchEntryTournament : AppCompatActivity() {
 
     private fun updateTournamentList() {
         val formattedDate = getCurrentDate()
+
         val realWeights = listOf(
             firstRealWeight, secondRealWeight, thirdRealWeight,
             fourthRealWeight, fifthRealWeight, sixthRealWeight
@@ -304,15 +304,27 @@ class CatchEntryTournament : AppCompatActivity() {
             firstDecWeight, secondDecWeight, thirdDecWeight,
             fourthDecWeight, fifthDecWeight, sixthDecWeight
         )
+
+        val colorLetters = listOf(
+            txtColorLetter1, txtColorLetter2, txtColorLetter3,
+            txtColorLetter4, txtColorLetter5, txtColorLetter6
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
         val allCatches = dbHelper.getCatchesForToday(catchType = "LbsOzs", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
+
+        // These are the ones used for scoring and totals
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
         } else {
             sortedCatches
         }
 
-        // ✨ Clean way to update available clip colors
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
             catchType = "LbsOzs",
@@ -326,10 +338,13 @@ class CatchEntryTournament : AppCompatActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            for (i in tournamentCatches.indices) {
+            // Show 1 extra row (6th) for culled fish preview
+            val loopLimit = minOf(sortedCatches.size, 6)
+
+            for (i in 0 until loopLimit) {
                 if (i >= realWeights.size) continue
 
-                val catch = tournamentCatches[i]
+                val catch = sortedCatches[i]
                 val totalWeightOz = catch.totalWeightOz ?: 0
                 val weightLbs = totalWeightOz / 16
                 val weightOz = totalWeightOz % 16
@@ -343,15 +358,10 @@ class CatchEntryTournament : AppCompatActivity() {
                 realWeights[i].text = weightLbs.toString()
                 decWeights[i].text = weightOz.toString()
 
-                realWeights[i].setBackgroundResource(clipColor.resId)
-                decWeights[i].setBackgroundResource(clipColor.resId)
-
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
                 val layeredDrawable = createLayeredDrawable(baseColor)
                 realWeights[i].background = layeredDrawable
                 decWeights[i].background = layeredDrawable
-
-
 
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
@@ -361,22 +371,8 @@ class CatchEntryTournament : AppCompatActivity() {
                 realWeights[i].setTextColor(textColor)
                 decWeights[i].setTextColor(textColor)
 
-                realWeights[i].invalidate()
-                decWeights[i].invalidate()
-            }
-            // 👇 ADD THIS FOR COLORBLIND ACCESSIBILITY 👇
-            val colorLetters = listOf(
-                txtColorLetter1, txtColorLetter2, txtColorLetter3,
-                txtColorLetter4, txtColorLetter5, txtColorLetter6
-            )
-
-            colorLetters.forEach { it.text = "" } // Clear first
-
-            for (i in tournamentCatches.indices) {
-                if (i >= tournamentCatchLimit || i >= colorLetters.size) break
-
-                val catch = tournamentCatches[i]
-                val colorInitial = when (catch.clipColor?.uppercase()) {
+                // Text overlays
+                colorLetters[i].text = when (clipColor.name) {
                     "BLUE" -> "B"
                     "RED" -> "R"
                     "GREEN" -> "G"
@@ -385,48 +381,35 @@ class CatchEntryTournament : AppCompatActivity() {
                     "WHITE" -> "W"
                     else -> "?"
                 }
-                colorLetters[i].text = colorInitial
 
-                val speciesCode = getSpeciesCode(catch.species ?: "")
-                when (i) {
-                    0 -> txtTypeLetter1.text = speciesCode
-                    1 -> txtTypeLetter2.text = speciesCode
-                    2 -> txtTypeLetter3.text = speciesCode
-                    3 -> txtTypeLetter4.text = speciesCode
-                    4 -> txtTypeLetter5.text = speciesCode
-                    5 -> txtTypeLetter6.text = speciesCode
-                }
+                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+            }
 
+            updateTotalWeight(tournamentCatches)
+            adjustTextViewVisibility()
+
+            // Blink the weight of the last qualifying fish
+            if (tournamentCatches.size >= tournamentCatchLimit) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    when (tournamentCatchLimit) {
+                        4 -> {
+                            blinkTextViewTwice(fourthRealWeight)
+                            blinkTextViewTwice(fourthDecWeight)
+                        }
+                        5 -> {
+                            blinkTextViewTwice(fifthRealWeight)
+                            blinkTextViewTwice(fifthDecWeight)
+                        }
+                        6 -> {
+                            blinkTextViewTwice(sixthRealWeight)
+                            blinkTextViewTwice(sixthDecWeight)
+                        }
+                    }
+                }, 300)
+            }
         }
-
     }
 
-        updateTotalWeight(tournamentCatches)
-        adjustTextViewVisibility()
-
-        if (tournamentCatches.size >= tournamentCatchLimit) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                when (tournamentCatchLimit) {
-                    4 -> {
-                        blinkTextViewTwice(fourthRealWeight)
-                        blinkTextViewTwice(fourthDecWeight)
-                    }
-
-                    5 -> {
-                        blinkTextViewTwice(fifthRealWeight)
-                        blinkTextViewTwice(fifthDecWeight)
-                    }
-
-                    6 -> {
-                        blinkTextViewTwice(sixthRealWeight)
-                        blinkTextViewTwice(sixthDecWeight)
-                    }
-                }
-            }, 300) // Wait
-        }
-
-
-    }
 
 
     //########### Clear Tournament Text Views  ########################

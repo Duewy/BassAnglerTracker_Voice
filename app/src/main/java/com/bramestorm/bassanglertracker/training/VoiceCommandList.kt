@@ -16,7 +16,7 @@ object VoiceCommandList {
         PracticePhrase("Carp", false),
         PracticePhrase("Cat Fish", false),
         PracticePhrase("Crappie", false),
-        PracticePhrase("Gar", false),
+        PracticePhrase("Gar Pike", false),
         PracticePhrase("Largemouth", false),
         PracticePhrase("Muskie", false),
         PracticePhrase("Perch", false),

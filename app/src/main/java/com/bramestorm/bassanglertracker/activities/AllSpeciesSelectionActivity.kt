@@ -136,10 +136,11 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
     private fun setupAdapter() {
         val speciesItemList = allSpecies.map { name ->
             val normalizedName = SharedPreferencesManager.normalizeSpeciesName(name)
-            val isChecked = selectedSpecies.contains(SharedPreferencesManager.normalizeSpeciesName(name))
-            val imageResId = getSpeciesImageResId(name) // ✅ use raw name for image lookup
+            val isChecked = selectedSpecies.contains(normalizedName)
+            val imageResId = getSpeciesImageResId(name) // use raw name for image
             SpeciesItem(name = name, imageResId = imageResId, isSelected = isChecked)
         }
+
 
         adapter = AllSpeciesAdapter(
             context = this,
