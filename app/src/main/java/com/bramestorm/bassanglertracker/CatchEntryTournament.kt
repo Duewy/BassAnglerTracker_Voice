@@ -222,12 +222,12 @@ class CatchEntryTournament : AppCompatActivity() {
             },
             onWakeUp = {
                 runOnUiThread {
-                    Toast.makeText(this, "🎤 Casper is listening!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "🎣 Catch Caddy is listening...", Toast.LENGTH_SHORT).show()
                 }
             },
             onFinish = {
                 runOnUiThread {
-                    Toast.makeText(this, "🔇 Casper signing off.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "🔇 Catch Caddy signing off.\n Over and Out", Toast.LENGTH_SHORT).show()
                 }
             }
         )

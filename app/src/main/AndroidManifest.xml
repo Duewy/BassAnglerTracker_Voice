@@ -13,10 +13,21 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Internet & Audio -->
+    <!-- Internet , Audio & Voice Controls -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Required to start any foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Required when using foregroundServiceType="microphone" -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <!-- Required for recording audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <!-- Alarm Permission -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
@@ -119,17 +130,7 @@
 
         <!-- Referral to web PDF How To Pages -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".training.UserTrainingIndex"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"/>
-        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".training.UserTrainingVoiceCommands"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"/>
-        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".training.TrainingWords"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"/>
+
 
         <!-- Tournament Popups for User Input -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
@@ -197,6 +198,19 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
+        <!-- For all VOICE CONTROL pages -->
+        <activity android:name=".training.VoiceOverlayActivity"/>
+        <activity android:name=".training.UserTrainingIndex"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".training.UserTrainingVoiceCommands"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".training.TrainingWords"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
 
 
         <!-- For all ALARMS of Tournament pages -->
@@ -217,7 +231,16 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Receiver for ALARMS  -->
         <receiver android:name=".alarm.AlarmReceiver" />
+
+        <!-- Receiver for Voice Control  -->
+        <service
+            android:name=".training.VoiceService"
+            android:exported="false"
+            android:foregroundServiceType="microphone"
+            android:enabled="true" />
+
 
     </application>
 

@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
+import com.bramestorm.bassanglertracker.training.VoiceService
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
@@ -181,6 +182,12 @@ class SetUpActivity : AppCompatActivity() {
             spinnerTournamentSpecies.alpha = 1.0f
             spinnerTournamentSpecies.isEnabled = true
         }
+
+        //############ Initialize Voice Communication via Porcupine  ####################
+
+        val serviceIntent = Intent(this, VoiceService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+
 
         // Initialize GPS location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)

@@ -12,6 +12,8 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2025.04.00"
 playServicesAuth = "21.3.0"
+porcupineAndroid = "3.0.0"
+porcupineJava = "3.0.4"
 roomCommon = "2.7.0"
 roomKtx = "2.7.0"
 appcompat = "1.7.0"
@@ -47,6 +49,8 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 kotlin-symbol-processing-api = { module = "org.jetbrains.kotlin:kotlin-symbol-processing-api", version.ref = "kotlinSymbolProcessingApi" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+porcupine-android = { module = "ai.picovoice:porcupine-android", version.ref = "porcupineAndroid" }
+porcupine-java = { module = "ai.picovoice:porcupine-java", version.ref = "porcupineJava" }
 support-annotations = { group = "com.android.support", name = "support-annotations", version.ref = "supportAnnotations" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }

@@ -1,18 +1,16 @@
 package com.bramestorm.bassanglertracker.training
 
+
+import ai.picovoice.porcupine.PorcupineManager
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import android.os.Bundle
-import ai.picovoice.porcupine.PorcupineManager
-
-import android.content.pm.PackageManager
-import android.widget.Toast
 
 
 class VoiceInputHelper(
@@ -27,7 +25,6 @@ class VoiceInputHelper(
     private var isCooldownActive = false
 
     private val handler = Handler(Looper.getMainLooper())
-    private val wakePhrase = "wake up casper"
     private val overPhrase = "over"
     private val endPhrase = "over and out"
 
@@ -41,8 +38,8 @@ class VoiceInputHelper(
     fun initWakeWordDetection() {
         try {
             porcupineManager = PorcupineManager.Builder()
-                .setAccessKey("6jSwOwgQR/mFYJJz4pAF7qhGvDV9Aonyr2FJJyh63FFBPFhoCPSikA==")
-                .setKeywordPath("wake_up_casper_android.ppn")
+                .setAccessKey("TawEvd8BQnSwLVve851+KaCo7U1H7uOVEHsbWKZrz28flmwGzHTX3w==")
+                .setKeywordPath("Catch-Caddy_en_android_v3_0_0.ppn")
                 .build(context) { _ ->
                     Log.d("VoiceInput", "🎤 Wake word detected!")
                     isActiveMode = true
