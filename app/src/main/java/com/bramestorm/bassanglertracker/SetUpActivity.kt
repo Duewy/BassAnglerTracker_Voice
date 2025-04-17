@@ -18,12 +18,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.training.VoiceService
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 
 
 class SetUpActivity : AppCompatActivity() {
@@ -43,6 +41,12 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var tglGPS: ToggleButton
     private lateinit var btnMainSetup:Button
     private lateinit var btnCustomizeSpecies :Button
+
+    // --------------- Permission Codes for GPS and Porcupine ----------------
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    }
+
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
 
     private var isWeightSelected = false
@@ -55,6 +59,8 @@ class SetUpActivity : AppCompatActivity() {
 
     private var isValUnits = false
     private var isValMeasuring = false
+
+    //--------------------------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,18 +189,10 @@ class SetUpActivity : AppCompatActivity() {
             spinnerTournamentSpecies.isEnabled = true
         }
 
-        //############ Initialize Voice Communication via Porcupine  ####################
-
-        val serviceIntent = Intent(this, VoiceService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
-
-
-        // Initialize GPS location client
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // |||||||||||||| Load saved GPS state ||||||||||||||||||||||||||||||||||
 
-// ✅ Check both: saved state AND permission
+        //------ ✅ Check both: saved state AND permission for GPS -----------
         val isGpsEnabledInPrefs = sharedPreferences.getBoolean("GPS_ENABLED", false)
         val hasLocationPermission = ContextCompat.checkSelfPermission(
             this,
@@ -222,7 +220,6 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
 
-
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
             startActivity(intent2)
@@ -238,7 +235,7 @@ class SetUpActivity : AppCompatActivity() {
         loadTournamentSpeciesSpinner()
 
 
-        // Fishing Event Selection (Fun Day or Tournament)
+        //---  Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
 
             val nextActivity = when {
@@ -271,9 +268,11 @@ class SetUpActivity : AppCompatActivity() {
 
             }
         }
-    }//-------------- END of ON CREATE  _______________________
+    }
+    //=================== END of ON CREATE ================================
 
 
+    // ------------ Tournament Species Selector ------------------
     private fun loadTournamentSpeciesSpinner() {
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerTournamentSpecies)
 
@@ -306,8 +305,7 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
 
-
-
+    //------------------------------ GPS Permissions --------------------------------------------------
     private fun checkAndRequestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -321,8 +319,8 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
 
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    //--------------- Request Permissions for GPS and Porcupine ----------------
+        override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -335,33 +333,31 @@ class SetUpActivity : AppCompatActivity() {
                 toast.setGravity(Gravity.CENTER, 0, 0)
                 toast.show()
             }
+
         }
     }
-
-
+    //------------------------ Enable GPS ------------------------
     private fun enableGps() {
             sharedPreferences.edit().putBoolean("GPS_ENABLED", true).apply()
         val toast = Toast.makeText(this, "GPS is Enabled", Toast.LENGTH_SHORT)
         toast.setGravity(Gravity.CENTER, 0, 0)
         toast.show()
         }
+    //------------------------ Disable GPS ------------------------
+    private fun disableGps() {
+        sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
+        val toast = Toast.makeText(this, "GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.", Toast.LENGTH_LONG)
+        toast.setGravity(Gravity.CENTER, 0, 0)
+        toast.view?.findViewById<TextView>(android.R.id.message)?.gravity = Gravity.CENTER
+        toast.show()
 
-        private fun disableGps() {
-            sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
-            val toast = Toast.makeText(this, "GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.", Toast.LENGTH_LONG)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.view?.findViewById<TextView>(android.R.id.message)?.gravity = Gravity.CENTER
-            toast.show()
+    }
 
-        }
-
-        companion object {
-            private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-        }
-
+//======================= onResume ==========================================
     override fun onResume() {
         super.onResume()
         loadTournamentSpeciesSpinner() // Refreshes list if species were updated
     }
 
 }
+//================END==========================
