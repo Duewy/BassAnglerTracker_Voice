@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -20,9 +21,16 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.ParsedCatch
+import com.bramestorm.bassanglertracker.training.VoiceCatchParse
+import com.bramestorm.bassanglertracker.training.VoiceCommandHandler
+import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
+import com.bramestorm.bassanglertracker.training.VoiceResponseManager
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -47,7 +55,11 @@ class CatchEntryTournament : AppCompatActivity() {
     private var alarmTriggered: Boolean = false
     // Audio Variables
     private var mediaPlayer: MediaPlayer? = null
-
+    private lateinit var voiceResponseManager: VoiceResponseManager
+    private lateinit var voiceHelper: VoiceInteractionHelper
+    private lateinit var voiceCommandHandler: VoiceCommandHandler
+    private var pendingParsedCatch: ParsedCatch? = null
+    private var awaitingConfirmation = false
 
     // Weight Display TextViews
     private lateinit var firstRealWeight: TextView
@@ -83,6 +95,7 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var totalDecWeight: TextView
 
     private lateinit var txtGPSNotice: TextView
+    private lateinit var tglVoiceOnLbs: ToggleButton
 
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
@@ -101,6 +114,7 @@ class CatchEntryTournament : AppCompatActivity() {
 
     // Request Codes
     private val requestAlarmSET = 1006
+    private val recordAudioRequestCode = 101
 
 
     // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
@@ -125,6 +139,13 @@ class CatchEntryTournament : AppCompatActivity() {
         }
     }
 
+    private fun checkAndRequestAudioPermission() {
+        val permission = android.Manifest.permission.RECORD_AUDIO
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), recordAudioRequestCode)
+        }
+    }
+
     //================ ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,6 +157,7 @@ class CatchEntryTournament : AppCompatActivity() {
         btnMainPg = findViewById(R.id.btnMainPg)
         btnAlarm = findViewById(R.id.btnAlarm)
         txtGPSNotice = findViewById(R.id.txtGPSNotice)
+        tglVoiceOnLbs = findViewById(R.id.tglVoiceOnLbs)
 
         // Assign TextViews
         firstRealWeight = findViewById(R.id.firstRealWeight)
@@ -177,11 +199,40 @@ class CatchEntryTournament : AppCompatActivity() {
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
 
+
+        //--------------- SETTING VOICE CONTROL ---------------------------
+        checkAndRequestAudioPermission()
+
+        voiceHelper = VoiceInteractionHelper(this) { command ->
+            handleVoiceCommand(command)  // Your command parser
+        }
+        voiceCommandHandler = VoiceCommandHandler(this) { message ->
+            voiceHelper.speak(message)
+        }
+
+        //---------------------------------------------------------------
+
         btnTournamentCatch.setOnClickListener { showWeightPopup() }
 
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
 
         btnMainPg.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+
+        //_______VOICE CONTROL FOR NOW ________________________________  REMOVE WHEN THE REAL VOICE CONTROL BUTTON IS IN SETUP PAGE
+        tglVoiceOnLbs.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // ✅ Turn ON: speak + listen
+                voiceHelper.speak("I am ready to log your catch.")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    voiceHelper.startListening()
+                }, 1500)
+            } else {
+                // ❌ Turn OFF: stop listening and reset state
+                voiceHelper.speak("Voice mode turned off.")
+                voiceHelper.stopListening()
+            }
+        }
+
 
 
         btnAlarm.setOnClickListener {
@@ -214,11 +265,7 @@ class CatchEntryTournament : AppCompatActivity() {
         super.onDestroy()
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
-    }
-
-    private fun isVoiceModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
-        return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+        voiceHelper.shutdown()
     }
 
 
@@ -668,6 +715,71 @@ class CatchEntryTournament : AppCompatActivity() {
 
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
+
+    //%%%%%%%%%%%%%%%% Script for Voice Commands & InterActions  is inside the training.VoiceCommandHandler  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    private fun handleVoiceCommand(command: String) {
+        val parser = VoiceCatchParse()
+
+        if (awaitingConfirmation) {
+            val yesWords = listOf("yes", "that is correct", "correct", "that's right", "right")
+            val noWords = listOf("no", "that's wrong", "incorrect")
+
+            val confirmation = command.lowercase(Locale.ROOT)
+
+            when {
+                yesWords.any { confirmation.contains(it) } -> {
+                    pendingParsedCatch?.let { parsed ->
+                        // Convert weight to total ounces
+                        val totalWeightOz = (parsed.weightLbs * 16) + parsed.weightOz
+                        val species = parsed.species
+                        val clipColor = parsed.clipColor
+
+                        saveTournamentCatch(totalWeightOz, species, clipColor)
+
+                        voiceHelper.speak("Catch saved. We'll tally your weight next.")
+                        pendingParsedCatch = null
+                        awaitingConfirmation = false
+                    }
+
+                }
+
+                noWords.any { confirmation.contains(it) } -> {
+                    voiceHelper.speak("Okay, please try again.")
+                    pendingParsedCatch = null
+                    awaitingConfirmation = false
+                }
+
+                else -> {
+                    voiceHelper.speak("Please confirm your catch by saying 'yes' or 'no'.")
+                }
+            }
+
+            return
+        }
+
+        val parsed = parser.parseVoiceCommand(command)
+
+        if (parsed != null) {
+            pendingParsedCatch = parsed
+            awaitingConfirmation = true
+
+            val response = "OK, you caught a ${parsed.species}, weighing ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces, on the ${parsed.clipColor} clip. Is this correct? Over."
+            voiceHelper.speak(response)
+
+        } else {
+            voiceHelper.speak("Sorry, I couldn't understand your catch details. Please try again.")
+        }
+
+        if (command.lowercase().contains("over and out")) {
+            voiceHelper.speak("Out.")
+            voiceHelper.stopListening()
+            return
+        }
+
+    }
+
+
 
 }
 //################## END  ################################

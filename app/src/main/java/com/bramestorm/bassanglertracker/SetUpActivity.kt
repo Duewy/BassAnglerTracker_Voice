@@ -359,5 +359,11 @@ class SetUpActivity : AppCompatActivity() {
         loadTournamentSpeciesSpinner() // Refreshes list if species were updated
     }
 
+    //!!!!!!!!!!!!!!! For Shared Sessions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    private fun isVoiceModeEnabled(): Boolean {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+        return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+    }
+
 }
 //================END==========================
