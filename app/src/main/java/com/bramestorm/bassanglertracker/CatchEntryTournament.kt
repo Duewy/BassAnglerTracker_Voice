@@ -15,6 +15,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -47,14 +50,21 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var btnMenu: Button
     private lateinit var btnMainPg: Button
     private lateinit var btnAlarm: Button
+    private lateinit var tglVoiceOnLbs: ToggleButton
 
+    private lateinit var txtGPSNotice: TextView
 
     // Alarm Variables
     private var alarmHour: Int = -1
     private var alarmMinute: Int = -1
     private var alarmTriggered: Boolean = false
+
     // Audio Variables
     private var mediaPlayer: MediaPlayer? = null
+
+    private lateinit var speechRecognizer: SpeechRecognizer
+    private lateinit var speechIntent: Intent
+
     private lateinit var voiceResponseManager: VoiceResponseManager
     private lateinit var voiceHelper: VoiceInteractionHelper
     private lateinit var voiceCommandHandler: VoiceCommandHandler
@@ -94,8 +104,6 @@ class CatchEntryTournament : AppCompatActivity() {
     private lateinit var totalRealWeight: TextView
     private lateinit var totalDecWeight: TextView
 
-    private lateinit var txtGPSNotice: TextView
-    private lateinit var tglVoiceOnLbs: ToggleButton
 
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
@@ -141,7 +149,11 @@ class CatchEntryTournament : AppCompatActivity() {
 
     private fun checkAndRequestAudioPermission() {
         val permission = android.Manifest.permission.RECORD_AUDIO
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(this, arrayOf(permission), recordAudioRequestCode)
         }
     }
@@ -202,12 +214,22 @@ class CatchEntryTournament : AppCompatActivity() {
 
         //--------------- SETTING VOICE CONTROL ---------------------------
         checkAndRequestAudioPermission()
+        //
+        //    voiceHelper = VoiceInteractionHelper(this) { command ->
+        //        handleVoiceCommand(command)  // Your command parser
+        //    }
+        //   voiceCommandHandler = VoiceCommandHandler(this) { message ->
+        //       voiceHelper.speak(message)
+        //   }
 
-        voiceHelper = VoiceInteractionHelper(this) { command ->
-            handleVoiceCommand(command)  // Your command parser
-        }
-        voiceCommandHandler = VoiceCommandHandler(this) { message ->
-            voiceHelper.speak(message)
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         }
 
         //---------------------------------------------------------------
@@ -219,28 +241,59 @@ class CatchEntryTournament : AppCompatActivity() {
         btnMainPg.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
 
         //_______VOICE CONTROL FOR NOW ________________________________  REMOVE WHEN THE REAL VOICE CONTROL BUTTON IS IN SETUP PAGE
+
         tglVoiceOnLbs.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // ✅ Turn ON: speak + listen
-                voiceHelper.speak("I am ready to log your catch.")
+                try {
+                    speechRecognizer.destroy()
+                } catch (_: Exception) {}
+
+                // ✅ Recreate recognizer
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+                setupRecognizerListener()
+
+                // ✅ Wait before calling startListening()
                 Handler(Looper.getMainLooper()).postDelayed({
-                    voiceHelper.startListening()
-                }, 1500)
+                    Log.d("VOICE", "▶️ Now calling startListening()")
+                    speechRecognizer.startListening(speechIntent)
+                }, 500) // 500ms seems to avoid busy error
+
             } else {
-                // ❌ Turn OFF: stop listening and reset state
-                voiceHelper.speak("Voice mode turned off.")
-                voiceHelper.stopListening()
+                try {
+                    speechRecognizer.stopListening()
+                    speechRecognizer.cancel()
+                    speechRecognizer.destroy()
+                } catch (_: Exception) {}
             }
         }
 
 
 
+
+
+
+
+
+        //tglVoiceOnLbs.setOnCheckedChangeListener { _, isChecked ->
+        //     if (isChecked) {
+        //         voiceHelper.speak("I am ready to log your catch.") {
+        //             Log.d("Voice", "🟢 TTS confirmed done. Starting recognizer.")
+        //             voiceHelper.startListening()
+        //         }
+        //    } else {
+        //        voiceHelper.speak("Voice mode turned off.")
+        //        voiceHelper.stopListening()
+        //     }
+        // }
+
+        // @@@@@@@@@@@@@ SET ALARM BTN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         btnAlarm.setOnClickListener {
             startActivityForResult(
                 Intent(this, PopUpAlarm::class.java),
                 requestAlarmSET
             )
         }
+
         val dbHelper = CatchDatabaseHelper(this)
 
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
@@ -253,11 +306,8 @@ class CatchEntryTournament : AppCompatActivity() {
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
         super.onResume()
-
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
-
     }
-
 
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
@@ -265,9 +315,9 @@ class CatchEntryTournament : AppCompatActivity() {
         super.onDestroy()
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
-        voiceHelper.shutdown()
+        speechRecognizer.destroy()
+        // voiceHelper.shutdown()
     }
-
 
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
@@ -640,7 +690,11 @@ class CatchEntryTournament : AppCompatActivity() {
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-                    Toast.makeText(this, "⚠️ Please enable exact alarm permission in settings.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "⚠️ Please enable exact alarm permission in settings.",
+                        Toast.LENGTH_LONG
+                    ).show()
                     val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                     startActivity(intent)
                     return  // Exit early — no point in scheduling
@@ -657,9 +711,13 @@ class CatchEntryTournament : AppCompatActivity() {
                     Log.d("ALARM_DEBUG", "⏱ Attempting to schedule alarm at: ${calendar.time}")
                     Log.d("ALARM_DEBUG", "🔍 System time now is: ${System.currentTimeMillis()}")
 
-                                   } catch (e: SecurityException) {
+                } catch (e: SecurityException) {
                     Log.e("ALARM_DEBUG", "❌ Cannot schedule exact alarm. SecurityException.", e)
-                    Toast.makeText(this, "Exact alarm could not be scheduled (permissions)", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Exact alarm could not be scheduled (permissions)",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
             }
@@ -718,68 +776,133 @@ class CatchEntryTournament : AppCompatActivity() {
 
     //%%%%%%%%%%%%%%%% Script for Voice Commands & InterActions  is inside the training.VoiceCommandHandler  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    private fun handleVoiceCommand(command: String) {
-        val parser = VoiceCatchParse()
 
-        if (awaitingConfirmation) {
-            val yesWords = listOf("yes", "that is correct", "correct", "that's right", "right")
-            val noWords = listOf("no", "that's wrong", "incorrect")
+    // Recreate a fresh recognizer
+// Attach the recognition listener to the existing recognizer
+    private fun setupRecognizerListener() {
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Log.d("VOICE", "✅ Ready for speech")
+                Toast.makeText(applicationContext, "🎧 Listening now...", Toast.LENGTH_SHORT).show()
+            }
 
-            val confirmation = command.lowercase(Locale.ROOT)
+            override fun onBeginningOfSpeech() {
+                Log.d("VOICE", "🎙️ Speech started")
+            }
 
-            when {
-                yesWords.any { confirmation.contains(it) } -> {
-                    pendingParsedCatch?.let { parsed ->
-                        // Convert weight to total ounces
-                        val totalWeightOz = (parsed.weightLbs * 16) + parsed.weightOz
-                        val species = parsed.species
-                        val clipColor = parsed.clipColor
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {
+                Log.d("VOICE", "🛑 End of speech")
+            }
 
-                        saveTournamentCatch(totalWeightOz, species, clipColor)
+            override fun onError(error: Int) {
+                val message = when (error) {
+                    SpeechRecognizer.ERROR_AUDIO -> "Audio error"
+                    SpeechRecognizer.ERROR_CLIENT -> "Client error"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permission error"
+                    SpeechRecognizer.ERROR_NETWORK -> "Network error"
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No match"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
+                    SpeechRecognizer.ERROR_SERVER -> "Server error"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
+                    else -> "Unknown error"
+                }
 
-                        voiceHelper.speak("Catch saved. We'll tally your weight next.")
+                Log.e("VOICE_ERROR", "❌ SpeechRecognizer error: $message ($error)")
+                Toast.makeText(applicationContext, "Speech Error: $message", Toast.LENGTH_LONG).show()
+                tglVoiceOnLbs.isChecked = false
+            }
+
+            override fun onResults(results: Bundle?) {
+                val spokenText =
+                    results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.get(0) ?: ""
+                Log.d("VOICE", "🗣️ Recognized: $spokenText")
+                Toast.makeText(applicationContext, "You said: \"$spokenText\"", Toast.LENGTH_LONG).show()
+
+                when {
+                    spokenText.contains("hello", true) -> {
+                        Toast.makeText(applicationContext, "Hey there, angler!", Toast.LENGTH_SHORT).show()
+                    }
+                    spokenText.contains("ready", true) -> {
+                        Toast.makeText(applicationContext, "Ready to log your next catch!", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        Toast.makeText(applicationContext, "I'm listening, say a command!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                tglVoiceOnLbs.isChecked = false
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+
+
+        private fun handleVoiceCommand(command: String) {
+            val parser = VoiceCatchParse()
+
+            if (awaitingConfirmation) {
+                val yesWords = listOf("yes", "that is correct", "correct", "that's right", "right")
+                val noWords = listOf("no", "that's wrong", "incorrect")
+
+                val confirmation = command.lowercase(Locale.ROOT)
+
+                when {
+                    yesWords.any { confirmation.contains(it) } -> {
+                        pendingParsedCatch?.let { parsed ->
+                            // Convert weight to total ounces
+                            val totalWeightOz = (parsed.weightLbs * 16) + parsed.weightOz
+                            val species = parsed.species
+                            val clipColor = parsed.clipColor
+
+                            saveTournamentCatch(totalWeightOz, species, clipColor)
+
+                            voiceHelper.speak("Catch saved. We'll tally your weight next.")
+                            pendingParsedCatch = null
+                            awaitingConfirmation = false
+                        }
+
+                    }
+
+                    noWords.any { confirmation.contains(it) } -> {
+                        voiceHelper.speak("Okay, please try again.")
                         pendingParsedCatch = null
                         awaitingConfirmation = false
                     }
 
+                    else -> {
+                        voiceHelper.speak("Please confirm your catch by saying 'yes' or 'no'.")
+                    }
                 }
 
-                noWords.any { confirmation.contains(it) } -> {
-                    voiceHelper.speak("Okay, please try again.")
-                    pendingParsedCatch = null
-                    awaitingConfirmation = false
-                }
-
-                else -> {
-                    voiceHelper.speak("Please confirm your catch by saying 'yes' or 'no'.")
-                }
+                return
             }
 
-            return
+            val parsed = parser.parseVoiceCommand(command)
+
+            if (parsed != null) {
+                pendingParsedCatch = parsed
+                awaitingConfirmation = true
+
+                val response =
+                    "OK, you caught a ${parsed.species}, weighing ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces, on the ${parsed.clipColor} clip. Is this correct? Over."
+                voiceHelper.speak(response)
+
+            } else {
+                voiceHelper.speak("Sorry, I couldn't understand your catch details. Please try again.")
+            }
+
+            if (command.lowercase().contains("over and out")) {
+                voiceHelper.speak("Out.")
+                voiceHelper.stopListening()
+                return
+            }
+
         }
-
-        val parsed = parser.parseVoiceCommand(command)
-
-        if (parsed != null) {
-            pendingParsedCatch = parsed
-            awaitingConfirmation = true
-
-            val response = "OK, you caught a ${parsed.species}, weighing ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces, on the ${parsed.clipColor} clip. Is this correct? Over."
-            voiceHelper.speak(response)
-
-        } else {
-            voiceHelper.speak("Sorry, I couldn't understand your catch details. Please try again.")
-        }
-
-        if (command.lowercase().contains("over and out")) {
-            voiceHelper.speak("Out.")
-            voiceHelper.stopListening()
-            return
-        }
-
-    }
-
-
 
 }
 //################## END  ################################

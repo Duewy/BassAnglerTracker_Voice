@@ -34,9 +34,10 @@ class VoiceInteractionHelper(
     }
 
 
-    fun speak(message: String) {
-        responseManager.speak(message)
+    fun speak(message: String, onDone: (() -> Unit)? = null) {
+        responseManager.speak(message, onDone)
     }
+
 
     fun shutdown() {
         Log.d("Voice", "🔻 VoiceInteractionHelper shutting down...")
