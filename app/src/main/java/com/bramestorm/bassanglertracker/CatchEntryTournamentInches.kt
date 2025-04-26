@@ -14,25 +14,30 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
+import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.ParsedCatch
+import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.Locale.getDefault
 
 
-class CatchEntryTournamentInches : AppCompatActivity() {
+class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
 
     // Buttons
@@ -93,6 +98,28 @@ class CatchEntryTournamentInches : AppCompatActivity() {
     // Database Helper
     private lateinit var dbHelper: CatchDatabaseHelper
 
+
+    // --- voice-to-text callback handler ---
+    private val recognitionListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {}
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onBufferReceived(buffer: ByteArray?) {}
+        override fun onEndOfSpeech() {}
+        override fun onError(error: Int) {
+            Toast.makeText(this@CatchEntryTournamentInches, "Speech error $error", Toast.LENGTH_SHORT).show()
+        }
+        override fun onResults(results: Bundle) {
+            results
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                ?.firstOrNull()
+                ?.let { onSpeechResult(it) }
+        }
+        override fun onPartialResults(partial: Bundle?) {}
+        override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+
     // Tournament Configuration
     private var tournamentCatchLimit: Int = 4
     private var measurementSystem: String = "weight"
@@ -127,6 +154,15 @@ class CatchEntryTournamentInches : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view_inches)
+
+        //******  Initialize speech recognizer ***********************
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(recognitionListener)
+        }
+        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
 
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishingInches)
@@ -191,6 +227,7 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
+        handler.postDelayed(checkAlarmRunnable, 60000)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -261,7 +298,6 @@ class CatchEntryTournamentInches : AppCompatActivity() {
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
-
         val result = dbHelper.insertCatch(catch)
 
         Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
@@ -269,11 +305,8 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         if (result) {
             lastTournamentCatch = catch
         }
-
         updateTournamentList()
     }
-
-
 
     // ``````````````` UPDATE TOTAL LENGTH ``````````````````````
 
@@ -306,8 +339,6 @@ class CatchEntryTournamentInches : AppCompatActivity() {
             }
         }
     }
-
-
 
     //################## UPDATE TOURNAMENT LIST   ###################################
     private fun updateTournamentList() {
@@ -427,8 +458,6 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         }
     }
 
-
-
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
@@ -483,8 +512,6 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         return ClipColor.entries.filter { it !in usedColors }
     }
 
-
-
     // ~~~~~~~~~~~~~ ADJUST TEXT VIEW VIABILITY for culling values ~~~~~~~~~~~~~
     private fun adjustTextViewVisibility() {
         when (tournamentCatchLimit) {
@@ -534,69 +561,108 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         }
     }
 
+    // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
+    private val checkAlarmRunnable = object : Runnable {
+        override fun run() {
+            val calendar = Calendar.getInstance()
+            val nowHour = calendar.get(Calendar.HOUR_OF_DAY)
+            val nowMinute = calendar.get(Calendar.MINUTE)
 
-//@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
+            Log.d("ALARM_DEBUG", "🕒 Checking alarm... Now: $nowHour:$nowMinute, Set: $alarmHour:$alarmMinute")
+
+            if (!alarmTriggered && nowHour == alarmHour && nowMinute == alarmMinute) {
+                alarmTriggered = true
+                Log.d("ALARM_DEBUG", "🔔 Alarm triggered!")
+                startAlarm()
+            }
+
+            if (!alarmTriggered) {
+                handler.postDelayed(this, 60000)
+            }
+        }
+    }
+
+    // --------- Start Alarm ------------------------
+    private fun startAlarm() {
+        // ✅ Ensure raw file exists
+        mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound)
+        mediaPlayer?.start()
+
+        val flashHandler = Handler()
+        var isRed = true
+        val flashRunnable = object : Runnable {
+            override fun run() {
+                btnAlarmInches.setBackgroundColor(if (isRed) Color.RED else Color.WHITE)
+                isRed = !isRed
+                flashHandler.postDelayed(this, 500)
+            }
+        }
+
+        flashHandler.post(flashRunnable)
+
+        handler.postDelayed({
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            btnAlarmInches.setBackgroundColor(Color.TRANSPARENT)
+            flashHandler.removeCallbacks(flashRunnable)
+        }, 4000)
+    }
+
+    //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
+        Log.d("ALARM_DEBUG", "📥 onActivityResult triggered with requestCode=$requestCode")
+
         if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
             alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
             alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
-            alarmTriggered = false
+            alarmTriggered = false // ✅ reset so the alarm can trigger again
+
+            Log.d("ALARM_DEBUG", "✅ Alarm Set - hour=$alarmHour, minute=$alarmMinute")
 
             if (alarmHour != -1 && alarmMinute != -1) {
+                // Format time string for display
                 val amPm = if (alarmHour >= 12) "PM" else "AM"
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                val formattedMinute = String.format(getDefault(), "%02d", alarmMinute)
+                val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
 
+                // Update button and show toast
                 btnAlarmInches.text = getString(R.string.alarm_set_to, timeString)
                 val toastMessage = getString(R.string.alarm_toast_message, timeString)
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
 
+                // Schedule alarm
                 val calendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, alarmHour)
                     set(Calendar.MINUTE, alarmMinute)
                     set(Calendar.SECOND, 0)
                 }
 
-                val alarmIntent = Intent(this, com.bramestorm.bassanglertracker.alarm.AlarmReceiver::class.java)
+                val alarmIntent = Intent(this, AlarmReceiver::class.java)
                 val pendingIntent = PendingIntent.getBroadcast(
-                    this,
-                    System.currentTimeMillis().toInt(), // unique ID
-                    alarmIntent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE
                 )
 
-                val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-
-                // ✅ First: Check exact alarm permission
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-                    Toast.makeText(this, "⚠️ Please enable exact alarm permission in settings.", Toast.LENGTH_LONG).show()
-                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                    startActivity(intent)
-                    return  // ❌ Stop here — don't schedule if not allowed
-                }
-
-                // ✅ Then try to schedule
-                try {
-                    alarmManager.setExactAndAllowWhileIdle(
+                val mgr = getSystemService(ALARM_SERVICE) as AlarmManager
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    !mgr.canScheduleExactAlarms()
+                ) {
+                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+                } else {
+                    mgr.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
                     )
-                    Log.d("ALARM_DEBUG", "✅ Alarm scheduled for ${calendar.time}")
-                } catch (e: SecurityException) {
-                    Log.e("ALARM_DEBUG", "❌ Cannot schedule exact alarm. SecurityException.", e)
-                    Toast.makeText(this, "Exact alarm could not be scheduled (permissions)", Toast.LENGTH_SHORT).show()
                 }
+                Log.d("ALARM_DEBUG", "⏰ Alarm scheduled for ${calendar.time}")
             }
         }
     }
-
-
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {
@@ -644,5 +710,18 @@ class CatchEntryTournamentInches : AppCompatActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
-}//################## END  ################################
+    // --- Voice Control: override to receive speech transcripts ---
 
+    override fun onSpeechResult(transcript: String) {
+
+        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->
+            if (p.totalLengthA8th > 0) saveTournamentCatch(p.totalLengthA8th, p.species, p.clipColor)
+        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
+    }
+
+    // --- Voice Control: override to start listening on wake event ---
+    override fun onVoiceWake() {
+        recognizer.startListening(recognizerIntent)
+    }
+
+}//################## END  ################################

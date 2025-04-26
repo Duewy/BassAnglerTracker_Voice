@@ -12,6 +12,7 @@
     <string name="days_End_time">End Time</string>
     <string name="fun_Day">Fun Day</string>
     <string name="gps_info">GPS will be ON only to get location of your catch</string>
+    <string name="voice_info">Voice Commands Enable or Disable</string>
     <string name="set_alarm">Set Alarm</string>
     <string name="cancel">Cancel</string>
     <string name="enter_catch_details_inches">Species and Length -Inches-</string>
@@ -109,7 +110,7 @@
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
     <string name="gps_pin">Mark if GPS Location for Catch</string>
-    <string name="log_catch_location">Log Catch Location</string>
+    <string name="log_catch_location">Log Location</string>
     <string name="gps_on">GPS\nON</string>
     <string name="gps_off">GPS\nOFF</string>
     <string name="close_map">Close Map</string>
@@ -214,6 +215,17 @@
     <string name="length_format_cm">%.1f cm</string>
     <string name="date_iso"> %1$04d-%2$02d-%3$02d</string>
     <string name="fun_day_fishing">Fun Day Fishing</string>
+    <string name="voice_control">Voice Control</string>
+    <string name="voice_service_explanation">The Catch and Call app needs to have control of the Voice Interaction\n Please ensure that you are using a proper Bluetooth device and that the Voice Assistance such as Bixby for Samsung phones are turned off.\n The default voice recognition service should be selected to Google</string>
+    <string name="steps_users_voice_assistance">Verify that the assistant and recognizer listed match your preferred services.\nIf you need to change either one, tap the corresponding button below to jump to the right Settings screen:\n=> Bixby App Info (only enabled if a Samsung Bixby package is installed) \n=> Voice Input Settings (to pick your default speech-to-text engine) \n=> Assistant Settings (to choose or configure your default assistant) \n Once you’ve confirmed your defaults, make sure your Bluetooth trigger is paired (you’ll get a centered toast if none is found), then flip the Voice Control toggle back on to start using voice commands in the app.</string>
+    <string name="open_assistant_settings">Open Assistant Settings</string>
+    <string name="open_voice_input_settings">Open Voice‑Input Settings</string>
+    <string name="open_bixby_app_settings">Open Bixby App Settings</string>
+    <string name="default_recognizer">Default recognizer: …</string>
+    <string name="default_voice_recognizer">Default Voice Recognizer</string>
+    <string name="default_assistant">Default assistant: …</string>
+    <string name="default_assistant_text">Default Assistant</string>
+    <string name="setting_up_bluetooth_voice">Setting Up the Bluetooth \n and \n Voice Assistant</string>
 
 
     //species

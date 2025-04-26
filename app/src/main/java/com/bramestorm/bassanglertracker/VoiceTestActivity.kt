@@ -17,113 +17,117 @@ import androidx.core.content.ContextCompat
 import java.util.Locale
 
 class VoiceTestActivity : AppCompatActivity() {
+
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var recognizerIntent: Intent
+    private val requestAudioCode = 101
 
-    private val REQUEST_AUDIO = 101
-
-    private lateinit var btnMic: Button
-    private lateinit var txtStatus: TextView
-    private lateinit var txtResult: TextView
+    private lateinit var btnVoiceMic: Button
+    private lateinit var txtVoiceResponse: TextView
+    private lateinit var txtVoiceInput: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 1) Inflate your XML once:
         setContentView(R.layout.activity_voice_test)
 
-        btnMic      = findViewById(R.id.btnVoiceMic)
-        txtStatus   = findViewById(R.id.txtVoiceResponse)
-        txtResult   = findViewById(R.id.txtVoiceInput)
+        // 2) Wire up views
+        btnVoiceMic      = findViewById(R.id.btnVoiceMic)
+        txtVoiceResponse = findViewById(R.id.txtVoiceResponse)
+        txtVoiceInput    = findViewById(R.id.txtVoiceInput)
 
-        // 1) — Runtime permission
+        // 3) Permission check
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
                 arrayOf(Manifest.permission.RECORD_AUDIO),
-                REQUEST_AUDIO
+                requestAudioCode
             )
         }
 
-        // 2) — Create recognizer + intent once
+        // 4) Create the recognizer and its intent
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        // Immediately tear down any leftover session:
+        speechRecognizer.stopListening()
+        speechRecognizer.cancel()
+
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         }
 
-        // 3) — Attach listener (logs every step)
+        // 5) Hook up listener
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {
-                Log.d("VOICE_TEST","✅ onReadyForSpeech")
-                txtStatus.text = "🎧 Ready to listen…"
+                Log.d("VOICE_TEST", "✅ Ready for speech")
+                txtVoiceResponse.text = "🎧 Listening…"
             }
+
             override fun onBeginningOfSpeech() {
-                Log.d("VOICE_TEST","🎙 onBeginningOfSpeech")
-                txtStatus.text = "🎙 Speak now…"
+                Log.d("VOICE_TEST", "🎙️ Speech started")
+                txtVoiceResponse.text = "🎙️ Speak now…"
             }
-            override fun onRmsChanged(rmsdB: Float) { }
-            override fun onBufferReceived(buffer: ByteArray?) { }
+
             override fun onEndOfSpeech() {
-                Log.d("VOICE_TEST","🛑 onEndOfSpeech")
-                txtStatus.text = "⏳ Processing…"
+                Log.d("VOICE_TEST", "🛑 Speech ended")
+                txtVoiceResponse.text = "Processing…"
             }
+
             override fun onError(error: Int) {
                 val msg = when (error) {
-                    SpeechRecognizer.ERROR_AUDIO                -> "Audio error"
-                    SpeechRecognizer.ERROR_CLIENT               -> "Client error"
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Missing permission"
-                    SpeechRecognizer.ERROR_NETWORK              -> "Network error"
-                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT      -> "Timeout"
-                    SpeechRecognizer.ERROR_NO_MATCH             -> "No match"
-                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY      -> "Recognizer busy"
-                    SpeechRecognizer.ERROR_SERVER               -> "Server error"
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT       -> "No speech"
-                    else                                       -> "Unknown ($error)"
+                    SpeechRecognizer.ERROR_AUDIO                       -> "Audio error"
+                    SpeechRecognizer.ERROR_CLIENT                      -> "Client error"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS    -> "Permission error"
+                    SpeechRecognizer.ERROR_NETWORK                     -> "Network error"
+                    SpeechRecognizer.ERROR_NO_MATCH                    -> "No match"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY             -> "Recognizer busy"
+                    SpeechRecognizer.ERROR_SERVER                      -> "Server error"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT              -> "Speech timeout"
+                    else                                                -> "Unknown error"
                 }
-                Log.e("VOICE_TEST","❌ onError: $msg")
-                txtStatus.text = "❌ $msg"
+                Log.e("VOICE_TEST", "❌ onError: $msg ($error)")
+                txtVoiceResponse.text = "❌ $msg"
                 Toast.makeText(this@VoiceTestActivity, msg, Toast.LENGTH_SHORT).show()
             }
+
             override fun onResults(results: Bundle?) {
                 val spoken = results
                     ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    ?.getOrNull(0)
-                    ?: "— nothing —"
-                Log.d("VOICE_TEST","🗣 onResults: $spoken")
-                txtResult.text = spoken
-                txtStatus.text = "✅ Done"
+                    ?.firstOrNull()
+                    ?: "Nothing recognized"
+                Log.d("VOICE_TEST", "🗣️ Recognized: $spoken")
+                txtVoiceInput.text    = spoken
+                txtVoiceResponse.text = "✅ Done!"
             }
-            override fun onPartialResults(partial: Bundle?) { }
-            override fun onEvent(eventType: Int, params: Bundle?) { }
+
+            // unused:
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
         })
 
-        // 4) — Kick off listening (always cancel first)
-        btnMic.setOnClickListener {
-            Log.d("VOICE_TEST","▶️ Button clicked — startListening()")
-            txtStatus.text = "⏳ Initializing…"
+        // 6) Start fresh on every click
+        btnVoiceMic.setOnClickListener {
+            txtVoiceResponse.text = "⏳ Preparing recognizer…"
+            Log.d("VOICE_TEST", "🎬 Button clicked — startListening()")
+
+            // *** CLEAN BREAK ***
+            speechRecognizer.stopListening()
             speechRecognizer.cancel()
+
+            // *** NEW SESSION ***
             speechRecognizer.startListening(recognizerIntent)
         }
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         speechRecognizer.destroy()
-    }
-
-    // 5) — If you need to handle the permission result:
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_AUDIO) {
-            val ok = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
-            Log.d("VOICE_TEST","🎤 Audio permission granted? $ok")
-            if (!ok) {
-                Toast.makeText(this, "Audio permission is required", Toast.LENGTH_LONG).show()
-            }
-        }
+        super.onDestroy()
     }
 }

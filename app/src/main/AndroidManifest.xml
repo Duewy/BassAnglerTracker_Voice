@@ -1,41 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.bramestorm.bassanglertracker">
+    xmlns:tools="http://schemas.android.com/tools" >
 
-    <!-- AndroidManifest.xml for Catch and Call (Manual Mode)
+    <!-- AndroidManifest.xml for Catch and Call (Voice Control Mode)
     - Locks all activities to portrait
     - Uses tools:ignore to suppress orientation lint warnings
-    - Includes all user input pages, tournament popups, training, and map/sharing -->
+    - Includes all user input pages, tournament popups, training, map/sharing and voice  -->
 
                 <!--Permissions List-->
+
     <!-- Location Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Internet , Audio & Voice Controls -->
+    <!-- Networking & notifications -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
+
+    <!--  Bluetooth (Android 12+) - -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" android:required="false"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:required="false"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" android:required="false"/>
+
+    <!-- Audio capture & foreground service -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Required to start any foreground service -->
+
+    <!-- Required to start a foreground service on Android 9+ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Required when using foregroundServiceType="microphone" -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-feature android:name="android.hardware.microphone" android:required="true"/>
 
-    <!-- Required for recording audio -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    <!-- Required when using foregroundServiceType="mediaPlayback" -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <!-- Alarm Permission -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
-        <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
 
-
-
+    <!-- Applications -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -198,7 +205,23 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
+        <activity android:name=".training.UserTrainingIndex"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+
+
         <!-- For all VOICE CONTROL pages -->
+
+        <!-- VoiceSetupActivity (the onboarding / permission check screen) -->
+        <activity
+            android:name=".voice.VoiceSetupActivity"
+            android:exported="false" />
+
+        <!-- VoiceControlService (the foreground service for double-tap wake) -->
+        <service
+            android:name=".voice.VoiceControlService"
+            android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"
+            android:exported="false" />
 
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.UserTrainingVoiceCommands"
@@ -208,11 +231,10 @@
         <activity android:name=".training.TrainingWords"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
-
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".VoiceTestActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-
 
 
         <!-- For all ALARMS of Tournament pages -->
@@ -236,7 +258,6 @@
         <!-- Receiver for ALARMS  -->
         <receiver android:name=".alarm.AlarmReceiver" />
 
-        <!-- Receiver for Voice Control  -->
 
 
 

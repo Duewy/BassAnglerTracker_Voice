@@ -334,9 +334,20 @@
             android:orientation="horizontal" >
 
             <TextView
+                android:id="@+id/txtGPSEnable"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/log_catch_location"
+                android:textColor="@color/black"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtVoiceEnable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:text="@string/voice_control"
                 android:textColor="@color/black"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -348,7 +359,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal" >
 
             <!-- GPS Enable/Disable -->
 
@@ -356,7 +367,6 @@
                 android:id="@+id/tglGPS"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:background="@drawable/btn_outline_orange"
@@ -372,8 +382,28 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <ToggleButton
+                android:id="@+id/tglVoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="30dp"
+                android:background="@drawable/btn_outline_gold"
+                android:contentDescription="@string/voice_info"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:paddingStart="24dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/black"
+                android:textOff="@string/disabled"
+                android:textOn="@string/enabled"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
+
 
         <View
             android:layout_width="match_parent"
@@ -424,7 +454,6 @@
 
             <!-- MAIN Menu Page  -->
 
-            <!-- Customize Species Pages  -->
             <Button
                 android:id="@+id/btnMainSetup"
                 android:layout_width="wrap_content"
@@ -441,6 +470,8 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
+            <!-- Customize Species Pages  -->
 
             <Button
                 android:id="@+id/btnCustomizeSpecies"

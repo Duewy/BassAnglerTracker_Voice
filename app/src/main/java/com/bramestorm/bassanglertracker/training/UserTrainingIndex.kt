@@ -83,5 +83,6 @@ class UserTrainingIndex : AppCompatActivity() {
             startActivity(intent)
         }
 
-    }
-}
+    }//========================= END onCreate =============================
+
+}//=====================END =============================================

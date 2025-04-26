@@ -4,6 +4,9 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -11,8 +14,9 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -20,7 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryKgs : AppCompatActivity() {
+class CatchEntryKgs : BaseCatchEntryActivity() {
 
     private lateinit var btnSetUp3Kgs: Button
     private lateinit var btnOpenWeightPopupKgs: Button
@@ -32,9 +36,40 @@ class CatchEntryKgs : AppCompatActivity() {
     private var  totalWeightHundredthKg: Int = 0
     private val requestWeightEntry = 1001
 
+    // --- voice-to-text callback handler ---
+    private val recognitionListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {}
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onBufferReceived(buffer: ByteArray?) {}
+        override fun onEndOfSpeech() {}
+        override fun onError(error: Int) {
+            Toast.makeText(this@CatchEntryKgs, "Speech error $error", Toast.LENGTH_SHORT).show()
+        }
+        override fun onResults(results: Bundle) {
+            results
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                ?.firstOrNull()
+                ?.let { onSpeechResult(it) }
+        }
+        override fun onPartialResults(partial: Bundle?) {}
+        override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+//========= onCreate =============================================
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_kgs)
+
+        //******  Initialize speech recognizer ***********************
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(recognitionListener)
+        }
+        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
 
         dbHelper = CatchDatabaseHelper(this)
 
@@ -73,33 +108,26 @@ class CatchEntryKgs : AppCompatActivity() {
     }//`````````` END ON-CREATE `````````````
 
 
+    override fun onDestroy() {
+        recognizer.destroy()
+        super.onDestroy()
+    }
 
     private fun openWeightPopupKgs() {
         val intent = Intent(this, PopupWeightEntryKgs::class.java)
         startActivityForResult(intent, requestWeightEntry)
     }
 
-
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n " +
-            "     which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n " +
-            "     contracts for common intents available in\n" +
-            "      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n" +
-            "      testing, and allow receiving results in separate, testable classes independent from your\n" +
-            "      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n" +
-            "      with the appropriate {@link ActivityResultContract} and handling the result in the\n " +
-            "     {@link ActivityResultCallback#onActivityResult(Object) callback}.")
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == requestWeightEntry && resultCode == Activity.RESULT_OK) {
-            totalWeightHundredthKg = data?.getIntExtra("weightTotalKg", 0) ?: 0
+            totalWeightHundredthKg= data?.getIntExtra("lengthTotalCms", 0) ?: 0
             selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
 
-            Log.d("DB_DEBUG", "✅ Weight=$totalWeightHundredthKg, Species=$selectedSpecies")
 
             //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
-            if (totalWeightHundredthKg  > 0) {
+            if (totalWeightHundredthKg > 0) {
                 selectedSpecies = normalizeSpeciesName(selectedSpecies)
                 saveCatch()
                 Log.d("DB_DEBUG", "✅ saveCatch is called")
@@ -107,7 +135,6 @@ class CatchEntryKgs : AppCompatActivity() {
                 Log.e("DB_DEBUG", "⚠️ Invalid weight! Catch not saved.")
             }
         }
-
     }
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -280,6 +307,26 @@ class CatchEntryKgs : AppCompatActivity() {
         return sdf.format(Date())
     }
 
+
+    // --- Voice Control: override to receive speech transcripts ---
+
+    override fun onSpeechResult(transcript: String) {
+        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p ->
+            if (p.totalWeightHundredthKg > 0) {
+                // stash into your existing fields…
+                totalWeightHundredthKg = p.totalWeightHundredthKg
+                selectedSpecies     = normalizeSpeciesName(p.species)
+                // then call your no-arg saveCatch()
+                saveCatch()
+            }
+        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
+    }
+
+
+    // --- Voice Control: override to start listening on wake event ---
+    override fun onVoiceWake() {
+        recognizer.startListening(recognizerIntent)
+    }
 
 
 }//+++++++++++++ END  od CATCH ENTRY Kgs ++++++++++++++++++++++++++++++++++++++++

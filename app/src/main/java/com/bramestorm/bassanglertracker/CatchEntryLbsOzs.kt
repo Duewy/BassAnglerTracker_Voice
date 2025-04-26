@@ -4,6 +4,9 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -11,8 +14,9 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -20,7 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryLbsOzs : AppCompatActivity() {
+class CatchEntryLbsOzs : BaseCatchEntryActivity() {
 
     private lateinit var btnSetUp3: Button
     private lateinit var btnOpenWeightPopup: Button
@@ -32,9 +36,40 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     private var totalWeightOz: Int = 0
     private val requestWeightEntry = 1001
 
+    // --- voice-to-text callback handler ---
+    private val recognitionListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {}
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onBufferReceived(buffer: ByteArray?) {}
+        override fun onEndOfSpeech() {}
+        override fun onError(error: Int) {
+            Toast.makeText(this@CatchEntryLbsOzs, "Speech error $error", Toast.LENGTH_SHORT).show()
+        }
+        override fun onResults(results: Bundle) {
+            results
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                ?.firstOrNull()
+                ?.let { onSpeechResult(it) }
+        }
+        override fun onPartialResults(partial: Bundle?) {}
+        override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+    //========= onCreate =============================================
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_lbs_ozs)
+
+        //******  Initialize speech recognizer ***********************
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(recognitionListener)
+        }
+        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
 
         dbHelper = CatchDatabaseHelper(this)
 
@@ -72,6 +107,10 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     }//`````````` END ON-CREATE `````````````
 
 
+    override fun onDestroy() {
+        recognizer.destroy()
+        super.onDestroy()
+    }
 
     private fun openWeightPopup() {
         val intent = Intent(this, PopupWeightEntryLbs::class.java)
@@ -108,7 +147,7 @@ class CatchEntryLbsOzs : AppCompatActivity() {
     }
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      private fun saveCatch() {
+    private fun saveCatch() {
         Log.d("DB_DEBUG", "🔍 We are in saveCatch().")
         val newCatch = CatchItem(
             id = 0,
@@ -128,19 +167,19 @@ class CatchEntryLbsOzs : AppCompatActivity() {
         val success = dbHelper.insertCatch(newCatch)
 
         if (success) {
-             Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
         } else {
-              Toast.makeText(this, "⚠️ Failed to save catch!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "⚠️ Failed to save catch!", Toast.LENGTH_SHORT).show()
         }
 
-          if (success) {
-              totalWeightOz = 0 // ✅ Move this after successful save
-              }
+        if (success) {
+            totalWeightOz = 0 // ✅ Move this after successful save
+        }
         updateListViewLb()  // ✅ Now only updates the UI, no extra insert
-     }
+    }
 
 
- //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
+    //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
 
     private fun updateListViewLb() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -255,5 +294,24 @@ class CatchEntryLbsOzs : AppCompatActivity() {
         return sdf.format(Date())
     }
 
+    // --- Voice Control: override to receive speech transcripts ---
+
+    override fun onSpeechResult(transcript: String) {
+        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p ->
+            if (p.totalLengthTenths > 0) {
+                // stash into your existing fields…
+                totalWeightOz = p.totalWeightOzs
+                selectedSpecies     = normalizeSpeciesName(p.species)
+                // then call your no-arg saveCatch()
+                saveCatch()
+            }
+        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
+    }
+
+
+    // --- Voice Control: override to start listening on wake event ---
+    override fun onVoiceWake() {
+        recognizer.startListening(recognizerIntent)
+    }
 
 }//+++++++++++++ END of CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++

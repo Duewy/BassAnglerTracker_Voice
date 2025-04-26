@@ -1,8 +1,14 @@
 package com.bramestorm.bassanglertracker
 
 import android.Manifest
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothProfile
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -21,6 +27,8 @@ import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
+import com.bramestorm.bassanglertracker.voice.VoiceControlService
+import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 
 
@@ -39,15 +47,19 @@ class SetUpActivity : AppCompatActivity() {
     private lateinit var tglCullingValue: ToggleButton
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var tglGPS: ToggleButton
+    private lateinit var tglVoice:ToggleButton
     private lateinit var btnMainSetup:Button
     private lateinit var btnCustomizeSpecies :Button
 
     // --------------- Permission Codes for GPS and Porcupine ----------------
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+        private const val REQUEST_VOICE_SETUP = 2001
+        private const val BT_REQUEST_CODE = 3003
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
+    private val prefs by lazy { getSharedPreferences("UserPrefs", MODE_PRIVATE) }
 
     private var isWeightSelected = false
     private var isLengthSelected = false
@@ -59,6 +71,8 @@ class SetUpActivity : AppCompatActivity() {
 
     private var isValUnits = false
     private var isValMeasuring = false
+
+
 
     //--------------------------------------------------------------
 
@@ -102,6 +116,7 @@ class SetUpActivity : AppCompatActivity() {
         txtSpeciesSelector = findViewById(R.id.txtSpeciesSelector)
         spinnerTournamentSpecies = findViewById(R.id.spinnerTournamentSpecies)
         tglGPS = findViewById(R.id.tglGPS)
+        tglVoice = findViewById(R.id.tglVoice)
         btnMainSetup = findViewById(R.id.btnMainSetup)
         btnCustomizeSpecies = findViewById(R.id.btnCustomizeSpecies)
 
@@ -220,6 +235,37 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
 
+        //------ VOICE CONTROL ----------------
+             // 1) Set initial state without triggering callbacks
+        tglVoice.setOnCheckedChangeListener(null)
+        tglVoice.isChecked = prefs.getBoolean("voice_enabled", false)
+
+            // 2) Now install the listener
+        tglVoice.setOnCheckedChangeListener { _, isOn ->
+            prefs.edit().putBoolean("voice_enabled", isOn).apply()
+
+            if (isOn) {
+                // first check for a headset
+                if (!checkBluetoothHeadset()) {
+                    Toast.makeText(this,
+                        "No Bluetooth headset detected. Voice controls won’t work until you pair one.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                // kick off your mic / assistant–hijack check
+                startActivityForResult(
+                    Intent(this, VoiceSetupActivity::class.java),
+                    REQUEST_VOICE_SETUP
+                )
+            } else {
+                // user disabled: stop the service immediately
+                stopVoiceService()
+            }
+        }
+
+
+
+
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
             startActivity(intent2)
@@ -270,6 +316,57 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
     //=================== END of ON CREATE ================================
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_VOICE_SETUP) {
+            if (resultCode == Activity.RESULT_OK) {
+                // user granted mic + no assistant conflict → start your service
+                startVoiceService()
+            } else {
+                // setup failed or was canceled → roll back the toggle
+                prefs.edit().putBoolean("voice_enabled", false).apply()
+                tglVoice.isChecked = false
+            }
+        }
+    }
+
+
+    private fun startVoiceService() {
+        val svc = Intent(this, VoiceControlService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(svc)
+        } else {
+            startService(svc)
+        }
+    }
+
+    private fun stopVoiceService() {
+        stopService(Intent(this, VoiceControlService::class.java))
+    }
+
+    private fun checkBluetoothHeadset(): Boolean {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        // on some devices you may need to call startBluetoothSco() first and listen for the broadcast…
+        // but at least this tells you if SCO is even supported
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    BT_REQUEST_CODE
+                )
+            }
+        }
+        // safe to check headset now…
+        if (!audioManager.isBluetoothScoAvailableOffCall) return false
+        val btAdapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+        val connected = btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) ==
+                BluetoothAdapter.STATE_CONNECTED
+        return connected
+    }
+
 
 
     // ------------ Tournament Species Selector ------------------
