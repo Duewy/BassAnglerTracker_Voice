@@ -2,13 +2,12 @@ package com.bramestorm.bassanglertracker.training
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
+import com.bramestorm.bassanglertracker.util.positionedToast
 
 class UserTrainingVoiceCommands : AppCompatActivity() {
 
@@ -48,15 +47,13 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         // GOOGLE DRIVE to save files on...
 
         btnWhatIsVCC.setOnClickListener {
-            val toast = Toast.makeText(this, "Not available on this version\n Check out the Catch and Call with Voice Control", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.show()
+           positionedToast("Not available on this version\n Check out the Catch and Call with Voice Control")
+            // TODO: Create What is Voice Control with Video 
         }
 
         btnEnableVCC.setOnClickListener {
-            val toast = Toast.makeText(this, "Not available on this version\n Check out the Catch and Call with Voice Control", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.show()
+          positionedToast("Not available on this version\n Check out the Catch and Call with Voice Control")
+            // TODO: Create How to Set Up Voice Control on your Cellphone with Video 
         }
 
         btnTeachVCC.setOnClickListener {

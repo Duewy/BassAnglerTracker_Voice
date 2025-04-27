@@ -46,7 +46,7 @@ class LookUpShareDataActivity : AppCompatActivity() {
         dbHelper.insertFakeCatchesForTesting(dbHelper.writableDatabase)
 
 
-
+        // TODO: Remove the Toast and the 20 catches from the DataBase
         val toast = Toast.makeText(this, "20 test catches added", Toast.LENGTH_SHORT)
         toast.setGravity(android.view.Gravity.CENTER, 0, 0)
         toast.show()

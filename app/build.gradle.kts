@@ -121,3 +121,6 @@ android {
         implementation(kotlin("script-runtime"))
     }
 }
+dependencies {
+    implementation(libs.androidx.ui.test.android)
+}

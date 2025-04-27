@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.training.UserTrainingIndex
+import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         val btnVCC = findViewById<Button>(R.id.btnVCC)
         btnVCC.setOnClickListener {
            //val intent = Intent(this, UserTrainingVoiceCommands::class.java)
-            intent = Intent(this, VoiceTestActivity::class.java)
+            intent = Intent(this, UserTrainingVoiceCommands::class.java)
             startActivity(intent)
         }
 

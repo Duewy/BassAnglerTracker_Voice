@@ -4,18 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/secondary_variant"
-    android:fillViewport="true">
+    android:fillViewport="true" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
 
         <TextView
             android:id="@+id/textView"
@@ -23,9 +21,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="15dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
-            android:text="@string/setting_up_bluetooth_voice"
+            android:text="Set Up the Voice Assistant and Voice Recognizers"
             android:textColor="@color/black"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -36,12 +34,21 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="15dp"
+            android:layout_marginVertical="5dp"
             android:gravity="center"
             android:text="@string/voice_service_explanation"
             android:textColor="@color/black"
             android:textSize="14sp"
             android:textStyle="italic" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginVertical="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/textView11"
@@ -49,12 +56,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="2dp"
             android:gravity="center"
             android:text="@string/default_assistant_text"
             android:textColor="@color/black"
             android:textSize="14sp"
-            android:textStyle="italic" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtDefaultAssist"
@@ -62,72 +69,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
+            android:layout_marginVertical="2dp"
             android:background="@color/very_lite_grey"
             android:drawablePadding="8dp"
-            android:drawableRight="@drawable/icon_check_mark_small"
             android:padding="5dp"
             android:text="@string/default_assistant"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="5dp"
-            android:gravity="center"
-            android:text="@string/default_voice_recognizer"
-            android:textColor="@color/black"
-            android:textSize="14sp"
-            android:textStyle="italic" />
-
-        <TextView
-            android:id="@+id/txtDefaultRecognizer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
-            android:background="@color/very_lite_grey"
-            android:drawablePadding="8dp"
-            android:drawableRight="@drawable/icon_check_mark_small"
-            android:padding="5dp"
-            android:text="@string/default_recognizer"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/btnBixbySettings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_bixby_app_settings"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/txtBixbyHint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="5dp"
-            android:text="If Bixby is on, tap above → Force stop Bixby in the App settings"
-            android:textColor="@color/softlock_blue"
-            android:textSize="12sp" />
-
-
-        <Button
-            android:id="@+id/btnVoiceInputSettings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/open_voice_input_settings"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -136,8 +82,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:padding="5dp"
-            android:text="If Voice-Input Service is not Google, \n tap above → Select Google Voice Service in the Digital Assistant app settings"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="1dp"
+            android:text="If Assistant is not Google, tap below → Select Google Assistant in the Digital Assistant app settings"
             android:textColor="@color/softlock_blue"
             android:textSize="12sp" />
 
@@ -146,11 +93,132 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
+            android:layout_marginVertical="2dp"
             android:layout_marginTop="10dp"
             android:text="@string/open_assistant_settings"
             android:textColor="@color/black"
             android:textSize="16sp" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginVertical="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:gravity="center"
+            android:text="@string/default_voice_recognizer"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtDefaultRecognizer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:background="@color/very_lite_grey"
+            android:drawablePadding="8dp"
+            android:padding="5dp"
+            android:text="@string/default_recognizer"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="1dp"
+            android:text="If Voice-Recognizer Service is not Google, tap below → Select Google Voice Recognizer in the Voice Recognizer app settings"
+            android:textColor="@color/softlock_blue"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnVoiceInputSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/open_voice_input_settings"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginVertical="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:gravity="center"
+            android:text="Manufacture's Voice Recognizer"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtDefaultBixby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/very_lite_grey"
+            android:drawablePadding="8dp"
+            android:padding="5dp"
+            android:text="Bixby:"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnBixbySettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:layout_marginTop="10dp"
+            android:text="open manufacture's Voice Recognizer"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+
+
+        <TextView
+            android:id="@+id/txtBixbyHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="2dp"
+            android:layout_gravity="center"
+            android:text="If Bixby is on, tap above → Force stop Bixby in the App settings"
+            android:textColor="@color/softlock_blue"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginVertical="5dp"
+            android:background="@color/clip_blue"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/textView7"

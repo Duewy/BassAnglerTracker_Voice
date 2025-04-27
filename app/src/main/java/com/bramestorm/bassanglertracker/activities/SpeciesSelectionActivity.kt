@@ -2,18 +2,17 @@ package com.bramestorm.bassanglertracker.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
+import com.bramestorm.bassanglertracker.adapters.ItemMoveCallback
 import com.bramestorm.bassanglertracker.adapters.SpeciesSelectAdapter
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.adapters.ItemMoveCallback
+import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 
@@ -58,9 +57,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // SAVE button → save reordered list to SharedPreferences
         btnSaveSpecies.setOnClickListener {
-            val toast = Toast.makeText(this,   "👍 Species List Saved Successfully", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.show()
+            positionedToast("👍 Species List Saved Successfully")
 
             val ordered = adapter.getOrderedSpeciesNames()
             SharedPreferencesManager.saveSelectedSpeciesList(this, ordered)
@@ -85,9 +82,7 @@ class SpeciesSelectionActivity : AppCompatActivity() {
 
         // RESET button → restore default species list
         btnResetSpecies.setOnClickListener {
-            val toast = Toast.makeText(this, "🐟 Species List RESET to Starting 8", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER, 0, 0)
-            toast.show()
+             positionedToast("🐟 Species List RESET to Starting 8")
 
                   SharedPreferencesManager.resetToDefaultSpecies(this)
             val defaultSpecies = SharedPreferencesManager.getSelectedSpeciesList(this)

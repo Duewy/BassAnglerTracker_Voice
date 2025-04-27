@@ -6,12 +6,12 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.mappopups.PopupMapQuery
 import com.bramestorm.bassanglertracker.models.MapQueryFilters
+import com.bramestorm.bassanglertracker.util.positionedToast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -89,11 +89,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .snippet("Default location")
             )
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(fallbackLocation, 10f))
-            Toast.makeText(
-                this,
-                "⚠️ No recent GPS-tagged catches.\nShowing default location.",
-                Toast.LENGTH_LONG
-            ).show()
+            positionedToast("⚠️ No recent GPS-tagged catches.\nShowing default location.")
         } else {
             for (catch in recentCatches) {
                 if (catch.latitude != null && catch.longitude != null) {
@@ -184,11 +180,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .snippet("Default location")
             )
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(fallbackLocation, 10f))
-            Toast.makeText(
-                this,
-                "⚠️ No catches found.\nShowing default location.",
-                Toast.LENGTH_LONG
-            ).show()
+            positionedToast("⚠️ No catches found.\nShowing default location.")
             return
         }
 

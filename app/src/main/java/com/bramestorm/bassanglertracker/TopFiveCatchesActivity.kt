@@ -10,9 +10,9 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.io.File
 import java.io.FileOutputStream
@@ -137,10 +137,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
         val maxValue = edtMaxWeight.text.toString().toFloatOrNull() ?: 99999f
 
         if (minValue > maxValue) {
-            Toast.makeText(this, "⚠️ Minimum value cannot be greater than maximum.", Toast.LENGTH_SHORT).apply {
-                setGravity(android.view.Gravity.CENTER, 0, 0)
-                show()
-            }
+            positionedToast("⚠️ Minimum value cannot be greater than maximum.")
             return
         }
 
@@ -196,10 +193,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
         if (results.isEmpty()) {
             listView.adapter = null
-            Toast.makeText(this, "❌ No catches matched your search.", Toast.LENGTH_SHORT).apply {
-                setGravity(android.view.Gravity.CENTER, 0, 0)
-                show()
-            }
+            positionedToast("❌ No catches matched your search.")
             return
         }
 
@@ -215,9 +209,10 @@ class TopFiveCatchesActivity : AppCompatActivity() {
     //---------------- SHARE CSV -----------------------
     private fun shareResultsAsCsv() {
         if (results.isEmpty()) {
-            Toast.makeText(this, "No results to share.", Toast.LENGTH_SHORT).show()
+            positionedToast("No results to share.")
             return
         }
+
 
         val csvBuilder = StringBuilder()
         csvBuilder.append("Date,Species,Weight (lbs/oz),Weight (kg),Length (in),Length (cm),Catch Type,Marker Type,Latitude,Longitude\n")

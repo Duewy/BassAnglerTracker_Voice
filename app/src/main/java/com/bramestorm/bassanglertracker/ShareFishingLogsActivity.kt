@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import com.bramestorm.bassanglertracker.util.positionedToast
 import java.io.File
 
 class ShareFishingLogsActivity : AppCompatActivity() {
@@ -43,9 +43,9 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             generatedCsvFile = generateDummyCatchLogCsv()
 
             if (generatedCsvFile != null) {
-                Toast.makeText(this, "CSV generated to cache!", Toast.LENGTH_SHORT).show()
+                positionedToast("CSV generated to cache!")
             } else {
-                Toast.makeText(this, "⚠️ Warning: Failed to generate CSV", Toast.LENGTH_SHORT).show()
+                positionedToast("⚠️ Warning: Failed to generate CSV",)
             }
         }
 
@@ -65,7 +65,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                 }
                 startActivity(Intent.createChooser(shareIntent, "Share fishing log via:"))
             } ?: run {
-                Toast.makeText(this,  "⚠️ Warning: Please generate the CSV first", Toast.LENGTH_SHORT).show()
+                positionedToast("⚠️ Warning: Please generate the CSV first")
             }
         }
 
