@@ -208,7 +208,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
                         if (filters.measurementType.contains("cm", true)) {
                             catch.totalLengthTenths?.let { formatLengthCm(this, it) } ?: "No length"
                         } else {
-                            catch.totalLengthA8th?.let { formatLengthA8thToInches(it) }
+                            catch.totalLengthQuarters?.let { formatLengthQuartersToInches(it) }
                                 ?: "No length"
                         }
                     }

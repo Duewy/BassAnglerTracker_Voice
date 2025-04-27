@@ -22,7 +22,7 @@ class PopupLengthEntryTourInches : Activity() {
     private lateinit var spinnerSpecies: Spinner
     private lateinit var spinnerClipColor: Spinner
     private lateinit var edtLengthInches: EditText
-    private lateinit var edtLength8ths: EditText
+    private lateinit var edtLengthQuarters: EditText
     private lateinit var btnSaveLengthInches: Button
     private lateinit var btnCancelInches: Button
 
@@ -43,7 +43,7 @@ class PopupLengthEntryTourInches : Activity() {
         spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)
         spinnerClipColor = findViewById(R.id.clipColorSpinner)
         edtLengthInches = findViewById(R.id.edtLengthTourInches)
-        edtLength8ths = findViewById(R.id.edtLengthTour8ths)
+        edtLengthQuarters = findViewById(R.id.edtLengthQuarters)
         btnSaveLengthInches = findViewById(R.id.btnSaveLengthInches)
         btnCancelInches = findViewById(R.id.btnCancelInches)
 
@@ -58,7 +58,7 @@ class PopupLengthEntryTourInches : Activity() {
             }
             isTournament -> {
                 arrayOf(tournamentSpecies)
-            }
+            }                   //todo Should this not get it from the SpeciesSelectionActivity ????
             else -> {
                 arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
             }
@@ -73,7 +73,7 @@ class PopupLengthEntryTourInches : Activity() {
         spinnerClipColor.adapter = adapter
 
         edtLengthInches.filters = arrayOf(MinMaxInputFilter(0, 99)) // Inches: 0-99
-        edtLength8ths.filters = arrayOf(MinMaxInputFilter(0, 7)) //  0 - 7 / 8ths
+        edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3)) //  0 - 3 / 4ths
 
         // `````````` btn SAVE  ````````````````
         btnSaveLengthInches.setOnClickListener {
@@ -82,19 +82,19 @@ class PopupLengthEntryTourInches : Activity() {
             Log.d("CLIPS", "🎨 Selected Clip Color: $selectedClipColor")
 
             val lengthInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
-            val length8ths = edtLength8ths.text.toString().toIntOrNull() ?: 0
+            val lengthQuarters = edtLengthQuarters.text.toString().toIntOrNull() ?: 0
 
-            val totalLengthA8th= ((lengthInches * 8) + length8ths)
+            val totalLengthQuarters= ((lengthInches * 4) + lengthQuarters)
 
-            if ( totalLengthA8th == 0) {
+            if ( totalLengthQuarters == 0) {
                 Toast.makeText(this, "Length cannot be 0 Inches!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            Log.d("CLIPS", "✅ Sending Result - weightLengthInches: $totalLengthA8th, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
+            Log.d("CLIPS", "✅ Sending Result - weightLengthInches: $totalLengthQuarters, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
 
             val resultIntent = Intent().apply {
-                putExtra("lengthTotalInches", totalLengthA8th)
+                putExtra("lengthTotalInches", totalLengthQuarters)
                 putExtra("selectedSpecies", selectedSpeciesValue)
                 putExtra("clip_color", selectedClipColor)
                 putExtra("catchType", catchType)

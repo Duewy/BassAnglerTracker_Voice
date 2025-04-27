@@ -17,7 +17,7 @@
     <string name="cancel">Cancel</string>
     <string name="enter_catch_details_inches">Species and Length -Inches-</string>
     <string name="inches">Inches</string>
-    <string name="_8ths_of_inch">/8ths of inch</string>
+    <string name="_4ths_of_inch">/4ths of inch</string>
     <string name="select_species">Select Species</string>
     <string name="edit_catch_entry_lbs">Edit Catch Entry Lbs</string>
     <string name="edit_catch_entry_kgs">Edit Catch Kgs</string>
@@ -27,7 +27,7 @@
     <string name="enter_cm_and_mm">Enter Cm and mm</string>
     <string name="cms_0_to_99">Cms 0 to 99</string>
     <string name="_0_to_9_mm">0 to 9 mm</string>
-    <string name="enter_inches_and_8ths">Enter Inches and 8ths</string>
+    <string name="enter_inches_and_4ths">Enter Inches and 4ths</string>
     <string name="kgs_100_0_to_99">Kgs/100 0 to 99</string>
     <string name="kgs_0_to_99kgs">-Kgs- 0 to 99Kgs</string>
     <string name="using_culling_app_in_manual_mode"><u>Using App in Manual Mode</u></string>
@@ -46,8 +46,8 @@
     <string name="select_clip_color">Select Clip Color</string>
     <string name="kgs">Kgs</string>
     <string name="x_00">X.00</string>
-    <string name="_0_7_8ths">0–7 /8ths</string>
-    <string name="_8ths">/8ths</string>
+    <string name="_0_3_4ths">0–3 /4ths</string>
+    <string name="_4ths">/4ths</string>
     <string name="_0_99_cms">0–99 Cms</string>
     <string name="cms">Cms</string>
     <string name="_0_9_mm">0–9 mm</string>

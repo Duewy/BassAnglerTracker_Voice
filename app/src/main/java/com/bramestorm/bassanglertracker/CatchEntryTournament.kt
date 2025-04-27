@@ -277,7 +277,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = bassType,
             totalWeightOz = weightTotalOz,
-            totalLengthA8th = null,
+            totalLengthQuarters = null,
             totalWeightHundredthKg = null,
             totalLengthTenths = null,
             catchType = "LbsOzs",

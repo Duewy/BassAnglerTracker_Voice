@@ -71,7 +71,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enter_inches_and_8ths"
+            android:text="@string/enter_inches_and_4ths"
             android:textColor="@color/black"
             android:gravity="center"
             android:layout_marginTop="10dp"/>
@@ -113,12 +113,12 @@
 
 
             <EditText
-                android:id="@+id/edtLength8ths"
+                android:id="@+id/edtLengthQuarters"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@color/very_lite_grey"
-                android:hint="@string/_0_7_8ths"
+                android:hint="@string/_0_3_4ths"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:gravity="center"
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_gravity="bottom"
-                android:text="@string/_8ths"
+                android:text="@string/_4ths"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
@@ -159,7 +159,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/_8ths"
+                android:text="@string/_4ths"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="16sp"

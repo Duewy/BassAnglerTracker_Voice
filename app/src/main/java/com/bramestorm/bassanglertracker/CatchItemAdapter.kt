@@ -46,18 +46,19 @@ class CatchItemAdapter(
                 }
                 "kgs" -> "$speciesName: ${it.totalWeightHundredthKg?.div(100.0) ?: 0.0} Kg, @ $timeFormatted"
                 "inches" -> {
-                    val totalA8th = it.totalLengthA8th ?: 0
-                    val inches = totalA8th / 8
-                    val a8ths = totalA8th % 8
-                    val lengthFormatted = when (a8ths) {
-                        0 -> "$inches in"
-                        2 -> "$inches 1/4 in"
-                        4 -> "$inches 1/2 in"
-                        6 -> "$inches 3/4 in"
-                        else -> "$inches ${a8ths}/8 in"
+                    val totalQuarters = it.totalLengthQuarters ?: 0
+                    val inchesPart    = totalQuarters / 4
+                    val quarterPart   = totalQuarters % 4
+
+                    val lengthFormatted = when (quarterPart) {
+                        0    -> "$inchesPart in"
+                        2    -> "$inchesPart 1/2 in"
+                        else -> "$inchesPart ${quarterPart}/4 in"
                     }
+
                     "$speciesName: $lengthFormatted, @ $timeFormatted"
                 }
+
                 "metric" -> "$speciesName: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm, @ $timeFormatted"
                 else -> it.toString()
             }

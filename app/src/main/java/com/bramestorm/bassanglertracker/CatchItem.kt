@@ -14,7 +14,7 @@ data class CatchItem(
 
     val totalWeightOz: Int?,            // Store lbs/oz as total ounces
     val totalWeightHundredthKg :Int?,   // Store Kgs 0.00 as hundredths of Kg
-    val totalLengthA8th: Int?,          // Store inches & 8ths as total eighths
+    val totalLengthQuarters: Int?,          // Store inches & 4ths
     val totalLengthTenths: Int?,         // Store cm as tenths (e.g., 45.6cm → stored as 456)
 
     val catchType: String,              // Sort Catch Log with catchType
@@ -27,7 +27,7 @@ fun CatchItem.getComparisonValueByMode(mode: String): Float {
     return when (mode.lowercase()) {
         "lbs" -> (this.totalWeightOz ?: 0).toFloat()
         "kgs" -> (this.totalWeightHundredthKg ?: 0) / 100f
-        "inches" -> (this.totalLengthA8th ?: 0) / 8f
+        "inches" -> (this.totalLengthQuarters ?: 0) / 8f
         "cms" -> (this.totalLengthTenths ?: 0) / 10f
         else -> 0f
     }
@@ -41,13 +41,13 @@ fun formatWeightOzToLbsOz(totalOz: Int): String {
     return "$lbs lbs $oz oz"
 }
 
-fun formatLengthA8thToInches(lengthA8ths: Int): String {
-    val inches = lengthA8ths / 8
-    val eighths = lengthA8ths % 8
-    return if (eighths == 0) {
+fun formatLengthQuartersToInches(lengthQuarters: Int): String {
+    val inches = lengthQuarters / 4
+    val quarters = lengthQuarters % 4
+    return if (quarters == 0) {
         "$inches in"
     } else {
-        "$inches ${eighths}/8 in"
+        "$inches ${quarters}/4 in"
     }
 }
 

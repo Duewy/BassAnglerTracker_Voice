@@ -138,14 +138,14 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
-            val totalLengthA8th = data?.getIntExtra("lengthTotalInches", 0) ?: 0
+            val totalLengthQuarters = data?.getIntExtra("lengthTotalInches", 0) ?: 0
             val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
             val clipColor = data?.getStringExtra("clip_color") ?: ""
 
-            Log.d("DB_DEBUG", "✅ Received totalLengthA8th: $totalLengthA8th, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
+            Log.d("DB_DEBUG", "✅ Received totalLengthQuarters: $totalLengthQuarters, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
 
-            if (totalLengthA8th > 0) {
-                saveTournamentCatch(totalLengthA8th, selectedSpecies, clipColor)
+            if (totalLengthQuarters > 0) {
+                saveTournamentCatch(totalLengthQuarters, selectedSpecies, clipColor)
             }
         }
     }
@@ -272,7 +272,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     }
 
     // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    private fun saveTournamentCatch(totalLengthA8th: Int, bassType: String, clipColor: String) {
+    private fun saveTournamentCatch(totalLengthQuarters: Int, bassType: String, clipColor: String) {
         val availableColors = calculateAvailableClipColors(
             dbHelper,
             catchType = "inches",
@@ -293,7 +293,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
             totalWeightOz = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
-            totalLengthA8th = totalLengthA8th,
+            totalLengthQuarters = totalLengthQuarters,
             catchType = "inches",
             markerType = speciesInitial,
             clipColor = cleanClipColor
@@ -313,10 +313,10 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private fun updateTotalLength(tournamentCatches: List<CatchItem>) {
         // Always sort and limit to top N
         val catchesToUse = tournamentCatches
-            .sortedByDescending { it.totalLengthA8th ?: 0 }
+            .sortedByDescending { it.totalLengthQuarters ?: 0 }
             .take(tournamentCatchLimit)  // ✅ Apply limit always
 
-        val totalLengthInches = catchesToUse.sumOf { it.totalLengthA8th ?: 0 }
+        val totalLengthInches = catchesToUse.sumOf { it.totalLengthQuarters ?: 0 }
         val totalInches = (totalLengthInches / 8)
         val totalDec = (totalLengthInches % 8)
 
@@ -326,7 +326,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
         val currentCount = dbHelper
             .getCatchesForToday("inches", getCurrentDate())
-            .sortedByDescending { it.totalLengthA8th ?: 0 }
+            .sortedByDescending { it.totalLengthQuarters ?: 0 }
             .take(tournamentCatchLimit)
             .size
 
@@ -365,7 +365,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         )
 
         val allCatches = dbHelper.getCatchesForToday(catchType = "inches", formattedDate)
-        val sortedCatches = allCatches.sortedByDescending { it.totalLengthA8th ?: 0 }
+        val sortedCatches = allCatches.sortedByDescending { it.totalLengthQuarters ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
@@ -392,7 +392,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
                 if (i >= realLengthInches.size) continue
 
                 val catch = sortedCatches[i]
-                val totalLengthInches = catch.totalLengthA8th ?: 0
+                val totalLengthInches = catch.totalLengthQuarters ?: 0
                 val lengthInches = totalLengthInches / 8
                 val lengthDec = totalLengthInches % 8
 
@@ -500,7 +500,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         isCullingEnabled: Boolean
     ): List<ClipColor> {
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
-        val sorted = allCatches.sortedByDescending { it.totalLengthA8th ?: 0 }
+        val sorted = allCatches.sortedByDescending { it.totalLengthQuarters ?: 0 }
         val topCatches = sorted.take(tournamentCatchLimit) // ✅ Always limit to top N
 
         val usedColors = topCatches.mapNotNull { it.clipColor }
@@ -715,7 +715,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     override fun onSpeechResult(transcript: String) {
 
         VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->
-            if (p.totalLengthA8th > 0) saveTournamentCatch(p.totalLengthA8th, p.species, p.clipColor)
+            if (p.totalLengthQuarters > 0) saveTournamentCatch(p.totalLengthQuarters, p.species, p.clipColor)
         } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
     }
 

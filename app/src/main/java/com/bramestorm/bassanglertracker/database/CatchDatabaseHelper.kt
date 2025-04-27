@@ -30,7 +30,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_LONGITUDE = "longitude"
         private const val COLUMN_SPECIES = "species"
         private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"
-        private const val COLUMN_TOTAL_LENGTH_8THS = "total_length_8ths"
+        private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters"
         private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"
         private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"
         private const val COLUMN_CATCH_TYPE = "catch_type"
@@ -47,7 +47,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             $COLUMN_LONGITUDE REAL,
             $COLUMN_SPECIES TEXT NOT NULL,
             $COLUMN_TOTAL_WEIGHT_OZ INTEGER DEFAULT 0,
-            $COLUMN_TOTAL_LENGTH_8THS INTEGER DEFAULT 0,
+            $COLUMN_TOTAL_LENGTH_QUARTERS INTEGER DEFAULT 0,
             $COLUMN_TOTAL_WEIGHT_KG INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_TENTHS INTEGER DEFAULT 0,
             $COLUMN_CATCH_TYPE TEXT NOT NULL,
@@ -73,7 +73,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_DATE_TIME, catch.dateTime)
                 put(COLUMN_SPECIES, catch.species)
                 put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
-                put(COLUMN_TOTAL_LENGTH_8THS, catch.totalLengthA8th)
+                put(COLUMN_TOTAL_LENGTH_QUARTERS, catch.totalLengthQuarters)
                 put(COLUMN_TOTAL_LENGTH_TENTHS, catch.totalLengthTenths)
                 put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
                 put(COLUMN_CATCH_TYPE, catch.catchType)
@@ -156,7 +156,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catchList
     }
 
- private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
+    private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, lat)
@@ -170,7 +170,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         catchId: Int,
         newWeightOz: Int? = null,
         newWeightKg: Int? = null,
-        newLengthA8ths: Int? = null,
+        newLengthQuarters: Int? = null,
         newLengthCm: Int? = null,
         species: String
     ) {
@@ -179,7 +179,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         values.put(COLUMN_SPECIES, species)
         if (newWeightOz != null) values.put(COLUMN_TOTAL_WEIGHT_OZ, newWeightOz)
         if (newWeightKg != null) values.put(COLUMN_TOTAL_WEIGHT_KG, newWeightKg)
-        if (newLengthA8ths != null) values.put(COLUMN_TOTAL_LENGTH_8THS, newLengthA8ths)
+        if (newLengthQuarters != null) values.put(COLUMN_TOTAL_LENGTH_QUARTERS, newLengthQuarters)
         if (newLengthCm != null) values.put(COLUMN_TOTAL_LENGTH_TENTHS, newLengthCm)
         db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
@@ -197,7 +197,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
             species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
             totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
-            totalLengthA8th = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_8THS)),
+            totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS)),
             totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
             totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
             catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),
@@ -253,7 +253,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             }
     }
 
-   private fun getCurrentDateTime(): String {
+    private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
     }
@@ -318,9 +318,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                     args.add((maxValue * 10).toInt().toString())
                 }
                 "length", "inches", "in" -> {
-                    whereClauses.add("$COLUMN_TOTAL_LENGTH_8THS BETWEEN ? AND ?")
-                    args.add((minValue * 8).toInt().toString())
-                    args.add((maxValue * 8).toInt().toString())
+                    whereClauses.add("$COLUMN_TOTAL_LENGTH_QUARTERS BETWEEN ? AND ?")
+                    args.add((minValue * 4).toInt().toString())
+                    args.add((maxValue * 4).toInt().toString())
                 }
             }
         }
@@ -503,7 +503,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put("catch_type", "Fun Day")
                 put("total_weight_oz", catchItem.totalWeightOz)
                 put("total_weight_hundredth_kg", catchItem.totalWeightHundredthKg)
-                put("total_length_8ths", catchItem.totalLengthA8th)
+                put("total_length_quarters", catchItem.totalLengthQuarters)
                 put("total_length_tenths", catchItem.totalLengthTenthCm)
                 put("marker_type", "")
                 put("clip_color", "")
@@ -519,7 +519,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val species: String,
         val totalWeightOz: Int,
         val totalWeightHundredthKg: Int,
-        val totalLengthA8th: Int,
+        val totalLengthQuarters: Int,
         val totalLengthTenthCm: Int,
         val lat: Double,
         val lon: Double
@@ -580,8 +580,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
     fun getTopCatchesByInchesForSpeciesThisMonth(
         species: String,
-        min8ths: Int,
-        max8ths: Int,
+        minQuarters: Int,
+        maxQuarters: Int,
         limit: Int
     ): List<CatchItem> {
         val db = readableDatabase
@@ -592,15 +592,15 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             """
         SELECT * FROM catches
         WHERE LOWER(species) = ?
-          AND total_length_8ths BETWEEN ? AND ?
+          AND total_length_quarters BETWEEN ? AND ?
           AND strftime('%Y-%m', date_time) = ?
-        ORDER BY total_length_8ths DESC
+        ORDER BY total_length_quarters DESC
         LIMIT ?
         """.trimIndent(),
             arrayOf(
                 species.lowercase(),
-                min8ths.toString(),
-                max8ths.toString(),
+                minQuarters.toString(),
+                maxQuarters.toString(),
                 monthPrefix,
                 limit.toString()
             )

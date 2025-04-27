@@ -27,31 +27,31 @@ class PopupLengthEntryInches : Activity() {
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         val edtLengthInches: EditText = findViewById(R.id.edtLengthInches)
-        val edtLength8ths: EditText = findViewById(R.id.edtLength8ths)
+        val edtLengthQuarters: EditText = findViewById(R.id.edtLengthQuarters)
         val btnSaveCatch: Button = findViewById(R.id.btnSaveCatch)
         val btnCancel: Button = findViewById(R.id.btnCancel)
 
         loadSpeciesSpinner()
 
         edtLengthInches.filters = arrayOf(MinMaxInputFilter(1, 99))
-        edtLength8ths.filters = arrayOf(MinMaxInputFilter(0, 7))
+        edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3))
 
         btnSaveCatch.setOnClickListener {
             val resultIntent = Intent()
 
             val lengthInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
-            val length8ths = edtLength8ths.text.toString().toIntOrNull() ?: 0
-            val lengthTotalInches = (lengthInches * 8) + length8ths
+            val lengthQuarters = edtLengthQuarters.text.toString().toIntOrNull() ?: 0
+            val lengthTotalInches = (lengthInches * 4) + lengthQuarters
 
             if (lengthTotalInches == 0) {
-                Toast.makeText(this, "Length cannot be 0 Inches 0/8ths!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Length cannot be 0 Inches 0/4ths!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             resultIntent.putExtra("lengthTotalInches", lengthTotalInches)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
-            Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $lengthTotalInches (in 1/8ths), Species: $selectedSpecies")
+            Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $lengthTotalInches (in 1/4ths), Species: $selectedSpecies")
 
             setResult(Activity.RESULT_OK, resultIntent)
             finish()

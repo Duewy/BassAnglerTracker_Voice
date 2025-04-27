@@ -166,13 +166,13 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
             }
             "inches" -> {
-                val min8ths = (minValue * 8).toInt()
-                val max8ths = (maxValue * 8).toInt()
+                val minQuarters  = (minValue * 4).toInt()
+                val maxQuarters  = (maxValue * 4).toInt()
 
                 db.getTopCatchesByInchesForSpeciesThisMonth(
                     species = selectedSpecies,
-                    min8ths = min8ths,
-                    max8ths = max8ths,
+                    minQuarters = minQuarters ,
+                    maxQuarters = maxQuarters ,
                     limit = 5
                 )
             }
@@ -224,8 +224,8 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                 if (kg > 0) formatWeightKg(this@TopFiveCatchesActivity, kg) else ""
             } ?: ""
 
-            val lengthIn = it.totalLengthA8th?.let { a8th ->
-                if (a8th > 0) formatLengthA8thToInches(a8th) else ""
+            val lengthIn = it.totalLengthQuarters?.let { a4th ->
+                if (a4th > 0) formatLengthQuartersToInches(a4th) else ""
             } ?: ""
 
             val lengthCm = it.totalLengthTenths?.let { cm ->

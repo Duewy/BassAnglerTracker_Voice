@@ -289,7 +289,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = bassType,
             totalWeightOz = null,
-            totalLengthA8th = null,
+            totalLengthQuarters = null,
             totalWeightHundredthKg = null,
             totalLengthTenths = totalLengthTenths,
             catchType = "metric",

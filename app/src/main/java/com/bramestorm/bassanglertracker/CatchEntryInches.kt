@@ -33,7 +33,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     private var selectedSpecies: String = ""
-    private var totalLengthA8th: Int = 0
+    private var totalLengthQuarters: Int = 0
     private val requestLengthEntry = 1003
 
     // --- voice-to-text callback handler ---
@@ -121,12 +121,12 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == requestLengthEntry && resultCode == Activity.RESULT_OK) {
-            totalLengthA8th = data?.getIntExtra("lengthTotalInches", 0) ?: 0
+            totalLengthQuarters = data?.getIntExtra("lengthTotalInches", 0) ?: 0
             selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
 
 
             //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
-            if (totalLengthA8th > 0) {
+            if (totalLengthQuarters > 0) {
                 selectedSpecies = normalizeSpeciesName(selectedSpecies)
                 saveCatch()
                 Log.d("DB_DEBUG", "✅ saveCatch is called")
@@ -146,7 +146,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = selectedSpecies,
             totalWeightOz = null,
-            totalLengthA8th = totalLengthA8th,
+            totalLengthQuarters = totalLengthQuarters,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
             catchType = "inches",
@@ -163,7 +163,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         }
 
         if (success) {
-            totalLengthA8th = 0 // ✅ Move this after successful save
+            totalLengthQuarters = 0 // ✅ Move this after successful save
         }
         // ✅ MOTIVATIONAL TOAST FOR FUN DAY - Inches
         if (catchList.size >= 2) {
@@ -175,7 +175,6 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                 }
             }
         }
-
         updateListViewInch()  // ✅ Now only updates the UI, no extra insert
     }
 
@@ -195,10 +194,10 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         catchList.clear()
         catchList.addAll(todaysCatches)
 
-        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the weight? it should be the ID # or dateTime... and totalWeightOz
-            val totalLengthA8th = it.totalLengthA8th ?: 0
-            val inches = totalLengthA8th / 8
-            val a8ths = totalLengthA8th  % 8
+        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the length? it should be the ID # or dateTime... and totalLengthQuarters
+            val totalLengthQuarters = it.totalLengthQuarters ?: 0
+            val inches = totalLengthQuarters / 4
+            val quarters = totalLengthQuarters  % 4
             // Format the time from dateTime
             val timeFormatted = try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -208,12 +207,10 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             } catch (e: Exception) {
                 "N/A"
             }
-            when (a8ths) {
+            when (quarters) {
                 0 -> "${it.species} - $inches Inches @ $timeFormatted"
-                2 -> "${it.species} - $inches 1/4 Inches @ $timeFormatted"
-                4 -> "${it.species} - $inches 1/2 Inches @ $timeFormatted"
-                6 -> "${it.species} - $inches 3/4 Inches @ $timeFormatted"
-                else -> "${it.species} - $inches ${a8ths}/8 Inches @ $timeFormatted"
+                2 -> "${it.species} - $inches 1/2 Inches @ $timeFormatted"
+                else -> "${it.species} - $inches ${quarters}/4 Inches @ $timeFormatted"
             }
         }
 
@@ -250,7 +247,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
     private fun showEditDialog(catchItem: CatchItem) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_inches, null)
         val edtLengthInches = dialogView.findViewById<EditText>(R.id.edtLengthInches)
-        val edtLengthEntry8ths = dialogView.findViewById<EditText>(R.id.edtLength8ths)
+        val edtLengthEntryQuarters = dialogView.findViewById<EditText>(R.id.edtLengthQuarters)
         val spinnerSpeciesEditInches = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditInches)
 
         // --- 1. Load user-selected species list ---
@@ -263,9 +260,9 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         spinnerSpeciesEditInches.adapter = adapter
 
         // --- 2. Set current values ---
-        val newLengthA8ths = catchItem.totalLengthA8th ?: 0
-        edtLengthInches.setText((newLengthA8ths / 8).toString())
-        edtLengthEntry8ths.setText((newLengthA8ths % 8).toString())
+        val newLengthQuarters = catchItem.totalLengthQuarters ?: 0
+        edtLengthInches.setText((newLengthQuarters / 4).toString())
+        edtLengthEntryQuarters.setText((newLengthQuarters % 4).toString())
 
         // --- 3. Set spinner selection based on normalized match ---
         val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
@@ -277,8 +274,8 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
                 val newInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
-                val new8ths = edtLengthEntry8ths.text.toString().toIntOrNull() ?: 0
-                val totalLengthA8th = (newInches * 8) + new8ths
+                val new4ths = edtLengthEntryQuarters.text.toString().toIntOrNull() ?: 0
+                val totalLengthQuarters = (newInches * 4) + new4ths
                 val species = spinnerSpeciesEditInches.selectedItem.toString()
 
                 val dbHelper = CatchDatabaseHelper(this)
@@ -287,12 +284,12 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                     catchId = catchItem.id,
                     newWeightOz = null,
                     newWeightKg = null,
-                    newLengthA8ths = totalLengthA8th,
+                    newLengthQuarters = totalLengthQuarters,
                     newLengthCm = null,
                     species = species
                 )
 
-                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Length=$totalLengthA8th, New Species=$species")
+                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Length=$totalLengthQuarters, New Species=$species")
 
                 updateListViewInch()
                 Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
@@ -313,9 +310,9 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
     override fun onSpeechResult(transcript: String) {
         VoiceCatchParse().parseVoiceCommand(transcript)?.let { p ->
-            if (p.totalLengthA8th> 0) {
+            if (p.totalLengthQuarters> 0) {
                 // stash into your existing fields…
-                totalLengthA8th = p.totalLengthA8th
+                totalLengthQuarters = p.totalLengthQuarters
                 selectedSpecies     = normalizeSpeciesName(p.species)
                 // then call your no-arg saveCatch()
                 saveCatch()

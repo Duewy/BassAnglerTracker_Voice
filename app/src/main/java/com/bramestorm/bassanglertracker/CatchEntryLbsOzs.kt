@@ -156,7 +156,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = selectedSpecies,
             totalWeightOz = totalWeightOz,
-            totalLengthA8th = null,
+            totalLengthQuarters = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
             catchType = "lbsOzs",
@@ -272,7 +272,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
                     catchId = catchItem.id,
                     newWeightOz = totalWeightOz,
                     newWeightKg = null,      // Lbs/Oz mode only
-                    newLengthA8ths = null,   // No length change
+                    newLengthQuarters = null,   // No length change
                     newLengthCm = null,
                     species = species
                 )

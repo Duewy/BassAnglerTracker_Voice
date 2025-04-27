@@ -140,7 +140,7 @@ class SetUpActivity : AppCompatActivity() {
             isLengthSelected = true
             isWeightSelected = false
             isValMeasuring = true
-            btnImperial.text = "Inches 8ths"
+            btnImperial.text = "Inches 4ths"
             btnMetric.text = "Cms"
             btnLength.setBackgroundResource(R.color.bright_green)
             btnWeight.setBackgroundResource(R.color.lite_grey)

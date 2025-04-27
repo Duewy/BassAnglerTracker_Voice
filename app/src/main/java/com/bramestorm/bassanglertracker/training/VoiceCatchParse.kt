@@ -15,11 +15,11 @@ data class ParsedCatch(
     val weightLbs: Int = 0,
     val weightOz: Int = 0,
     val lengthTenths: Int = 0,
-    val lengthA8ths: Int = 0,
+    val lengthQuarters: Int = 0,
     val totalWeightOzs: Int = 0,
     val totalWeightHundredthKg: Int = 0,   // kilograms ×100 + grams
     val totalLengthTenths: Int = 0,         // centimeters ×10 + tenths
-    val totalLengthA8th: Int = 0,           // inches ×8 + eighths
+    val totalLengthQuarters: Int = 0,           // inches ×4 + quarters
     val clipColor: String = ""
 )
 
@@ -57,16 +57,16 @@ class VoiceCatchParse {
         } ?: 0
 
         // ✅ Extract imperial length (inches + eighths)
-        val inchRegex = Regex("""(\d+)\s*(?:and)?\s*(\d+)/8\s*(?:inches|in)""")
+        val inchRegex = Regex("""(\d+)\s*(?:and)?\s*(\d+)/4\s*(?:inches|in)""")
         val inchMatch = inchRegex.find(lower)
-        val totalLengthA8th = inchMatch?.let {
+        val totalLengthQuarters= inchMatch?.let {
             val inches = it.groupValues[1].toIntOrNull() ?: 0
-            val eighths = it.groupValues[2].toIntOrNull() ?: 0
-            inches * 8 + eighths
+            val quarters = it.groupValues[2].toIntOrNull() ?: 0
+            inches * 4 + quarters
         } ?: 0
 
-        // ✅ Handle known species
-        val knownSpecies = listOf(
+        // ✅ Handle known species todo Check out if this should not get list from SpeciesSelectionActivity???
+         val knownSpecies = listOf(
             "largemouth bass", "smallmouth bass", "largemouth", "smallmouth",
             "walleye", "perch", "crappie", "pike", "catfish", "panfish"
         )
@@ -85,7 +85,7 @@ class VoiceCatchParse {
 
         val hasWeight = (weightLbs > 0 || weightOz > 0 || totalWeightHundredthKg > 0)
         val hasMetricLen = totalLengthTenths > 0
-        val hasImperialLen = totalLengthA8th > 0
+        val hasImperialLen = totalLengthQuarters > 0
 
         return if (normalizedSpecies.isNotBlank() && (hasWeight || hasMetricLen || hasImperialLen)) {
             ParsedCatch(
@@ -94,7 +94,7 @@ class VoiceCatchParse {
                 weightOz = weightOz,
                 totalWeightHundredthKg = totalWeightHundredthKg,
                 totalLengthTenths = totalLengthTenths,
-                totalLengthA8th = totalLengthA8th,
+                totalLengthQuarters = totalLengthQuarters,
                 clipColor = clipColor
             )
         } else {
