@@ -226,6 +226,8 @@
     <string name="default_assistant">Default assistant: …</string>
     <string name="default_assistant_text">Default Assistant</string>
     <string name="setting_up_bluetooth_voice">Setting Up the Bluetooth \n and \n Voice Assistant</string>
+    <string name="test_bluetooth">We’re going to test your speakers. Make sure your Bluetooth headset is connected.</string>
+    <string name="start_test">Start Test</string>
 
 
     //species

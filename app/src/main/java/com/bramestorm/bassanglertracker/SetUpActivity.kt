@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -26,8 +27,10 @@ import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
+import com.bramestorm.bassanglertracker.voice.BluetoothTestDialogFragment
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
+import java.util.Date
 
 
 class SetUpActivity : AppCompatActivity() {
@@ -54,10 +57,14 @@ class SetUpActivity : AppCompatActivity() {
         private const val REQUEST_VOICE_SETUP = 2001
         private const val BT_REQUEST_CODE = 3003
         private const val AUDIO_PERM_REQ = 4001
+        private const val PREFS_NAME              = "BassAnglerTrackerPrefs"
+        private const val KEY_VOICE_CONTROL       = "VOICE_CONTROL_ENABLED"
+        private const val KEY_LAST_VOICE_DATE   = "VOICE_LAST_TOGGLE_DATE"
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
-    private val prefs by lazy { getSharedPreferences("UserPrefs", MODE_PRIVATE) }
+   // private val prefs by lazy { getSharedPreferences("UserPrefs", MODE_PRIVATE) }
+    private val prefs by lazy { getSharedPreferences(PREFS_NAME, MODE_PRIVATE) }
 
     private var isWeightSelected = false
     private var isLengthSelected = false
@@ -82,17 +89,14 @@ class SetUpActivity : AppCompatActivity() {
 
         //------------------- Ensures that the GPS must be Enabled Every Day --------------------
 
-        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val today = android.text.format.DateFormat.format("yyyy-MM-dd", java.util.Date()).toString()
-        val lastDate = prefs.getString("GPS_LAST_DATE", "")
-
-        if (today != lastDate) {
-            // New day → reset GPS to disabled
+        val today = DateFormat.format("yyyy-MM-dd", Date()).toString()
+        val lastVoiceDate = prefs.getString(KEY_LAST_VOICE_DATE, "")
+        if (lastVoiceDate != today) {
             prefs.edit()
-                .putBoolean("GPS_ENABLED", false)
-                .putString("GPS_LAST_DATE", today)
+                .putBoolean(KEY_VOICE_CONTROL, false)
+                .putString(KEY_LAST_VOICE_DATE, today)
                 .apply()
-            positionedToast("📍 GPS logging has been reset.\nEnable it manually if needed.")
+            positionedToast("📍 GPS and Voice Control logging has been reset.\nEnable then manually if needed.")
         }
 
         setContentView(R.layout.activity_set_up_event)
@@ -231,21 +235,29 @@ class SetUpActivity : AppCompatActivity() {
         }
 
         //------ VOICE CONTROL ----------------
-             // 1) Set initial state without triggering callbacks
         tglVoice.setOnCheckedChangeListener(null)
-        tglVoice.isChecked = prefs.getBoolean("voice_enabled", false)
-        tglVoice.background = if (isVoiceModeEnabled()) {
+        val isOn = prefs.getBoolean(KEY_VOICE_CONTROL, false)
+        tglVoice.isChecked = isOn
+        tglVoice.background = if (isOn)
             ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
-        } else
+        else
             ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
 
-            // 2) Now install the listener
-        tglVoice.setOnCheckedChangeListener { _, isOn ->
-            prefs.edit().putBoolean("voice_enabled", isOn).apply()
-            if (isOn) {
-                if (!checkBluetoothHeadset()) {
-                    positionedToast("⚠️ No Bluetooth headset detected.")
-                }
+        // 3) Now wire the listener that *updates* prefs + UI + behavior:
+        tglVoice.setOnCheckedChangeListener { _, isChecked ->
+            // save new state in the same prefs file
+            prefs.edit()
+                .putBoolean(KEY_VOICE_CONTROL, isChecked)
+                .apply()
+
+            // toggle the button’s outline
+            tglVoice.background = if (isChecked)
+                ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
+            else
+                ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
+
+            if (isChecked) {
+                if (!checkBluetoothHeadset()) positionedToast("⚠️ No Bluetooth headset detected.")
                 ensureAudioPermissions {
                     startActivityForResult(
                         Intent(this, VoiceSetupActivity::class.java),
@@ -256,8 +268,6 @@ class SetUpActivity : AppCompatActivity() {
                 stopVoiceService()
             }
         }
-
-
 
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
@@ -313,6 +323,7 @@ class SetUpActivity : AppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 // user granted mic + no assistant conflict → start your service
                 startVoiceService()
+                BluetoothTestDialogFragment().show(supportFragmentManager, "bt_test")
             } else {
                 // setup failed or was canceled → roll back the toggle
                 prefs.edit().putBoolean("voice_enabled", false).apply()

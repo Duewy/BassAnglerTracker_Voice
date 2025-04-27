@@ -77,6 +77,7 @@ android {
         implementation(libs.androidx.core.ktx)
         implementation(libs.kotlin.symbol.processing.api)
         implementation(libs.androidx.lifecycle.runtime.ktx)
+        implementation(libs.androidx.ui.test.android)
 
         // 🖼 Jetpack Compose
         implementation(libs.androidx.activity.compose)
@@ -109,8 +110,12 @@ android {
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
 
+        // Compose’s JUnit4 integration (uses Espresso 3.5.0)
+        androidTestImplementation(libs.compose.ui.test.junit4)
+
+
         // ✅ Android Media
-        implementation("androidx.media:media:1.6.0")
+        implementation(libs.androidx.media)
 
 
         // 🧪 Compose UI Testing
@@ -121,6 +126,4 @@ android {
         implementation(kotlin("script-runtime"))
     }
 }
-dependencies {
-    implementation(libs.androidx.ui.test.android)
-}
+
