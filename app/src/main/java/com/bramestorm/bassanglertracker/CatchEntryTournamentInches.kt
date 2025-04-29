@@ -607,13 +607,13 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         btnSave.setOnClickListener {
             val newInches   = edtInches.text.toString().toIntOrNull() ?: 0
             val newQuarters = edtQuartersOfInch.text.toString().toIntOrNull() ?: 0
-            val newTotal    = (newInches * 4 + newQuarters)
+            val newTotalInches    = (newInches * 4 + newQuarters)
 
             dbHelper.updateCatch(
                 catchId           = c.id,
                 newWeightOz       = null,
                 newWeightKg       = null,
-                newLengthQuarters = newTotal,
+                newLengthQuarters = newTotalInches,
                 newLengthCm       = null,
                 species           = c.species
             )

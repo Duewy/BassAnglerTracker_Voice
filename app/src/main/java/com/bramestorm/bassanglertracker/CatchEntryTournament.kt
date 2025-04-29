@@ -139,12 +139,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
-                val weightTotalOz = data.getIntExtra("weightTotalOz", 0)
+                val totalWeightOz = data.getIntExtra("weightTotalOz", 0)
                 val species       = data.getStringExtra("selectedSpecies") ?: ""
                 val clipColor     = data.getStringExtra("clip_color") ?: ""
 
-                if (weightTotalOz > 0) {
-                    saveTournamentCatch(weightTotalOz, species, clipColor)
+                if (totalWeightOz > 0) {
+                    saveTournamentCatch(totalWeightOz, species, clipColor)
                 }
             }
         }
@@ -306,8 +306,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             .take(tournamentCatchLimit)  // ✅ Apply limit always
 
         val totalWeightOz = catchesToUse.sumOf { it.totalWeightOz ?: 0 }
-        val totalLbs = totalWeightOz / 16
-        val totalOz = totalWeightOz % 16
+        val totalLbs = (totalWeightOz / 16)
+        val totalOz = (totalWeightOz % 16)
 
         totalRealWeight.text = totalLbs.toString()
         totalDecWeight.text = totalOz.toString()
@@ -592,11 +592,11 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             btnSave.setOnClickListener {
                 val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
                 val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
-                val newTotalOz = (newLbs * 16) + newOzs
+                val newWeightOz = (newLbs * 16) + newOzs
 
                 dbHelper.updateCatch(
                     catchId            = c.id,
-                    newWeightOz        = newTotalOz,
+                    newWeightOz        = newWeightOz,
                     newWeightKg        = null,
                     newLengthQuarters  = null,
                     newLengthCm        = null,
@@ -769,7 +769,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     override fun onSpeechResult(transcript: String) {
 
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->
+        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->        //todo Why is totalWeightOzs NOT totalWeightOz  MAY CAUSE ISSUES!!!!!!!
             if (p.totalWeightOzs> 0) saveTournamentCatch(p.totalWeightOzs, p.species, p.clipColor)
         } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
     }

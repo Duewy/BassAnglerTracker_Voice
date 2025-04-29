@@ -86,10 +86,10 @@ class PopupWeightEntryTourLbs : Activity() {
 
             val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
             val weightOz = edtWeightOz.text.toString().toIntOrNull() ?: 0
-            val totalWeightOz = (weightLbs * 16) + weightOz
+            val totalWeightOz = ((weightLbs * 16) + weightOz)
 
             if (totalWeightOz == 0) {
-                Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "🚫 Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 

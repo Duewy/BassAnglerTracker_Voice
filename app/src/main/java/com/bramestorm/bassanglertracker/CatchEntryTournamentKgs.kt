@@ -601,12 +601,12 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         btnSave.setOnClickListener {
             val newKgs   = edtKgs.text.toString().toIntOrNull() ?: 0
             val newGrams = edtGrams.text.toString().toIntOrNull() ?: 0
-            val newTotal = (newKgs * 100 + newGrams)
+            val newTotalKg = (newKgs * 100 + newGrams)
 
             dbHelper.updateCatch(
                 catchId           = c.id,
                 newWeightOz       = null,
-                newWeightKg       = newTotal,
+                newWeightKg       = newTotalKg,
                 newLengthQuarters = null,
                 newLengthCm       = null,
                 species           = c.species

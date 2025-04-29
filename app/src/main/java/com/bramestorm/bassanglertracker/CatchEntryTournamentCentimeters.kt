@@ -599,13 +599,14 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         btnSave.setOnClickListener {
             val newCms  = edtCms.text.toString().toIntOrNull() ?: 0
             val newDec = edtDec.text.toString().toIntOrNull() ?: 0
-            val newTotalTenths  = (newCms* 10 + newDec)
+            val newLengthCm  = (newCms* 10 + newDec)
+
             dbHelper.updateCatch(
                 catchId = c.id,
                 newWeightOz = null,
                 newWeightKg = null,
                 newLengthQuarters = null,
-                newLengthCm = newTotalTenths,
+                newLengthCm = newLengthCm,
                 species = c.species
             )
             updateTournamentList()

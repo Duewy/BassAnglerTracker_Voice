@@ -112,12 +112,11 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
         simpleInchListView.setOnItemLongClickListener { parent, view, position, id ->
             if (catchList.isEmpty()) {
-                Toast.makeText(this, "No catches available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "😢 No catches available", Toast.LENGTH_SHORT).show()
                 return@setOnItemLongClickListener true
             }
 
             if (position >= catchList.size) {
-                Log.e("DB_DEBUG", "⚠️ Invalid position: $position, Catch List Size: ${catchList.size}")
                 return@setOnItemLongClickListener true
             }
 
@@ -142,7 +141,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private fun saveCatch() {
-        Log.d("DB_DEBUG", "🔍 We are in saveCatch().")
+
         val newCatch = CatchItem(
             id = 0,
             latitude = null,
@@ -179,29 +178,27 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                 }
             }
         }
-        updateListViewInch()  // ✅ Now only updates the UI, no extra insert
+        updateListViewInch()  // ✅ Updates the UI
     }
 
 
     //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
 
     private fun updateListViewInch() {
-        Log.d("DB_DEBUG", "🔍 We are in updateListViewLb.")
+
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        Log.d("DB_DEBUG", "🔍 This is todaysDate in CatchEntry: $todaysDate")
+
         val todaysCatches = dbHelper.getCatchesForToday("inches", todaysDate)
             .sortedByDescending { it.dateTime }  // Sort by dateTime (newest first)
 
-        Log.d("DB_DEBUG", "🔍 Catches retrieved from DB: ${todaysCatches.size}")
-
-        // ✅ Make sure catchList is updated BEFORE updating the ListView
+        // ✅ CatchList is updated BEFORE updating the ListView
         catchList.clear()
         catchList.addAll(todaysCatches)
 
-        val catchDisplayList = todaysCatches.map {   // are we mapping the viewList on the length? it should be the ID # or dateTime... and totalLengthQuarters
+        val catchDisplayList = todaysCatches.map {
             val totalLengthQuarters = it.totalLengthQuarters ?: 0
-            val inches = totalLengthQuarters / 4
-            val quarters = totalLengthQuarters  % 4
+            val inches = (totalLengthQuarters / 4)
+            val quarters = (totalLengthQuarters  % 4)
             // Format the time from dateTime
             val timeFormatted = try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -222,8 +219,6 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             val adapter = CatchItemAdapter(this, catchList)
             simpleInchListView.adapter = adapter
         }
-
-
     }
 
 
@@ -231,7 +226,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
     private fun showEditDeleteDialog(catchItem: CatchItem) {
         AlertDialog.Builder(this)
-            .setTitle("Edit or Delete")
+            .setTitle("⚠️ Edit or Delete")
             .setMessage("Do you want to edit or delete this entry?")
             .setPositiveButton("Edit") { _, _ ->
                 showEditDialog(catchItem) // Call the new edit function
@@ -279,7 +274,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val newInches = edtLengthInches.text.toString().toIntOrNull() ?: 0
                 val new4ths = edtLengthEntryQuarters.text.toString().toIntOrNull() ?: 0
-                val totalLengthQuarters = (newInches * 4) + new4ths
+                val totalLengthQuarters = ((newInches * 4) + new4ths)
                 val species = spinnerSpeciesEditInches.selectedItem.toString()
 
                 val dbHelper = CatchDatabaseHelper(this)
@@ -321,7 +316,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                 // then call your no-arg saveCatch()
                 saveCatch()
             }
-        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
+        } ?: Toast.makeText(this, " 👎Could not parse: $transcript", Toast.LENGTH_LONG).show()
     }
 
 
