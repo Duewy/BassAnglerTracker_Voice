@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceCatchParse
@@ -31,10 +32,31 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     private lateinit var simpleLbsListView: ListView
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
+    private val weightEntryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                totalWeightOz = data.getIntExtra("weightTotalOz", 0)
+                selectedSpecies = data.getStringExtra("selectedSpecies") ?: selectedSpecies
+
+                if (totalWeightOz > 0) {
+                    selectedSpecies = normalizeSpeciesName(selectedSpecies)
+                    saveCatch()
+                    Log.d("DB_DEBUG", "✅ saveCatch() called via launcher")
+                } else {
+                    Log.e("DB_DEBUG", "⚠️ Invalid weight—nothing saved")
+                }
+            }
+        }
+    }
 
     private var selectedSpecies: String = ""
     private var totalWeightOz: Int = 0
-    private val requestWeightEntry = 1001
+    private lateinit var dialogInstance: AlertDialog
+    override val dialog: Any
+        get() = dialogInstance
+
 
     // --- voice-to-text callback handler ---
     private val recognitionListener = object : RecognitionListener {
@@ -114,37 +136,9 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
 
     private fun openWeightPopup() {
         val intent = Intent(this, PopupWeightEntryLbs::class.java)
-        startActivityForResult(intent, requestWeightEntry)
+        weightEntryLauncher.launch(intent)
     }
 
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n " +
-            "     which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n " +
-            "     contracts for common intents available in\n" +
-            "      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n" +
-            "      testing, and allow receiving results in separate, testable classes independent from your\n" +
-            "      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n" +
-            "      with the appropriate {@link ActivityResultContract} and handling the result in the\n " +
-            "     {@link ActivityResultCallback#onActivityResult(Object) callback}.")
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == requestWeightEntry && resultCode == Activity.RESULT_OK) {
-            totalWeightOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
-            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
-
-
-            //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
-            if (totalWeightOz > 0) {
-                selectedSpecies = normalizeSpeciesName(selectedSpecies)
-
-                saveCatch()
-                Log.d("DB_DEBUG", "✅ saveCatch is called")
-            } else {
-                Log.e("DB_DEBUG", "⚠️ Invalid weight! Catch not saved.")
-            }
-        }
-    }
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private fun saveCatch() {

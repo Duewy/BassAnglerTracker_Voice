@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceCatchParse
@@ -31,10 +32,30 @@ class CatchEntryMetric : BaseCatchEntryActivity(){
     private lateinit var simpleCmListView: ListView
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
+    private val lengthEntryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                totalLengthTenths = data.getIntExtra("lengthTotalCms", 0)
+                selectedSpecies   = data.getStringExtra("selectedSpecies") ?: selectedSpecies
+
+                if (totalLengthTenths > 0) {
+                    selectedSpecies = normalizeSpeciesName(selectedSpecies)
+                    saveCatch()
+                    Log.d("DB_DEBUG", "✅ saveCatch() called via launcher")
+                } else {
+                    Log.e("DB_DEBUG", "⚠️ Invalid length—nothing saved")
+                }
+            }
+        }
+    }
 
     private var selectedSpecies: String = ""
     private var totalLengthTenths: Int = 0
-    private val requestLengthEntry = 1004
+    private lateinit var dialogInstance: AlertDialog
+    override val dialog: Any
+        get() = dialogInstance
 
     // --- voice-to-text callback handler ---
     private val recognitionListener = object : RecognitionListener {
@@ -115,27 +136,9 @@ class CatchEntryMetric : BaseCatchEntryActivity(){
 
     private fun openLengthCmPopup() {
         val intent = Intent(this, PopupLengthEntryMetric::class.java)
-        startActivityForResult(intent, requestLengthEntry)
+        lengthEntryLauncher.launch(intent)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == requestLengthEntry && resultCode == Activity.RESULT_OK) {
-            totalLengthTenths= data?.getIntExtra("lengthTotalCms", 0) ?: 0
-            selectedSpecies = data?.getStringExtra("selectedSpecies") ?: selectedSpecies
-
-
-            //  CALL `saveCatch()` IMMEDIATELY AFTER WEIGHT IS RECEIVED
-            if (totalLengthTenths > 0) {
-                selectedSpecies = normalizeSpeciesName(selectedSpecies)
-                saveCatch()
-                Log.d("DB_DEBUG", "✅ saveCatch is called")
-            } else {
-                Log.e("DB_DEBUG", "⚠️ Invalid weight! Catch not saved.")
-            }
-        }
-    }
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private fun saveCatch() {

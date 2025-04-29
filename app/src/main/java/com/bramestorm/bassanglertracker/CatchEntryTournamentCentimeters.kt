@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
@@ -21,6 +22,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -52,6 +54,10 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     private var alarmHour: Int = -1
     private var alarmMinute: Int = -1
     private var alarmTriggered: Boolean = false
+    // satisfy abstract dialog property
+    private lateinit var dialogInstance: AlertDialog
+    override val dialog: Any
+        get() = dialogInstance
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
@@ -135,15 +141,14 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val totalLengthTenths = data?.getIntExtra("lengthTotalCms", 0) ?: 0
-            val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
-            val clipColor = data?.getStringExtra("clip_color") ?: ""
+            result.data?.let { data ->
+                val totalLengthTenths = data.getIntExtra("lengthTotalCms", 0)
+                val species = data.getStringExtra("selectedSpecies") ?: ""
+                val clipColor = data.getStringExtra("clip_color") ?: ""
 
-            Log.d("DB_DEBUG", "✅ Received totalLengthTenths: $totalLengthTenths, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
-
-            if (totalLengthTenths > 0) {
-                saveTournamentCatch(totalLengthTenths, selectedSpecies, clipColor)
+                if (totalLengthTenths > 0) {
+                    saveTournamentCatch(totalLengthTenths, species, clipColor)
+                }
             }
         }
     }
@@ -566,6 +571,51 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         }
     }
 
+    private fun showTournamentEditDialog(c: CatchItem) {
+        // 1) inflate your layout
+        val view = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_cms, null)
+        val txtClip = view.findViewById<TextView>(R.id.txtClipColor)
+        val edtCms  = view.findViewById<EditText>(R.id.edtTourLengthCms)
+        val edtDec = view.findViewById<EditText>(R.id.edtTourLengthDec)
+        val btnSave    = view.findViewById<Button>(R.id.btnSaveEdtTourCms)
+        val btnCancel  = view.findViewById<Button>(R.id.btnCancelEdtTourCms)
+
+        // 2) prefill from the *tenths* field
+        val totalTenths = c.totalLengthTenths  ?: 0
+        edtCms.setText(( totalTenths / 10).toString())
+        edtDec.setText(( totalTenths % 10).toString())
+
+        // 3) clip-color swatch
+        val clip = try { ClipColor.valueOf(c.clipColor!!.uppercase()) } catch(_:Exception){ ClipColor.RED }
+        txtClip.background = createLayeredDrawable(ContextCompat.getColor(this, clip.resId))
+
+        // 4) build & show
+        dialogInstance = AlertDialog.Builder(this)
+            .setTitle("Edit or Delete Catch")
+            .setView(view)
+            .create().also { it.show() }
+
+        // 5) Save → write into the tenths column
+        btnSave.setOnClickListener {
+            val newCms  = edtCms.text.toString().toIntOrNull() ?: 0
+            val newDec = edtDec.text.toString().toIntOrNull() ?: 0
+            val newTotalTenths  = (newCms* 10 + newDec)
+            dbHelper.updateCatch(
+                catchId = c.id,
+                newWeightOz = null,
+                newWeightKg = null,
+                newLengthQuarters = null,
+                newLengthCm = newTotalTenths,
+                species = c.species
+            )
+            updateTournamentList()
+            dialogInstance.dismiss()
+        }
+        // 6) Cancel
+        btnCancel.setOnClickListener { dialogInstance.dismiss() }
+    }
+
+
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
     private val checkAlarmRunnable = object : Runnable {
@@ -617,6 +667,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
 //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

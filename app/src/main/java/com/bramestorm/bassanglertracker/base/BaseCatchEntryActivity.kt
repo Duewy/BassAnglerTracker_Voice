@@ -31,6 +31,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         private const val VOICE_WAKE_ACTION = "com.bramestorm.bassanglertracker.VOICE_WAKE"
     }
 
+    abstract val dialog: Any
     open lateinit var recognizer: SpeechRecognizer
     open lateinit var recognizerIntent: Intent
     private val wakeReceiver = object : BroadcastReceiver() {

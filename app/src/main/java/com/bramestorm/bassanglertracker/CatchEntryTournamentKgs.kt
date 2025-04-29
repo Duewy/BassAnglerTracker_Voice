@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
@@ -21,6 +22,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -44,7 +46,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private lateinit var btnSetUpKgs: Button
     private lateinit var btnMainKgs:Button
     private lateinit var btnAlarmKgs: Button
-
+    private lateinit var dialogInstance: AlertDialog
+    override val dialog: AlertDialog
+        get() = dialogInstance
 
     // Alarm Variables
     private var alarmHour: Int = -1
@@ -138,8 +142,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
             val clipColor = data?.getStringExtra("clip_color") ?: ""
 
-            Log.d("DB_DEBUG", "✅ Received weightTotalKgs: $weightTotalKgs, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
-
             if (weightTotalKgs > 0) {
                 saveTournamentCatch(weightTotalKgs, selectedSpecies, clipColor)
             }
@@ -210,7 +212,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         btnSetUpKgs.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainKgs.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarmKgs.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
-        val dbHelper = CatchDatabaseHelper(this)
 
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
@@ -262,7 +263,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private fun saveTournamentCatch(weightTotalKgs: Int, bassType: String, clipColor: String) {
         val availableColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "Kgs",
+            catchType = "kgs",
             date = getCurrentDate(),
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
@@ -281,7 +282,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalWeightHundredthKg = weightTotalKgs,
             totalLengthTenths = null,
-            catchType = "Kgs",
+            catchType = "kgs",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -354,7 +355,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "Kgs", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "kgs", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
@@ -365,7 +366,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "Kgs",
+            catchType = "kgs",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
@@ -394,6 +395,16 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
                 realWeightKgs[i].text = weightKgs.toString()
                 decWeightKgs[i].text = weightDec.toString()
+
+                realWeightKgs[i].setOnLongClickListener {
+                    showTournamentEditDialog(sortedCatches[i])
+                    true
+                }
+                decWeightKgs[i].setOnLongClickListener {
+                    showTournamentEditDialog(sortedCatches[i])
+                    true
+                }
+
 
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
                 val layeredDrawable = createLayeredDrawable(baseColor)
@@ -550,6 +561,67 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         }
     }
 
+    private fun showTournamentEditDialog(c: CatchItem) {
+        // 1) inflate your custom layout
+        val dialogView = layoutInflater.inflate(
+            R.layout.dialog_edit_tournament_catch_kgs,
+            null
+        )
+
+        // 2) find in-layout views
+        val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
+        val edtKgs       = dialogView.findViewById<EditText>(R.id.edtTourWeightKgs)
+        val edtGrams     = dialogView.findViewById<EditText>(R.id.edtTourWeightGrams)
+        val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourKgss)
+        val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourKgs)
+
+        // 3) prefill the fields from the CatchItem
+        val totalHundredth = c.totalWeightHundredthKg ?: 0
+        edtKgs.setText((totalHundredth / 100).toString())
+        edtGrams.setText((totalHundredth % 100).toString())
+
+        // 4) set the clip-color box
+        val clip = try {
+            ClipColor.valueOf(c.clipColor!!.uppercase())
+        } catch (_: Exception) {
+            ClipColor.RED
+        }
+        txtClipColor.background = createLayeredDrawable(
+            ContextCompat.getColor(this, clip.resId)
+        )
+
+        // 5) build & show the AlertDialog (rename to 'dlg' to avoid collision)
+        dialogInstance = AlertDialog.Builder(this)
+            .setTitle("Edit or Delete Catch")
+            .setView(dialogView)
+            .create()
+        dialogInstance.show()
+
+        // 6) Save button
+        btnSave.setOnClickListener {
+            val newKgs   = edtKgs.text.toString().toIntOrNull() ?: 0
+            val newGrams = edtGrams.text.toString().toIntOrNull() ?: 0
+            val newTotal = (newKgs * 100 + newGrams)
+
+            dbHelper.updateCatch(
+                catchId           = c.id,
+                newWeightOz       = null,
+                newWeightKg       = newTotal,
+                newLengthQuarters = null,
+                newLengthCm       = null,
+                species           = c.species
+            )
+            updateTournamentList()
+            dialogInstance.dismiss()
+        }
+
+        // 7) Cancel button
+        btnCancel.setOnClickListener {
+            dialogInstance.dismiss()
+        }
+    }
+
+
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
     private val checkAlarmRunnable = object : Runnable {
@@ -599,6 +671,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         }, 4000)
     }
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

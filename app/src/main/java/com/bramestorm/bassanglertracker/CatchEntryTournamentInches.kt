@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
@@ -21,6 +22,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -93,6 +95,11 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
+    // hold onto whatever AlertDialog you show
+    private lateinit var dialogInstance: AlertDialog
+    // satisfy the abstract BaseCatchEntryActivity contract
+    override val dialog: Any
+        get() = dialogInstance
 
 
     // Database Helper
@@ -136,18 +143,17 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private val lengthEntryLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val totalLengthQuarters = data?.getIntExtra("lengthTotalInches", 0) ?: 0
-            val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
-            val clipColor = data?.getStringExtra("clip_color") ?: ""
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let { data ->
+                    val totalLengthQuarters = data.getIntExtra("lengthTotalInches", 0)
+                    val species = data.getStringExtra("selectedSpecies")  ?: ""
+                    val clipColor = data.getStringExtra("clip_color") ?: ""
 
-            Log.d("DB_DEBUG", "✅ Received totalLengthQuarters: $totalLengthQuarters, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
-
-            if (totalLengthQuarters > 0) {
-                saveTournamentCatch(totalLengthQuarters, selectedSpecies, clipColor)
+                    if (totalLengthQuarters > 0) {
+                        saveTournamentCatch(totalLengthQuarters, species, clipColor)
+                    }
+                }
             }
-        }
     }
 
     //================ ON CREATE =======================================
@@ -222,7 +228,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         btnSetUpInches.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainInches.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
         btnAlarmInches.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
-        val dbHelper = CatchDatabaseHelper(this)
 
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
@@ -561,6 +566,67 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
+    private fun showTournamentEditDialog(c: CatchItem) {
+        // 1) inflate your 4ths layout
+        val dialogView = layoutInflater.inflate(
+            R.layout.dialog_edit_tournament_catch_inches,
+            null
+        )
+
+        // 2) find your views
+        val txtClipColor          = dialogView.findViewById<TextView>(R.id.txtClipColor)
+        val edtInches             = dialogView.findViewById<EditText>(R.id.edtTourWeightKgs)            // hint="inches"
+        val edtQuartersOfInch     = dialogView.findViewById<EditText>(R.id.edtTourWeightGrams)          // hint="⁄4ths"
+        val btnSave               = dialogView.findViewById<Button>(R.id.btnSaveEdtTourInches)
+        val btnCancel             = dialogView.findViewById<Button>(R.id.btnCancelEdtTourInches)
+
+        // 3) prefill from CatchItem.totalLengthQuarters (which stores quarters)
+        val totalQuarters = c.totalLengthQuarters ?: 0
+        edtInches.setText((totalQuarters / 4).toString())
+        edtQuartersOfInch.setText((totalQuarters % 4).toString())
+
+        // 4) show clip-color box
+        val clip = try {
+            ClipColor.valueOf(c.clipColor!!.uppercase())
+        } catch (_: Exception) {
+            ClipColor.RED
+        }
+        txtClipColor.background = createLayeredDrawable(
+            ContextCompat.getColor(this, clip.resId)
+        )
+
+        // 5) build + show the dialog
+        dialogInstance = AlertDialog.Builder(this)
+            .setTitle("Edit or Delete Catch")
+            .setView(dialogView)
+            .create()
+
+        dialogInstance.show()
+
+        // 6) Save → recombine inches*4 + quarters, update DB
+        btnSave.setOnClickListener {
+            val newInches   = edtInches.text.toString().toIntOrNull() ?: 0
+            val newQuarters = edtQuartersOfInch.text.toString().toIntOrNull() ?: 0
+            val newTotal    = (newInches * 4 + newQuarters)
+
+            dbHelper.updateCatch(
+                catchId           = c.id,
+                newWeightOz       = null,
+                newWeightKg       = null,
+                newLengthQuarters = newTotal,
+                newLengthCm       = null,
+                species           = c.species
+            )
+            updateTournamentList()
+            dialogInstance.dismiss()
+        }
+
+        // 7) Cancel just dismisses
+        btnCancel.setOnClickListener {
+            dialogInstance.dismiss()
+        }
+    }
+
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 
     private val checkAlarmRunnable = object : Runnable {
@@ -611,6 +677,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
     //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

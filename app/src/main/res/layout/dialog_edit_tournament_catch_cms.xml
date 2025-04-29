@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/popup_background_cms"
+    android:orientation="vertical"
+    android:padding="20dp" >
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginBottom="15dp"
+        android:text="Edit Tournament\nLength Cms"
+        android:textColor="@color/clip_blue"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:background="@color/lt_brown"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/txtClipColor"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.5"
+            android:layout_marginEnd="15dp"
+            android:background="@color/clip_red"/>
+
+        <EditText
+            android:id="@+id/edtTourLengthCms"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.5"
+            android:hint="@string/cms"
+            android:inputType="number"
+            android:textColor="@color/black"
+            android:background="@color/lite_grey"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:id="@+id/edtTourLengthDec"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.5"
+            android:layout_marginStart="15dp"
+            android:hint="@string/_0_9_mm"
+            android:inputType="number"
+            android:textColor="@color/black"
+            android:background="@color/lite_grey"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_weight="0.4"
+            android:text="@string/clip"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtEditTourCms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_weight="0.4"
+            android:text="@string/cms"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtEditTourDec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:padding="5dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_weight="0.4"
+            android:text="@string/_0_9_mm"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancelEdtTourCms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_marginHorizontal="5dp"
+            android:background="@drawable/btn_outline_orange"
+            android:text="@string/cancel"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+
+        <Button
+            android:id="@+id/btnSaveEdtTourCms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_marginHorizontal="5dp"
+            android:background="@drawable/btn_outline_blue"
+            android:text="@string/save"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+</LinearLayout>
+

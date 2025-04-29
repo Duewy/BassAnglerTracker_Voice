@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
@@ -21,8 +22,10 @@ import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
@@ -44,7 +47,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var btnMenu: Button
     private lateinit var btnMainPg:Button
     private lateinit var btnAlarm: Button
-
+    private lateinit var editDialog: AlertDialog
+    override val dialog: Any
+        get() = editDialog
 
     // Alarm Variables
     private var alarmHour: Int = -1
@@ -130,19 +135,17 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
     private val weightEntryLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val weightTotalOz = data?.getIntExtra("weightTotalOz", 0) ?: 0
-            val selectedSpecies = data?.getStringExtra("selectedSpecies") ?: ""
-            val clipColor = data?.getStringExtra("clip_color") ?: ""
+            result.data?.let { data ->
+                val weightTotalOz = data.getIntExtra("weightTotalOz", 0)
+                val species       = data.getStringExtra("selectedSpecies") ?: ""
+                val clipColor     = data.getStringExtra("clip_color") ?: ""
 
-            Log.d("DB_DEBUG", "✅ Received weightTotalOz: $weightTotalOz, selectedSpecies: $selectedSpecies, clip_color: $clipColor")
-
-            if (weightTotalOz > 0) {
-
-                saveTournamentCatch(weightTotalOz, selectedSpecies, clipColor)
+                if (weightTotalOz > 0) {
+                    saveTournamentCatch(weightTotalOz, species, clipColor)
+                }
             }
         }
     }
@@ -212,7 +215,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
-        val dbHelper = CatchDatabaseHelper(this)
 
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
@@ -310,7 +312,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         totalRealWeight.text = totalLbs.toString()
         totalDecWeight.text = totalOz.toString()
 
-        // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         val currentCount = dbHelper
             .getCatchesForToday("LbsOzs", getCurrentDate())
             .sortedByDescending { it.totalWeightOz ?: 0 }
@@ -326,8 +330,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             }
         }
     }
-
-
 
     //################## UPDATE TOURNAMENT LIST   ###################################
 
@@ -372,43 +374,32 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             isCullingEnabled = isCullingEnabled
         )
 
-        Log.d("CLIP_COLOR", "🎨 Available Colors: $availableClipColors")
-
         clearTournamentTextViews()
 
         runOnUiThread {
-            // Show 1 extra row (6th) for culled fish preview
             val loopLimit = minOf(sortedCatches.size, 6)
-
             for (i in 0 until loopLimit) {
-                if (i >= realWeights.size) continue
+                if (i >= realWeights.size) break
 
-                val catch = sortedCatches[i]
-                val totalWeightOz = catch.totalWeightOz ?: 0
-                val weightLbs = totalWeightOz / 16
-                val weightOz = totalWeightOz % 16
+                val item = sortedCatches[i]
+                val oz = item.totalWeightOz ?: 0
+                val lbs = oz / 16
+                val remOz = oz % 16
+
+                // fill in the TextViews
+                realWeights[i].text = lbs.toString()
+                decWeights[i].text  = remOz.toString()
 
                 val clipColor = try {
-                    ClipColor.valueOf(catch.clipColor?.uppercase() ?: "")
+                    ClipColor.valueOf(item.clipColor!!.uppercase())
                 } catch (_: Exception) {
                     ClipColor.RED
                 }
 
-                realWeights[i].text = weightLbs.toString()
-                decWeights[i].text = weightOz.toString()
-
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
-                val layeredDrawable = createLayeredDrawable(baseColor)
-                realWeights[i].background = layeredDrawable
-                decWeights[i].background = layeredDrawable
-
-                val textColor = if (clipColor == ClipColor.BLUE)
-                    resources.getColor(R.color.clip_white, theme)
-                else
-                    resources.getColor(R.color.black, theme)
-
-                realWeights[i].setTextColor(textColor)
-                decWeights[i].setTextColor(textColor)
+                val drawable  = createLayeredDrawable(baseColor)
+                realWeights[i].background = drawable
+                decWeights[i].background  = drawable
 
                 // Text overlays
                 colorLetters[i].text = when (clipColor.name) {
@@ -420,8 +411,16 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                     "WHITE" -> "W"
                     else -> "?"
                 }
-
-                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+                typeLetters[i].text  = getSpeciesCode(item.species ?: "")
+                // **long-press to edit/delete this exact item**
+                realWeights[i].setOnLongClickListener {
+                    showTournamentEditDialog(item)
+                    true
+                }
+                decWeights[i].setOnLongClickListener {
+                    showTournamentEditDialog(item)
+                    true
+                }
             }
 
             updateTotalWeight(tournamentCatches)
@@ -539,7 +538,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-    //!!!!!!!!!!!!!!!! Get SPECIES Letter !!!!!!!!!!!!!!!!!
+    //!!!!!!!!!!!!!!!! Get SPECIES Letters !!!!!!!!!!!!!!!!!
 
     private fun getSpeciesCode(species: String): String {
         return when (species.uppercase()) {
@@ -555,6 +554,63 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
+
+        //******************* EDIT Weights ********************************
+        private fun showTournamentEditDialog(c: CatchItem) {
+            // 1) inflate the custom layout
+            val dialogView = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_lbs, null)
+
+            // 2) pull out your in-layout buttons & fields
+            val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
+            val edtLbs       = dialogView.findViewById<EditText>(R.id.edtTourWeightLbs)
+            val edtOzs       = dialogView.findViewById<EditText>(R.id.edtTourWeightOzs)
+            val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourLbs)
+            val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourLbs)
+
+            // 3) pre-fill the fields
+            val weightOz = c.totalWeightOz ?: 0
+            edtLbs.setText((weightOz / 16).toString())
+            edtOzs.setText((weightOz % 16).toString())
+
+            // 4) color box
+            val clipColor = try {
+                ClipColor.valueOf(c.clipColor!!.uppercase())
+            } catch (_: Exception) {
+                ClipColor.RED
+            }
+            txtClipColor.background =
+                createLayeredDrawable(ContextCompat.getColor(this, clipColor.resId))
+
+            // 5) build & show **one** dialog
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Edit or Delete Catch")
+                .setView(dialogView)
+                .create()
+            dialog.show()
+
+            // 6) wire your in-layout Save
+            btnSave.setOnClickListener {
+                val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
+                val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
+                val newTotalOz = (newLbs * 16) + newOzs
+
+                dbHelper.updateCatch(
+                    catchId            = c.id,
+                    newWeightOz        = newTotalOz,
+                    newWeightKg        = null,
+                    newLengthQuarters  = null,
+                    newLengthCm        = null,
+                    species            = c.species
+                )
+                updateTournamentList()
+                dialog.dismiss()
+            }
+
+            // 7) …and Cancel
+            btnCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
 
 
 
@@ -581,7 +637,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     }
 
 
-    // Start Alarm
+    //!!!!!!!  Start Alarm  !!!!!!!!
     private fun startAlarm() {
         // ✅ Ensure raw file exists
         mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound)
@@ -607,6 +663,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }, 4000)
     }
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -661,7 +718,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     }
 
 
-
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -691,7 +747,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     //+++++++ Create Boarder Around Clip Color ++++++++++++++++++++
 
-
     private fun createLayeredDrawable(baseColor: Int): Drawable {
         val colorDrawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -709,6 +764,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
+    //                  VOICE CONTROLS
     // --- Voice Control: override to receive speech transcripts ---
 
     override fun onSpeechResult(transcript: String) {
