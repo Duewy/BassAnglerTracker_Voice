@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothProfile
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,7 +30,7 @@ import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.voice.BluetoothTestDialogFragment
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
-import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.Date
 
 
@@ -53,13 +54,16 @@ class SetUpActivity : AppCompatActivity() {
 
     // --------------- Permission Codes for GPS and Porcupine ----------------
     companion object {
+        private const val REQUEST_RECORD_AUDIO              = 100
+        private const val REQUEST_BLUETOOTH_CONNECT         = 101
+        private const val BT_REQUEST_CODE                   = 104
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-        private const val REQUEST_VOICE_SETUP = 2001
-        private const val BT_REQUEST_CODE = 3003
-        private const val AUDIO_PERM_REQ = 4001
-        private const val PREFS_NAME              = "BassAnglerTrackerPrefs"
-        private const val KEY_VOICE_CONTROL       = "VOICE_CONTROL_ENABLED"
-        private const val KEY_LAST_VOICE_DATE   = "VOICE_LAST_TOGGLE_DATE"
+        private const val REQUEST_VOICE_SETUP               = 2001
+
+        private const val PREFS_NAME                        = "BassAnglerTrackerPrefs"
+        private const val KEY_VOICE_CONTROL                 = "VOICE_CONTROL_ENABLED"
+        private const val KEY_LAST_VOICE_DATE               = "VOICE_LAST_TOGGLE_DATE"
+        private const val KEY_USE_BLUETOOTH_MODE            = "VOICE_USE_BLUETOOTH"
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
@@ -235,39 +239,64 @@ class SetUpActivity : AppCompatActivity() {
         }
 
         //------ VOICE CONTROL ----------------
-        tglVoice.setOnCheckedChangeListener(null)
-        val isOn = prefs.getBoolean(KEY_VOICE_CONTROL, false)
-        tglVoice.isChecked = isOn
-        tglVoice.background = if (isOn)
-            ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
-        else
-            ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
-
-        // 3) Now wire the listener that *updates* prefs + UI + behavior:
         tglVoice.setOnCheckedChangeListener { _, isChecked ->
-            // save new state in the same prefs file
-            prefs.edit()
-                .putBoolean(KEY_VOICE_CONTROL, isChecked)
-                .apply()
+            if (isChecked) {
+                // 1) RECORD_AUDIO check
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.RECORD_AUDIO
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.RECORD_AUDIO),
+                        REQUEST_RECORD_AUDIO
+                    )
+                    tglVoice.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
 
-            // toggle the button’s outline
-            tglVoice.background = if (isChecked)
+                // 2) BLUETOOTH_CONNECT check (only on Android 12+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                        REQUEST_BLUETOOTH_CONNECT
+                    )
+                    tglVoice.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+
+                // 3) All permissions are granted → choose mic source
+                val usingBluetooth = isBluetoothConnectedSafe()
+                val sourceName = if (usingBluetooth) "Bluetooth mic" else "phone mic"
+               positionedToast("🤙 Voice control enabled using $sourceName 🤳")
+
+                // (Optional) persist which source we’ll use
+                prefs.edit()
+                    .putBoolean(KEY_USE_BLUETOOTH_MODE, usingBluetooth)
+                    .putBoolean(KEY_VOICE_CONTROL, true)
+                    .apply()
+
+                startVoiceService()
+            } else {
+                // disable
+                prefs.edit().putBoolean(KEY_VOICE_CONTROL, false).apply()
+                stopVoiceService()
+                positionedToast("⚠️ Voice control disabled 🚫️")
+            }
+
+            // update toggle UI color
+            tglVoice.background = if (tglVoice.isChecked)
                 ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
             else
                 ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
-
-            if (isChecked) {
-                if (!checkBluetoothHeadset()) positionedToast("⚠️ No Bluetooth headset detected.")
-                ensureAudioPermissions {
-                    startActivityForResult(
-                        Intent(this, VoiceSetupActivity::class.java),
-                        REQUEST_VOICE_SETUP
-                    )
-                }
-            } else {
-                stopVoiceService()
-            }
-        }
+        }//-------------------END -- tglVoice -------------------------------------------
 
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
@@ -327,37 +356,10 @@ class SetUpActivity : AppCompatActivity() {
             } else {
                 // setup failed or was canceled → roll back the toggle
                 prefs.edit().putBoolean("voice_enabled", false).apply()
-                tglVoice.isChecked = false
+                tglVoice.isChecked = false      //todo Should we add tglVoice.text = "Disabled" and tglVoice.background = orange ?????
             }
         }
     }
-
-    private fun ensureAudioPermissions(onGranted: () -> Unit) {
-        val perms = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED) {
-            perms += Manifest.permission.RECORD_AUDIO
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.FOREGROUND_SERVICE_MICROPHONE
-            ) != PackageManager.PERMISSION_GRANTED) {
-            perms += Manifest.permission.FOREGROUND_SERVICE_MICROPHONE
-        }
-
-        if (perms.isNotEmpty()) {
-            audioPermissionCallback = onGranted
-            ActivityCompat.requestPermissions(
-                this,
-                perms.toTypedArray(),
-                AUDIO_PERM_REQ
-            )
-        } else {
-            onGranted()
-        }
-    }
-
 
 
     private fun startVoiceService() {
@@ -447,70 +449,95 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
 
-    //--------------- Request Permissions for GPS and Porcupine ----------------
-    override fun onRequestPermissionsResult(
+    private fun showBluetoothRequiredDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Bluetooth Required")
+            .setMessage("Voice control won’t run until a Bluetooth microphone is connected and tested.")
+            .setPositiveButton("Test Now") { _, _ ->
+                BluetoothTestDialogFragment().show(supportFragmentManager, "bt_test")
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+
+    //--------------- Request Permissions for GPS and Bluetooth ----------------
+    // ---------- Permission Callbacks ------------
+        override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+        grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
 
-            BT_REQUEST_CODE -> {
-                if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
-                    // user just granted Bluetooth; re–invoke your toggle logic
-                    if (checkBluetoothHeadset()) {
-                        positionedToast("✅ Bluetooth headset connected.")
+            when (requestCode) {
+                REQUEST_RECORD_AUDIO -> {
+                    if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                        // user granted mic → re‐toggle on
+                        tglVoice.isChecked = true
                     } else {
-                        positionedToast("⚠️ No headset paired or powered on.")
+                        positionedToast("🚫 Audio permission denied.")
                     }
-                } else {
-                    positionedToast("🚫 Bluetooth permission denied; voice won’t work.")
-                    tglVoice.isChecked = false
+                }
+
+                REQUEST_BLUETOOTH_CONNECT -> {
+                    if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                        // user granted BT_CONNECT → re‐toggle on
+                        tglVoice.isChecked = true
+                    } else {
+                        positionedToast("🚫 Bluetooth permission denied.")
+                    }
+                }
+
+                LOCATION_PERMISSION_REQUEST_CODE -> {
+                    if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                        enableGps()
+                    } else {
+                        positionedToast("🚫 GPS permission denied.")
+                        tglGPS.isChecked = false
+                        disableGps()
+                    }
                 }
             }
+        }//================= END onRequestPermissionResult ==============================
 
-            LOCATION_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED
-                ) {
-                    enableGps()
-                } else {
-                    positionedToast("🚫 GPS permission denied.")
-                    tglGPS.isChecked = false
-                    disableGps()
-                }
+        // ---------- Safe Bluetooth check ---------
+        private fun isBluetoothConnectedSafe(): Boolean {
+            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return false
+            return try {
+                adapter.getProfileConnectionState(BluetoothProfile.HEADSET) ==
+                        BluetoothAdapter.STATE_CONNECTED
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Bluetooth CONNECT permission missing", e)
+                false
             }
         }
+
+        //------------------------ Enable GPS ------------------------
+        private fun enableGps() {
+            sharedPreferences.edit()
+                .putBoolean("GPS_ENABLED", true)
+                .apply()
+            // one call, always positioned the same
+            positionedToast("GPS is Enabled")
+        }
+
+        //------------------------ Disable GPS ------------------------
+        private fun disableGps() {
+            sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
+            positionedToast("GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.")
+        }
+
+    //======================= onResume ==========================================
+        override fun onResume() {
+            super.onResume()
+            loadTournamentSpeciesSpinner() // Refreshes list if species were updated
+        }
+
+        //!!!!!!!!!!!!!!! For Shared Sessions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        private fun isVoiceModeEnabled(): Boolean {
+            val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+            return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+        }
+
     }
-
-
-    //------------------------ Enable GPS ------------------------
-    private fun enableGps() {
-        sharedPreferences.edit()
-            .putBoolean("GPS_ENABLED", true)
-            .apply()
-        // one call, always positioned the same
-        positionedToast("GPS is Enabled")
-    }
-
-    //------------------------ Disable GPS ------------------------
-    private fun disableGps() {
-        sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
-        positionedToast("GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.")
-    }
-
-//======================= onResume ==========================================
-    override fun onResume() {
-        super.onResume()
-        loadTournamentSpeciesSpinner() // Refreshes list if species were updated
-    }
-
-    //!!!!!!!!!!!!!!! For Shared Sessions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    private fun isVoiceModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
-        return prefs.getBoolean("VOICE_MODE_ENABLED", false)
-    }
-
-}
 //================END==========================

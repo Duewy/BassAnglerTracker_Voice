@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.training
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.voice.VoiceInteractionFlows
 
 class VoiceInteractionHelper(
     private val activity: Activity,
@@ -31,6 +32,10 @@ class VoiceInteractionHelper(
 
     fun stopListening() {
        commandManager.stopListening()
+    }
+
+    fun startAddCatchSequence() {
+        runFlow(VoiceInteractionFlows.addCatchFlow)
     }
 
 

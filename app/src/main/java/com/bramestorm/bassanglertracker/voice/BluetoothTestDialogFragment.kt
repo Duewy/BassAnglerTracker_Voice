@@ -99,7 +99,8 @@ class BluetoothTestDialogFragment : DialogFragment() {
         return AlertDialog.Builder(requireContext())
             .setView(view)
             .create()
-    }
+    }//=============== END BluetoothTestDialogFragment =====================
+
 
     override fun onDestroy() {
         super.onDestroy()
