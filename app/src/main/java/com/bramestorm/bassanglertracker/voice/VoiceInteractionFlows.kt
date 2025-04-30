@@ -1,32 +1,33 @@
+// === VoiceInteractionFlows.kt ===
 package com.bramestorm.bassanglertracker.voice
 
+import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
+
+/**
+ * A single step in a voice-driven interaction flow.
+ */
 data class VoiceStep(
-    val prompt: String,
+    val prompt: (helper: VoiceInteractionHelper) -> String,
     val pattern: Regex,
-    val onMatch: (MatchResult) -> Unit,
-    val onNoMatch: () -> Unit = { /* reprompt */ }
+    val onMatch: (match: MatchResult, helper: VoiceInteractionHelper) -> Unit,
+    val onNoMatch: (helper: VoiceInteractionHelper) -> Unit = { helper ->
+        helper.speak("Sorry, I didn’t catch that. Please repeat.")
+    }
 )
 
+/**
+ * Collection of static, reusable steps or configurations for voice flows.
+ */
 object VoiceInteractionFlows {
-    val addCatchFlow = listOf(
-        VoiceStep(
-            prompt  = "Catch Caddy here. Over to you.",
-            pattern = Regex(".*over.*", RegexOption.IGNORE_CASE),
-            onMatch = { /* move to speciesStep */ }
+    /**
+     * First step in any catch flow: wake phrase.
+     */
+    val wakeStep = VoiceStep(
+        prompt = { _ -> "Catch Caddy, here and waiting for your instructions. Over." },
+        pattern = Regex(
+            ".*over.*",
+            setOf(RegexOption.IGNORE_CASE)
         ),
-        VoiceStep(
-            prompt  = "Please say species.",
-            pattern = Regex("(largemouth bass|smallmouth bass|crappie|...)", RegexOption.IGNORE_CASE),
-            onMatch = { match -> /* store species = match.groups[1] */ },
-            onNoMatch = { /* "Sorry, didn’t catch that—species again." */ }
-        ),
-        VoiceStep( /* weight step */ ),
-        VoiceStep( /* length step, if needed */ ),
-        VoiceStep( /* clip color step */ ),
-        VoiceStep(
-            prompt  = "So you caught a {species} weighing {lbs} pounds {oz} ounces on the {color} clip—correct? Over.",
-            pattern = Regex(".*over and out.*", RegexOption.IGNORE_CASE),
-            onMatch = { /* saveCatch() */ }
-        )
+        onMatch = { _, _ -> /* proceed to next step in the flow */ }
     )
 }

@@ -16,8 +16,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -30,8 +28,8 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.ParsedCatch
-import com.bramestorm.bassanglertracker.training.VoiceCatchParse
+import com.bramestorm.bassanglertracker.training.CatchMode
+import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -55,6 +53,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private var alarmHour: Int = -1
     private var alarmMinute: Int = -1
     private var alarmTriggered: Boolean = false
+
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
@@ -97,29 +96,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
 
-
     // Database Helper
     private lateinit var dbHelper: CatchDatabaseHelper
 
-    // --- voice-to-text callback handler ---
-    private val recognitionListener = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle?) {}
-        override fun onBeginningOfSpeech() {}
-        override fun onRmsChanged(rmsdB: Float) {}
-        override fun onBufferReceived(buffer: ByteArray?) {}
-        override fun onEndOfSpeech() {}
-        override fun onError(error: Int) {
-            Toast.makeText(this@CatchEntryTournament, "Speech error $error", Toast.LENGTH_SHORT).show()
-        }
-        override fun onResults(results: Bundle) {
-            results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                ?.firstOrNull()
-                ?.let { onSpeechResult(it) }
-        }
-        override fun onPartialResults(partial: Bundle?) {}
-        override fun onEvent(eventType: Int, params: Bundle?) {}
-    }
+    // Voice Helper
+    private var voiceControlEnabled = false
+    private lateinit var voiceHelper: VoiceInteractionHelper
 
     // Tournament Configuration
     private var tournamentCatchLimit: Int = 4
@@ -150,20 +132,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-    //================ ON CREATE =======================================
+    //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
 
-        //******  Initialize speech recognizer ***********************
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
-            setRecognitionListener(recognitionListener)
-        }
-        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
-
+        val voiceOn = intent.getBooleanExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, false)
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         btnMenu = findViewById(R.id.btnMenu)
@@ -204,14 +178,38 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         txtColorLetter6 = findViewById(R.id.txtColorLetter6)
 
 
-
+        voiceHelper = VoiceInteractionHelper(
+            this,
+            object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() {}
+                override fun onError(error: Int) {}
+                override fun onResults(results: Bundle?) {}
+                override fun onPartialResults(partial: Bundle?) {}
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            },
+            CatchMode.TOURNAMENT_LBS_OZS,
+           // onCommandAction = { /* raw transcript if you care */ }
+        )
+            // GET VAlUES from SetUp page -----------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
         tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
 
-        btnTournamentCatch.setOnClickListener { showWeightPopup() }
+        //----ADD a CATCH button is clicked -----------
+        btnTournamentCatch.setOnClickListener {
+            if (voiceOn) {
+                voiceHelper.startCatchSequence()
+            } else {
+                showWeightPopup()  // your manual entry
+            }
+        }
+
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
@@ -764,19 +762,17 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
-    //                  VOICE CONTROLS
-    // --- Voice Control: override to receive speech transcripts ---
-
     override fun onSpeechResult(transcript: String) {
-
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->        //todo Why is totalWeightOzs NOT totalWeightOz  MAY CAUSE ISSUES!!!!!!!
-            if (p.totalWeightOzs> 0) saveTournamentCatch(p.totalWeightOzs, p.species, p.clipColor)
-        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
+        // no-op
     }
 
-    // --- Voice Control: override to start listening on wake event ---
+    /**
+     * Also required by the base.  You could use this
+     * if you wanted the old “wake” event to kick off VCC,
+     * but we’re using a double-tap listener instead.
+     */
     override fun onVoiceWake() {
-        recognizer.startListening(recognizerIntent)
+        // no-op
     }
 
 }//################## END  ################################

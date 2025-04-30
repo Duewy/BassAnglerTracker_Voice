@@ -315,7 +315,7 @@ class SetUpActivity : AppCompatActivity() {
 
         //---  Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
-
+            val voiceOn = prefs.getBoolean(KEY_VOICE_CONTROL, false)
             val nextActivity = when {
                 isFunDaySelected && isWeightSelected && isImperialSelected -> CatchEntryLbsOzs::class.java
                 isFunDaySelected && isWeightSelected && isMetricSelected -> CatchEntryKgs::class.java
@@ -337,14 +337,16 @@ class SetUpActivity : AppCompatActivity() {
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                     }
+                    putExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, voiceOn)
                 }
+
                 startActivity(intent)
             } else {
                positionedToast("⚠️ Please select a Measurement and Unit Type!")
             }
         }
-    }
-    //=================== END of ON CREATE ================================
+
+    }    //=================== END of ON CREATE ================================
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
