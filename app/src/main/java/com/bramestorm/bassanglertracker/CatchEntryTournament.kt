@@ -91,7 +91,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var totalRealWeight: TextView
     private lateinit var totalDecWeight: TextView
 
-    private lateinit var txtGPSNotice: TextView
+    private lateinit var txtGPSNotice:  TextView
+    private lateinit var txtVCCTourLbs: TextView
 
     private var availableClipColors: List<ClipColor> = emptyList()
     private val flashHandler = Handler(Looper.getMainLooper())
@@ -144,6 +145,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         btnMainPg = findViewById(R.id.btnMainPg)
         btnAlarm = findViewById(R.id.btnAlarm)
         txtGPSNotice = findViewById(R.id.txtGPSNotice)
+        txtVCCTourLbs = findViewById(R.id.txtVCCTourLbs)
 
         // Assign TextViews
         firstRealWeight = findViewById(R.id.firstRealWeight)
@@ -195,11 +197,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
            // onCommandAction = { /* raw transcript if you care */ }
         )
             // GET VAlUES from SetUp page -----------
-        tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
-        typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
-        tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
-        measurementSystem = intent.getStringExtra("unitType") ?: "weight"
-        isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
+        tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)       // Culling Values
+        typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"                 // Typical Markers colors
+        tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"      // Tournament Species
+        measurementSystem = intent.getStringExtra("unitType") ?: "weight"                 // Type of Measuring
+        isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)     // Is Culling / Tournament mode
+        voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
 
         //----ADD a CATCH button is clicked -----------
         btnTournamentCatch.setOnClickListener {
@@ -234,6 +237,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
     }
+
+    override val dialog = MyWeightEntryDialog(this)  // or however you construct it
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -661,6 +666,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }, 4000)
     }
 
+
+
     @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -762,6 +769,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
+        // ------------ VCC Enabled Set Up Voice Control ----------------
     override fun onSpeechResult(transcript: String) {
         // no-op
     }
@@ -771,6 +779,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
      * if you wanted the old “wake” event to kick off VCC,
      * but we’re using a double-tap listener instead.
      */
+        // ------------ Double Tap Wakes App Up for VCC --------------
     override fun onVoiceWake() {
         // no-op
     }

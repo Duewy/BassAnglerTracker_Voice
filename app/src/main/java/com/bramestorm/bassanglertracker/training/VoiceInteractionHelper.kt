@@ -115,17 +115,18 @@ class VoiceInteractionHelper(
     fun isTournamentMode(): Boolean = when (currentMode) {
         CatchMode.TOURNAMENT_LBS_OZS,
         CatchMode.TOURNAMENT_INCHES_QUARTERS,
+        CatchMode.TOURNAMENT_METRIC,
         CatchMode.TOURNAMENT_KGS -> true
         else -> false
     }
 
-    fun getNextClipColor(): String = TODO("Provide next available clip color from your logic")
-    fun caughtCount(): Int = TODO("Return number of fish caught so far")
-    fun targetCount(): Int = TODO("Return tournament limit or 1 for Fun Day")
-    fun totalWeightLbsOz(): String = TODO("Compute and format cumulative weight in lbs/oz")
-    fun timeToAlarm(): String = TODO("Compute time remaining until alarm or return current time")
-    fun saveCatch(species: String, lbs: Int, oz: Int): Nothing = TODO("Persist the catch to your DB")
-    fun finishFlow() = stopListening()
+    private fun getNextClipColor(): String = TODO("Provide next available clip color from your logic")
+    private fun caughtCount(): Int = TODO("Return number of fish caught so far")
+    private fun targetCount(): Int = TODO("Return tournament limit or 1 for Fun Day")
+    private fun totalWeightLbsOz(): String = TODO("Compute and format cumulative weight in lbs/oz")
+    private fun timeToAlarm(): String = TODO("Compute time remaining until alarm or return current time")
+    private fun saveCatch(species: String, lbs: Int, oz: Int): Nothing = TODO("Persist the catch to your DB")
+    private fun finishFlow() = stopListening()
 
     /**
      * Dynamically builds the catch-utterance step based on mode, species list, and clip colors.

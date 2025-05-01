@@ -1,15 +1,19 @@
 package com.bramestorm.bassanglertracker.base
 
 import android.Manifest
+import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.view.KeyEvent
+import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,9 +30,35 @@ import com.bramestorm.bassanglertracker.voice.VoiceControlService
  */
 abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
+    private var lastVolDownTap = 0L
+    private var lastVolUpTap   = 0L
+
     companion object {
         private const val AUDIO_REQUEST_CODE = 42
         private const val VOICE_WAKE_ACTION = "com.bramestorm.bassanglertracker.VOICE_WAKE"
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        val now = SystemClock.elapsedRealtime()
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                if (now - lastVolDownTap < 400) {
+                    onVoiceWake()
+                    lastVolDownTap = 0L
+                    return true
+                }
+                lastVolDownTap = now
+            }
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                if (now - lastVolUpTap < 400) {
+                    onManualWake()
+                    lastVolUpTap = 0L
+                    return true
+                }
+                lastVolUpTap = now
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     abstract val dialog: Any
@@ -114,6 +144,23 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
             recognizer.startListening(recognizerIntent)
         }
     }
+
+    /**
+     * Called on a Volume-Up double-tap.
+     * By default: if your `dialog` is a Dialog (or PopupWindow) instance, show it.
+     * Subclasses can override this to call whatever “show manual catch” method they need.
+     */
+    protected open fun onManualWake() {
+        when (dialog) {
+            is Dialog       -> (dialog as Dialog).show()
+            is PopupWindow  -> (dialog as PopupWindow).showAsDropDown(/* anchor view */)
+            else            -> {
+                // or call a method on your subclass, e.g. showWeightPopup()
+            }
+        }
+    }
+
+
 
     private val recognitionListener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {}

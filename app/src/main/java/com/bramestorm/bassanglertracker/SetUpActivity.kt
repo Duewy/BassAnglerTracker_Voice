@@ -337,7 +337,7 @@ class SetUpActivity : AppCompatActivity() {
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                     }
-                    putExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, voiceOn)
+                    putExtra("VCC_ENABLED", tglVoice.isChecked)
                 }
 
                 startActivity(intent)

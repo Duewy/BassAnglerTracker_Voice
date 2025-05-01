@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:background="@color/softlock_green"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/softlock_green"
-    tools:context=".CatchEntryTournament">
+    tools:context=".CatchEntryTournament"
+    android:paddingTop="5dp">
 
     <ImageView
         android:id="@+id/imageView"
@@ -489,6 +490,8 @@
         android:id="@+id/txtGPSNotice"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="15dp"
         android:text="@string/gps_on"
         android:gravity="center"
         android:textAlignment="center"
@@ -498,30 +501,30 @@
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="@id/totalRealWeight"
         app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"
-        app:layout_constraintEnd_toStartOf="@id/totalRealWeight"
-        android:layout_marginEnd="15dp"/>
+        app:layout_constraintStart_toStartOf="@id/txtColorLetter1"/>
 
     <TextView
         android:id="@+id/totalRealWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.2"
         android:background="@color/clip_white"
         android:gravity="center"
         android:textAlignment="gravity"
         android:textColor="@color/black"
         android:textSize="48sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@id/sixthRealWeight"
         app:layout_constraintHeight_percent="0.1"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_weightView"
-        app:layout_constraintWidth_percent="0.2" />
+        app:layout_constraintStart_toStartOf="@id/firstRealWeight"
+        android:layout_marginStart="25dp"
+        app:layout_constraintTop_toBottomOf="@id/total_weightView"    />
 
     <TextView
         android:id="@+id/txtLbHolder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
         android:gravity="bottom"
         android:text="@string/lbs"
         android:textColor="@color/black"
@@ -536,6 +539,8 @@
         android:id="@+id/totalDecWeight"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.2"
+        android:layout_marginStart="5dp"
         android:background="@color/clip_white"
         android:gravity="center"
         android:textAlignment="gravity"
@@ -546,13 +551,13 @@
         app:layout_constraintEnd_toStartOf="@+id/txtHolderOzs"
         app:layout_constraintHeight_percent="0.1"
         app:layout_constraintStart_toEndOf="@id/txtLbHolder"
-        app:layout_constraintTop_toBottomOf="@+id/total_weightView"
-        app:layout_constraintWidth_percent="0.2" />
+        app:layout_constraintTop_toBottomOf="@+id/total_weightView" />
 
     <TextView
         android:id="@+id/txtHolderOzs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
         android:gravity="bottom"
         android:text="@string/ozs"
         android:textColor="@color/black"
@@ -562,6 +567,23 @@
         app:layout_constraintBottom_toBottomOf="@id/totalDecWeight"
         app:layout_constraintStart_toEndOf="@id/totalDecWeight" />
 
+
+    <TextView
+        android:id="@+id/txtVCCTourLbs"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="VCC\nON"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealWeight"
+        app:layout_constraintStart_toEndOf="@id/txtHolderOzs"
+        app:layout_constraintTop_toTopOf="@id/totalRealWeight"
+        app:layout_constraintVertical_bias="0.0" />
 
     <LinearLayout
         android:layout_width="match_parent"
