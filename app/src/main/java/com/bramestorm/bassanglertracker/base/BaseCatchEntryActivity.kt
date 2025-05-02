@@ -13,11 +13,13 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.view.KeyEvent
-import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper
+import com.bramestorm.bassanglertracker.utils.FishSpecies
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 
 /**
@@ -74,6 +76,17 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        // ✅ Register species for voice recognition
+        FishSpecies.allSpeciesList.forEach {
+            VoiceInputMapper.registerUserSpecies(it)
+        }
+
+        val userSpecies = SharedPreferencesManager.getUserAddedSpeciesList(this)
+        userSpecies.forEach {
+            VoiceInputMapper.registerUserSpecies(it)
+        }
 
         // Start/stop service and register receiver based on user preference
         val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
@@ -153,7 +166,6 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
     protected open fun onManualWake() {
         when (dialog) {
             is Dialog       -> (dialog as Dialog).show()
-            is PopupWindow  -> (dialog as PopupWindow).showAsDropDown(/* anchor view */)
             else            -> {
                 // or call a method on your subclass, e.g. showWeightPopup()
             }

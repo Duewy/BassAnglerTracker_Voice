@@ -233,6 +233,8 @@
     <string name="edit_tourn_kgs">Edit Tournament\nWeight Kgs</string>
     <string name="save">Save</string>
     <string name="voice_control_tag">Voice\nControl</string>
+    <string name="vcc_tournament_lbs">Voice Control\n Touranment Lbs</string>
+    <string name="clip_color">Clip Color</string>
 
 
     //species

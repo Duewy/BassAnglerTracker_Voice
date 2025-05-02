@@ -140,7 +140,7 @@ object SharedPreferencesManager {
         Log.d(TAG, "Saved all species list: $allSpecies")
     }
 
-    private fun getUserAddedSpeciesList(context: Context): List<String> {
+    fun getUserAddedSpeciesList(context: Context): List<String> {
         val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
         val defaultSpecies = listOf("Largemouth", "Smallmouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
             .map { normalizeSpeciesName(it) }

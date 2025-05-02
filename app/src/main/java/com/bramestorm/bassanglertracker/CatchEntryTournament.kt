@@ -25,11 +25,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.CatchMode
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
+import com.bramestorm.bassanglertracker.ui.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -46,8 +48,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var btnMainPg:Button
     private lateinit var btnAlarm: Button
     private lateinit var editDialog: AlertDialog
-    override val dialog: Any
-        get() = editDialog
 
     // Alarm Variables
     private var alarmHour: Int = -1
@@ -104,6 +104,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
 
+
     // Tournament Configuration
     private var tournamentCatchLimit: Int = 4
     private var measurementSystem: String = "weight"
@@ -133,12 +134,42 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
+    override val dialog: DialogFragment
+        get() {
+            // build the species list
+            val speciesList = if (tournamentSpecies.equals("Bass", true)) {
+                listOf("Large Mouth", "Small Mouth")
+            } else {
+                listOf(tournamentSpecies)
+            }
+
+            // compute the _current_ available clip colors
+            val clipColorList = calculateAvailableClipColors(
+                dbHelper,
+                catchType            = "LbsOzs",
+                date                 = getCurrentDate(),
+                tournamentCatchLimit = tournamentCatchLimit,
+                isCullingEnabled     = isCullingEnabled
+            ).map { it.name }  // convert from your enum to String list
+
+            // return a brand‐new DialogFragment each time, wiring in the real save call
+            return MyWeightEntryDialogFragment(
+                speciesList     = speciesList,
+                clipColorList   = clipColorList
+            ) { lbs, oz, species, clipColor ->
+                // lbs & oz come from the three spinners
+                val totalWeightOz = lbs * 16 + oz
+                saveTournamentCatch(totalWeightOz, species, clipColor)
+            }
+        }
+
+
     //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
 
-        val voiceOn = intent.getBooleanExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, false)
+
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         btnMenu = findViewById(R.id.btnMenu)
@@ -179,10 +210,11 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         txtColorLetter5 = findViewById(R.id.txtColorLetter5)
         txtColorLetter6 = findViewById(R.id.txtColorLetter6)
 
-
+    // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
         voiceHelper = VoiceInteractionHelper(
             this,
-            object : RecognitionListener {
+            CatchMode.TOURNAMENT_LBS_OZS,       // ← mode goes second
+            object : RecognitionListener {      // ← listener goes third
                 override fun onReadyForSpeech(params: Bundle?) {}
                 override fun onBeginningOfSpeech() {}
                 override fun onRmsChanged(rmsdB: Float) {}
@@ -192,10 +224,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 override fun onResults(results: Bundle?) {}
                 override fun onPartialResults(partial: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
-            },
-            CatchMode.TOURNAMENT_LBS_OZS,
-           // onCommandAction = { /* raw transcript if you care */ }
+            }
         )
+
             // GET VAlUES from SetUp page -----------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)       // Culling Values
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"                 // Typical Markers colors
@@ -203,10 +234,11 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"                 // Type of Measuring
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)     // Is Culling / Tournament mode
         voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
+        val voiceOn = intent.getBooleanExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, false)
 
         //----ADD a CATCH button is clicked -----------
         btnTournamentCatch.setOnClickListener {
-            if (voiceOn) {
+            if (voiceControlEnabled) {
                 voiceHelper.startCatchSequence()
             } else {
                 showWeightPopup()  // your manual entry
@@ -217,6 +249,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
 
+        updateVccLabel()
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
@@ -227,7 +260,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
         super.onResume()
+        updateVccLabel()
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+    }
+
+    //----------- On Manual Wake ------------------------
+    override fun onManualWake() {
+        showWeightPopup()   // launches PopupWeightEntry… Activity
     }
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
@@ -238,7 +277,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         mediaPlayer?.release()
     }
 
-    override val dialog = MyWeightEntryDialog(this)  // or however you construct it
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
@@ -491,7 +529,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         catchType: String,
         date: String,
         tournamentCatchLimit: Int,
-        isCullingEnabled: Boolean
+        isCullingEnabled: Boolean,
     ): List<ClipColor> {
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
         val sorted = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
@@ -769,7 +807,19 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
-        // ------------ VCC Enabled Set Up Voice Control ----------------
+    // ----------- Check if VCC is Enabled ------------------
+    private fun updateVccLabel() {
+        if (voiceControlEnabled) {
+            txtVCCTourLbs.text = "Voice Control ON"
+            txtVCCTourLbs.setTextColor(Color.parseColor("#00800D")) // Green
+        } else {
+            txtVCCTourLbs.text = "Manual Mode"
+            txtVCCTourLbs.setTextColor(Color.parseColor("#FF000000")) // Black
+        }
+    }
+
+
+    // ------------ VCC Enabled Set Up Voice Control ----------------
     override fun onSpeechResult(transcript: String) {
         // no-op
     }

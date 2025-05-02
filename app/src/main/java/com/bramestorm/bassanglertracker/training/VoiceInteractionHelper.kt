@@ -28,8 +28,8 @@ enum class CatchMode {
  */
 class VoiceInteractionHelper(
     private val activity: AppCompatActivity,
-    private val currentMode: RecognitionListener,
-    private val onCommandAction: CatchMode
+    private val currentMode: CatchMode,
+    private val recognitionListener: RecognitionListener
 ){
     private val responseManager = VoiceResponseManager(activity)
     private val commandManager = VoiceCommandManager(

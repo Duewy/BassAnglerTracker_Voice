@@ -1,42 +1,116 @@
 package com.bramestorm.bassanglertracker.training
-// Adjusting for Language and Accent Issues
-// A Listing of Acceptable Words and or Phrases from the User
 
-
+/**
+ * VoiceInputMapper handles known speech misfires and provides canonical names for commands and species.
+ * This includes dynamic registration of new user-added species.
+ */
 object VoiceInputMapper {
 
-    private val speciesVoiceAliases = mapOf(
-        "Clear List" to listOf("clear list", "clearlist"),      //-------- User Words or Phrases
-        "Save Catch" to listOf("Save the Catch"),
-        "New Fish" to listOf("new fish"),
-        "Caught" to listOf("caught"),
-        "Log Entry" to listOf("log entry"),
+    // Stores all voice-to-species mappings (static + dynamic)
+    private val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
+        // PHRASES / COMMANDS
+        put("clear list", "Clear List")
+        put("clearlist", "Clear List")
+        put("save the catch", "Save Catch")
+        put("new fish", "New Fish")
+        put("caught", "Caught")
+        put("log entry", "Log Entry")
 
-        "Large Mouth" to listOf("Largemouth","large mouth", "largemouth", "lard mouth", "large moth"), //-- Species
-        "Small Mouth" to listOf("Smallmouth","small mouth", "smallmouth", "smile mouth"),
-        "Crappie" to listOf("crappie", "crap pie", "crappy", "crop e"),
-        "Sunfish" to listOf("sunfish", "sun fish", "some fish"),
-        "White Bass" to listOf("white bass", "why bass", "wide bass"),
-        "Rock Bass" to listOf("rock bass", "rack bass", "rug bass"),
-        "Bowfin" to listOf("bowfin", "bow fin", "bovine"),
-        "Muskie" to listOf("muskie", "musky", "musky fish"),
-        "Walleye" to listOf("wall eye", "wallie", "walleye"),
-        "Pike" to listOf("pike", "northern pike"),
-        "Perch" to listOf("perch"),
-        "Cat Fish" to listOf("catfish", "cat fish"),
-        "Gar Pike" to listOf("gar pike", "gor pike", "guard pike"),
-        "Bullhead" to listOf("bullhead", "bull head", "bald head"),
-        "Red Drum" to listOf("red drum", "redrum", "red fish"),
-        "Carp" to listOf("carp", "cart"),
-                                                       // Add more mappings as needed
-    )
+        // SPECIES: Largemouth
+        put("largemouth", "Largemouth")
+        put("large mouth", "Largemouth")
+        put("lard mouth", "Largemouth")
+        put("large moth", "Largemouth")
 
-    private val voiceToSpecies = speciesVoiceAliases
-        .flatMap { (canonical, aliases) -> aliases.map { it.lowercase() to canonical } }
-        .toMap()
+        // Smallmouth
+        put("smallmouth", "Small Mouth")
+        put("small mouth", "Small Mouth")
+        put("smile mouth", "Small Mouth")
 
-    fun getSpeciesFromVoice(input: String): String {
-        return voiceToSpecies[input.trim().lowercase()] ?: "Unrecognized"
+        // Crappie
+        put("crappie", "Crappie")
+        put("crap pie", "Crappie")
+        put("crappy", "Crappie")
+        put("crop e", "Crappie")
+
+        // Sunfish
+        put("sunfish", "Sunfish")
+        put("sun fish", "Sunfish")
+        put("some fish", "Sunfish")
+
+        // White Bass
+        put("white bass", "White Bass")
+        put("why bass", "White Bass")
+        put("wide bass", "White Bass")
+
+        // Rock Bass
+        put("rock bass", "Rock Bass")
+        put("rack bass", "Rock Bass")
+        put("rug bass", "Rock Bass")
+
+        // Bowfin
+        put("bowfin", "Bowfin")
+        put("bow fin", "Bowfin")
+        put("bovine", "Bowfin")
+
+        // Muskie
+        put("muskie", "Muskie")
+        put("musky", "Muskie")
+        put("musky fish", "Muskie")
+
+        // Walleye
+        put("walleye", "Walleye")
+        put("wall eye", "Walleye")
+        put("wallie", "Walleye")
+        put("while I", "Walleye")
+
+        // Pike
+        put("pike", "Pike")
+        put("northern pike", "Pike")
+
+        // Perch
+        put("perch", "Perch")
+        put("purse", "Perch")
+
+        // Catfish
+        put("catfish", "Cat Fish")
+        put("cat fish", "Cat Fish")
+
+        // Gar Pike
+        put("gar pike", "Gar Pike")
+        put("gor pike", "Gar Pike")
+        put("guard pike", "Gar Pike")
+
+        // Bullhead
+        put("bullhead", "Bullhead")
+        put("bull head", "Bullhead")
+        put("bald head", "Bullhead")
+
+        // Red Drum
+        put("red drum", "Red Drum")
+        put("redrum", "Red Drum")
+        put("red fish", "Red Drum")
+
+        // Carp
+        put("carp", "Carp")
+        put("cart", "Carp")
     }
 
-}//----------- END VoiceInputMapper -------------------------
+    /**
+     * Register a new user-added species so it’s recognized by the voice system.
+     */
+    fun registerUserSpecies(name: String) {
+        val cleaned = name.trim().lowercase()
+        baseSpeciesVoiceMap[cleaned] = name
+    }
+
+    /**
+     * Given some voice input (full or partial), return the matched canonical species or command.
+     */
+    fun getSpeciesFromVoice(input: String): String {
+        val cleaned = input.trim().lowercase()
+        return baseSpeciesVoiceMap.keys.firstOrNull { cleaned.contains(it) }?.let {
+            baseSpeciesVoiceMap[it]!!
+        } ?: "Unrecognized"
+    }
+}
