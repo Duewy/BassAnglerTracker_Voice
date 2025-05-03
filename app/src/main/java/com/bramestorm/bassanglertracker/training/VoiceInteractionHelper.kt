@@ -1,4 +1,3 @@
-// === VoiceInteractionHelper.kt ===
 package com.bramestorm.bassanglertracker.training
 
 import android.speech.RecognitionListener
@@ -6,12 +5,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.R
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.saveUserVoiceMap
 import com.bramestorm.bassanglertracker.voice.VoiceInteractionFlows
 import com.bramestorm.bassanglertracker.voice.VoiceStep
 
-/**
- * Modes for different catch entry screens.
- */
 enum class CatchMode {
     FUN_LBS_OZS,
     TOURNAMENT_LBS_OZS,
@@ -23,52 +20,74 @@ enum class CatchMode {
     TOURNAMENT_KGS
 }
 
-/**
- * Centralized helper for all voice-driven interactions (e.g., Add Catch flow).
- */
 class VoiceInteractionHelper(
     private val activity: AppCompatActivity,
     private val currentMode: CatchMode,
     private val recognitionListener: RecognitionListener
-){
+) {
     private val responseManager = VoiceResponseManager(activity)
     private val commandManager = VoiceCommandManager(
         activity,
-        onCommandReceived = { spokenText -> handleRecognitionResult(spokenText) },
-        onError = { _ -> speak("Sorry, I didn't catch that.") },
-        onAlreadyListening = { Toast.makeText(activity, "Voice already listening. Please wait...", Toast.LENGTH_SHORT).show() }
+        onCommandReceived = { spokenText -> handleTranscript(spokenText) },
+        onError = { speak("Sorry, I didn't catch that.") },
+        onAlreadyListening = {
+            Toast.makeText(activity, "Voice already listening. Please wait...", Toast.LENGTH_SHORT).show()
+        }
     )
 
-    // Flow state
     private lateinit var currentFlow: List<VoiceStep>
     private var currentStepIndex = 0
 
-    /**
-     * Legacy alias for startCatchSequence
-     */
+    var onCommandRecognized: ((String) -> Unit)? = null
+    lateinit var userVoiceMap: MutableMap<String, String>
+
+    private var lastUnknownPhrase: String? = null
+    private var unknownPhraseFailCount: Int = 0
+    private val correctionThreshold = 4
+
     fun startAddCatchSequence() = startCatchSequence()
 
-    /**
-     * Entry point: builds and runs the two-step catch flow.
-     */
     fun startCatchSequence() {
         val catchStep = buildCatchStep(currentMode)
         runFlow(listOf(VoiceInteractionFlows.wakeStep, catchStep))
     }
 
-    /**
-     * Drives a list of VoiceSteps from start to finish.
-     */
     private fun runFlow(flow: List<VoiceStep>) {
         currentFlow = flow
         currentStepIndex = 0
         speak(currentFlow[0].prompt(this))
-        startListening()
+        startListening { _ -> }
     }
 
-    /**
-     * Called by RecognitionListener when speech is recognized.
-     */
+    fun handleTranscript(transcript: String) {
+        val cleanedInput = transcript.trim().lowercase()
+        val mapped = userVoiceMap[cleanedInput] ?: cleanedInput
+
+        if (VoiceCommandList.isKnownTournamentCommand(mapped)) {
+            onCommandRecognized?.invoke(mapped)
+            lastUnknownPhrase = null
+            unknownPhraseFailCount = 0
+        } else {
+            if (mapped.isBlank()) {
+                speak("I didn’t catch anything. Please try again.")
+                return
+            }
+
+            if (mapped == lastUnknownPhrase) {
+                unknownPhraseFailCount++
+            } else {
+                lastUnknownPhrase = mapped
+                unknownPhraseFailCount = 1
+            }
+
+            if (unknownPhraseFailCount >= correctionThreshold) {
+                promptToSaveUnknownPhrase(mapped)
+            } else {
+                speak("Sorry, I didn’t understand. Try again.")
+            }
+        }
+    }
+
     private fun handleRecognitionResult(spokenText: String) {
         val step = currentFlow[currentStepIndex]
         val match = step.pattern.find(spokenText)
@@ -85,24 +104,18 @@ class VoiceInteractionHelper(
         }
     }
 
-    /**
-     * Start listening via the SpeechRecognizer.
-     */
-    fun startListening() = commandManager.startListening()
-
-    /**
-     * Stop the SpeechRecognizer.
-     */
+    fun startListening(onResult: (String) -> Unit) = commandManager.startListening()
     fun stopListening() = commandManager.stopListening()
 
-    /**
-     * Speak text via TTS and optional callback on done.
-     */
     fun speak(message: String, onDone: (() -> Unit)? = null) = responseManager.speak(message, onDone)
 
-    /**
-     * Shutdown and clean up voice resources.
-     */
+    fun listenForConfirmation(onResult: (String) -> Unit) {
+        startListening { confirmationTranscript ->
+            val response = confirmationTranscript.trim().lowercase()
+            onResult(response)
+        }
+    }
+
     fun shutdown() {
         Log.d("Voice", "🔻 VoiceInteractionHelper shutting down...")
         commandManager.stopListening()
@@ -110,7 +123,21 @@ class VoiceInteractionHelper(
         responseManager.shutdown()
     }
 
-    // --- Application-specific hooks to implement ---
+    private fun promptToSaveUnknownPhrase(unknownPhrase: String) {
+        speak("I didn’t recognize that. Should I remember this phrase for next time?")
+        listenForConfirmation { userResponse ->
+            if (userResponse == "yes") {
+                speak("Okay. What did you mean to say?")
+                listenForConfirmation { intendedPhrase ->
+                    userVoiceMap[unknownPhrase] = intendedPhrase.lowercase()
+                    saveUserVoiceMap(activity, userVoiceMap)
+                    speak("Got it. I’ll remember that.")
+                }
+            } else {
+                speak("Okay, not saving it.")
+            }
+        }
+    }
 
     fun isTournamentMode(): Boolean = when (currentMode) {
         CatchMode.TOURNAMENT_LBS_OZS,
@@ -120,24 +147,22 @@ class VoiceInteractionHelper(
         else -> false
     }
 
-    private fun getNextClipColor(): String = TODO("Provide next available clip color from your logic")
-    private fun caughtCount(): Int = TODO("Return number of fish caught so far")
-    private fun targetCount(): Int = TODO("Return tournament limit or 1 for Fun Day")
-    private fun totalWeightLbsOz(): String = TODO("Compute and format cumulative weight in lbs/oz")
-    private fun timeToAlarm(): String = TODO("Compute time remaining until alarm or return current time")
-    private fun saveCatch(species: String, lbs: Int, oz: Int): Nothing = TODO("Persist the catch to your DB")
+    private fun getNextClipColor(): String = TODO("Provide next available clip color")
+    private fun caughtCount(): Int = TODO("Return number of fish caught")
+    private fun targetCount(): Int = TODO("Return tournament catch limit")
+    private fun totalWeightLbsOz(): String = TODO("Format total weight")
+    private fun timeToAlarm(): String = TODO("Return time until alarm")
+    private fun saveCatch(species: String, lbs: Int, oz: Int): Nothing = TODO("Persist catch to DB")
     private fun finishFlow() = stopListening()
 
-    /**
-     * Dynamically builds the catch-utterance step based on mode, species list, and clip colors.
-     */
     private fun buildCatchStep(mode: CatchMode): VoiceStep {
-        val speciesList = /* load from SharedPreferences */ listOf("largemouth bass", "smallmouth bass", "crappie", "pike", "perch", "walleye", "catfish", "panfish")
+        val speciesList = listOf("largemouth bass", "smallmouth bass", "crappie", "pike", "perch", "walleye", "catfish", "panfish")
         val speciesPattern = speciesList.joinToString("|") { Regex.escape(it) }
         val clipColorsArray = if (isTournamentMode()) activity.resources.getStringArray(R.array.clip_colors) else emptyArray()
         val clipPattern = clipColorsArray.joinToString("|") { Regex.escape(it) }
 
-        val promptText = "I’m listening for your catch. Say, “I have caught a <species> and it weighs <X> pounds and <Y> ounces${if (isTournamentMode()) " and I put it on the Red clip" else ""}, Over.”"
+        val promptText = "I’m listening for your catch. Say, \"I have caught a <species> and it weighs <X> pounds and <Y> ounces${if (isTournamentMode()) " and I put it on the Red clip" else ""}, Over.\""
+
         val regexPattern =
             """
             I have caught a\s+($speciesPattern)\s+and it weighs\s+(\d{1,2})\s*(?:pounds|lbs?)\s*(?:and\s*)?(\d{1,2})\s*(?:ounces|ozs?)(?:\s+and I put it on the\s+($clipPattern)\s+clip)?\s*,\s*Over
@@ -150,7 +175,7 @@ class VoiceInteractionHelper(
                 val species = match.groupValues[1]
                 val lbs = match.groupValues[2].toInt()
                 val oz = match.groupValues[3].toInt()
-                val spokenColor = match.groupValues.getOrNull(4).takeIf { it!!.isNotEmpty() }
+                val spokenColor = match.groupValues.getOrNull(4)?.takeIf { it.isNotEmpty() }
                 val color = spokenColor ?: if (helper.isTournamentMode()) helper.getNextClipColor() else ""
 
                 helper.saveCatch(species, lbs, oz)

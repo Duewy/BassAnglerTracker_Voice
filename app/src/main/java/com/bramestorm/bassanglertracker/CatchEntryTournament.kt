@@ -30,6 +30,7 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.CatchMode
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.loadUserVoiceMap
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.ui.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.GpsUtils
@@ -103,6 +104,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     // Voice Helper
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
+    lateinit var userVoiceMap: MutableMap<String, String>       // Correct with Mispronunciations ReWrite the Word/Phrase DataBase
+
 
 
     // Tournament Configuration
@@ -213,8 +216,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
         voiceHelper = VoiceInteractionHelper(
             this,
-            CatchMode.TOURNAMENT_LBS_OZS,       // ← mode goes second
-            object : RecognitionListener {      // ← listener goes third
+            CatchMode.TOURNAMENT_LBS_OZS,
+            object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {}
                 override fun onBeginningOfSpeech() {}
                 override fun onRmsChanged(rmsdB: Float) {}
@@ -225,9 +228,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 override fun onPartialResults(partial: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
             }
-        )
+        ).apply {
+            userVoiceMap = loadUserVoiceMap(this@CatchEntryTournament).toMutableMap()
+            onCommandRecognized = { command: String -> handleCommand(command) }
+        }
 
-            // GET VAlUES from SetUp page -----------
+
+        // GET VAlUES from SetUp page -----------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)       // Culling Values
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"                 // Typical Markers colors
         tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"      // Tournament Species
@@ -819,10 +826,23 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     }
 
 
+    private fun handleCommand(command: String) {
+        when (command) {
+            "add a catch", "save fish", "save that", "tag fish", "record fish", "log catch" -> {
+                showWeightPopup()
+            }
+            else -> {
+                Toast.makeText(this, "Command recognized but no action assigned.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
     // ------------ VCC Enabled Set Up Voice Control ----------------
     override fun onSpeechResult(transcript: String) {
-        // no-op
+        voiceHelper.handleTranscript(transcript)
     }
+
 
     /**
      * Also required by the base.  You could use this

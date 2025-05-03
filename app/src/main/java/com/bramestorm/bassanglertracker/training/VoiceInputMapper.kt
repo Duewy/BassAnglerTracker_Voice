@@ -1,13 +1,22 @@
 package com.bramestorm.bassanglertracker.training
 
+import android.content.Context
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
 /**
  * VoiceInputMapper handles known speech misfires and provides canonical names for commands and species.
  * This includes dynamic registration of new user-added species.
  */
 object VoiceInputMapper {
 
+
+    //to hold and correct all the MisSpoken Words
+    val userVoiceMap = mutableMapOf<String, String>()
+
+
     // Stores all voice-to-species mappings (static + dynamic)
-    private val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
+    val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
         // PHRASES / COMMANDS
         put("clear list", "Clear List")
         put("clearlist", "Clear List")
@@ -105,12 +114,37 @@ object VoiceInputMapper {
     }
 
     /**
-     * Given some voice input (full or partial), return the matched canonical species or command.
+     * Help the user by LEARNING from mistakes and given some voice input (full or partial), return the matched canonical species or command.
      */
     fun getSpeciesFromVoice(input: String): String {
         val cleaned = input.trim().lowercase()
-        return baseSpeciesVoiceMap.keys.firstOrNull { cleaned.contains(it) }?.let {
-            baseSpeciesVoiceMap[it]!!
-        } ?: "Unrecognized"
+
+        // Step 1: Check user-trained phrases
+        userVoiceMap.keys.firstOrNull { cleaned.contains(it) }?.let {
+            return userVoiceMap[it]!!
+        }
+
+        // Step 2: Check default (base) map
+        baseSpeciesVoiceMap.keys.firstOrNull { cleaned.contains(it) }?.let {
+            return baseSpeciesVoiceMap[it]!!
+        }
+
+        return "Unrecognized"
     }
+
+    fun saveUserVoiceMap(context: Context, voiceMap: Map<String, String>) {
+        val prefs = context.getSharedPreferences("user_voice_map", Context.MODE_PRIVATE)
+        val json = Gson().toJson(voiceMap)
+        prefs.edit().putString("voice_map_json", json).apply()
+    }
+
+
+    fun loadUserVoiceMap(context: Context): Map<String, String> {
+        val prefs = context.getSharedPreferences("user_voice_map", Context.MODE_PRIVATE)
+        val json = prefs.getString("voice_map_json", "{}")
+        val type = object : TypeToken<Map<String, String>>() {}.type
+        return Gson().fromJson(json, type)
+    }
+
+
 }

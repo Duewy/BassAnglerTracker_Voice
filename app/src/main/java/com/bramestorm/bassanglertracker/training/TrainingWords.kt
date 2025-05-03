@@ -26,6 +26,8 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.loadUserVoiceMap
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.saveUserVoiceMap
 import java.util.Locale
 
 
@@ -42,6 +44,7 @@ class TrainingWords : AppCompatActivity() {
     private val recordAudioRequestCode = 101
     private lateinit var textToSpeech: TextToSpeech
     private var selectedPhrase: PracticePhrase? = null
+    private lateinit var userVoiceMap: MutableMap<String, String>
 
 
 
@@ -50,6 +53,10 @@ class TrainingWords : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training_words)
+
+        VoiceInputMapper.loadUserVoiceMap(this)
+        userVoiceMap = loadUserVoiceMap(this).toMutableMap()
+
 
         speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -120,6 +127,12 @@ class TrainingWords : AppCompatActivity() {
 
 
     }// ================== END On Create ===================================
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveUserVoiceMap(this, userVoiceMap)
+    }
+
 
     private fun savePhraseStatsToPrefs() {
         val prefs = getSharedPreferences("PhraseTrainingPrefs", MODE_PRIVATE)
@@ -277,24 +290,61 @@ class TrainingWords : AppCompatActivity() {
         val normalizedInput = rawInput.lowercase().replace(" ", "").trim()
         val currentPhraseTextRaw = txtSayThis.text.toString().replace("Say This: ", "").trim()
         val currentPhraseText = currentPhraseTextRaw.lowercase().replace(" ", "")
-
         val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
         val matchedNormalized = matchedSpecies.lowercase().replace(" ", "")
 
-            // Find the matching phrase object
         val phrase = phraseList.find {
             it.text.lowercase().replace(" ", "") == currentPhraseText
         }
 
         if (matchedNormalized == currentPhraseText && phrase != null) {
-            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n✔ That is a match for \"${phrase.text}\"!"
+            txtWhatComputerHeard.text = "✔ You said: \"$rawInput\" — That’s a match for \"${phrase.text}\"!"
             phrase.successCount++
+            phrase.recentFailures = 0
+            phrase.lastMisheardInput = null
         } else {
-            txtWhatComputerHeard.text = "You said: \"$rawInput\"\n❌ Species not recognized."
+            txtWhatComputerHeard.text = "❌ You said: \"$rawInput\"\nThat’s not quite right."
             phrase?.failureCount = (phrase?.failureCount ?: 0) + 1
+
+            if (phrase != null) {
+                // Ignore if user said "no" previously
+                if (phrase.skipSuggestionsFor.contains(rawInput)) return
+
+                // Track misheard phrase
+                if (phrase.lastMisheardInput == rawInput) {
+                    phrase.recentFailures++
+                } else {
+                    phrase.lastMisheardInput = rawInput
+                    phrase.recentFailures = 1
+                }
+
+                // Only after 4 identical mistakes
+                if (phrase.recentFailures >= 4) {
+                    showCorrectionDialog(rawInput, phrase.text, phrase)
+                }
+            }
         }
         savePhraseStatsToPrefs()
         updateSayThisUI()
+    }
+
+
+    private fun showCorrectionDialog(rawInput: String, intended: String, phrase: PracticePhrase) {
+        AlertDialog.Builder(this)
+            .setTitle("Having Trouble?")
+            .setMessage("You’ve said \"$rawInput\" 4 times. Should we remember this as a shortcut for \"$intended\"?")
+            .setPositiveButton("Yes") { _, _ ->
+                val cleanedInput = rawInput.trim().lowercase()
+                VoiceInputMapper.userVoiceMap[cleanedInput] = intended
+                Toast.makeText(this, "Shortcut saved for \"$intended\"!", Toast.LENGTH_SHORT).show()
+                phrase.recentFailures = 0
+            }
+            .setNegativeButton("No") { _, _ ->
+                phrase.skipSuggestionsFor.add(rawInput)
+                Toast.makeText(this, "No problem — we won’t ask again for \"$rawInput\".", Toast.LENGTH_SHORT).show()
+                phrase.recentFailures = 0
+            }
+            .show()
     }
 
 

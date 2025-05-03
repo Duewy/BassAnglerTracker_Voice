@@ -12,6 +12,7 @@ import android.os.SystemClock
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +35,8 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
     private var lastVolDownTap = 0L
     private var lastVolUpTap   = 0L
+    private var isWakeReceiverRegistered = false
+
 
     companion object {
         private const val AUDIO_REQUEST_CODE = 42
@@ -96,6 +99,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
                 Intent(this, VoiceControlService::class.java)
             )
             registerReceiver(wakeReceiver, IntentFilter(VOICE_WAKE_ACTION))
+            isWakeReceiverRegistered = true
         }
 
         // Request microphone permission and initialize SpeechRecognizer
@@ -110,6 +114,18 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         } else {
             initSpeechRecognizer()
         }
+    }//=============== END onCreate ====================================
+
+    override fun onDestroy() {
+        recognizer.destroy()
+        try {
+            if (isWakeReceiverRegistered) {
+                unregisterReceiver(wakeReceiver)
+            }
+        } catch (e: IllegalArgumentException) {
+            Log.w("VCC", "Receiver not registered — skipping unregister.")
+        }
+        super.onDestroy()
     }
 
     private fun initSpeechRecognizer() {
@@ -142,11 +158,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        recognizer.destroy()
-        unregisterReceiver(wakeReceiver)
-        super.onDestroy()
-    }
+
 
     /**
      * Called when the BroadcastReceiver sees a VOICE_WAKE action.

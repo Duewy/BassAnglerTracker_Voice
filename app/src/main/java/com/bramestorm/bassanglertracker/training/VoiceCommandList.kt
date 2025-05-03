@@ -29,6 +29,19 @@ object VoiceCommandList {
         PracticePhrase("White Bass", false)
 
     )
+
+    val knownTournamentCommands = listOf(
+        "add a catch",
+        "save fish",
+        "save that",
+        "tag fish",
+        "record fish",
+        "log catch"
+    )
+
+    fun isKnownTournamentCommand(command: String): Boolean {
+        return knownTournamentCommands.contains(command.lowercase())
+    }
 }
 
 

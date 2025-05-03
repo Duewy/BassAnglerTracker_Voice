@@ -9,10 +9,10 @@ object VoiceParser {
     // Step 1: Pre-process the transcript for known misheard words
     private fun correctMisheardWords(input: String): String {
         var corrected = input
-        VoiceInputMapper.speciesVoiceAliases.forEach { (_, aliasList) ->
+        VoiceInputMapper.baseSpeciesVoiceMap.forEach { (_, aliasList) ->
             aliasList.forEach { alias ->
                 if (corrected.contains(alias, ignoreCase = true)) {
-                    corrected = corrected.replace(alias, VoiceInputMapper.getSpeciesFromVoice(alias), ignoreCase = true)
+                    corrected = corrected.replace(alias, VoiceInputMapper.getSpeciesFromVoice(alias.toString()), ignoreCase = true)
                 }
             }
         }
@@ -41,4 +41,12 @@ object VoiceParser {
     }
 
     // Later: Add parseKgs(), parseMetric(), parseInches(), etc.
+
+
+
+    private fun String.replace(alias: Char, speciesFromVoice: String, ignoreCase: Boolean): String {
+        return ".."
+    }//todo fix this up for tomorrow
+
 }
+
