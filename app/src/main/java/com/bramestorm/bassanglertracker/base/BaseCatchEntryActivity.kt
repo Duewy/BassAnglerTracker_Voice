@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.bramestorm.bassanglertracker.utils.FishSpecies
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.voice.VoiceAudioUtils
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 
 /**
@@ -47,17 +48,19 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         val now = SystemClock.elapsedRealtime()
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (now - lastVolDownTap < 400) {
-                    onVoiceWake()
+                if (now - lastVolUpTap < 400) {
+                    onVoiceWake()  // Combo detected
+                    lastVolUpTap = 0L
                     lastVolDownTap = 0L
                     return true
                 }
                 lastVolDownTap = now
             }
             KeyEvent.KEYCODE_VOLUME_UP -> {
-                if (now - lastVolUpTap < 400) {
-                    onManualWake()
+                if (now - lastVolDownTap < 400) {
+                    onVoiceWake()  // Combo detected
                     lastVolUpTap = 0L
+                    lastVolDownTap = 0L
                     return true
                 }
                 lastVolUpTap = now
@@ -65,6 +68,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
+
 
     abstract val dialog: Any
     open lateinit var recognizer: SpeechRecognizer
@@ -94,11 +98,19 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         // Start/stop service and register receiver based on user preference
         val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
         if (prefs.getBoolean("voice_enabled", false)) {
+            // 👇 Play silent audio to claim Bluetooth media button control
+            VoiceAudioUtils.playSilentAudio(this)
             ContextCompat.startForegroundService(
                 this,
                 Intent(this, VoiceControlService::class.java)
             )
-            registerReceiver(wakeReceiver, IntentFilter(VOICE_WAKE_ACTION))
+            ContextCompat.registerReceiver(
+                this,
+                wakeReceiver,
+                IntentFilter(VOICE_WAKE_ACTION),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+
             isWakeReceiverRegistered = true
         }
 
@@ -115,6 +127,15 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
             initSpeechRecognizer()
         }
     }//=============== END onCreate ====================================
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val voiceControlEnabled = prefs.getBoolean("VOICE_CONTROL_ENABLED", false)
+        if (voiceControlEnabled) {
+            VoiceAudioUtils.playSilentAudio(this)
+        }
+    }
 
     override fun onDestroy() {
         recognizer.destroy()

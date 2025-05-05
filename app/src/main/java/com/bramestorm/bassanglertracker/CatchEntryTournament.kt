@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -15,10 +16,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.speech.RecognitionListener
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -26,13 +27,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import com.bramestorm.bassanglertracker.CatchEntryTournamentKgs.ClipColor
+import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.CatchMode
-import com.bramestorm.bassanglertracker.training.VoiceInputMapper.loadUserVoiceMap
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.ui.MyWeightEntryDialogFragment
+import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -153,7 +155,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 date                 = getCurrentDate(),
                 tournamentCatchLimit = tournamentCatchLimit,
                 isCullingEnabled     = isCullingEnabled
-            ).map { it.name }  // convert from your enum to String list
+            ).map { it.name }  // convert from the enum to String list
 
             // return a brand‐new DialogFragment each time, wiring in the real save call
             return MyWeightEntryDialogFragment(
@@ -166,11 +168,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             }
         }
 
-
-    //================START - ON CREATE =======================================
+ //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
+
+     // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
+     voiceHelper = VoiceInteractionHelper(this)
 
 
         dbHelper = CatchDatabaseHelper(this)
@@ -213,26 +217,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         txtColorLetter5 = findViewById(R.id.txtColorLetter5)
         txtColorLetter6 = findViewById(R.id.txtColorLetter6)
 
-    // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-        voiceHelper = VoiceInteractionHelper(
-            this,
-            CatchMode.TOURNAMENT_LBS_OZS,
-            object : RecognitionListener {
-                override fun onReadyForSpeech(params: Bundle?) {}
-                override fun onBeginningOfSpeech() {}
-                override fun onRmsChanged(rmsdB: Float) {}
-                override fun onBufferReceived(buffer: ByteArray?) {}
-                override fun onEndOfSpeech() {}
-                override fun onError(error: Int) {}
-                override fun onResults(results: Bundle?) {}
-                override fun onPartialResults(partial: Bundle?) {}
-                override fun onEvent(eventType: Int, params: Bundle?) {}
-            }
-        ).apply {
-            userVoiceMap = loadUserVoiceMap(this@CatchEntryTournament).toMutableMap()
-            onCommandRecognized = { command: String -> handleCommand(command) }
-        }
-
 
         // GET VAlUES from SetUp page -----------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)       // Culling Values
@@ -245,10 +229,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         //----ADD a CATCH button is clicked -----------
         btnTournamentCatch.setOnClickListener {
-            if (voiceControlEnabled) {
-                voiceHelper.startCatchSequence()
+            if (voiceControlEnabled) {                      //VCC kicks in for Catch Entry
+                voiceHelper.startListening { transcript ->
+                    processVoiceCommand(transcript)
+                }
             } else {
-                showWeightPopup()  // your manual entry
+                showWeightPopup()                        // user using Manual for Catch Entry
             }
         }
 
@@ -279,6 +265,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
+        voiceHelper.shutdown()
         handler.removeCallbacksAndMessages(null)
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
@@ -449,6 +436,15 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 realWeights[i].background = drawable
                 decWeights[i].background  = drawable
 
+                //------------- If Clip is Blue then Text is White
+                val textColor = if (clipColor == ClipColor.BLUE)
+                    resources.getColor(R.color.clip_white, theme)
+                else
+                    resources.getColor(R.color.black, theme)
+
+                realWeights[i].setTextColor(textColor)
+                decWeights[i].setTextColor(textColor)
+
                 // Text overlays
                 colorLetters[i].text = when (clipColor.name) {
                     "BLUE" -> "B"
@@ -616,6 +612,10 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourLbs)
 
             // 3) pre-fill the fields
+            edtLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
+            edtOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
+
+
             val weightOz = c.totalWeightOz ?: 0
             edtLbs.setText((weightOz / 16).toString())
             edtOzs.setText((weightOz % 16).toString())
@@ -641,6 +641,19 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
                 val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
                 val newWeightOz = (newLbs * 16) + newOzs
+
+                if (newWeightOz == 0) {
+                    edtLbs.setText("0")
+                    edtOzs.setText("0")
+                    edtLbs.requestFocus()
+                    edtLbs.setSelection(edtLbs.text.length)
+
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(edtLbs, InputMethodManager.SHOW_IMPLICIT)
+
+                    positionedToast("🚫 Weight cannot be 0 lbs 0 oz!")
+                    return@setOnClickListener
+                }
 
                 dbHelper.updateCatch(
                     catchId            = c.id,
@@ -840,8 +853,21 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // ------------ VCC Enabled Set Up Voice Control ----------------
     override fun onSpeechResult(transcript: String) {
-        voiceHelper.handleTranscript(transcript)
+        processVoiceCommand(transcript)
     }
+
+    private fun processVoiceCommand(transcript: String) {
+        val cleaned = transcript.lowercase().trim()
+
+        if (cleaned.contains("over")) {
+            Toast.makeText(this, "Finished listening: $cleaned", Toast.LENGTH_SHORT).show()
+            // Example: trigger catch popup
+            showWeightPopup()
+        } else {
+            Toast.makeText(this, "Listening... say 'Over' to finish.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
 
     /**
@@ -853,5 +879,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     override fun onVoiceWake() {
         // no-op
     }
+
 
 }//################## END  ################################

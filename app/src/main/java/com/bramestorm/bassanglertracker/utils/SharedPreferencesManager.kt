@@ -171,5 +171,10 @@ object SharedPreferencesManager {
         return name.trim().lowercase().replace(Regex("\\s+"), " ")
     }
 
+    fun isVoiceControlEnabled(context: Context): Boolean {
+        val prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        return prefs.getBoolean("VOICE_CONTROL_ENABLED", false)
+    }
+
 
 }//------------- END -------------------------------------------

@@ -116,6 +116,7 @@ android {
 
         // ✅ Android Media
         implementation(libs.androidx.media)
+        implementation("androidx.media:media:1.6.0")
 
 
         // 🧪 Compose UI Testing

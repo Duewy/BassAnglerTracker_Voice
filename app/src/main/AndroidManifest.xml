@@ -19,8 +19,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
 
     <!--  Bluetooth (Android 12+) - -->
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" android:required="false"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" android:required="false"/>
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:required="false"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" android:required="false"/>
 
@@ -222,6 +224,14 @@
             android:name=".voice.VoiceControlService"
             android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"
             android:exported="false" />
+        <service
+            android:name=".media.MediaButtonService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
 
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.UserTrainingVoiceCommands"
@@ -257,6 +267,13 @@
 
         <!-- Receiver for ALARMS  -->
         <receiver android:name=".alarm.AlarmReceiver" />
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
 
 
