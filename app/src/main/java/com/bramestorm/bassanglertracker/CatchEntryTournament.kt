@@ -122,6 +122,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // Request Codes
     private val requestAlarmSET = 1006
+    private val VCC_POPUP_REQUEST = 3000
 
 
     // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
@@ -176,7 +177,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         setContentView(R.layout.activity_tournament_view)
 
      // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-     voiceHelper = VoiceInteractionHelper(this)
+     voiceHelper = VoiceInteractionHelper(
+         this,
+         VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+         isTournament = true
+     )
+
      voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
 
      Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
@@ -745,7 +751,15 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
 
 
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API" +
+            "which brings increased type safety via an {@link ActivityResultContract} and the prebuilt" +
+            "contracts for common intents available in {@link androidx.activity.result.contract.ActivityResultContracts}," +
+            " provides hooks for" +
+            "testing, and allow receiving results in separate, testable classes independent from your activity. Use" +
+            " {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}" +
+            " with the appropriate {@link ActivityResultContract} and handling the result in the" +
+            "{@link ActivityResultCallback#onActivityResult(Object) callback}.")
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -754,23 +768,20 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
             alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
             alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
-            alarmTriggered = false // ✅ reset so the alarm can trigger again
+            alarmTriggered = false
 
             Log.d("ALARM_DEBUG", "✅ Alarm Set - hour=$alarmHour, minute=$alarmMinute")
 
             if (alarmHour != -1 && alarmMinute != -1) {
-                // Format time string for display
                 val amPm = if (alarmHour >= 12) "PM" else "AM"
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
                 val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
 
-                // Update button and show toast
                 btnAlarm.text = getString(R.string.alarm_set_to, timeString)
                 val toastMessage = getString(R.string.alarm_toast_message, timeString)
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show()
 
-                // Schedule alarm
                 val calendar = Calendar.getInstance().apply {
                     set(Calendar.HOUR_OF_DAY, alarmHour)
                     set(Calendar.MINUTE, alarmMinute)
@@ -783,9 +794,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 )
 
                 val mgr = getSystemService(ALARM_SERVICE) as AlarmManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    !mgr.canScheduleExactAlarms()
-                ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !mgr.canScheduleExactAlarms()) {
                     startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
                 } else {
                     mgr.setExactAndAllowWhileIdle(
@@ -794,10 +803,27 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                         pendingIntent
                     )
                 }
+
                 Log.d("ALARM_DEBUG", "⏰ Alarm scheduled for ${calendar.time}")
             }
         }
-    }
+
+        // ✅ This block now runs independently when VCC popup result returns
+        if (requestCode == VCC_POPUP_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            val weightOz = data.getIntExtra("weightTotalOz", -1)
+            val species = data.getStringExtra("selectedSpecies") ?: ""
+            val clipColor = data.getStringExtra("clip_color") ?: ""
+
+            Log.d("VCC", "🎣 Received voice entry: $species | $weightOz oz | Clip=$clipColor")
+
+            if (weightOz > 0) {
+                saveTournamentCatch(weightOz, species, clipColor)
+            }
+
+            updateTournamentList()
+        }
+    }//====== END onActivityResults =====================
+
 
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++

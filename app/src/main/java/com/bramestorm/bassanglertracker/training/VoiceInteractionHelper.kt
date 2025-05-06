@@ -15,7 +15,10 @@ import androidx.appcompat.app.AppCompatActivity
 import java.util.Locale
 
 class VoiceInteractionHelper(
-    private val activity: AppCompatActivity
+
+    private val activity: AppCompatActivity,
+    private val measurementUnit: MeasurementUnit,
+    private val isTournament: Boolean
 ) {
     private var speechRecognizer: SpeechRecognizer? = null
     private var tts: TextToSpeech? = null
@@ -31,6 +34,14 @@ class VoiceInteractionHelper(
         setupTTS()
         setupRecognizer()
     }
+
+    enum class MeasurementUnit {
+        LBS_OZ,
+        KG_G,
+        INCHES,
+        CM
+    }
+
 
     private fun setupTTS() {
         tts = TextToSpeech(activity) {
@@ -83,6 +94,22 @@ class VoiceInteractionHelper(
                     restartListening()
                     return
                 }
+                // Fill In Species if Missing
+                if (species.isEmpty()) {
+                    Log.w("VCC", "⚠️ No species detected in input: $spokenText")
+                    speak("What species of fish did you catch?")
+                    restartListening(2500)
+                    return
+                }
+
+                // Fill In Clip_Color if Missing
+                if (clipColor.isEmpty()) {
+                    Log.w("VCC", "⚠️ No clip color detected in input: $spokenText")
+                    speak("What clip color did you use?")
+                    restartListening(2500)
+                    return
+                }
+
 
                 // Store temporary catch
                 pendingCatch = CatchData(weight.first, weight.second, species, clipColor)
@@ -109,29 +136,43 @@ class VoiceInteractionHelper(
     }
 
     private fun handleConfirmation(input: String) {
-        awaitingConfirmation = false
-        if (input.contains("yes")) {
-            val c = pendingCatch ?: return
-            val totalOz = c.pounds * 16 + c.ounces
-
-            val resultIntent = Intent().apply {
-                putExtra("weightTotalOz", totalOz)
-                putExtra("selectedSpecies", c.species)
-                putExtra("clip_color", c.clipColor)
-                putExtra("catchType", "Tournament") // Adjust as needed
-                putExtra("isTournament", true)
-            }
-
-            speak("Catch saved.")
-            Handler(Looper.getMainLooper()).postDelayed({
-                activity.setResult(Activity.RESULT_OK, resultIntent)
-                activity.finish()
-            }, 2000)
-        } else {
-            speak("Okay, let's try again. Please tell me the weight and clip color of your catch.")
-            restartListening(2500)
+        if (!awaitingConfirmation) {
+            Log.w("VCC", "⚠️ Ignored stale confirmation. Already processed.")
+            return
         }
+
+        Log.d("VCC", "🧠 User confirmation received: \"$input\"")
+        awaitingConfirmation = false
+
+        val c = pendingCatch
+        if (c == null) {
+            Log.e("VCC", "❌ Cannot finalize catch – pendingCatch is null")
+            speak("I lost the catch details. Let's try again.")
+            restartListening(2500)
+            return
+        }
+
+        pendingCatch = null // ✅ Prevent accidental reuse
+        val totalOz = c.pounds * 16 + c.ounces
+
+        Log.d("VCC", "✅ Finalizing catch: ${c.pounds} lbs ${c.ounces} oz | ${c.species} | Clip=${c.clipColor} | totalOz=$totalOz")
+
+        val resultIntent = Intent().apply {
+            putExtra("weightTotalOz", totalOz)
+            putExtra("selectedSpecies", c.species)
+            putExtra("clip_color", c.clipColor)
+            putExtra("catchType", "Tournament")
+            putExtra("isTournament", true)
+        }
+
+        speak("Catch saved.")
+        Handler(Looper.getMainLooper()).postDelayed({
+            activity.setResult(Activity.RESULT_OK, resultIntent)
+            activity.finish()
+        }, 2000)
     }
+
+
 
     private fun extractWeight(text: String): Pair<Int, Int>? {
         val numberWords = mapOf(
@@ -161,14 +202,16 @@ class VoiceInteractionHelper(
     }
 
     private fun extractSpecies(text: String): String {
-        val bassWords = listOf("largemouth", "large mouth", "smallmouth", "small mouth")
-        return bassWords.firstOrNull { text.contains(it) }?.replace(" ", "") ?: ""
+                val species = VoiceInputMapper.getSpeciesFromVoice(text)
+        return if (species == "Unrecognized") "" else species
     }
 
+
     private fun extractClipColor(text: String): String {
-        val colors = listOf("red", "blue", "green", "yellow", "orange", "white")
-        return colors.firstOrNull { text.contains(it) }?.uppercase() ?: ""
+        return VoiceInputMapper.getClipColorFromVoice(text)
     }
+
+
 
     fun startListening(onResult: (String) -> Unit = {}) {
         if (isListening) {
@@ -187,10 +230,12 @@ class VoiceInteractionHelper(
         isListening = true
     }
 
+
     fun stopListening() {
         speechRecognizer?.stopListening()
         isListening = false
     }
+
 
     fun speak(text: String) {
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)

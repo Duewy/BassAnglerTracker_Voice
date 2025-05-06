@@ -15,6 +15,16 @@ object VoiceInputMapper {
     val userVoiceMap = mutableMapOf<String, String>()
 
 
+    val baseColorMap = mapOf(
+        "red" to "RED",
+        "blue" to "BLUE",
+        "green" to "GREEN",
+        "yellow" to "YELLOW",
+        "orange" to "ORANGE",
+        "white" to "WHITE"
+    )
+
+
     // Stores all voice-to-species mappings (static + dynamic)
     val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
         // PHRASES / COMMANDS
@@ -144,6 +154,11 @@ object VoiceInputMapper {
         val json = prefs.getString("voice_map_json", "{}")
         val type = object : TypeToken<Map<String, String>>() {}.type
         return Gson().fromJson(json, type)
+    }
+
+    fun getClipColorFromVoice(input: String): String {
+        val cleaned = input.trim().lowercase()
+        return baseColorMap.keys.firstOrNull { cleaned.contains(it) }?.let { baseColorMap[it] ?: "" } ?: ""
     }
 
 

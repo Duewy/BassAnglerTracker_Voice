@@ -132,9 +132,10 @@ class PopupVccTournLbs: Activity() {
             val selectedClipColor = spinnerClipColor.selectedItem?.toString()?.uppercase() ?: "RED"
             Log.d("CLIPS", "🎨 Selected Clip Color: $selectedClipColor")
 
-            val weightTensLbs = edtWeightTensLbs.toString().toIntOrNull() ?: 0
-            val weightLbs = edtWeightLbs.toString().toIntOrNull() ?: 0
-            val weightOz = edtWeightOz.toString().toIntOrNull() ?: 0
+            val weightTensLbs = edtWeightTensLbs.selectedItem.toString().toIntOrNull() ?: 0
+            val weightLbs     = edtWeightLbs.selectedItem.toString().toIntOrNull() ?: 0
+            val weightOz      = edtWeightOz.selectedItem.toString().toIntOrNull() ?: 0
+
             val totalWeightOz = ((((weightTensLbs * 10) + weightLbs) * 16) + weightOz)
 
             if (totalWeightOz == 0) {
