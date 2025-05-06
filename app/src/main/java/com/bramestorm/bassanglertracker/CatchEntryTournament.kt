@@ -765,7 +765,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         Log.d("ALARM_DEBUG", "📥 onActivityResult triggered with requestCode=$requestCode")
 
-        if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            if (requestCode == requestAlarmSET)  {
             alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
             alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
             alarmTriggered = false
@@ -809,18 +810,17 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
 
         // ✅ This block now runs independently when VCC popup result returns
-        if (requestCode == VCC_POPUP_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            val weightOz = data.getIntExtra("weightTotalOz", -1)
-            val species = data.getStringExtra("selectedSpecies") ?: ""
-            val clipColor = data.getStringExtra("clip_color") ?: ""
+            if (requestCode == VCC_POPUP_REQUEST) {
+                val weightOz = data.getIntExtra("weightTotalOz", -1)
+                val species = data.getStringExtra("selectedSpecies") ?: ""
+                val clipColor = data.getStringExtra("clip_color") ?: ""
 
-            Log.d("VCC", "🎣 Received voice entry: $species | $weightOz oz | Clip=$clipColor")
-
-            if (weightOz > 0) {
-                saveTournamentCatch(weightOz, species, clipColor)
+                Log.d("VCC", "🎣 Received voice entry: $species | $weightOz oz | Clip=$clipColor")
+                if (weightOz > 0) {
+                    saveTournamentCatch(weightOz, species, clipColor)
+                    updateTournamentList()
+                }
             }
-
-            updateTournamentList()
         }
     }//====== END onActivityResults =====================
 
