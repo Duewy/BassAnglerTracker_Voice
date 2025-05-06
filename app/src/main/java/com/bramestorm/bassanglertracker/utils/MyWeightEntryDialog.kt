@@ -22,8 +22,8 @@ class MyWeightEntryDialogFragment(
             .inflate(R.layout.popup_vcc_tourn_lbs, null)
 
         // 2) Find your spinners
-        val spSpecies   = view.findViewById<Spinner>(R.id.spinnerSpecies)
-        val spClipColor = view.findViewById<Spinner>(R.id.spinnerClipColor)
+        val spSpecies   = view.findViewById<Spinner>(R.id.spinnerSpeciesVCCLbs)
+        val spClipColor = view.findViewById<Spinner>(R.id.spinnerClipColorVCCLbs)
         val spLbsTens   = view.findViewById<Spinner>(R.id.spinnerLbsTens)
         val spLbsOnes   = view.findViewById<Spinner>(R.id.spinnerLbsOnes)
         val spOunces    = view.findViewById<Spinner>(R.id.spinnerOunces)

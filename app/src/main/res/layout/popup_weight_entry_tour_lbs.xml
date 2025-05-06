@@ -88,6 +88,8 @@
                 android:id="@+id/clipColorSpinner"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
+                android:focusable="true"
+                android:clickable="true"
                 android:background="@color/lite_grey"
                 android:entries="@array/clip_colors"
                 android:spinnerMode="dialog"

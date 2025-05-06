@@ -80,7 +80,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Spinner
-                android:id="@+id/spinnerSpecies"
+                android:id="@+id/spinnerSpeciesVCCLbs"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="30dp"
@@ -91,7 +91,7 @@
                 android:textStyle="bold" />
 
             <Spinner
-                android:id="@+id/spinnerClipColor"
+                android:id="@+id/spinnerClipColorVCCLbs"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:background="@color/lite_grey"
@@ -182,27 +182,51 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
+            <TextView
+                android:id="@+id/txtIfRequired"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="If Voice Control Fails Use Buttons Below"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="20dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
             <Button
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0.4"
                 android:background="@drawable/btn_outline_grey"
                 android:text="@string/cancel"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnSaveWeight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0.4"
                 android:background="@drawable/btn_menu_setup"
                 android:text="@string/save_catch"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
         </LinearLayout>

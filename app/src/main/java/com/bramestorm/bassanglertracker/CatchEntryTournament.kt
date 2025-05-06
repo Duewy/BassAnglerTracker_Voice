@@ -60,6 +60,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
+    private var launchFromWake = false
+
 
     // Weight Display TextViews
     private lateinit var firstRealWeight: TextView
@@ -175,9 +177,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
      // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
      voiceHelper = VoiceInteractionHelper(this)
+     voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+
+     Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
 
 
-        dbHelper = CatchDatabaseHelper(this)
+
+     dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         btnMenu = findViewById(R.id.btnMenu)
         btnMainPg = findViewById(R.id.btnMainPg)
@@ -225,7 +231,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"                 // Type of Measuring
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)     // Is Culling / Tournament mode
         voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
-        val voiceOn = intent.getBooleanExtra(Constants.EXTRA_VOICE_CONTROL_ENABLED, false)
 
         //----ADD a CATCH button is clicked -----------
         btnTournamentCatch.setOnClickListener {
@@ -247,7 +252,16 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         updateTournamentList()
         handler.postDelayed(checkAlarmRunnable, 60000)
-    }
+
+     Handler(Looper.getMainLooper()).post {
+         if (launchFromWake) {
+             Log.d("VCC_DEBUG", "🔊 Wake trigger → launching popup with voiceControlEnabled=$voiceControlEnabled")
+             showWeightPopup()
+             launchFromWake = false
+         }
+     }
+
+ }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // ------------- On RESUME --------- Check GPS  Statues --------------
@@ -260,6 +274,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     //----------- On Manual Wake ------------------------
     override fun onManualWake() {
         showWeightPopup()   // launches PopupWeightEntry… Activity
+        voiceControlEnabled = true
     }
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
@@ -275,7 +290,11 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
     private fun showWeightPopup() {
-        val intent = Intent(this, PopupWeightEntryTourLbs::class.java)
+        val intent = if (voiceControlEnabled) {
+            Intent(this, PopupVccTournLbs::class.java)
+        } else {
+            Intent(this, PopupWeightEntryTourLbs::class.java)
+        }
         intent.putExtra("isTournament", true)
 
         if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
@@ -877,7 +896,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
      */
         // ------------ Double Tap Wakes App Up for VCC --------------
     override fun onVoiceWake() {
-        // no-op
+        launchFromWake = true
     }
 
 

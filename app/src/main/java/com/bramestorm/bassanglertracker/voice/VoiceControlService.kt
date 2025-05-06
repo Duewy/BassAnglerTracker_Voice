@@ -18,6 +18,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
+import com.bramestorm.bassanglertracker.PopupVccTournLbs
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.ArrayDeque
@@ -176,7 +177,13 @@ class VoiceControlService : Service() {
 
 
     private fun onWake() {
-        Log.d(TAG, "onWake(): broadcasting VOICE_WAKE")
+        Log.d("VCC", "🔥 onWake(): Directly launching voice popup")
+
+        val popupIntent = Intent(this, PopupVccTournLbs::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        startActivity(popupIntent)
+
         mediaSession?.let { session ->
             session.isActive = false
             sendBroadcast(Intent("com.bramestorm.bassanglertracker.VOICE_WAKE"))

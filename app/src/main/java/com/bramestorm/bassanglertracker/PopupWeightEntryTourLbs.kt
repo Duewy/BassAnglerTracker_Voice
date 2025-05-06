@@ -1,5 +1,6 @@
 package com.bramestorm.bassanglertracker
 
+
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -113,5 +114,6 @@ class PopupWeightEntryTourLbs : Activity() {
             finish()
         }
     }//```````````` END ON CREATE ```````````````````````````
+
 
 }//================== END  ==========================
