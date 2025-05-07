@@ -235,6 +235,15 @@
     <string name="voice_control_tag">Voice\nControl</string>
     <string name="vcc_tournament_lbs">Voice Control\n Touranment Lbs</string>
     <string name="clip_color">Clip Color</string>
+    <string name="vcc_on">VCC\nON</string>
+    <string name="manual_mode">Manual\\nMode</string>
+    <string name="voice_tourn_kgs">Voice Control\nTournament Kgs</string>
+    <string name="if_voice_control_fails">If Voice Control Fails Use Buttons Below</string>
+    <string name="voice_control_inches">Voice Control\nTournament Inches</string>
+    <string name="voice_control_tournament_inches">Voice Control\nTournament Inches</string>
+    <string name="voice_control_tournament_cms">Voice Control\nTournament Cms</string>
+    <string name="voice_control_fun_day_lbs">Voice Control\nFun-Day Lbs</string>
+    <string name="voice_control_nfun_day_kgs">Voice Control\nFun-Day Kgs</string>
 
 
     //species

@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background_inches"
+        android:background="@drawable/popup_background_cms"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -17,15 +17,16 @@
         <!-- Popup Title -->
 
         <TextView
-            android:id="@+id/txtPopupTitle"
+            android:id="@+id/txtVccPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="5dp"
-            android:background="@color/golden"
-            android:padding="5dp"
-            android:text="@string/tournament_catch_inches"
-            android:textColor="@color/clip_blue"
+            android:background="@color/lt_brown"
+            android:gravity="center"
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="5dp"
+            android:text="@string/voice_control_tournament_cms"
+            android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -33,167 +34,151 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="30dp"
-                android:text="@string/select_species"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginStart="40dp"
-                android:text="@string/select_clip_color"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <!-- Species Spinner -->
-            <Spinner
-                android:id="@+id/spinnerSpeciesPopUp"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="30dp"
-                android:background="@color/lite_grey"
-                android:spinnerMode="dialog"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <!-- Clip Color Spinner -->
-            <Spinner
-                android:id="@+id/clipColorSpinner"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:background="@color/lite_grey"
-                android:entries="@array/clip_colors"
-                android:spinnerMode="dialog"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Length Input (Inches & 4ths) -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="visible"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <EditText
-                android:id="@+id/edtLengthTourInches"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:background="@color/very_lite_grey"
-                android:hint="@string/_0_99_inches"
-                android:inputType="number"
-                android:textColor="@color/black"
-                android:textColorHint="@color/grey"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_gravity="bottom"
-                android:text="@string/inches"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
-
-
-            <EditText
-                android:id="@+id/edtLengthQuarters"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:hint="@string/_0_3_4ths"
-                android:inputType="number"
-                android:textColor="@color/black"
-                android:textColorHint="@color/grey"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:background="@color/very_lite_grey"/>
-
-            <TextView
-                android:id="@+id/textView10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_gravity="bottom"
-                android:text="@string/_4ths"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
-            android:layout_marginHorizontal="10dp">
-
-            <!-- Lbs and Ozs labels  -->
-            <TextView
-                android:id="@+id/textLbsLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:text="@string/inches"
-                android:gravity="start"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <TextView
-                android:id="@+id/textOzsLabel"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:text="@string/_4ths_of_inch"
+                android:layout_marginEnd="30dp"
+                android:layout_gravity="center"
                 android:gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="@string/species"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="@string/clip_color"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
+
+        </LinearLayout>
+
+
+        <!-- Species & Clip_Color Spinners -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Spinner
+                android:id="@+id/spinnerSpeciesVCCCms"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="30dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinnerClipColorVCCCms"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Length Input (Cms) -->
+
+        <LinearLayout
+            android:id="@+id/layoutLengthCms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" >
+
+            <Spinner
+                android:id="@+id/spinnerCmsTens"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="2dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <Spinner
+                android:id="@+id/spinnerCmsOnes"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="2dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCmsPlaceHolder"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="15dp"
+                android:gravity="bottom"
+                android:text="@string/dot"
+                android:textColor="@color/black"
+                android:textSize="60sp"
+                android:textStyle="bold"    />
+
+            <Spinner
+                android:id="@+id/spinnerCmsTenths"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="2dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <Spinner
+                android:id="@+id/spinnerCmsHundreds"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:background="@color/lite_grey"
+                android:spinnerMode="dialog"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCmsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:scaleY="1.75"
+                android:text="@string/cms"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"    />
+
 
         </LinearLayout>
 
@@ -202,33 +187,57 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" >
+
+            <TextView
+                android:id="@+id/txtIfRequired"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="@string/if_voice_control_fails"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="20dp"
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                android:id="@+id/btnCancelInches"
+                android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/btn_outline_green"
+                android:layout_weight="0.4"
+                android:background="@drawable/btn_outline_grey"
                 android:text="@string/cancel"
                 android:layout_marginEnd="10dp"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnSaveLengthInches"
+                android:id="@+id/btnSaveWeight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/btn_outline_blue"
+                android:layout_weight="0.4"
+                android:background="@drawable/btn_menu_setup"
                 android:text="@string/save_catch"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
         </LinearLayout>

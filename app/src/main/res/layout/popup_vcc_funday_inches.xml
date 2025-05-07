@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_background_lbs"
+        android:background="@drawable/popup_background_inches"
         android:orientation="vertical"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -16,19 +16,17 @@
 
         <!-- Popup Title -->
 
-        <!-- Species Spinner -->
-
         <TextView
             android:id="@+id/txtVccPopupTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@color/clip_blue"
+            android:background="@color/golden"
             android:paddingVertical="5dp"
-            android:paddingHorizontal="10dp"
-            android:text="@string/vcc_tournament_lbs"
-            android:textColor="@color/clip_white"
+            android:paddingHorizontal="15dp"
+            android:text="Voice Control\nFun-Day Inches"
+            android:textColor="@color/clip_blue"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -42,34 +40,23 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginEnd="30dp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
-                android:layout_marginEnd="30dp"
                 android:text="@string/species"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/clip_color"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
 
         </LinearLayout>
 
+
+        <!-- Species & Clip_Color Spinners -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -80,7 +67,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Spinner
-                android:id="@+id/spinnerSpeciesVCCLbs"
+                android:id="@+id/spinnerSpeciesVCCInchesFD"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="30dp"
@@ -90,22 +77,14 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/spinnerClipColorVCCLbs"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:background="@color/lite_grey"
-                android:spinnerMode="dialog"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+
 
         </LinearLayout>
 
-        <!-- Weight Input (Lbs/Ozs) -->
+        <!-- Weight Input (Kgs) -->
 
         <LinearLayout
-            android:id="@+id/layoutWeightLbsOzs"
+            android:id="@+id/layoutLengthInchesFD"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -116,10 +95,12 @@
             app:layout_constraintStart_toStartOf="parent" >
 
             <Spinner
-                android:id="@+id/spinnerLbsTens"
-                android:layout_width="70dp"
+                android:id="@+id/spinnerInchesTensFD"
+                android:layout_width="60dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="2dp"
+                android:layout_gravity="right"
+                android:gravity="right"
                 android:background="@color/lite_grey"
                 android:spinnerMode="dialog"
                 android:textColor="@color/black"
@@ -127,8 +108,8 @@
                 android:textStyle="bold"/>
 
             <Spinner
-                android:id="@+id/spinnerLbsOnes"
-                android:layout_width="70dp"
+                android:id="@+id/spinnerInchesOnesFD"
+                android:layout_width="60dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="2dp"
                 android:background="@color/lite_grey"
@@ -138,35 +119,38 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtLbsPlaceHolder"
+                android:id="@+id/txtInchesPlaceHolder"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="5dp"
-                android:gravity="bottom"
-                android:text="@string/lbs"
+                android:gravity="center"
+                android:scaleY="1.75"
+                android:text="@string/inches"
                 android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold"     />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <Spinner
-                android:id="@+id/spinnerOunces"
-                android:layout_width="70dp"
+                android:id="@+id/spinnerInchesQuartersFD"
+                android:layout_width="60dp"
                 android:layout_height="50dp"
+                android:layout_marginEnd="2dp"
                 android:background="@color/lite_grey"
                 android:spinnerMode="dialog"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
+
             <TextView
-                android:id="@+id/txtOzsPlaceHolder"
+                android:id="@+id/txtInchesLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:text="@string/ozs"
+                android:gravity="center"
+                android:scaleY="1.75"
+                android:text="@string/_4ths"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold"     />
+                android:textStyle="bold" />
 
 
         </LinearLayout>
@@ -180,11 +164,11 @@
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent" >
 
             <TextView
                 android:id="@+id/txtIfRequired"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
@@ -195,7 +179,6 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -209,7 +192,7 @@
 
             <Button
                 android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.4"
                 android:background="@drawable/btn_outline_grey"
@@ -221,7 +204,7 @@
 
             <Button
                 android:id="@+id/btnSaveWeight"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.4"
                 android:background="@drawable/btn_menu_setup"
@@ -231,5 +214,5 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-            </LinearLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

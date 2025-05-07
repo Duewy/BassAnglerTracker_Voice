@@ -12,13 +12,15 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.util.Locale
 
 class VoiceInteractionHelper(
 
     private val activity: AppCompatActivity,
-    private val measurementUnit: MeasurementUnit,
-    private val isTournament: Boolean
+    private val measurementUnit: MeasurementUnit,           //todo for later
+    private val isTournament: Boolean,
+    private val onCommandAction: (String) -> Unit
 ) {
     private var speechRecognizer: SpeechRecognizer? = null
     private var tts: TextToSpeech? = null
@@ -35,13 +37,12 @@ class VoiceInteractionHelper(
         setupRecognizer()
     }
 
-    enum class MeasurementUnit {
+    enum class MeasurementUnit {        //todo ... for when we add the other CatchEntry files
         LBS_OZ,
         KG_G,
         INCHES,
         CM
     }
-
 
     private fun setupTTS() {
         tts = TextToSpeech(activity) {
@@ -63,10 +64,20 @@ class VoiceInteractionHelper(
                 isListening = false
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val spokenText = matches?.firstOrNull()?.trim()?.lowercase(Locale.getDefault()) ?: ""
+                val transcript = matches?.firstOrNull()?.trim() ?: ""
+
+                Log.d("VCC", "Transcript: $transcript")
+
+                onCommandAction(transcript)
 
                 Log.d("Voice", "✅ Result: $spokenText")
 
                 if (awaitingConfirmation) {
+
+                    val species = extractSpecies(spokenText)
+                    val clipColor = extractClipColor(spokenText)
+                    Log.d("VCC_TRANSCRIPT", "Full transcript: $spokenText")
+                    Log.d("VCC_PARSING", "→ Species: $species, Clip Color: $clipColor")
                     handleConfirmation(spokenText)
                     return
                 }
@@ -115,6 +126,7 @@ class VoiceInteractionHelper(
                 pendingCatch = CatchData(weight.first, weight.second, species, clipColor)
                 awaitingConfirmation = true
 
+
                 speak("You just caught a $species that weighs ${weight.first} pounds and ${weight.second} ounces and you put it on the $clipColor. Is that correct?")
                 restartListening(4000)
             }
@@ -136,6 +148,7 @@ class VoiceInteractionHelper(
     }
 
     private fun handleConfirmation(input: String) {
+
         if (!awaitingConfirmation) {
             Log.w("VCC", "⚠️ Ignored stale confirmation. Already processed.")
             return
@@ -173,7 +186,6 @@ class VoiceInteractionHelper(
     }
 
 
-
     private fun extractWeight(text: String): Pair<Int, Int>? {
         val numberWords = mapOf(
             "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
@@ -202,7 +214,9 @@ class VoiceInteractionHelper(
     }
 
     private fun extractSpecies(text: String): String {
-                val species = VoiceInputMapper.getSpeciesFromVoice(text)
+        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(activity)  // or your source
+        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
+
         return if (species == "Unrecognized") "" else species
     }
 
@@ -210,7 +224,6 @@ class VoiceInteractionHelper(
     private fun extractClipColor(text: String): String {
         return VoiceInputMapper.getClipColorFromVoice(text)
     }
-
 
 
     fun startListening(onResult: (String) -> Unit = {}) {

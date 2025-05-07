@@ -31,7 +31,7 @@
     <ImageView
         android:id="@+id/imgVCC"
         android:layout_width="150dp"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:layout_gravity="center"
         android:layout_marginStart="5dp"
         android:contentDescription="@string/app_image_description"
@@ -55,7 +55,7 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:contentDescription="@string/select_the_type_of_fishing"
@@ -426,11 +426,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
                 android:layout_marginBottom="7dp"
-                android:background="@drawable/btn_outline_dk_yellow"
+                android:background="@drawable/btn_outline_softlock_blue"
                 android:fontFamily="sans-serif-medium"
                 android:padding="7dp"
                 android:text="@string/start_fishing_event"
-                android:textColor="@color/black"
+                android:textColor="@color/clip_white"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"

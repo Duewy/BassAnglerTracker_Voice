@@ -18,6 +18,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
 class PopupVccTournLbs: Activity() {
@@ -55,7 +56,9 @@ class PopupVccTournLbs: Activity() {
             )
         }
 
-        speak("Please say the weight of your catch.")
+            // !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        speak("Please say the weight, species, and the clip color you used for your catch.")
+
         //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
         isTournament = intent.getBooleanExtra("isTournament", false)
         catchType = intent.getStringExtra("catchType") ?: ""
@@ -95,12 +98,14 @@ class PopupVccTournLbs: Activity() {
         speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = speciesAdapter
 
+
         // ****************  Setup Clip Color Spinner ****************
-        val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?: emptyArray()
+        val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?:  arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
 
-            // ++++ Setup Weight Spinners ++++
+
+       // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
 
             // Tens place: 0–9 (represents 0–90 lbs)
         val tensOptions = (0..9).map { it.toString() }
@@ -126,10 +131,10 @@ class PopupVccTournLbs: Activity() {
         edtWeightOz.setSelection(0)
 
 
-        // `````````` SAVE btn ````````````````
+        // `````````` SAVE btn If User wants to enter Manually ````````````````
         btnSaveWeight.setOnClickListener {
             val selectedSpeciesValue = spinnerSpecies.selectedItem.toString()
-            val selectedClipColor = spinnerClipColor.selectedItem?.toString()?.uppercase() ?: "RED"
+            val selectedClipColor = spinnerClipColor.selectedItem?.toString()?.uppercase() ?: "RED" //todo why are we having two places for clip_color variables...line 100
             Log.d("CLIPS", "🎨 Selected Clip Color: $selectedClipColor")
 
             val weightTensLbs = edtWeightTensLbs.selectedItem.toString().toIntOrNull() ?: 0
@@ -139,7 +144,7 @@ class PopupVccTournLbs: Activity() {
             val totalWeightOz = ((((weightTensLbs * 10) + weightLbs) * 16) + weightOz)
 
             if (totalWeightOz == 0) {
-                Toast.makeText(this, "🚫 Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+                positionedToast("🚫 Weight cannot be 0 lbs 0 oz!",)
                 return@setOnClickListener
             }
 
@@ -190,12 +195,11 @@ class PopupVccTournLbs: Activity() {
                     }
                 }
             }
-            override fun onError(utteranceId: String?) {}
+            override fun onError(utteranceId: String?) {}   // todo do we need something for Error catching?
         })
     }
 
-
-
+    //------------------- startListening --------------------------
     private fun startListening() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -233,8 +237,8 @@ class PopupVccTournLbs: Activity() {
         val lowerInput = input.lowercase(Locale.getDefault())
         Log.d("VCC", "🎤 Raw speech: $lowerInput")
 
-        if (!lowerInput.contains("over")) {
-            Toast.makeText(this, "Say 'over' to finish your catch entry.", Toast.LENGTH_SHORT).show()
+        if (!lowerInput.contains("over")) {     // todo why are we sending toast for VCC interaction?
+            Toast.makeText(this, "Say the key word 'over' to finish your catch entry.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -275,9 +279,9 @@ class PopupVccTournLbs: Activity() {
             val word = words[i]
             val number = numberWords[word] ?: word.toIntOrNull()
             if (number != null) {
-                if (i + 1 < words.size && words[i + 1].contains("pound")) {
+                if (i + 1 < words.size && words[i + 1].contains("pound")) {  //todo what about pounds  the "s"
                     pounds = number
-                } else if (i + 1 < words.size && words[i + 1].contains("ounce")) {
+                } else if (i + 1 < words.size && words[i + 1].contains("ounce")) {  //todo what about ounces  the "s"
                     ounces = number
                 } else if (pounds == -1) {
                     pounds = number
@@ -294,7 +298,7 @@ class PopupVccTournLbs: Activity() {
         val ones = pounds % 10
         val totalWeightOz = pounds * 16 + ounces
 
-        if (totalWeightOz == 0) {
+        if (totalWeightOz == 0) {       // todo why a toast for VCC activity
             Toast.makeText(this, "🚫 Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
             return
         }
@@ -354,14 +358,12 @@ class PopupVccTournLbs: Activity() {
             finish()
         }, 1800)
 
-
     }//=========== END handleVoiceInput ==================================
 
 private var awaitingConfirmation = false
 
 data class ConfirmedCatch(val weightOz: Int, val species: String, val clipColor: String)
-private var lastConfirmedCatch: ConfirmedCatch? = null
-
+private var lastConfirmedCatch: ConfirmedCatch? = null      //todo Need to finish off the Confirmation with Yes/No ???
 
 
 }//================== END  ==========================
