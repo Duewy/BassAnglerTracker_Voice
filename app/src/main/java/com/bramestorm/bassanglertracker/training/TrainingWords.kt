@@ -28,6 +28,7 @@ import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper.loadUserVoiceMap
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper.saveUserVoiceMap
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.util.Locale
 
 
@@ -290,7 +291,8 @@ class TrainingWords : AppCompatActivity() {
         val normalizedInput = rawInput.lowercase().replace(" ", "").trim()
         val currentPhraseTextRaw = txtSayThis.text.toString().replace("Say This: ", "").trim()
         val currentPhraseText = currentPhraseTextRaw.lowercase().replace(" ", "")
-        val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput)
+        val speciesList = SharedPreferencesManager.loadAllSpecies(this)
+        val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput, speciesList)
         val matchedNormalized = matchedSpecies.lowercase().replace(" ", "")
 
         val phrase = phraseList.find {

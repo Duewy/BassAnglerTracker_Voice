@@ -7,12 +7,16 @@ data class ParsedCatch(val species: String?, val lbs: Int?, val oz: Int?, val cl
 object VoiceParser {
 
     // Step 1: Pre-process the transcript for known misheard words
-    private fun correctMisheardWords(input: String): String {
+    private fun correctMisheardWords(input: String, speciesList: List<String>): String  {
         var corrected = input
         VoiceInputMapper.baseSpeciesVoiceMap.forEach { (_, aliasList) ->
             aliasList.forEach { alias ->
                 if (corrected.contains(alias, ignoreCase = true)) {
-                    corrected = corrected.replace(alias, VoiceInputMapper.getSpeciesFromVoice(alias.toString()), ignoreCase = true)
+                    corrected = corrected.replace(
+                        alias,
+                        VoiceInputMapper.getSpeciesFromVoice(alias.toString(), speciesList),
+                        ignoreCase = true
+                    )
                 }
             }
         }
@@ -25,7 +29,7 @@ object VoiceParser {
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val corrected = correctMisheardWords(transcript.lowercase())
+        val corrected = correctMisheardWords(transcript.lowercase(), speciesList)
 
         val species = speciesList.firstOrNull { corrected.contains(it.lowercase()) }
 

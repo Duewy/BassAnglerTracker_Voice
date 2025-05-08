@@ -171,10 +171,34 @@ object SharedPreferencesManager {
         return name.trim().lowercase().replace(Regex("\\s+"), " ")
     }
 
+    fun loadSelectedSpecies(context: Context): List<String> {
+        val prefs = context.getSharedPreferences("SpeciesPrefs", Context.MODE_PRIVATE)
+        val json = prefs.getString("selectedSpeciesList", null)
+        return if (!json.isNullOrEmpty()) {
+            val type = object : TypeToken<List<String>>() {}.type
+            Gson().fromJson(json, type)
+        } else {
+            emptyList()
+        }
+    }
+
+    fun loadAllSpecies(context: Context): List<String> {
+        val prefs = context.getSharedPreferences("SpeciesPrefs", Context.MODE_PRIVATE)
+        val json = prefs.getString("allSpeciesList", null)
+        return if (!json.isNullOrEmpty()) {
+            val type = object : TypeToken<List<String>>() {}.type
+            Gson().fromJson(json, type)
+        } else {
+            emptyList()
+        }
+    }
+
+
     fun isVoiceControlEnabled(context: Context): Boolean {
         val prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         return prefs.getBoolean("VOICE_CONTROL_ENABLED", false)
     }
+
 
 
 }//------------- END -------------------------------------------

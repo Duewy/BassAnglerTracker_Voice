@@ -106,7 +106,7 @@ class VoiceInteractionHelper(
                     return
                 }
                 // Fill In Species if Missing
-                if (species.isEmpty()) {
+                if (species.isEmpty()) {            //todo Why are we duplicating this???
                     Log.w("VCC", "⚠️ No species detected in input: $spokenText")
                     speak("What species of fish did you catch?")
                     restartListening(2500)

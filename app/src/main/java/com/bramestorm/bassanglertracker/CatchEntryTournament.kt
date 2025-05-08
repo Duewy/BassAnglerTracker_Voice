@@ -177,7 +177,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
      // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
      voiceHelper = VoiceInteractionHelper(
-         activity = this, // ✅ FIXED: use 'activity' instead of 'context'
+         activity = this, //
          measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
          isTournament = true,
          onCommandAction = { transcript -> onSpeechResult(transcript) }
