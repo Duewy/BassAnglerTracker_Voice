@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
+import com.bramestorm.bassanglertracker.util.positionedToast
 
 class PopupWeightEntryTourLbs : Activity() {
 
@@ -94,7 +95,7 @@ class PopupWeightEntryTourLbs : Activity() {
                 return@setOnClickListener
             }
 
-            Log.d("CLIPS", "✅ Sending Result - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
+            Log.d("CLIPS", "✅ Sending Result - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor, catch type $catchType, and is Tourny $isTournament")
 
             val resultIntent = Intent().apply {
                 putExtra("weightTotalOz", totalWeightOz)
@@ -105,6 +106,8 @@ class PopupWeightEntryTourLbs : Activity() {
             }
 
             setResult(Activity.RESULT_OK, resultIntent)
+            positionedToast( "✅ Sending Results PPWETLBS - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor, catch type $catchType, and is Tourny $isTournament")
+
             finish()
         }
 
