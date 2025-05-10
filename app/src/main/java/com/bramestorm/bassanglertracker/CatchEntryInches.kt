@@ -2,6 +2,8 @@ package com.bramestorm.bassanglertracker
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognitionListener
@@ -26,6 +28,12 @@ import java.util.Date
 import java.util.Locale
 
 class CatchEntryInches : BaseCatchEntryActivity() {
+
+    override val catchReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context, intent: Intent) {
+            // no-op for now – we don’t use tournament broadcasts here
+        }
+    }
 
     private lateinit var btnSetUp3Inch: Button
     private lateinit var btnOpenWeightPopupInch: Button

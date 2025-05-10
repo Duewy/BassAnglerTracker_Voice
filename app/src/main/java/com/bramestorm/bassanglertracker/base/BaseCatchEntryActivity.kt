@@ -34,10 +34,15 @@ import com.bramestorm.bassanglertracker.voice.VoiceControlService
  */
 abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
+
     private var lastVolDownTap = 0L
     private var lastVolUpTap   = 0L
     private var isWakeReceiverRegistered = false
 
+    protected open val catchReceiver: BroadcastReceiver
+            = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context, intent: Intent) { /* no-op */ }
+    }
 
     companion object {
         private const val AUDIO_REQUEST_CODE = 42
@@ -234,4 +239,9 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
      * Subclasses implement this to receive recognized speech text.
      */
     protected abstract fun onSpeechResult(transcript: String)
+    }
+
+
+class ABroadcastReceiver {
+
 }

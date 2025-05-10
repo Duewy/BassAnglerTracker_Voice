@@ -11,7 +11,6 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
-import com.bramestorm.bassanglertracker.util.positionedToast
 
 class PopupWeightEntryTourLbs : Activity() {
 
@@ -27,6 +26,16 @@ class PopupWeightEntryTourLbs : Activity() {
     private lateinit var edtWeightOz: EditText
     private lateinit var btnSaveWeight: Button
     private lateinit var btnCancel: Button
+
+    companion object {
+        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
+        const val EXTRA_SPECIES       = "selectedSpecies"
+        const val EXTRA_CLIP_COLOR    = "clip_color"
+        const val EXTRA_CATCH_TYPE    = "catchType"
+        const val EXTRA_IS_TOURNAMENT = "isTournament"
+        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
+        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+    }
 
     //============== ON CREATE ===============================
 
@@ -95,28 +104,26 @@ class PopupWeightEntryTourLbs : Activity() {
                 return@setOnClickListener
             }
 
-            Log.d("CLIPS", "✅ Sending Result - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor, catch type $catchType, and is Tourny $isTournament")
-
-            val resultIntent = Intent().apply {
-                putExtra("weightTotalOz", totalWeightOz)
-                putExtra("selectedSpecies", selectedSpeciesValue)
-                putExtra("clip_color", selectedClipColor)
-                putExtra("catchType", catchType)
-                putExtra("isTournament", isTournament)
+            Intent().also {
+                it.putExtra(EXTRA_WEIGHT_OZ, totalWeightOz)
+                it.putExtra(EXTRA_SPECIES, selectedSpeciesValue)
+                it.putExtra(EXTRA_CLIP_COLOR, selectedClipColor)
+                it.putExtra(EXTRA_CATCH_TYPE, catchType)
+                it.putExtra(EXTRA_IS_TOURNAMENT, isTournament)
+            }.let { resultIntent ->
+                setResult(Activity.RESULT_OK, resultIntent)
+                Log.d(
+                    "Popup",
+                    "🏁 finishWithResult → oz=$weightOz, sp=$selectedSpeciesValue, clip=$selectedClipColor"
+                )
+                finish()
             }
-
-            setResult(Activity.RESULT_OK, resultIntent)
-            positionedToast( "✅ Sending Results PPWETLBS - weightTotalOz: $totalWeightOz, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor, catch type $catchType, and is Tourny $isTournament")
-
-            finish()
         }
-
       // ````````` CANCEL btn ```````````````````
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
     }//```````````` END ON CREATE ```````````````````````````
-
 
 }//================== END  ==========================

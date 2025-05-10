@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
+
 class PopupVccTournLbs: Activity() {
 
     // Flags and extras
@@ -39,18 +40,17 @@ class PopupVccTournLbs: Activity() {
     private lateinit var edtWeightTensLbs: Spinner
     private lateinit var edtWeightLbs: Spinner
     private lateinit var edtWeightOz: Spinner
-    private lateinit var btnSaveWeight: Button
     private lateinit var btnCancel: Button
 
 
     companion object {
-        const val EXTRA_WEIGHT_OZ    = "weightTotalOz"
-        const val EXTRA_SPECIES      = "species"
-        const val EXTRA_CLIP_COLOR   = "clip_color"
-        const val EXTRA_IS_TOURNAMENT= "isTournament"
-        const val EXTRA_CATCH_TYPE     = "catchType"
-        private const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
-        private const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
+        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
+        const val EXTRA_SPECIES       = "selectedSpecies"
+        const val EXTRA_CLIP_COLOR    = "clip_color"
+        const val EXTRA_CATCH_TYPE    = "catchType"
+        const val EXTRA_IS_TOURNAMENT = "isTournament"
+        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
+        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
     }
 
 
@@ -59,7 +59,11 @@ class PopupVccTournLbs: Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_vcc_tourn_lbs)
+
         Log.d("VCC", "🎯 setting up SpeechRecognizer listener")
+
+        val receivedColors = intent.getStringArrayExtra(EXTRA_AVAILABLE_CLIP_COLORS)
+        Log.d("POPUP-DEBUG", "onCreate: receivedColors=${receivedColors?.toList()}")
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
@@ -89,7 +93,6 @@ class PopupVccTournLbs: Activity() {
         edtWeightTensLbs = findViewById(R.id.spinnerLbsTens)
         edtWeightLbs = findViewById(R.id.spinnerLbsOnes)
         edtWeightOz = findViewById(R.id.spinnerOunces)
-        btnSaveWeight = findViewById(R.id.btnSaveWeight)
         btnCancel = findViewById(R.id.btnCancel)
 
         // ************  Setup Species Spinner *********************        // if Small Mouth is selected then Small Mouth is at top of Spinner
@@ -144,26 +147,6 @@ class PopupVccTournLbs: Activity() {
         edtWeightLbs.setSelection(0)
         edtWeightOz.setSelection(0)
 
-
-        // `````````` SAVE btn If User wants to enter Manually ````````````````
-        btnSaveWeight.setOnClickListener {
-            val lbsTens = edtWeightTensLbs.selectedItem.toString().toInt()
-            val lbsOnes = edtWeightLbs.selectedItem.toString().toInt()
-            val oz      = edtWeightOz.selectedItem.toString().toInt()
-            val totalOz = ((lbsTens * 10 + lbsOnes) * 16) + oz
-
-            if (totalOz == 0) {
-                positionedToast("🚫 Weight cannot be 0 lbs 0 oz!")
-                return@setOnClickListener
-            }
-
-            val selSpecies  = spinnerSpecies.selectedItem.toString()
-            val selClipColor = spinnerClipColor.selectedItem.toString().uppercase()
-
-            // now call the same helper:
-            returnTournamentResult(totalOz, selSpecies, selClipColor)
-        }
-//========== END Save Weight ===============================
 
             // ````````` CANCEL btn ```````````````````
         btnCancel.setOnClickListener {
@@ -285,10 +268,12 @@ class PopupVccTournLbs: Activity() {
                 lower.contains("yes") -> {
                     Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournament.kt ")
 
-                        lastConfirmedCatch?.let { (weightOz, species, clipColor) ->
-                            returnTournamentResult(weightOz, species, clipColor)
-                        }
+                    lastConfirmedCatch?.let { (weightOz, species, clipColor) ->
+
+                        returnTournamentResult(weightOz, species, clipColor)
                     }
+
+                }
 
                 lower.contains("no") -> {
                     awaitingConfirmation = false
@@ -386,7 +371,7 @@ class PopupVccTournLbs: Activity() {
         val spokenColor = clipColors.firstOrNull { cleaned.contains(it) }
         val selectedClip = spokenColor?.uppercase()
             ?: spinnerClipColor.selectedItem?.toString()?.uppercase()
-            ?: "RED"
+            ?: "white"
         if (spokenColor == null) {
             tts.speak(
                 "What clip color did you put the fish on?",
@@ -408,8 +393,6 @@ class PopupVccTournLbs: Activity() {
         // 9) Ask for confirmation, echoing back exactly what we think we heard
         val question = "You said a $pounds-lb $ounces-oz $selectedSpecies on the $selectedClip clip, is that correct Over"
 
-        Log.d("VCC", "❓ Asking confirmation: $question")
-
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
         // 10) Save state and flip the flag
@@ -418,29 +401,23 @@ class PopupVccTournLbs: Activity() {
 
 
         // 11) Immediately start listening for that “yes” or “no”
-        Handler(mainLooper).postDelayed({ startListening() }, 1900)
+        Handler(mainLooper).postDelayed({ startListening() }, 2500)
 
     } //===================END handle Voice Input  ====================
 
+   // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
     private fun Activity.returnTournamentResult(
-        weightOz: Int,
-        species: String,
-        clipColor: String
+        weightOz: Int, species: String, clipColor: String
     ) {
-        val dataIntent = Intent().apply {
-            putExtra(CatchEntryTournament.EXTRA_WEIGHT_OZ, weightOz)
-            putExtra(CatchEntryTournament.EXTRA_SPECIES,    species)
-            putExtra(CatchEntryTournament.EXTRA_CLIP_COLOR, clipColor)
-            putExtra(CatchEntryTournament.EXTRA_CATCH_TYPE,   catchType)
-            putExtra(CatchEntryTournament.EXTRA_IS_TOURNAMENT, isTournament)
-        }
-
-        positionedToast("sending information to CatchEntry $weightOz, and $species and , $clipColor")
-
-        this.setResult(Activity.RESULT_OK, dataIntent)
-        this.finish()
-
-        }
-
+       Intent(this, CatchEntryTournament::class.java).apply {
+           flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+           putExtra(EXTRA_WEIGHT_OZ,     weightOz)
+           putExtra(EXTRA_SPECIES,       species)
+           putExtra(EXTRA_CLIP_COLOR,    clipColor)
+       }.also {
+           startActivity(it)
+           finish()
+       }
+   }
 
 }//================== END  ==========================
