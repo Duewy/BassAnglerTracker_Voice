@@ -566,6 +566,24 @@
         app:layout_constraintStart_toEndOf="@id/totalDecLengthInches" />
 
 
+
+    <TextView
+        android:id="@+id/txtVCCTourInches"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="@string/vcc_on"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealLengthInches"
+        app:layout_constraintStart_toEndOf="@id/txtHolderOzs"
+        app:layout_constraintTop_toTopOf="@id/totalRealLengthInches"
+        app:layout_constraintVertical_bias="0.0" />
+
     <Button
         android:id="@+id/btnMainInches"
         android:layout_width="wrap_content"

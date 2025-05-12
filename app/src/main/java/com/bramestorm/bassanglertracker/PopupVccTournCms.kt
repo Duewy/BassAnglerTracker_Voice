@@ -22,7 +22,7 @@ import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
 
-class PopupVccTournLbs: Activity() {
+class PopupVccTournCms: Activity() {
 
     // Flags and extras
     private var isTournament: Boolean = false
@@ -36,13 +36,14 @@ class PopupVccTournLbs: Activity() {
     // UI Components
     private lateinit var spinnerSpecies: Spinner
     private lateinit var spinnerClipColor: Spinner
-    private lateinit var edtWeightTensLbs: Spinner
-    private lateinit var edtWeightLbs: Spinner
-    private lateinit var edtWeightOz: Spinner
+    private lateinit var edtLengthCmsTens: Spinner
+    private lateinit var edtLengthCmsOnes: Spinner
+    private lateinit var edtLengthCmsTenths: Spinner
     private lateinit var btnCancel: Button
 
+
     companion object {
-        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
+        const val EXTRA_LENGTH_CMS     = "lengthTotalCms"
         const val EXTRA_SPECIES       = "selectedSpecies"
         const val EXTRA_CLIP_COLOR    = "clip_color"
         const val EXTRA_CATCH_TYPE    = "catchType"
@@ -56,12 +57,7 @@ class PopupVccTournLbs: Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.popup_vcc_tourn_lbs)
-
-        Log.d("VCC", "🎯 setting up SpeechRecognizer listener")
-
-        val receivedColors = intent.getStringArrayExtra(EXTRA_AVAILABLE_CLIP_COLORS)
-        Log.d("POPUP-DEBUG", "onCreate: receivedColors=${receivedColors?.toList()}")
+        setContentView(R.layout.popup_vcc_tourn_cms)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
@@ -73,28 +69,25 @@ class PopupVccTournLbs: Activity() {
             )
         }
 
-            // !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        speak("Please say the weight species and clip color used for the catch Over")
-
-        //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
-        isTournament = intent.getBooleanExtra("isTournament", false)
-        catchType = intent.getStringExtra("catchType") ?: ""
-        selectedSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: ""
-        val colorNames = intent.getStringArrayExtra("availableClipColors")
-            ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
-        val incomingSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: ""
+        // 🔊 !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 🔊
+        speak("Please say the Length Species and Clip Color used for the Catch Over")
 
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCLbs)
-        spinnerClipColor = findViewById(R.id.spinnerClipColorVCCLbs)
-        edtWeightTensLbs = findViewById(R.id.spinnerLbsTens)
-        edtWeightLbs = findViewById(R.id.spinnerLbsOnes)
-        edtWeightOz = findViewById(R.id.spinnerOunces)
+        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCCms)
+        spinnerClipColor = findViewById(R.id.spinnerClipColorVCCCms)
+        edtLengthCmsTens = findViewById(R.id.spinnerCmsTens)
+        edtLengthCmsOnes = findViewById(R.id.spinnerCmsOnes)
+        edtLengthCmsTenths = findViewById(R.id.spinnerCmsTenths)
         btnCancel = findViewById(R.id.btnCancel)
 
+
+        //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
+        isTournament = intent.getBooleanExtra(EXTRA_IS_TOURNAMENT, false)
+        catchType = intent.getStringExtra(EXTRA_CATCH_TYPE) ?: ""
+
         // ************  Setup Species Spinner *********************        // if Small Mouth is selected then Small Mouth is at top of Spinner
-        val tournamentSpecies = intent.getStringExtra("tournamentSpecies")?.trim() ?: "Unknown"
+        val tournamentSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES)?.trim() ?: "Unknown"
         val speciesList: Array<String> = when {
             isTournament && tournamentSpecies.equals("Large Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Large Mouth", "Small Mouth")
@@ -113,40 +106,38 @@ class PopupVccTournLbs: Activity() {
         speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = speciesAdapter
 
-
         // ****************  Setup Clip Color Spinner ****************
-        val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?:  arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
+        val availableColorNames = intent.getStringArrayExtra(EXTRA_AVAILABLE_CLIP_COLORS) ?:  arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
 
 
-       // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
-
-            // Tens place: 0–9 (represents 0–90 lbs)
+        // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
+        // Tens place: 0–9 (represents 0–90 Centimeters)
         val tensOptions = (0..9).map { it.toString() }
         val tensAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tensOptions)
         tensAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightTensLbs.adapter = tensAdapter
+        edtLengthCmsTens.adapter = tensAdapter
 
-            // Ones place: 0–9 (represents 0–9 lbs)
+        // Ones place: 0–9 (represents 0–9 Centimeters)
         val onesOptions = (0..9).map { it.toString() }
         val onesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, onesOptions)
         onesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightLbs.adapter = onesAdapter
+        edtLengthCmsOnes.adapter = onesAdapter
 
-            // Ounces: 0–15
-        val ounceOptions = (0..15).map { it.toString() }
-        val ounceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ounceOptions)
-        ounceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightOz.adapter = ounceAdapter
+        // tenths: 0–9 millimeters
+        val tenthsOptions = (0..9).map { it.toString() }
+        val tenthsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tenthsOptions)
+        tenthsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        edtLengthCmsTenths.adapter = tenthsAdapter
 
-            // Optionally set default selection to 0
-        edtWeightTensLbs.setSelection(0)
-        edtWeightLbs.setSelection(0)
-        edtWeightOz.setSelection(0)
+        // Optionally set default selection to 0
+        edtLengthCmsTens.setSelection(0)
+        edtLengthCmsOnes.setSelection(0)
+        edtLengthCmsTenths.setSelection(0)
 
 
-            // ````````` CANCEL btn ```````````````````
+        // ````````` CANCEL btn ```````````````````
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
@@ -224,7 +215,7 @@ class PopupVccTournLbs: Activity() {
             override fun onPartialResults(partialResults: Bundle?) {}
             override fun onEvent(eventType: Int, params: Bundle?) {}
 
-            override fun onError(error: Int) {
+            override fun onError(error: Int) {                                               //todo fix up ERROR Catching...
                 Log.e("VCC", "Speech recognition error: $error")
                 when (error) {
                     SpeechRecognizer.ERROR_NO_MATCH,
@@ -252,8 +243,7 @@ class PopupVccTournLbs: Activity() {
 
     //============= 👂Gets Users Info 📖 and Puts Everything for  Database and Listing =======================
 
-
-    data class ConfirmedCatch(val weightOz: Int, val species: String, val clipColor: String)
+    data class ConfirmedCatch(val totalLengthTenths: Int, val species: String, val clipColor: String)
 
     //===============================================
     private fun handleVoiceInput(input: String) {
@@ -264,11 +254,11 @@ class PopupVccTournLbs: Activity() {
         if (awaitingConfirmation) {
             when {
                 lower.contains("yes") -> {
-                    Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournament.kt ")
+                    Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournamentCms.kt ")
 
-                    lastConfirmedCatch?.let { (weightOz, species, clipColor) ->
+                    lastConfirmedCatch?.let { (totalLengthTenths, species, clipColor) ->
 
-                        returnTournamentResult(weightOz, species, clipColor)
+                        returnTournamentResult(totalLengthTenths, species, clipColor)
                     }
 
                 }
@@ -276,7 +266,7 @@ class PopupVccTournLbs: Activity() {
                 lower.contains("no") -> {
                     awaitingConfirmation = false
                     tts.speak(
-                        "Okay, let's start over. Please say the weight species and clip then say over when you are done.",
+                        "Okay, let's start over. Please say the length species and clip then say over when you are done.",
                         TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
                     )
                     Handler(mainLooper).postDelayed({ startListening() }, 1500)
@@ -320,39 +310,38 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
-        // 5) Parse weight (lbs + oz)
+        // 5) Parse length (inches and quarters)
         val numberWords = mapOf(
             "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
             "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
             "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
             "fifteen" to 15
         )
-        var pounds = -1
-        var ounces = -1
+        var centimeters = -1
+        var tenths= -1
         val words = cleaned.split("\\s+".toRegex())
         for ((i, word) in words.withIndex()) {
             val num = numberWords[word] ?: word.toIntOrNull()
             if (num != null) {
                 when {
-                    i + 1 < words.size && words[i + 1].contains("pound")  -> pounds = num
-                    i + 1 < words.size && words[i + 1].contains("ounce")  -> ounces = num
-                    pounds < 0                                            -> pounds = num
-                    ounces < 0                                            -> ounces = num
+                    i + 1 < words.size && words[i + 1].contains("centimeter")  -> centimeters= num
+                    i + 1 < words.size && words[i + 1].contains("point")  -> tenths = num
+                    centimeters < 0                                            -> centimeters = num
+                    tenths < 0                                            -> tenths = num
                 }
             }
         }
-        if (pounds < 0) pounds = 0
-        if (ounces < 0) ounces = 0
-        val totalOz = pounds * 16 + ounces
-        if (totalOz == 0) {
-            Toast.makeText(this, "🚫 Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+        if (centimeters < 0) centimeters = 0
+        if (tenths < 0) tenths = 0
+        val totalLengthTenths= ((centimeters * 10) + tenths)
+        if (totalLengthTenths== 0) {
+            Toast.makeText(this, "🚫 Length cannot be 0 Cms 0 mm!", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // ENSURE Ounces is 0 to 15 only
-        if (ounces > 15) {
+        // ENSURE millimeters is 0 to 9
+        if (tenths > 9) {
             tts.speak(
-                "Sorry, ounces can only be zero to fifteen. Please repeat your length.",
+                "Sorry, millimeters can only be zero to nine. Please repeat your length.",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
             )
             Handler(mainLooper).postDelayed({ startListening() }, 1500)
@@ -366,8 +355,9 @@ class PopupVccTournLbs: Activity() {
             else                             -> null
         }
         val selectedSpecies = speciesCode ?: run {
+
             tts.speak(
-                "What species was the $pounds pound $ounces ounce catch?",
+                "What species was the $centimeters point $tenths centimeters catch?",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_SPECIES"
             )
             Handler(mainLooper).postDelayed({ startListening() }, 2500)
@@ -389,24 +379,22 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
+
         // 8) Update your UI spinners immediately
-        edtWeightTensLbs.setSelection(pounds / 10)
-        edtWeightLbs.setSelection(pounds % 10)
-        edtWeightOz.setSelection(ounces)
+        edtLengthCmsTens.setSelection(centimeters/ 10)
+        edtLengthCmsOnes.setSelection(centimeters % 10)
+        edtLengthCmsTenths.setSelection(tenths)
         spinnerSpecies.setSelection((spinnerSpecies.adapter as ArrayAdapter<String>)
             .getPosition(selectedSpecies))
         spinnerClipColor.setSelection((spinnerClipColor.adapter as ArrayAdapter<String>)
             .getPosition(selectedClip))
 
-        // 9) Ask for confirmation, echoing back exactly what we think we heard
-        // after parsing pounds & ounces:
-
-        val question = "You said a $pounds-lb $ounces-oz $selectedSpecies on the $selectedClip clip, is that correct Over"
+        val question = "You said $centimeters point $tenths centimeters $selectedSpecies on the $selectedClip clip, is that correct Over"
 
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
         // 10) Save state and flip the flag
-        lastConfirmedCatch = ConfirmedCatch(totalOz, selectedSpecies, selectedClip)
+        lastConfirmedCatch = ConfirmedCatch(totalLengthTenths, selectedSpecies, selectedClip)
         awaitingConfirmation = true
 
 
@@ -415,19 +403,19 @@ class PopupVccTournLbs: Activity() {
 
     } //===================END handle Voice Input  ====================
 
-   // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
     private fun Activity.returnTournamentResult(
-        weightOz: Int, species: String, clipColor: String
+        totalLengthTenths: Int, species: String, clipColor: String
     ) {
-       Intent(this, CatchEntryTournament::class.java).apply {
-           flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-           putExtra(EXTRA_WEIGHT_OZ,     weightOz)
-           putExtra(EXTRA_SPECIES,       species)
-           putExtra(EXTRA_CLIP_COLOR,    clipColor)
-       }.also {
-           startActivity(it)
-           finish()
-       }
-   }
+        Intent(this, CatchEntryTournamentCentimeters::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(EXTRA_LENGTH_CMS,    totalLengthTenths)
+            putExtra(EXTRA_SPECIES,       species)
+            putExtra(EXTRA_CLIP_COLOR,    clipColor)
+        }.also {
+            startActivity(it)
+            finish()
+        }
+    }
 
 }//================== END  ==========================

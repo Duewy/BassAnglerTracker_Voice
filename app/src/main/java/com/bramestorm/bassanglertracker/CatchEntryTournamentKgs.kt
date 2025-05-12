@@ -224,7 +224,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
-        handler.postDelayed(checkAlarmRunnable, 60000)
+        handler.postDelayed(checkAlarmRunnable, 60000)  // check every minute (60 sec)
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -319,7 +319,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         val totalDec = totalWeightKgs % 100
 
         totalRealWeightKgs.text = totalKgs.toString()
-        totalDecWeightKgs.text = totalDec.toString()
+        totalDecWeightKgs.text = totalDec.toString().padStart(2, '0')
 
         // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
         val currentCount = dbHelper
@@ -401,8 +401,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                     ClipColor.RED
                 }
 
-                realWeightKgs[i].text = weightKgs.toString()
-                decWeightKgs[i].text = weightDec.toString()
+                realWeightKgs[i].text = weightKgs.toString()  // ensure there is a "0" in 01 - 09
+                decWeightKgs[i].text = weightDec.toString().padStart(2, '0')
+
 
                 realWeightKgs[i].setOnLongClickListener {
                     showTournamentEditDialog(sortedCatches[i])

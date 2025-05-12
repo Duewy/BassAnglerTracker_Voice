@@ -184,8 +184,6 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         }
     }
 
-
-
     /**
      * Called when the BroadcastReceiver sees a VOICE_WAKE action.
      * Default behavior: start listening if initialized.

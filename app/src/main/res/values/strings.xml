@@ -244,6 +244,7 @@
     <string name="voice_control_tournament_cms">Voice Control\nTournament Cms</string>
     <string name="voice_control_fun_day_lbs">Voice Control\nFun-Day Lbs</string>
     <string name="voice_control_nfun_day_kgs">Voice Control\nFun-Day Kgs</string>
+    <string name="vcc_weight_lbs">VCC Weight Lbs</string>
 
 
     //species

@@ -22,10 +22,9 @@ import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
 
-class PopupVccTournLbs: Activity() {
+class PopupVccWeightEntryKgs: Activity() {
 
     // Flags and extras
-    private var isTournament: Boolean = false
     private var catchType: String = ""
     private var selectedSpecies: String = ""
     private var speechRecognizer: SpeechRecognizer? = null
@@ -35,20 +34,15 @@ class PopupVccTournLbs: Activity() {
 
     // UI Components
     private lateinit var spinnerSpecies: Spinner
-    private lateinit var spinnerClipColor: Spinner
-    private lateinit var edtWeightTensLbs: Spinner
-    private lateinit var edtWeightLbs: Spinner
-    private lateinit var edtWeightOz: Spinner
+    private lateinit var edtWeightTensKgs: Spinner
+    private lateinit var edtWeightKgs: Spinner
+    private lateinit var edtWeightKgsTenths: Spinner
+    private lateinit var edtWeightKgsHundreds: Spinner
     private lateinit var btnCancel: Button
 
     companion object {
-        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
-        const val EXTRA_SPECIES       = "selectedSpecies"
-        const val EXTRA_CLIP_COLOR    = "clip_color"
-        const val EXTRA_CATCH_TYPE    = "catchType"
-        const val EXTRA_IS_TOURNAMENT = "isTournament"
-        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
-        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+        const val EXTRA_WEIGHT_KGS = "weightTotalKgs"
+        const val EXTRA_SPECIES = "selectedSpecies"
     }
 
 
@@ -56,12 +50,7 @@ class PopupVccTournLbs: Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.popup_vcc_tourn_lbs)
-
-        Log.d("VCC", "🎯 setting up SpeechRecognizer listener")
-
-        val receivedColors = intent.getStringArrayExtra(EXTRA_AVAILABLE_CLIP_COLORS)
-        Log.d("POPUP-DEBUG", "onCreate: receivedColors=${receivedColors?.toList()}")
+        setContentView(R.layout.popup_vcc_funday_kgs)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
@@ -73,84 +62,60 @@ class PopupVccTournLbs: Activity() {
             )
         }
 
-            // !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        speak("Please say the weight species and clip color used for the catch Over")
 
-        //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
-        isTournament = intent.getBooleanExtra("isTournament", false)
+        // !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        speak("Please say the weight and the species used for the catch Over")
+
         catchType = intent.getStringExtra("catchType") ?: ""
-        selectedSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: ""
-        val colorNames = intent.getStringArrayExtra("availableClipColors")
-            ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
-        val incomingSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: ""
-
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCLbs)
-        spinnerClipColor = findViewById(R.id.spinnerClipColorVCCLbs)
-        edtWeightTensLbs = findViewById(R.id.spinnerLbsTens)
-        edtWeightLbs = findViewById(R.id.spinnerLbsOnes)
-        edtWeightOz = findViewById(R.id.spinnerOunces)
+        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCKgsFD)
+        edtWeightTensKgs = findViewById(R.id.spinnerKgsTensFD)
+        edtWeightKgs = findViewById(R.id.spinnerKgsOnesFD)
+        edtWeightKgsTenths = findViewById(R.id.spinnerKgsTenthsFD)
+        edtWeightKgsHundreds = findViewById(R.id.spinnerKgsHundredsFD)
         btnCancel = findViewById(R.id.btnCancel)
 
-        // ************  Setup Species Spinner *********************        // if Small Mouth is selected then Small Mouth is at top of Spinner
-        val tournamentSpecies = intent.getStringExtra("tournamentSpecies")?.trim() ?: "Unknown"
-        val speciesList: Array<String> = when {
-            isTournament && tournamentSpecies.equals("Large Mouth Bass", ignoreCase = true) -> {
-                arrayOf("Large Mouth", "Small Mouth")
-            }
-            isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
-                arrayOf("Small Mouth", "Large Mouth")
-            }
-            isTournament -> {
-                arrayOf(tournamentSpecies)
-            }
-            else -> {
-                arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
-            }
-        }
-        val speciesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
-        speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerSpecies.adapter = speciesAdapter
 
+        // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
 
-        // ****************  Setup Clip Color Spinner ****************
-        val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?:  arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
-        val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
-        spinnerClipColor.adapter = adapter
-
-
-       // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
-
-            // Tens place: 0–9 (represents 0–90 lbs)
+        // Tens place: 0–9 (represents 0–90 lbs)
         val tensOptions = (0..9).map { it.toString() }
         val tensAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tensOptions)
         tensAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightTensLbs.adapter = tensAdapter
+        edtWeightTensKgs.adapter = tensAdapter
 
-            // Ones place: 0–9 (represents 0–9 lbs)
+        // Ones place: 0–9 (represents 0–9 lbs)
         val onesOptions = (0..9).map { it.toString() }
         val onesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, onesOptions)
         onesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightLbs.adapter = onesAdapter
+        edtWeightKgs.adapter = onesAdapter
 
-            // Ounces: 0–15
-        val ounceOptions = (0..15).map { it.toString() }
-        val ounceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ounceOptions)
-        ounceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightOz.adapter = ounceAdapter
+        // grams: 0.0–0.9
+        val tenthsOptions = (0..9).map { it.toString() }
+        val tenthsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tenthsOptions)
+        tenthsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        edtWeightKgsTenths.adapter = tenthsAdapter
 
-            // Optionally set default selection to 0
-        edtWeightTensLbs.setSelection(0)
-        edtWeightLbs.setSelection(0)
-        edtWeightOz.setSelection(0)
+        // grams: 0.00–0.09
+        val hundredsOptions = (0..9).map { it.toString() }
+        val hundredsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hundredsOptions)
+        hundredsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        edtWeightKgsTenths.adapter = hundredsAdapter
+
+        // Optionally set default selection to 0
+        edtWeightTensKgs.setSelection(0)
+        edtWeightKgs.setSelection(0)
+        edtWeightKgsTenths.setSelection(0)
+        edtWeightKgsHundreds.setSelection(0)
 
 
-            // ````````` CANCEL btn ```````````````````
+        // ````````` CANCEL btn ```````````````````
         btnCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
+
     }//==============  END ON CREATE =================================
 
     override fun onDestroy() {
@@ -178,6 +143,7 @@ class PopupVccTournLbs: Activity() {
                     }
                 }
             }
+
             override fun onError(utteranceId: String?) {}   // todo do we need something for Error catching?
         })
     }
@@ -210,7 +176,8 @@ class PopupVccTournLbs: Activity() {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                val matches =
+                    results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val spokenText = matches?.firstOrNull() ?: "No input"
                 Log.d("VCC", "🎤 User said: $spokenText")
                 handleVoiceInput(spokenText)
@@ -228,7 +195,8 @@ class PopupVccTournLbs: Activity() {
                 Log.e("VCC", "Speech recognition error: $error")
                 when (error) {
                     SpeechRecognizer.ERROR_NO_MATCH,
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                    -> {
                         // Let the user know and try again
                         tts.speak(
                             "I did not catch that. Please say yes or no after the beep.",
@@ -236,6 +204,7 @@ class PopupVccTournLbs: Activity() {
                         )
                         Handler(mainLooper).postDelayed({ startListening() }, 1200)
                     }
+
                     else -> {
                         // Fallback for other errors
                         tts.speak(
@@ -253,7 +222,7 @@ class PopupVccTournLbs: Activity() {
     //============= 👂Gets Users Info 📖 and Puts Everything for  Database and Listing =======================
 
 
-    data class ConfirmedCatch(val weightOz: Int, val species: String, val clipColor: String)
+    data class ConfirmedCatch(val weightTotalKgsFD: Int, val species: String)
 
     //===============================================
     private fun handleVoiceInput(input: String) {
@@ -264,11 +233,14 @@ class PopupVccTournLbs: Activity() {
         if (awaitingConfirmation) {
             when {
                 lower.contains("yes") -> {
-                    Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournament.kt ")
+                    Log.d(
+                        "VCC",
+                        "👂 User input was confirmed now sending to CatchEntryTournament.kt "
+                    )
 
-                    lastConfirmedCatch?.let { (weightOz, species, clipColor) ->
+                    lastConfirmedCatch?.let { (weightOz, species) ->
 
-                        returnTournamentResult(weightOz, species, clipColor)
+                        returnTournamentResult(weightOz, species)
                     }
 
                 }
@@ -276,11 +248,12 @@ class PopupVccTournLbs: Activity() {
                 lower.contains("no") -> {
                     awaitingConfirmation = false
                     tts.speak(
-                        "Okay, let's start over. Please say the weight species and clip then say over when you are done.",
+                        "Okay, let's start over. Please say the weight and the species then say over when you are done.",
                         TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
                     )
                     Handler(mainLooper).postDelayed({ startListening() }, 1500)
                 }
+
                 else -> {
                     tts.speak(
                         "Please say 'yes' to confirm or 'no' to start over.",
@@ -306,12 +279,12 @@ class PopupVccTournLbs: Activity() {
             .replace("over and out", "")
             .replace("over", "")
             .trim()
-        Log.d("VCC", "🧹 Cleaned input: $cleaned")
+
 
         // 4) Cancel keywords
         val cancelPhrases = listOf("cancel", "that is wrong", "start over", "not right")
         if (cancelPhrases.any { cleaned.contains(it) }) {
-            Log.d("VCC", "❌ Cancel voice command detected. Restarting...")
+
             tts.speak(
                 "Okay, let's try again. Please say the weight and say over when done.",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
@@ -320,114 +293,97 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
-        // 5) Parse weight (lbs + oz)
+        // 5) Parse weight (Kgs + Grams)
         val numberWords = mapOf(
             "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
             "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
             "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
             "fifteen" to 15
         )
-        var pounds = -1
-        var ounces = -1
+        var kilograms = -1
+        var grams = -1
         val words = cleaned.split("\\s+".toRegex())
         for ((i, word) in words.withIndex()) {
             val num = numberWords[word] ?: word.toIntOrNull()
             if (num != null) {
                 when {
-                    i + 1 < words.size && words[i + 1].contains("pound")  -> pounds = num
-                    i + 1 < words.size && words[i + 1].contains("ounce")  -> ounces = num
-                    pounds < 0                                            -> pounds = num
-                    ounces < 0                                            -> ounces = num
+                    i + 1 < words.size && words[i + 1].contains("kilogram") -> kilograms = num
+                    i + 1 < words.size && words[i + 1].contains("grams") -> grams = num
+                    kilograms < 0 -> kilograms = num
+                    grams < 0 -> grams = num
                 }
             }
         }
-        if (pounds < 0) pounds = 0
-        if (ounces < 0) ounces = 0
-        val totalOz = pounds * 16 + ounces
-        if (totalOz == 0) {
-            Toast.makeText(this, "🚫 Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // ENSURE Ounces is 0 to 15 only
-        if (ounces > 15) {
-            tts.speak(
-                "Sorry, ounces can only be zero to fifteen. Please repeat your length.",
-                TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
-            )
-            Handler(mainLooper).postDelayed({ startListening() }, 1500)
+        if (kilograms < 0) kilograms = 0
+        if (grams < 0) grams = 0
+        val weightTotalKgsFD= kilograms * 100 + grams
+        if (weightTotalKgsFD == 0) {
+            Toast.makeText(this, "🚫 Weight cannot be 0.00 Kgs!", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
         // 6) Parse species
         val speciesCode = when {
-            cleaned.contains("smallmouth")   -> "Small Mouth"
-            cleaned.contains("largemouth")   -> "Large Mouth"
-            else                             -> null
+            cleaned.contains("smallmouth") -> "Small Mouth"
+            cleaned.contains("largemouth") -> "Large Mouth"
+            else -> null
         }
-        val selectedSpecies = speciesCode ?: run {
+        selectedSpecies = speciesCode ?: run {
             tts.speak(
-                "What species was the $pounds pound $ounces ounce catch?",
+                "What species was the $kilograms point $grams kilograms catch?",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_SPECIES"
             )
             Handler(mainLooper).postDelayed({ startListening() }, 2500)
             return
         }
 
-        // 7) Parse clip color
-        val clipColors = listOf("red","blue","green","yellow","orange","white")
-        val spokenColor = clipColors.firstOrNull { cleaned.contains(it) }
-        val selectedClip = spokenColor?.uppercase()
-            ?: spinnerClipColor.selectedItem?.toString()?.uppercase()
-            ?: "white"
-        if (spokenColor == null) {
-            tts.speak(
-                "What clip color did you put the fish on?",
-                TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_CLIP"
-            )
-            Handler(mainLooper).postDelayed({ startListening() }, 2500)
-            return
-        }
+        // 7)  Setup Species Spinner
+        val onlyThatList: List<String> = listOf(selectedSpecies)
+        val speciesAdapter = ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_spinner_item, onlyThatList).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        spinnerSpecies.adapter = speciesAdapter
 
-        // 8) Update your UI spinners immediately
-        edtWeightTensLbs.setSelection(pounds / 10)
-        edtWeightLbs.setSelection(pounds % 10)
-        edtWeightOz.setSelection(ounces)
-        spinnerSpecies.setSelection((spinnerSpecies.adapter as ArrayAdapter<String>)
-            .getPosition(selectedSpecies))
-        spinnerClipColor.setSelection((spinnerClipColor.adapter as ArrayAdapter<String>)
-            .getPosition(selectedClip))
+        // 8) Update your UI spinners
+        edtWeightTensKgs.setSelection(kilograms/ 10)
+        edtWeightKgs.setSelection(kilograms % 10)
+        edtWeightKgsTenths.setSelection(grams / 10)
+        edtWeightKgsHundreds.setSelection(grams % 10)
+        spinnerSpecies.setSelection(
+            (spinnerSpecies.adapter as ArrayAdapter<String>)
+                .getPosition(selectedSpecies)
+        )
 
-        // 9) Ask for confirmation, echoing back exactly what we think we heard
+        // 8) Ask for confirmation, echoing back exactly what we think we heard
         // after parsing pounds & ounces:
 
-        val question = "You said a $pounds-lb $ounces-oz $selectedSpecies on the $selectedClip clip, is that correct Over"
+        val question =
+            "You said a $kilograms point $grams kilograms for a $selectedSpecies, is that correct Over"
 
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
-        // 10) Save state and flip the flag
-        lastConfirmedCatch = ConfirmedCatch(totalOz, selectedSpecies, selectedClip)
+        // 9) Save state and flip the flag
+        lastConfirmedCatch = ConfirmedCatch(weightTotalKgsFD, selectedSpecies)
         awaitingConfirmation = true
 
-
-        // 11) Immediately start listening for that “yes” or “no”
+        // 10) Immediately start listening for that “yes” or “no”
         Handler(mainLooper).postDelayed({ startListening() }, 2500)
 
     } //===================END handle Voice Input  ====================
 
-   // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
-    private fun Activity.returnTournamentResult(
-        weightOz: Int, species: String, clipColor: String
-    ) {
-       Intent(this, CatchEntryTournament::class.java).apply {
-           flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-           putExtra(EXTRA_WEIGHT_OZ,     weightOz)
-           putExtra(EXTRA_SPECIES,       species)
-           putExtra(EXTRA_CLIP_COLOR,    clipColor)
-       }.also {
-           startActivity(it)
-           finish()
-       }
-   }
+    // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
+    private fun Activity.returnTournamentResult(weightTotalKgsFD: Int, species: String) {
+        Intent(this, CatchEntryKgs::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(EXTRA_WEIGHT_KGS, weightTotalKgsFD)
+            putExtra(EXTRA_SPECIES, species)
+        }.also {
+            startActivity(it)
+            finish()
+        }
+    }
+
 
 }//================== END  ==========================
