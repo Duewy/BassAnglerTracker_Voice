@@ -93,6 +93,17 @@
 
         <!-- Generate CSV Button -->
         <Button
+            android:id="@+id/btnViewFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/btn_outline_green"
+            android:text="View your file"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
             android:id="@+id/btnGenerateCSV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

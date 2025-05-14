@@ -23,7 +23,7 @@ import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
 
-class PopupVccLengthEntryInches: Activity() {
+class PopupVccLengthEntryCms: Activity() {
 
     // Flags and extras
     private var selectedSpecies: String = ""
@@ -34,14 +34,14 @@ class PopupVccLengthEntryInches: Activity() {
 
     // UI Components
     private lateinit var spinnerSpecies: Spinner
-    private lateinit var edtLengthInchesTens: Spinner
-    private lateinit var edtLengthInchesOnes: Spinner
-    private lateinit var edtLengthInchesQuarters: Spinner
+    private lateinit var edtLengthCmsTens: Spinner
+    private lateinit var edtLengthCmsOnes: Spinner
+    private lateinit var edtLengthCmsDec: Spinner
     private lateinit var btnCancel: Button
 
 
     companion object {
-        const val EXTRA_LENGTH_INCHES     = "lengthTotalInches"
+        const val EXTRA_LENGTH_CMS     = "lengthTotalCms"
         const val EXTRA_SPECIES       = "selectedSpecies"
     }
 
@@ -50,7 +50,7 @@ class PopupVccLengthEntryInches: Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.popup_vcc_funday_inches)
+        setContentView(R.layout.popup_vcc_funday_cms)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
@@ -67,36 +67,36 @@ class PopupVccLengthEntryInches: Activity() {
 
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCInchesFD)
-        edtLengthInchesTens = findViewById(R.id.spinnerInchesTensFD)
-        edtLengthInchesOnes = findViewById(R.id.spinnerInchesOnesFD)
-        edtLengthInchesQuarters = findViewById(R.id.spinnerInchesQuartersFD)
+        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCCmsFD)
+        edtLengthCmsTens = findViewById(R.id.spinnerCmsTensFD)
+        edtLengthCmsOnes = findViewById(R.id.spinnerCmsOnesFD)
+        edtLengthCmsDec = findViewById(R.id.spinnerCmsTenthsFD)
         btnCancel = findViewById(R.id.btnCancel)
 
 
         // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
-        // Tens place: 0–9 (represents 0–90 inches)
+        // Tens place: 0–9 (represents 0–90 cms)
         val tensOptions = (0..9).map { it.toString() }
         val tensAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tensOptions)
         tensAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtLengthInchesTens.adapter = tensAdapter
+        edtLengthCmsTens.adapter = tensAdapter
 
-        // Ones place: 0–9 (represents 0–9 inches)
+        // Ones place: 0–9 (represents 0–9 cms)
         val onesOptions = (0..9).map { it.toString() }
         val onesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, onesOptions)
         onesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtLengthInchesOnes.adapter = onesAdapter
+        edtLengthCmsOnes.adapter = onesAdapter
 
-        // Quarters: 0–3
-        val quartersOptions = (0..3).map { it.toString() }
-        val quartersAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, quartersOptions)
-        quartersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtLengthInchesQuarters.adapter = quartersAdapter
+        // Millimeters: 0–9
+        val decOptions = (0..9).map { it.toString() }
+        val decAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, decOptions)
+        decAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        edtLengthCmsDec.adapter = decAdapter
 
         // Optionally set default selection to 0
-        edtLengthInchesTens.setSelection(0)
-        edtLengthInchesOnes.setSelection(0)
-        edtLengthInchesQuarters.setSelection(0)
+        edtLengthCmsTens.setSelection(0)
+        edtLengthCmsOnes.setSelection(0)
+        edtLengthCmsDec.setSelection(0)
 
 
         // ````````` CANCEL btn ```````````````````
@@ -205,7 +205,7 @@ class PopupVccLengthEntryInches: Activity() {
 
     //============= 👂Gets Users Info 📖 and Puts Everything for  Database and Listing =======================
 
-    data class ConfirmedCatch(val totalLengthQuarters: Int, val species: String)
+    data class ConfirmedCatch(val totalLengthTenths: Int, val species: String)
 
     //===============================================
     private fun handleVoiceInput(input: String) {
@@ -216,11 +216,11 @@ class PopupVccLengthEntryInches: Activity() {
         if (awaitingConfirmation) {
             when {
                 lower.contains("yes") -> {
-                    Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournamentInches.kt ")
+                    Log.d("VCC", "👂 User input was confirmed now sending to CatchEntryTournamentCms.kt ")
 
-                    lastConfirmedCatch?.let { (totalLengthQuarters, species) ->
+                    lastConfirmedCatch?.let { (totalLengthTenths, species) ->
 
-                        returnTournamentResult(totalLengthQuarters, species)
+                        returnTournamentResult(totalLengthTenths, species)
                     }
 
                 }
@@ -279,34 +279,25 @@ class PopupVccLengthEntryInches: Activity() {
             "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
             "fifteen" to 15
         )
-        var inches = -1
-        var quarters = -1
+        var centimeters = -1
+        var millimeters = -1
         val words = cleaned.split("\\s+".toRegex())
         for ((i, word) in words.withIndex()) {
             val num = numberWords[word] ?: word.toIntOrNull()
             if (num != null) {
                 when {
-                    i + 1 < words.size && words[i + 1].contains("inches")  -> inches = num
-                    i + 1 < words.size && words[i + 1].contains("quarters")  -> quarters = num
-                    inches < 0                                            -> inches = num
-                    quarters < 0                                            -> quarters = num
+                    i + 1 < words.size && words[i + 1].contains("centimeters")  -> centimeters = num
+                    i + 1 < words.size && words[i + 1].contains("millimeters")  -> millimeters = num
+                    centimeters < 0                                            -> centimeters = num
+                    millimeters < 0                                            -> millimeters = num
                 }
             }
         }
-        if (inches < 0) inches = 0
-        if (quarters < 0) quarters = 0
-        val totalLengthQuarters = ((inches * 4) + quarters)
-        if (totalLengthQuarters == 0) {
-            Toast.makeText(this, "🚫 Length cannot be 0 inches 0 quarters!", Toast.LENGTH_SHORT).show()
-            return
-        }
-        // ENSURE Quarters is 0 to 3
-        if (quarters > 3) {
-            tts.speak(
-                "Sorry, quarters can only be zero to three. Please repeat your length.",
-                TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
-            )
-            Handler(mainLooper).postDelayed({ startListening() }, 1500)
+        if (centimeters < 0) centimeters = 0
+        if (millimeters < 0) millimeters = 0
+        val totalLengthTenths = ((centimeters * 10) + millimeters)
+        if (totalLengthTenths == 0) {
+            Toast.makeText(this, "🚫 Length cannot be 0 centimeters !", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -325,38 +316,33 @@ class PopupVccLengthEntryInches: Activity() {
         }
         selectedSpecies = normalizedSpecies
 
-
-        // 7)  Setup Species Spinner from User Input
-        val onlyThatList: List<String> = listOf(selectedSpecies)
-        val speciesAdapter = ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_spinner_item, onlyThatList).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-        spinnerSpecies.adapter = speciesAdapter
-
+// 7) (DEBUG-only) Populate spinner for a quick QA check
+        if (BuildConfig.DEBUG) {
+            val debugList = listOf(selectedSpecies)
+            val adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                debugList
+            ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            spinnerSpecies.adapter = adapter
+            spinnerSpecies.setSelection(0)
+        }
 
         // 8) Update your UI spinners immediately
-        edtLengthInchesTens.setSelection(inches / 10)
-        edtLengthInchesOnes.setSelection(inches % 10)
-        edtLengthInchesQuarters.setSelection(quarters)
+        edtLengthCmsTens.setSelection(centimeters / 10)
+        edtLengthCmsOnes.setSelection(centimeters % 10)
+        edtLengthCmsDec.setSelection(millimeters)
         spinnerSpecies.setSelection((spinnerSpecies.adapter as ArrayAdapter<String>)
             .getPosition(selectedSpecies))
 
         // 9) Ask for confirmation, echoing back exactly what we think we heard
-        val lengthPhrase = when (quarters) {
-            0 -> "$inches inches"
-            1 -> "$inches and a quarter inches"
-            2 -> "$inches and a half inches"
-            3 -> "$inches and three quarter inches"
-            else -> "$inches inches"
-        }
 
-        val question = "You said $lengthPhrase of the $selectedSpecies, is that correct Over"
+        val question = "You said a $selectedSpecies,that is $centimeters point $millimeters centimeters long is that correct Over"
 
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
         // 10) Save state and flip the flag
-        lastConfirmedCatch = ConfirmedCatch(totalLengthQuarters, selectedSpecies)
+        lastConfirmedCatch = ConfirmedCatch(totalLengthTenths, selectedSpecies)
         awaitingConfirmation = true
 
         // 11) Immediately start listening for that “yes” or “no”
@@ -364,12 +350,12 @@ class PopupVccLengthEntryInches: Activity() {
 
     } //===================END handle Voice Input  ====================
 
-    // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^ Sending Data to CatchEntryFundDay  ^^^^^^^^^^^^^^^^
     private fun Activity.returnTournamentResult(
-        totalLengthQuarters: Int, species: String) {
-        Intent(this, CatchEntryInches::class.java).apply {
+        totalLengthTenths: Int, species: String) {
+        Intent(this, CatchEntryMetric::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(EXTRA_LENGTH_INCHES, totalLengthQuarters)
+            putExtra(EXTRA_LENGTH_CMS, totalLengthTenths)
             putExtra(EXTRA_SPECIES,       species)
         }.also {
             startActivity(it)

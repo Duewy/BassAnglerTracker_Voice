@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceCatchParse
+import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -40,13 +41,26 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     private lateinit var simpleLbsListView: ListView
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
+
+    // Voice Helper
+    private var voiceControlEnabled = false
+    private lateinit var voiceHelper: VoiceInteractionHelper
+    lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
+    private var awaitingResult = false
+
+
+    companion object {
+        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
+        const val EXTRA_SPECIES       = "selectedSpecies"
+    }
+
     private val weightEntryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
-                totalWeightOz = data.getIntExtra("weightTotalOz", 0)
-                selectedSpecies = data.getStringExtra("selectedSpecies") ?: selectedSpecies
+                totalWeightOz = data.getIntExtra(EXTRA_WEIGHT_OZ , 0)
+                selectedSpecies = data.getStringExtra(EXTRA_SPECIES) ?: selectedSpecies
 
                 if (totalWeightOz > 0) {
                     selectedSpecies = normalizeSpeciesName(selectedSpecies)
@@ -92,6 +106,16 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_lbs_ozs)
 
+        //-- Set Up the Voice Helper interaction with VoiceInteractionHelper ------
+        voiceHelper = VoiceInteractionHelper(
+            activity = this, //
+            measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+            isTournament = false,
+            onCommandAction = { transcript -> onSpeechResult(transcript) }
+        )
+        voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+        dbHelper = CatchDatabaseHelper(this)
+
         //******  Initialize speech recognizer ***********************
         recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
             setRecognitionListener(recognitionListener)
@@ -101,34 +125,33 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
 
-        dbHelper = CatchDatabaseHelper(this)
-
+        // ******** Set Up Values ****************
         btnSetUp3 = findViewById(R.id.btnSetUp3)
         btnOpenWeightPopup = findViewById(R.id.btnOpenWeightPopup)
         simpleLbsListView = findViewById(R.id.simpleLbsListView)
 
         updateListViewLb() // Load today's catches into ListView
 
+        // $$$$$$$$ ADD a Catch  $$$$$$$$$$$$$$$$$$$$$$$
         btnOpenWeightPopup.setOnClickListener {
             openWeightPopup()
         }
-
+        // GOTO SET-UP PAGE
         btnSetUp3.setOnClickListener {
             val intent2 = Intent(this, SetUpActivity::class.java)
             startActivity(intent2)
         }
 
+        //+++++++++ EDIT OR DELETE ENTRIES ++++++++++++++
         simpleLbsListView.setOnItemLongClickListener { _, _, position, _ ->
             if (catchList.isEmpty()) {
                 Toast.makeText(this, "No catches available", Toast.LENGTH_SHORT).show()
                 return@setOnItemLongClickListener true
             }
-
             if (position >= catchList.size) {
                 Log.e("DB_DEBUG", "⚠️ Invalid position: $position, Catch List Size: ${catchList.size}")
                 return@setOnItemLongClickListener true
             }
-
             val selectedCatch = catchList[position]
             showEditDeleteDialog(selectedCatch)
             true
@@ -138,12 +161,18 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
 
 
     override fun onDestroy() {
-        recognizer.destroy()
         super.onDestroy()
+        voiceHelper.shutdown()
+        recognizer.destroy()
     }
 
     private fun openWeightPopup() {
-        val intent = Intent(this, PopupWeightEntryLbs::class.java)
+        val intent = if (voiceControlEnabled) {
+            Intent(this, PopupVccWeightEntryLbs::class.java)
+
+        } else {
+            Intent(this, PopupWeightEntryLbs::class.java)
+        }
         weightEntryLauncher.launch(intent)
     }
 
@@ -315,5 +344,11 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     override fun onVoiceWake() {
         recognizer.startListening(recognizerIntent)
     }
+
+    override fun onManualWake() {
+        // (this is the tap handler)
+        openWeightPopup()
+    }
+
 
 }//+++++++++++++ END of CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++

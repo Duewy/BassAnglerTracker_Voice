@@ -314,7 +314,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         val sp   = intent.getStringExtra(EXTRA_SPECIES).orEmpty()
         val clip = intent.getStringExtra(EXTRA_CLIP_COLOR).orEmpty()
         saveTournamentCatch(oz, sp, clip)
-    }  /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
+    }
+
+    /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
     /** Launches the appropriate popup (VCC vs manual) */
     private fun showWeightPopup() {
         awaitingResult = true

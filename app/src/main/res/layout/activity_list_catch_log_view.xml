@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/golden"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CatchEntryLbsOzs">
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.25"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.50"
+        app:srcCompat="@drawable/bass_jumping_boater_no_backing"
+        android:contentDescription="@string/bass_fighting"/>
+
+    <!-- Page Label -->
+    <TextView
+        android:id="@+id/txtCatchEntryViewLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="26dp"
+        android:text="@string/list_view_of_your_catch"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <LinearLayout
+        android:id="@+id/llAllButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtCatchEntryViewLog">
+
+        <!-- btn Goto Main Page -->
+        <Button
+            android:id="@+id/btnMainCLV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/btn_outline_orange"
+            android:padding="10dp"
+            android:text="Main"
+            android:textStyle="bold"/>
+
+        <!-- btn Goto Set Up Page -->
+        <Button
+            android:id="@+id/btnSetUpCLV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/btn_menu_setup"
+            android:padding="10dp"
+            android:text="@string/goto_SetUp_description"
+            android:textStyle="bold"/>
+
+        <!-- btn Goto Look-Up Page -->
+        <Button
+            android:id="@+id/btnLookUpCLV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/btn_outline_green"
+            android:padding="10dp"
+            android:text="@string/back"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divListView"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/lt_brown"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llAllButtons" />
+
+    <!-- List of Todays Catch -->
+    <ListView
+        android:id="@+id/userGenCsvListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:divider="@color/Log_brown"
+        android:dividerHeight="2dp"
+        android:padding="8dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divListView"
+        app:layout_constraintVertical_bias="1.0" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

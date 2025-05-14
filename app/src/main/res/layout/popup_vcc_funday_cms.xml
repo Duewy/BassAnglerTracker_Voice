@@ -138,15 +138,6 @@
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
-            <Spinner
-                android:id="@+id/spinnerCmsHundredsFD"
-                android:layout_width="60dp"
-                android:layout_height="50dp"
-                android:background="@color/lite_grey"
-                android:spinnerMode="dialog"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtCmsLabel"

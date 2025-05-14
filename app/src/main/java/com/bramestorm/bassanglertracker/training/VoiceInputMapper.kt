@@ -100,6 +100,25 @@ object VoiceInputMapper {
         put("cart", "Carp")
     }
 
+    /**
+     * Normalize raw input → Title-cased species name,
+     * or return null if it’s empty after cleaning.
+     */
+    fun normalizeSpecies(raw: String): String? {
+        val words = raw
+            .trim()
+            .split(Regex("\\s+"))
+            .map { token ->
+                token
+                    .lowercase()
+                    .replaceFirstChar { it.uppercaseChar() }
+            }
+
+        val result = words.joinToString(" ")
+        return result.ifBlank { null }
+    }
+
+
     fun registerUserSpecies(name: String) {
         val cleaned = name.trim().lowercase()
         baseSpeciesVoiceMap[cleaned] = name

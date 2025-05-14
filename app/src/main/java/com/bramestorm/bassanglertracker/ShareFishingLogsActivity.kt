@@ -18,8 +18,10 @@ class ShareFishingLogsActivity : AppCompatActivity() {
     private lateinit var chkIncludeGPS: CheckBox
     private lateinit var chkIncludeCatchType: CheckBox
     private lateinit var btnGenerateCSV: Button
+    private lateinit var btnViewFile : Button
     private lateinit var btnShareCSV: Button
     private lateinit var btnSetUpSFLogs :Button
+
 
     private var generatedCsvFile: File? = null
 
@@ -35,6 +37,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         chkIncludeCatchType = findViewById(R.id.chkIncludeCatchType)
 
         btnGenerateCSV = findViewById(R.id.btnGenerateCSV)
+        btnViewFile = findViewById(R.id.btnViewFile)
         btnShareCSV = findViewById(R.id.btnShareCSV)
         btnSetUpSFLogs= findViewById(R.id.btnSetUpSFLogs)
 
@@ -67,6 +70,13 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             } ?: run {
                 positionedToast("⚠️ Warning: Please generate the CSV first")
             }
+        }
+
+        // ---------- See the Files Yourself
+        btnViewFile.setOnClickListener {
+            val intent = Intent(this, ListCatchLogView::class.java)
+            // todo generate the file then send it to the ListCatchLogView file to see in a list view...
+            startActivity(intent)
         }
 
         //-------------- Goto SetUp page ---------------------

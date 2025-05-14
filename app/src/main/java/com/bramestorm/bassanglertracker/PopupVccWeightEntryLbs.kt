@@ -18,6 +18,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
@@ -205,7 +206,6 @@ class PopupVccWeightEntryLbs: Activity() {
                             }
                         }
                     }
-
                 })
                 speechRecognizer?.startListening(intent)
             }//------------------- End of startListening --------------------------
@@ -218,22 +218,14 @@ class PopupVccWeightEntryLbs: Activity() {
             //===============================================
             private fun handleVoiceInput(input: String) {
                 val lower = input.lowercase(Locale.getDefault()).trim()
-                Log.d("VCC", "🎤 Raw speech: $lower")
 
                 // 1) If we’re waiting for a “yes”/“no” confirmation, handle it first:
                 if (awaitingConfirmation) {
                     when {
                         lower.contains("yes") -> {
-                            Log.d(
-                                "VCC",
-                                "👂 User input was confirmed now sending to CatchEntryTournament.kt "
-                            )
-
                             lastConfirmedCatch?.let { (weightOz, species) ->
-
-                                returnTournamentResult(weightOz, species)
+                                returnFunDayResult(weightOz, species)
                             }
-
                         }
 
                         lower.contains("no") -> {
@@ -324,20 +316,20 @@ class PopupVccWeightEntryLbs: Activity() {
                     return
                 }
 
-                // 6) Parse species
-                val speciesCode = when {
-                    cleaned.contains("smallmouth") -> "Small Mouth"
-                    cleaned.contains("largemouth") -> "Large Mouth"
-                    else -> null
-                }
-                 selectedSpecies = speciesCode ?: run {
+
+                // 6) Parse and normalize species via the user-defined mapper
+                val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"F
+                val normalizedSpecies = VoiceInputMapper.normalizeSpecies(rawSpeciesPhrase)
+                if (normalizedSpecies == null)  {
+                    // Did not recognize a valid species—prompt again
                     tts.speak(
-                        "What species was the $pounds pound $ounces ounce catch?",
+                        "I didn't catch the species. Please say the species name over.",
                         TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_SPECIES"
                     )
                     Handler(mainLooper).postDelayed({ startListening() }, 2500)
                     return
                 }
+                selectedSpecies = normalizedSpecies
 
                 // 7)  Setup Species Spinner
 
@@ -374,17 +366,14 @@ class PopupVccWeightEntryLbs: Activity() {
 
             } //===================END handle Voice Input  ====================
 
-            // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
-            private fun Activity.returnTournamentResult(weightOz: Int, species: String) {
-                Intent(this, CatchEntryLbsOzs::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            // ^^^^^^^^^^ Sending Data to CatchEntryLbsOzs ^^^^^^^^^^^^^^^^
+            private fun returnFunDayResult(weightOz: Int, species: String) {
+                val data = Intent().apply {
                     putExtra(EXTRA_WEIGHT_OZ, weightOz)
-                    putExtra(EXTRA_SPECIES, species)
-                }.also {
-                    startActivity(it)
-                    finish()
+                    putExtra(EXTRA_SPECIES,  species)
                 }
+                setResult(Activity.RESULT_OK, data)
+                finish()
             }
-
 
     }//================== END  ==========================

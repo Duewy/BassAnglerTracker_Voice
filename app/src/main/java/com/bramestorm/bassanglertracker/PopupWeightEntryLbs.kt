@@ -22,6 +22,11 @@ class PopupWeightEntryLbs : Activity() {
 
     private var selectedSpecies: String = ""
 
+    companion object {
+        const val EXTRA_WEIGHT_OZ = "weightTotalOz"
+        const val EXTRA_SPECIES = "selectedSpecies"
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +56,8 @@ class PopupWeightEntryLbs : Activity() {
                 return@setOnClickListener
             }
 
-            resultIntent.putExtra("weightTotalOz", totalWeightOz)
-            resultIntent.putExtra("selectedSpecies", selectedSpecies)
+            resultIntent.putExtra(EXTRA_WEIGHT_OZ, totalWeightOz)
+            resultIntent.putExtra(EXTRA_SPECIES, selectedSpecies)
 
             setResult(Activity.RESULT_OK, resultIntent)
             finish()

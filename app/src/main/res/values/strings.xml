@@ -233,7 +233,7 @@
     <string name="edit_tourn_kgs">Edit Tournament\nWeight Kgs</string>
     <string name="save">Save</string>
     <string name="voice_control_tag">Voice\nControl</string>
-    <string name="vcc_tournament_lbs">Voice Control\n Touranment Lbs</string>
+    <string name="vcc_tournament_lbs">Voice Control\n Tournament Lbs</string>
     <string name="clip_color">Clip Color</string>
     <string name="vcc_on">VCC\nON</string>
     <string name="manual_mode">Manual\\nMode</string>
@@ -245,6 +245,12 @@
     <string name="voice_control_fun_day_lbs">Voice Control\nFun-Day Lbs</string>
     <string name="voice_control_nfun_day_kgs">Voice Control\nFun-Day Kgs</string>
     <string name="vcc_weight_lbs">VCC Weight Lbs</string>
+    <string name="list_of_your_catch">List of your catch</string>
+    <string name="select_the_logged_fields_data_of_your_catches_for_the_list">select the logged fields data of your catches for the list</string>
+    <string name="see_the_list">See the List</string>
+    <string name="look_up_new_files">Look Up\nNew Files</string>
+    <string name="back">Back</string>
+    <string name="list_view_of_your_catch"><u>LIST VIEW OF YOUR CATCH</u></string>
 
 
     //species

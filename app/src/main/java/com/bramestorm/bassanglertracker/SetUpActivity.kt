@@ -30,7 +30,6 @@ import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.voice.BluetoothTestDialogFragment
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.Date
 
 
@@ -67,7 +66,6 @@ class SetUpActivity : AppCompatActivity() {
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
-   // private val prefs by lazy { getSharedPreferences("UserPrefs", MODE_PRIVATE) }
     private val prefs by lazy { getSharedPreferences(PREFS_NAME, MODE_PRIVATE) }
 
     private var isWeightSelected = false
@@ -77,11 +75,9 @@ class SetUpActivity : AppCompatActivity() {
     private var isFunDaySelected = false
     private var isTournamentSelected = false
     private var selectedSpecies: String = ""
-    private var audioPermissionCallback: (() -> Unit)? = null
 
     private var isValUnits = false
     private var isValMeasuring = false
-
 
 
     //--------------------------------------------------------------
@@ -91,7 +87,7 @@ class SetUpActivity : AppCompatActivity() {
 
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-        //------------------- Ensures that the GPS must be Enabled Every Day --------------------
+        //------------------- Ensures that the GPS must be Re-Enabled Every Day --------------------
 
         val today = DateFormat.format("yyyy-MM-dd", Date()).toString()
         val lastVoiceDate = prefs.getString(KEY_LAST_VOICE_DATE, "")
@@ -337,7 +333,7 @@ class SetUpActivity : AppCompatActivity() {
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                     }
-                    putExtra("VCC_ENABLED", tglVoice.isChecked)
+                        putExtra("VCC_ENABLED", tglVoice.isChecked)
                 }
 
                 startActivity(intent)
@@ -346,7 +342,7 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
 
-    }    //=================== END of ON CREATE ================================
+    }  //=================== END of ON CREATE ================================
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -363,7 +359,7 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
 
-
+    // ~~~~ Voice Services for Vcc ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     private fun startVoiceService() {
         val svc = Intent(this, VoiceControlService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -377,7 +373,7 @@ class SetUpActivity : AppCompatActivity() {
         stopService(Intent(this, VoiceControlService::class.java))
     }
 
-    private fun checkBluetoothHeadset(): Boolean {
+    private fun checkBluetoothHeadset(): Boolean {          //todo see if we need this anymore or if it just comes up on older Android Cell Phones???
         // on Android 12+ we need BLUETOOTH_CONNECT at runtime
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
@@ -400,7 +396,6 @@ class SetUpActivity : AppCompatActivity() {
         return btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) ==
                 BluetoothAdapter.STATE_CONNECTED
     }
-
 
 
 
@@ -451,19 +446,22 @@ class SetUpActivity : AppCompatActivity() {
         }
     }
 
-    private fun showBluetoothRequiredDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Bluetooth Required")
-            .setMessage("Voice control won’t run until a Bluetooth microphone is connected and tested.")
-            .setPositiveButton("Test Now") { _, _ ->
-                BluetoothTestDialogFragment().show(supportFragmentManager, "bt_test")
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    //------------------------ Enable GPS ------------------------
+    private fun enableGps() {
+        sharedPreferences.edit()
+            .putBoolean("GPS_ENABLED", true)
+            .apply()
+        // one call, always positioned the same
+        positionedToast("GPS is Enabled")
     }
 
+    //------------------------ Disable GPS ------------------------
+    private fun disableGps() {
+        sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
+        positionedToast("GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.")
+    }
 
-    //--------------- Request Permissions for GPS and Bluetooth ----------------
+    //--------------- Request Permissions for Bluetooth ----------------
     // ---------- Permission Callbacks ------------
         override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -512,21 +510,6 @@ class SetUpActivity : AppCompatActivity() {
                 Log.w(TAG, "Bluetooth CONNECT permission missing", e)
                 false
             }
-        }
-
-        //------------------------ Enable GPS ------------------------
-        private fun enableGps() {
-            sharedPreferences.edit()
-                .putBoolean("GPS_ENABLED", true)
-                .apply()
-            // one call, always positioned the same
-            positionedToast("GPS is Enabled")
-        }
-
-        //------------------------ Disable GPS ------------------------
-        private fun disableGps() {
-            sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
-            positionedToast("GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.")
         }
 
     //======================= onResume ==========================================

@@ -21,12 +21,18 @@ class LookUpShareDataActivity : AppCompatActivity() {
         }
 
         //---------------- GoTo Google Map Lookup button ----------------
+        val btnListCatch = findViewById<Button>(R.id.btnListCatch)
+        btnListCatch.setOnClickListener {
+            val intent = Intent(this, ListCatchLogView::class.java)
+            startActivity(intent)
+        }
+
+        //---------------- GoTo Google Map Lookup button ----------------
         val btnLookUpMap = findViewById<Button>(R.id.btnLookUpMap)
         btnLookUpMap.setOnClickListener {
             val intent = Intent(this, MapCatchLocationsActivity::class.java)
             startActivity(intent)
         }
-
         // ------------ GoTo Top 5 Page button -------------------
         val btnGoToTop5Page= findViewById<Button>(R.id.btnGoToTop5Page)
         btnGoToTop5Page.setOnClickListener {

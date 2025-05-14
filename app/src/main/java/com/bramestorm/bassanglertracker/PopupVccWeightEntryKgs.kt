@@ -18,6 +18,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.bramestorm.bassanglertracker.util.positionedToast
 import java.util.Locale
 
@@ -323,20 +324,20 @@ class PopupVccWeightEntryKgs: Activity() {
             return
         }
 
-        // 6) Parse species
-        val speciesCode = when {
-            cleaned.contains("smallmouth") -> "Small Mouth"
-            cleaned.contains("largemouth") -> "Large Mouth"
-            else -> null
-        }
-        selectedSpecies = speciesCode ?: run {
+
+// 6) Parse and normalize species via the user-defined mapper
+        val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"
+        val normalizedSpecies = VoiceInputMapper.normalizeSpecies(rawSpeciesPhrase)
+        if (normalizedSpecies == null)  {
+            // Did not recognize a valid species—prompt again
             tts.speak(
-                "What species was the $kilograms point $grams kilograms catch?",
+                "I didn't catch the species. Please say the species name over.",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_SPECIES"
             )
             Handler(mainLooper).postDelayed({ startListening() }, 2500)
             return
         }
+        selectedSpecies = normalizedSpecies
 
         // 7)  Setup Species Spinner
         val onlyThatList: List<String> = listOf(selectedSpecies)
