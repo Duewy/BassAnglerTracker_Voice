@@ -238,7 +238,7 @@
     <string name="vcc_on">VCC\nON</string>
     <string name="manual_mode">Manual\\nMode</string>
     <string name="voice_tourn_kgs">Voice Control\nTournament Kgs</string>
-    <string name="if_voice_control_fails">If Voice Control Fails Use Buttons Below</string>
+    <string name="if_voice_control_fails">If Voice Control Fails Use Manual Mode</string>
     <string name="voice_control_inches">Voice Control\nTournament Inches</string>
     <string name="voice_control_tournament_inches">Voice Control\nTournament Inches</string>
     <string name="voice_control_tournament_cms">Voice Control\nTournament Cms</string>
@@ -251,6 +251,7 @@
     <string name="look_up_new_files">Look Up\nNew Files</string>
     <string name="back">Back</string>
     <string name="list_view_of_your_catch"><u>LIST VIEW OF YOUR CATCH</u></string>
+    <string name="_0">0</string>
 
 
     //species

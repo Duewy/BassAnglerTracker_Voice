@@ -281,7 +281,6 @@ class PopupVccWeightEntryKgs: Activity() {
             .replace("over", "")
             .trim()
 
-
         // 4) Cancel keywords
         val cancelPhrases = listOf("cancel", "that is wrong", "start over", "not right")
         if (cancelPhrases.any { cleaned.contains(it) }) {

@@ -29,14 +29,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
-import com.bramestorm.bassanglertracker.ui.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -46,7 +44,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class CatchEntryTournament : BaseCatchEntryActivity() {
+abstract class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // Buttons
     private lateinit var btnTournamentCatch: Button
@@ -162,37 +160,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-
-    override val dialog: DialogFragment
-        get() {
-            // build the species list  > if Large or Small Mouth both will be on list
-            val speciesList = if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
-                listOf("Large Mouth", "Small Mouth")
-            } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
-                listOf("Small Mouth", "Large Mouth")
-            } else{
-                listOf(tournamentSpecies)
-            }
-
-            // compute the _current_ available clip colors
-            val clipColorList = calculateAvailableClipColors(
-                dbHelper,
-                catchType            = "LbsOzs",
-                date                 = getCurrentDate(),
-                tournamentCatchLimit = tournamentCatchLimit,
-                isCullingEnabled     = isCullingEnabled
-            ).map { it.name }  // convert from the enum to String list
-
-            // return a brand‐new DialogFragment each time, wiring in the real save call
-            return MyWeightEntryDialogFragment(
-                speciesList     = speciesList,
-                clipColorList   = clipColorList
-            ) { lbs, oz, species, clipColor ->
-                // lbs & oz come from the three spinners
-                val totalWeightOz = lbs * 16 + oz
-                saveTournamentCatch(totalWeightOz, species, clipColor)
-            }
-        }
 
  //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {

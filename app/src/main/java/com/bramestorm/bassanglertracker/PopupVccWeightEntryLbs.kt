@@ -316,9 +316,8 @@ class PopupVccWeightEntryLbs: Activity() {
                     return
                 }
 
-
                 // 6) Parse and normalize species via the user-defined mapper
-                val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"F
+                val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"
                 val normalizedSpecies = VoiceInputMapper.normalizeSpecies(rawSpeciesPhrase)
                 if (normalizedSpecies == null)  {
                     // Did not recognize a valid species—prompt again

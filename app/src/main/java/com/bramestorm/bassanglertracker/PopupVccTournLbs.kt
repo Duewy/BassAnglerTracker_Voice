@@ -12,9 +12,8 @@ import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.Spinner
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
@@ -41,11 +40,11 @@ class PopupVccTournLbs: Activity() {
 
 
     // UI Components
-    private lateinit var spinnerSpecies: Spinner
-    private lateinit var spinnerClipColor: Spinner
-    private lateinit var edtWeightTensLbs: Spinner
-    private lateinit var edtWeightLbs: Spinner
-    private lateinit var edtWeightOz: Spinner
+    private lateinit var tvSpecies: TextView
+    private lateinit var tvClipColor: TextView
+    private lateinit var edtWeightTensLbs: TextView
+    private lateinit var edtWeightLbs: TextView
+    private lateinit var edtWeightOz: TextView
     private lateinit var btnCancel: Button
 
     companion object {
@@ -88,38 +87,13 @@ class PopupVccTournLbs: Activity() {
 
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesVCCLbs)
-        spinnerClipColor = findViewById(R.id.spinnerClipColorVCCLbs)
-        edtWeightTensLbs = findViewById(R.id.spinnerLbsTens)
-        edtWeightLbs = findViewById(R.id.spinnerLbsOnes)
-        edtWeightOz = findViewById(R.id.spinnerOunces)
+        tvSpecies = findViewById(R.id.tvSpeciesVCCLbs)
+        tvClipColor = findViewById(R.id.tvClipColorVCCLbs)
+        edtWeightTensLbs = findViewById(R.id.tvLbsTens)
+        edtWeightLbs = findViewById(R.id.tvLbsOnes)
+        edtWeightOz = findViewById(R.id.tvOunces)
         btnCancel = findViewById(R.id.btnCancel)
 
-
-       // ++++++++++++ Setup Weight Spinners ++++++++++++++++++++++++++
-
-            // Tens place: 0–9 (represents 0–90 lbs)
-        val tensOptions = (0..9).map { it.toString() }
-        val tensAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tensOptions)
-        tensAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightTensLbs.adapter = tensAdapter
-
-            // Ones place: 0–9 (represents 0–9 lbs)
-        val onesOptions = (0..9).map { it.toString() }
-        val onesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, onesOptions)
-        onesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightLbs.adapter = onesAdapter
-
-            // Ounces: 0–15
-        val ounceOptions = (0..15).map { it.toString() }
-        val ounceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, ounceOptions)
-        ounceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightOz.adapter = ounceAdapter
-
-            // Optionally set default selection to 0
-        edtWeightTensLbs.setSelection(0)
-        edtWeightLbs.setSelection(0)
-        edtWeightOz.setSelection(0)
 
 
             // ````````` CANCEL btn ```````````````````
@@ -337,10 +311,24 @@ class PopupVccTournLbs: Activity() {
 
 
         // === 8) 🚨🚨 Fail if any critical info missing  🚨🚨  ===
-        if ((totalOz == 0) || (ounces > 15) || (speciesCode == null) || (selectedClip == null)) {
+
+       // 1) Check for too-many ounces
+        if (ounces > 15) {
             retryCount++
             if (retryCount >= MAX_RETRIES) {
-                speak("I'm still having trouble. For now please enter your catch manually. Over")
+                speak("I'm still having trouble. Please enter your catch manually. Over and Out")
+                return
+            }
+            speak("Ounces must be under 16. Please try again. Over.")
+            Handler(mainLooper).postDelayed({ startListening() }, 2000)
+            return
+        }
+
+        // 2) Now catch the other “nothing understood” cases
+        if (totalOz == 0 || speciesCode == null || selectedClip == null) {
+            retryCount++
+            if (retryCount >= MAX_RETRIES) {
+                speak("I'm still having trouble. Please enter your catch manually. Over and Out")
                 return
             }
             speak("I could not understand everything. Please say the full catch again, including weight, species, and clip color, then say OVER.")
@@ -348,20 +336,18 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
-        retryCount = 0  // reset retries
+        // 3) When we reach here, everything parsed is OK — reset retry counter
+        retryCount = 0
+
 
         // === 9) Update UI for visual feedback ===
-        edtWeightTensLbs.setSelection(pounds / 10)
-        edtWeightLbs.setSelection(pounds % 10)
-        edtWeightOz.setSelection(ounces)
-        @Suppress("UNCHECKED_CAST")
-        spinnerSpecies.setSelection(
-            (spinnerSpecies.adapter as ArrayAdapter<String>).getPosition(speciesCode)
-        )
-        @Suppress("UNCHECKED_CAST")
-        spinnerClipColor.setSelection(
-            (spinnerClipColor.adapter as ArrayAdapter<String>).getPosition(selectedClip)
-        )
+
+        edtWeightTensLbs.text  = (pounds / 10).toString()
+        edtWeightLbs.text     = (pounds % 10).toString()
+        edtWeightOz.text = ounces.toString()
+        tvSpecies.text   = speciesCode
+        tvClipColor.text = selectedClip
+
 
         // === 10) Confirm with user ===
         val question = "You said a $pounds pound $ounces ounce $speciesCode on the $selectedClip clip. Is that correct? Over."
