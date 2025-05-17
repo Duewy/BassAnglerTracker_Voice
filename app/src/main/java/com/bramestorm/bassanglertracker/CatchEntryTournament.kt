@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -62,6 +63,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
+
 
     // For VCC to Wake UP
     private var launchFromWake = false
@@ -108,6 +110,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     // Voice Helper
+    private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
@@ -302,6 +305,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(catchReceiver)
         voiceHelper.shutdown()
+        toastTts?.shutdown()
         handler.removeCallbacksAndMessages(null)
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
@@ -416,9 +420,25 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "lbs")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+                    if (voiceControlEnabled) {
+                        toastTts = TextToSpeech(this) { status ->
+                            if (status == TextToSpeech.SUCCESS) {
+                                toastTts?.language = Locale.getDefault()
+                                toastTts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "TTS_MOTIVATION")
+
+                                // Optional: shut down after 4 seconds to free memory
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    toastTts?.shutdown()
+                                    toastTts = null
+                                }, 4000)
+                            }
+                        }
+                    }
                 }
             }
         }
+
     }
 
     //################## UPDATE TOURNAMENT LIST   ###################################

@@ -48,7 +48,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             if (generatedCsvFile != null) {
                 positionedToast("CSV generated to cache!")
             } else {
-                positionedToast("⚠️ Warning: Failed to generate CSV",)
+                positionedToast("⚠️ Warning: Failed to generate CSV 📄",)
             }
         }
 
@@ -72,12 +72,15 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             }
         }
 
-        // ---------- See the Files Yourself
+        // ----------🥽 See the Files Yourself 😍----------------------------
         btnViewFile.setOnClickListener {
-            val intent = Intent(this, ListCatchLogView::class.java)
-            // todo generate the file then send it to the ListCatchLogView file to see in a list view...
+            val csvFile = File(getExternalFilesDir(null), "your_exported_log.csv")
+            val intent = Intent(this, ListCatchLogView::class.java).apply {
+                putExtra("CSV_FILE_PATH", csvFile.absolutePath)
+            }
             startActivity(intent)
         }
+
 
         //-------------- Goto SetUp page ---------------------
         btnSetUpSFLogs.setOnClickListener {

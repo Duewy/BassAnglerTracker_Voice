@@ -310,35 +310,40 @@ class PopupVccTournCms: Activity() {
             return
         }
 
-        // 5) Parse length (inches and quarters)
+
+    // 5) Parse length with decimal support (centimeters and tenths of cm → mm)
         val numberWords = mapOf(
-            "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15
+            "zero" to 0, "oh" to 0,
+            "one" to 1, "two" to 2, "three" to 3, "four" to 4,
+            "five" to 5, "six" to 6, "seven" to 7,
+            "eight" to 8, "nine" to 9
         )
-        var centimeters = -1
-        var tenths= -1
-        val words = cleaned.split("\\s+".toRegex())
-        for ((i, word) in words.withIndex()) {
-            val num = numberWords[word] ?: word.toIntOrNull()
-            if (num != null) {
-                when {
-                    i + 1 < words.size && words[i + 1].contains("centimeter")  -> centimeters= num
-                    i + 1 < words.size && words[i + 1].contains("point")  -> tenths = num
-                    centimeters < 0                                            -> centimeters = num
-                    tenths < 0                                            -> tenths = num
-                }
-            }
-        }
-        if (centimeters < 0) centimeters = 0
-        if (tenths < 0) tenths = 0
-        val totalLengthTenths= ((centimeters * 10) + tenths)
-        if (totalLengthTenths== 0) {
-            Toast.makeText(this, "🚫 Length cannot be 0 Cms 0 mm!", Toast.LENGTH_SHORT).show()
+
+        // Split on “point” so we get whole vs fractional parts
+        val parts = cleaned.split(regex = "\\s+point\\s+".toRegex(), limit = 2)
+        val wholePart = parts[0]
+        val fractionPart = if (parts.size > 1) parts[1] else ""
+
+        // 5a) Extract the whole centimeter value
+        val centimeters = wholePart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+            .firstOrNull() ?: 0
+
+        // 5b) Extract first fractional digit as tenths of a cm (millimeters)
+        val tenths = fractionPart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+            .getOrNull(0) ?: 0
+
+        // 5c) Compute total tenths-of-cm
+        val totalLengthTenths = (centimeters * 10) + tenths
+
+        // 5d) Validation
+        if (totalLengthTenths == 0) {
+            Toast.makeText(this, "🚫 Length cannot be 0 cm 0 mm!", Toast.LENGTH_SHORT).show()
             return
         }
-        // ENSURE millimeters is 0 to 9
         if (tenths > 9) {
             tts.speak(
                 "Sorry, millimeters can only be zero to nine. Please repeat your length.",
@@ -347,6 +352,7 @@ class PopupVccTournCms: Activity() {
             Handler(mainLooper).postDelayed({ startListening() }, 1500)
             return
         }
+
 
         // 6) Parse species
         val speciesCode = when {

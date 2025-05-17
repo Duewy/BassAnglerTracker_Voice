@@ -59,10 +59,53 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        Log.d("DB_DEBUG", "⚠️ Upgrading database from version $oldVersion to $newVersion...")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
-        onCreate(db)
+        // v1 → v2 migration: preserve all existing rows
+        if (oldVersion < 2) {
+            // 1) Rename the old table out of the way
+            db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO ${TABLE_NAME}_old;")
+
+            // 2) Re-create the new table with the updated schema
+            onCreate(db)
+
+            // 3) Copy every row from the old table into the new one
+            db.execSQL("""
+            INSERT INTO $TABLE_NAME (
+                $COLUMN_ID,
+                $COLUMN_DATE_TIME,
+                $COLUMN_LATITUDE,
+                $COLUMN_LONGITUDE,
+                $COLUMN_SPECIES,
+                $COLUMN_TOTAL_WEIGHT_OZ,
+                $COLUMN_TOTAL_WEIGHT_KG,
+                $COLUMN_TOTAL_LENGTH_QUARTERS,
+                $COLUMN_TOTAL_LENGTH_TENTHS,
+                $COLUMN_MARKER_TYPE,
+                $COLUMN_CATCH_TYPE,
+                $COLUMN_CLIP_COLOR
+            )
+            SELECT
+                $COLUMN_ID,
+                $COLUMN_DATE_TIME,
+                $COLUMN_LATITUDE,
+                $COLUMN_LONGITUDE,
+                $COLUMN_SPECIES,
+                $COLUMN_TOTAL_WEIGHT_OZ,
+                $COLUMN_TOTAL_WEIGHT_KG,
+                $COLUMN_TOTAL_LENGTH_QUARTERS,
+                $COLUMN_TOTAL_LENGTH_TENTHS,
+                $COLUMN_MARKER_TYPE,
+                $COLUMN_CATCH_TYPE,
+                $COLUMN_CLIP_COLOR
+            FROM ${TABLE_NAME}_old;
+        """.trimIndent())
+
+            // 4) Drop the temporary backup
+            db.execSQL("DROP TABLE IF EXISTS ${TABLE_NAME}_old;")
+        }
+
+        // future migrations (v2→v3, v3→v4, …) go here as additional if(oldVersion < X) blocks
     }
+
 
     fun insertCatch(catch: CatchItem): Boolean {
         val db = this.writableDatabase

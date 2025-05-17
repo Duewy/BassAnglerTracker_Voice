@@ -212,7 +212,7 @@ class PopupVccLengthEntryCms: Activity() {
         val lower = input.lowercase(Locale.getDefault()).trim()
         Log.d("VCC", "🎤 Raw speech: $lower")
 
-        // 1) If we’re waiting for a “yes”/“no” confirmation, handle it first:
+       // 1) If we’re waiting for a “yes”/“no” confirmation, handle it first:
         if (awaitingConfirmation) {
             when {
                 lower.contains("yes") -> {
@@ -244,7 +244,7 @@ class PopupVccLengthEntryCms: Activity() {
             return
         }
 
-        // 2) Normal flow: user must say “over” to finish their catch entry
+      // 2) Normal flow: user must say “over” to finish their catch entry
         if (!lower.contains("over")) {
             speak("You must say the key word OVER to finish your catch entry voice command.")
 
@@ -253,14 +253,14 @@ class PopupVccLengthEntryCms: Activity() {
             return
         }
 
-        // 3) Strip off “over” and clean up
+      // 3) Strip off “over” and clean up
         val cleaned = lower
             .replace("over and out", "")
             .replace("over", "")
             .trim()
         Log.d("VCC", "🧹 Cleaned input: $cleaned")
 
-        // 4) Cancel keywords
+       // 4) Cancel keywords
         val cancelPhrases = listOf("cancel", "that is wrong", "start over", "not right")
         if (cancelPhrases.any { cleaned.contains(it) }) {
             Log.d("VCC", "❌ Cancel voice command detected. Restarting...")
@@ -272,37 +272,49 @@ class PopupVccLengthEntryCms: Activity() {
             return
         }
 
-        // 5) Parse length (inches and quarters)
+     // 5) Parse length with decimal support (centimeters and tenths of cm → mm)
         val numberWords = mapOf(
-            "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15
+            "zero" to 0, "oh" to 0,
+            "one" to 1, "two" to 2, "three" to 3, "four" to 4,
+            "five" to 5, "six" to 6, "seven" to 7,
+            "eight" to 8, "nine" to 9
         )
-        var centimeters = -1
-        var millimeters = -1
-        val words = cleaned.split("\\s+".toRegex())
-        for ((i, word) in words.withIndex()) {
-            val num = numberWords[word] ?: word.toIntOrNull()
-            if (num != null) {
-                when {
-                    i + 1 < words.size && words[i + 1].contains("centimeters")  -> centimeters = num
-                    i + 1 < words.size && words[i + 1].contains("millimeters")  -> millimeters = num
-                    centimeters < 0                                            -> centimeters = num
-                    millimeters < 0                                            -> millimeters = num
-                }
-            }
-        }
-        if (centimeters < 0) centimeters = 0
-        if (millimeters < 0) millimeters = 0
-        val totalLengthTenths = ((centimeters * 10) + millimeters)
+
+        // Split on “point” so we get whole vs fractional parts
+        val parts = cleaned.split(regex = "\\s+point\\s+".toRegex(), limit = 2)
+        val wholePart = parts[0]
+        val fractionPart = if (parts.size > 1) parts[1] else ""
+
+        // 5a) Extract the whole centimeter value
+        val centimeters = wholePart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+            .firstOrNull() ?: 0
+
+        // 5b) Extract first fractional digit as tenths of a cm (millimeters)
+        val tenths = fractionPart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+            .getOrNull(0) ?: 0
+
+        // 5c) Compute total tenths-of-cm
+        val totalLengthTenths = (centimeters * 10) + tenths
+
+        // 5d) Validation
         if (totalLengthTenths == 0) {
-            Toast.makeText(this, "🚫 Length cannot be 0 centimeters !", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "🚫 Length cannot be 0 cm 0 mm!", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (tenths > 9) {
+            tts.speak(
+                "Sorry, millimeters can only be zero to nine. Please repeat your length.",
+                TextToSpeech.QUEUE_FLUSH, null, "TTS_RETRY"
+            )
+            Handler(mainLooper).postDelayed({ startListening() }, 1500)
             return
         }
 
-
-// 6) Parse and normalize species via the user-defined mapper
+     // 6) Parse and normalize species via the user-defined mapper
         val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"
         val normalizedSpecies = VoiceInputMapper.normalizeSpecies(rawSpeciesPhrase)
         if (normalizedSpecies == null)  {
@@ -316,7 +328,7 @@ class PopupVccLengthEntryCms: Activity() {
         }
         selectedSpecies = normalizedSpecies
 
-// 7) (DEBUG-only) Populate spinner for a quick QA check
+     // 7) (DEBUG-only) Populate spinner for a quick QA check
         if (BuildConfig.DEBUG) {
             val debugList = listOf(selectedSpecies)
             val adapter = ArrayAdapter(
@@ -327,17 +339,16 @@ class PopupVccLengthEntryCms: Activity() {
             spinnerSpecies.adapter = adapter
             spinnerSpecies.setSelection(0)
         }
-
-        // 8) Update your UI spinners immediately
+     // 8) Update your UI spinners immediately
         edtLengthCmsTens.setSelection(centimeters / 10)
         edtLengthCmsOnes.setSelection(centimeters % 10)
-        edtLengthCmsDec.setSelection(millimeters)
+        edtLengthCmsDec.setSelection(tenths)
         spinnerSpecies.setSelection((spinnerSpecies.adapter as ArrayAdapter<String>)
             .getPosition(selectedSpecies))
 
-        // 9) Ask for confirmation, echoing back exactly what we think we heard
+      // 9) Ask for confirmation, echoing back exactly what we think we heard
 
-        val question = "You said a $selectedSpecies,that is $centimeters point $millimeters centimeters long is that correct Over"
+        val question = "You said a $selectedSpecies,that is $centimeters point $tenths centimeters long is that correct Over"
 
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 

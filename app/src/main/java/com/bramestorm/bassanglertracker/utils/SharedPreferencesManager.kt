@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.utils
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -197,6 +198,12 @@ object SharedPreferencesManager {
     fun isVoiceControlEnabled(context: Context): Boolean {
         val prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         return prefs.getBoolean("VOICE_CONTROL_ENABLED", false)
+    }
+
+    // For the Vcc Pop ups to validate the available clip colors the user can call
+    fun validateClipColorFromVoice(cleaned: String, availableColors: Array<String>): String? {
+        val spoken = VoiceInputMapper.getClipColorFromVoice(cleaned).uppercase()
+        return if (availableColors.contains(spoken)) spoken else null
     }
 
 

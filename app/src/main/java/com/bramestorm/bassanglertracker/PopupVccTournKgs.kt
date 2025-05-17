@@ -261,7 +261,7 @@ class PopupVccTournKgs: Activity() {
 
     //============= 👂Gets Users Info 📖 and Puts Everything for  Database and Listing =======================
 
-    data class ConfirmedCatch(val weightKgs: Int, val species: String, val clipColor: String)
+    data class ConfirmedCatch(val weightTotalHundredthKg: Int, val species: String, val clipColor: String)
 
     //===============================================
     private fun handleVoiceInput(input: String) {
@@ -327,34 +327,45 @@ class PopupVccTournKgs: Activity() {
             return
         }
 
-        // 5) Parse weight (lbs + oz)
+
+    // 5) Parse weight with full decimal support (kgs + tenths + hundredths)
         val numberWords = mapOf(
-            "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15
+            "zero" to 0, "oh" to 0,
+            "one" to 1, "two" to 2, "three" to 3, "four" to 4,
+            "five" to 5, "six" to 6, "seven" to 7,
+            "eight" to 8, "nine" to 9
         )
-        var kilograms = -1
-        var grams = -1
-        val words = cleaned.split("\\s+".toRegex())
-        for ((i, word) in words.withIndex()) {
-            val num = numberWords[word] ?: word.toIntOrNull()
-            if (num != null) {
-                when {
-                    i + 1 < words.size && words[i + 1].contains("kilograms")  -> kilograms = num
-                    i + 1 < words.size && words[i + 1].contains("grams")  -> grams = num
-                    kilograms < 0                                            -> kilograms = num
-                    grams < 0                                            -> grams = num
-                }
-            }
-        }
-        if (kilograms < 0) kilograms = 0
-        if (grams < 0) grams = 0
-        val totalKgs = kilograms * 100 + grams      // totalKgs is actually all in grams
-        if (totalKgs == 0) {
-            Toast.makeText(this, "🚫 Weight cannot be 0 kgs 0 grams!", Toast.LENGTH_SHORT).show()
+
+        // Split on “point” so we get whole vs fractional parts
+        val parts = cleaned.split(regex = "\\s+point\\s+".toRegex(), limit = 2)
+        val wholePart = parts[0]
+        val fractionPart = if (parts.size > 1) parts[1] else ""
+
+        // 5a) Extract the whole‐kg number (first numeric word or digit)
+        val kilograms = wholePart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+            .firstOrNull() ?: 0
+
+        // 5b) Extract up to two fractional digits
+        val fractionDigits = fractionPart
+            .split("\\s+".toRegex())
+            .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+
+        val tenthsDigit = fractionDigits.getOrNull(0) ?: 0
+        val hundredthsDigit = fractionDigits.getOrNull(1) ?: 0
+
+
+        // 5c) Compute total hundredths‐of‐kg (to match database)
+        val weightTotalHundredthKg = (kilograms * 100) + (tenthsDigit * 10) + hundredthsDigit
+        val grams = ((tenthsDigit * 10) + hundredthsDigit)
+
+        // 5d) Validate
+        if (weightTotalHundredthKg == 0) {
+            Toast.makeText(this, "🚫 Weight cannot be 0.00 kg!", Toast.LENGTH_SHORT).show()
             return
         }
+
 
         // 6) Parse species
         val speciesCode = when {
@@ -364,7 +375,7 @@ class PopupVccTournKgs: Activity() {
         }
         val selectedSpecies = speciesCode ?: run {
             tts.speak(
-                "What species was the $kilograms kilograms $grams grams catch?",
+                "What species was the $weightTotalHundredthKg kilograms $grams grams catch?",
                 TextToSpeech.QUEUE_FLUSH, null, "TTS_ASK_SPECIES"
             )
             Handler(mainLooper).postDelayed({ startListening() }, 2500)
@@ -399,8 +410,8 @@ class PopupVccTournKgs: Activity() {
 
         // 9) Ask for confirmation, echoing back exactly what we think we heard
         // after parsing pounds & ounces:
-        val displayWhole  = totalKgs / 100              // e.g. 23
-        val displayFrac   = totalKgs % 100              // e.g. 45
+        val displayWhole  = weightTotalHundredthKg / 100              // e.g. 23
+        val displayFrac   = weightTotalHundredthKg % 100              // e.g. 45
         val displayString = "$displayWhole.${
             displayFrac.toString().padStart(2, '0')
         }"
@@ -409,7 +420,7 @@ class PopupVccTournKgs: Activity() {
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
         // 10) Save state and flip the flag
-        lastConfirmedCatch = ConfirmedCatch(totalKgs, selectedSpecies, selectedClip)
+        lastConfirmedCatch = ConfirmedCatch(weightTotalHundredthKg, selectedSpecies, selectedClip)
         awaitingConfirmation = true
 
 
@@ -420,11 +431,11 @@ class PopupVccTournKgs: Activity() {
 
     // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
     private fun Activity.returnTournamentResult(
-        totalKgs: Int, species: String, clipColor: String
+        weightTotalHundredthKg: Int, species: String, clipColor: String
     ) {
         Intent(this, CatchEntryTournamentKgs::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(EXTRA_WEIGHT_KG,     totalKgs)
+            putExtra(EXTRA_WEIGHT_KG,     weightTotalHundredthKg)
             putExtra(EXTRA_SPECIES,       species)
             putExtra(EXTRA_CLIP_COLOR,    clipColor)
         }.also {

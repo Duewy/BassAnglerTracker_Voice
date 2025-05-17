@@ -206,6 +206,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         if (success) {
             totalWeightOz = 0 // ✅ Move this after successful save
         }
+
         updateListViewLb()  // ✅ Now only updates the UI, no extra insert
     }
 
@@ -219,6 +220,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
 
         Log.d("DB_DEBUG", "🔍 Catches retrieved from DB: ${todaysCatches.size}")
 
+        // ✅ Make sure catchList is updated BEFORE updating the ListView
         catchList.clear()
         catchList.addAll(todaysCatches)
 

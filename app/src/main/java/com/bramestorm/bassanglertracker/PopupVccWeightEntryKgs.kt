@@ -42,7 +42,7 @@ class PopupVccWeightEntryKgs: Activity() {
     private lateinit var btnCancel: Button
 
     companion object {
-        const val EXTRA_WEIGHT_KGS = "weightTotalKgs"
+        const val EXTRA_WEIGHT_KGS = "totalWeightHundredthKg"
         const val EXTRA_SPECIES = "selectedSpecies"
     }
 
@@ -102,7 +102,7 @@ class PopupVccWeightEntryKgs: Activity() {
         val hundredsOptions = (0..9).map { it.toString() }
         val hundredsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hundredsOptions)
         hundredsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        edtWeightKgsTenths.adapter = hundredsAdapter
+        edtWeightKgsHundreds.adapter = hundredsAdapter
 
         // Optionally set default selection to 0
         edtWeightTensKgs.setSelection(0)
@@ -223,7 +223,7 @@ class PopupVccWeightEntryKgs: Activity() {
     //============= 👂Gets Users Info 📖 and Puts Everything for  Database and Listing =======================
 
 
-    data class ConfirmedCatch(val weightTotalKgsFD: Int, val species: String)
+    data class ConfirmedCatch(val weightTotalHundredthKg: Int, val species: String)
 
     //===============================================
     private fun handleVoiceInput(input: String) {
@@ -239,9 +239,9 @@ class PopupVccWeightEntryKgs: Activity() {
                         "👂 User input was confirmed now sending to CatchEntryTournament.kt "
                     )
 
-                    lastConfirmedCatch?.let { (weightOz, species) ->
+                    lastConfirmedCatch?.let { (weightTotalHundredthKg, species) ->
 
-                        returnTournamentResult(weightOz, species)
+                        returnTournamentResult(weightTotalHundredthKg, species)
                     }
 
                 }
@@ -294,38 +294,55 @@ class PopupVccWeightEntryKgs: Activity() {
             return
         }
 
-        // 5) Parse weight (Kgs + Grams)
+        // 5) Parse weight with full decimal support (kgs + tenths + hundredths)
         val numberWords = mapOf(
-            "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
-            "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14,
-            "fifteen" to 15
+            "zero" to 0, "oh" to 0,
+            "one" to 1, "two" to 2, "three" to 3, "four" to 4,
+            "five" to 5, "six" to 6, "seven" to 7,
+            "eight" to 8, "nine" to 9
         )
-        var kilograms = -1
-        var grams = -1
-        val words = cleaned.split("\\s+".toRegex())
-        for ((i, word) in words.withIndex()) {
-            val num = numberWords[word] ?: word.toIntOrNull()
-            if (num != null) {
-                when {
-                    i + 1 < words.size && words[i + 1].contains("kilogram") -> kilograms = num
-                    i + 1 < words.size && words[i + 1].contains("grams") -> grams = num
-                    kilograms < 0 -> kilograms = num
-                    grams < 0 -> grams = num
-                }
+
+            // Split on “point” so we get whole vs fractional parts
+            val parts = cleaned.split(regex = "\\s+point\\s+".toRegex(), limit = 2)
+            val wholePart = parts[0]
+            val fractionPart  = if (parts.size > 1) parts[1] else ""
+
+            // 5a) Extract the whole‐kg number (first numeric word or digit)
+            val kilograms = wholePart
+                .split("\\s+".toRegex())
+                .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+                .firstOrNull() ?: 0
+
+            // 5b) Extract up to two fractional digits
+            val fractionDigits = fractionPart
+                .split("\\s+".toRegex())
+                .mapNotNull { numberWords[it] ?: it.toIntOrNull() }
+
+            val tenthsDigit    = fractionDigits.getOrNull(0) ?: 0
+            val hundredthsDigit = fractionDigits.getOrNull(1) ?: 0
+
+             // 5c) Compute total hundredths‐of‐kg
+            val weightTotalHundredthKg = ((kilograms * 100) + (tenthsDigit * 10) + hundredthsDigit)
+            val grams = ((tenthsDigit * 10) + hundredthsDigit)
+
+            // 5d) Validate
+            if (weightTotalHundredthKg == 0) {
+                Toast.makeText(this, "🚫 Weight cannot be 0.00 kg!", Toast.LENGTH_SHORT).show()
+                return
             }
-        }
-        if (kilograms < 0) kilograms = 0
-        if (grams < 0) grams = 0
-        val weightTotalKgsFD= kilograms * 100 + grams
-        if (weightTotalKgsFD == 0) {
-            Toast.makeText(this, "🚫 Weight cannot be 0.00 Kgs!", Toast.LENGTH_SHORT)
-                .show()
-            return
-        }
+
+            // 5e) Update your spinners
+            edtWeightTensKgs.setSelection(kilograms / 10)
+            edtWeightKgs.setSelection(kilograms % 10)
+            edtWeightKgsTenths.setSelection(tenthsDigit)
+            edtWeightKgsHundreds.setSelection(hundredthsDigit)
+
+            // 5f) Prepare for confirmation
+            val questionUser = "You said $kilograms point $tenthsDigit$hundredthsDigit kilograms for $selectedSpecies. Is that correct? Over"
+            tts.speak(questionUser, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
 
-// 6) Parse and normalize species via the user-defined mapper
+        // 6) Parse and normalize species via the user-defined mapper
         val rawSpeciesPhrase = cleaned    // e.g. "lark mouth" or "perch"
         val normalizedSpecies = VoiceInputMapper.normalizeSpecies(rawSpeciesPhrase)
         if (normalizedSpecies == null)  {
@@ -350,8 +367,8 @@ class PopupVccWeightEntryKgs: Activity() {
         // 8) Update your UI spinners
         edtWeightTensKgs.setSelection(kilograms/ 10)
         edtWeightKgs.setSelection(kilograms % 10)
-        edtWeightKgsTenths.setSelection(grams / 10)
-        edtWeightKgsHundreds.setSelection(grams % 10)
+        edtWeightKgsTenths.setSelection(tenthsDigit)
+        edtWeightKgsHundreds.setSelection(hundredthsDigit)
         spinnerSpecies.setSelection(
             (spinnerSpecies.adapter as ArrayAdapter<String>)
                 .getPosition(selectedSpecies)
@@ -366,7 +383,7 @@ class PopupVccWeightEntryKgs: Activity() {
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
         // 9) Save state and flip the flag
-        lastConfirmedCatch = ConfirmedCatch(weightTotalKgsFD, selectedSpecies)
+        lastConfirmedCatch = ConfirmedCatch(weightTotalHundredthKg, selectedSpecies)
         awaitingConfirmation = true
 
         // 10) Immediately start listening for that “yes” or “no”
@@ -375,10 +392,10 @@ class PopupVccWeightEntryKgs: Activity() {
     } //===================END handle Voice Input  ====================
 
     // ^^^^^^^^^^ Sending Data to CatchEntryTournament ^^^^^^^^^^^^^^^^
-    private fun Activity.returnTournamentResult(weightTotalKgsFD: Int, species: String) {
+    private fun Activity.returnTournamentResult(weightTotalHundredthKg: Int, species: String) {
         Intent(this, CatchEntryKgs::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(EXTRA_WEIGHT_KGS, weightTotalKgsFD)
+            putExtra(EXTRA_WEIGHT_KGS, weightTotalHundredthKg)
             putExtra(EXTRA_SPECIES, species)
         }.also {
             startActivity(it)
