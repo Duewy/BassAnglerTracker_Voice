@@ -43,11 +43,12 @@ class PopupWeightEntryTourLbs : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_weight_entry_tour_lbs)
 
-     //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
+
+        //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
         isTournament = intent.getBooleanExtra("isTournament", false)
-        catchType = intent.getStringExtra("catchType") ?: ""
-        selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
-        val colorNames = intent.getStringArrayExtra("availableClipColors")
+        catchType    = intent.getStringExtra("catchType") ?: ""
+
+        val colorNames  = intent.getStringArrayExtra("availableClipColors")
             ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
 
         Log.d("PopupWeightEntry", "isTournament: $isTournament | catchType: $catchType | selectedSpecies: $selectedSpecies")
@@ -70,6 +71,9 @@ class PopupWeightEntryTourLbs : Activity() {
             isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Small Mouth", "Large Mouth")
             }
+            isTournament && tournamentSpecies.equals("Spotted Bass", ignoreCase = true) -> {
+                arrayOf("Spotted Bass","Small Mouth", "Large Mouth")    // Southern States Have All Three Bass Species
+            }
             isTournament -> {
                 arrayOf(tournamentSpecies)
             }
@@ -77,6 +81,7 @@ class PopupWeightEntryTourLbs : Activity() {
                 arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
             }
         }
+
         val speciesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = speciesAdapter
@@ -86,6 +91,7 @@ class PopupWeightEntryTourLbs : Activity() {
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
 
+        // `````````````` Apply InputFilters to limit values  ````````````````````
         edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
         edtWeightOz.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
 
@@ -112,10 +118,6 @@ class PopupWeightEntryTourLbs : Activity() {
                 it.putExtra(EXTRA_IS_TOURNAMENT, isTournament)
             }.let { resultIntent ->
                 setResult(Activity.RESULT_OK, resultIntent)
-                Log.d(
-                    "Popup",
-                    "🏁 finishWithResult → oz=$weightOz, sp=$selectedSpeciesValue, clip=$selectedClipColor"
-                )
                 finish()
             }
         }

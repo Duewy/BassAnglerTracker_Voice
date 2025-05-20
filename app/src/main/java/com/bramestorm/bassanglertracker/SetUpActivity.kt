@@ -24,7 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
@@ -58,6 +58,12 @@ class SetUpActivity : AppCompatActivity() {
         private const val BT_REQUEST_CODE                   = 104
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         private const val REQUEST_VOICE_SETUP               = 2001
+
+        const val EXTRA_SPECIES       = "selectedSpecies"
+        const val EXTRA_CATCH_TYPE    = "catchType"
+        const val EXTRA_IS_TOURNAMENT = "isTournament"
+        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+        const val EXTRA_NUMBER_OF_CATCHES = "NUMBER_OF_CATCHES"
 
         private const val PREFS_NAME                        = "BassAnglerTrackerPrefs"
         private const val KEY_VOICE_CONTROL                 = "VOICE_CONTROL_ENABLED"
@@ -287,11 +293,11 @@ class SetUpActivity : AppCompatActivity() {
                 positionedToast("⚠️ Voice control disabled 🚫️")
             }
 
-            // update toggle UI color
-            tglVoice.background = if (tglVoice.isChecked)
-                ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
-            else
-                ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
+                // update toggle UI color
+                tglVoice.background = if (tglVoice.isChecked)
+                    ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
+                else
+                    ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
         }//-------------------END -- tglVoice -------------------------------------------
 
         btnMainSetup.setOnClickListener {
@@ -329,11 +335,12 @@ class SetUpActivity : AppCompatActivity() {
                 val intent = Intent(this, nextActivity).apply {
                     if (isTournamentSelected) {
                         putExtra("NUMBER_OF_CATCHES", if (tglCullingValue.isChecked) 5 else 4)
+                        putExtra("Color_Numbers", "Color")
                         putExtra("TOURNAMENT_SPECIES", selectedSpecies)
                         putExtra("unitType", if (isWeightSelected) "weight" else "length")
                         putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
                     }
-                        putExtra("VCC_ENABLED", tglVoice.isChecked)
+                        putExtra("VCC_ENABLED", tglVoice.isChecked)     // send to Fun Day and Tournament pages if Vcc is On
                 }
 
                 startActivity(intent)
@@ -427,7 +434,7 @@ class SetUpActivity : AppCompatActivity() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = ""
+                selectedSpecies = normalizeSpeciesName(speciesList[0].name)
             }
         }
     }

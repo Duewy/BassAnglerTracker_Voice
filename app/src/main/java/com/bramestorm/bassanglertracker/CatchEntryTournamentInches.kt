@@ -29,14 +29,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bramestorm.bassanglertracker.PopupVccTournInches
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
-import com.bramestorm.bassanglertracker.ui.MyWeightEntryDialogFragment
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -45,7 +44,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
+abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
 
     // Buttons
@@ -152,7 +151,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
     }
 
-    //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is already using Bluetooth
+    //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is using Bluetooth
     override val catchReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
             val oz   = intent.getIntExtra(PopupVccTournLbs.EXTRA_WEIGHT_OZ, 0)
@@ -162,23 +161,8 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
-    // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
-    private val lengthEntryLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.let { data ->
-                    val totalLengthQuarters = data.getIntExtra(EXTRA_LENGTH_INCHES, 0)
-                    val species = data.getStringExtra(EXTRA_SPECIES)  ?: ""
-                    val clipColor = data.getStringExtra(EXTRA_CLIP_COLOR) ?: ""
 
-                    if (totalLengthQuarters > 0) {
-                        saveTournamentCatch(totalLengthQuarters, species, clipColor)
-                    }
-                }
-            }
-    }
-    // ````````````` Retrieves data from the POPUPS ````````````````````````
+    // ````````````` Retrieves data from the POPUP ````````````````````````
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -192,36 +176,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
-    override val dialog: DialogFragment
-        get() {
-            // build the species list  > if Large or Small Mouth both will be on list
-            val speciesList = if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
-                listOf("Large Mouth", "Small Mouth")
-            } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
-                listOf("Small Mouth", "Large Mouth")
-            } else{
-                listOf(tournamentSpecies)
-            }
-
-            // compute the _current_ available clip colors
-            val clipColorList = calculateAvailableClipColors(
-                dbHelper,
-                catchType            = "Inches",
-                date                 = getCurrentDate(),
-                tournamentCatchLimit = tournamentCatchLimit,
-                isCullingEnabled     = isCullingEnabled
-            ).map { it.name }  // convert from the enum to String list
-
-            // return a brand‐new DialogFragment each time, wiring in the real save call
-            return MyWeightEntryDialogFragment(
-                speciesList     = speciesList,
-                clipColorList   = clipColorList
-            ) { inches, quarters, species, clipColor ->
-                // Inches and Quarters come from the three spinners
-                val totalLengthQuarters = inches * 4 + quarters
-                saveTournamentCatch(totalLengthQuarters, species, clipColor)
-            }
-        }
 
     //================ ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -35,8 +35,9 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -44,14 +45,13 @@ import java.util.Date
 import java.util.Locale
 
 
-abstract class CatchEntryTournament : BaseCatchEntryActivity() {
+  class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // Buttons
     private lateinit var btnTournamentCatch: Button
     private lateinit var btnMenu: Button
     private lateinit var btnMainPg:Button
     private lateinit var btnAlarm: Button
-    private lateinit var editDialog: AlertDialog
 
     // Alarm Variables
     private var alarmHour: Int = -1
@@ -61,7 +61,6 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
-
 
     // For VCC to Wake UP
     private var launchFromWake = false
@@ -108,6 +107,7 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     // Voice Helper
+    private lateinit var tts: TextToSpeech
     private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
@@ -124,13 +124,16 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
     private var lastTournamentCatch: CatchItem? = null
 
     companion object {
-        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
-        const val EXTRA_SPECIES       = "selectedSpecies"
-        const val EXTRA_CLIP_COLOR    = "clip_color"
-        const val EXTRA_CATCH_TYPE    = "catchType"
-        const val EXTRA_IS_TOURNAMENT = "isTournament"
-        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
-        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+        // ← outputs from this popup
+        const val EXTRA_WEIGHT_OZ              = "weightTotalOz"        // Send & receive this
+        const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+        const val EXTRA_MEASURING_TYPE         = "measuringType"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
 
     //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is already using Bluetooth
@@ -141,10 +144,13 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
             val clip = intent.getStringExtra(PopupVccTournLbs.EXTRA_CLIP_COLOR).orEmpty()
             Log.d("CET-DEBUG", "Broadcast received: $oz, $sp, $clip")
             saveTournamentCatch(oz, sp, clip)
+
+            // now that data’s in your DB and UI’s updated:
+            tts.speak("Oh OK  your  Catch is Saved, Over and Out", TextToSpeech.QUEUE_FLUSH, null, "CATCH_SAVED")
         }
     }
 
-    // ````````````` Retrieves data from the POPUPS ````````````````````````
+    // ````````````` Retrieves data from the Manual Mode POPUP ````````````````````````
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -160,8 +166,31 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
+      override val dialog: Any
+          get() {
+              // Build the species list for the dialog
+              val speciesList = when {
+                  tournamentSpecies.equals("Large Mouth", true)  -> arrayOf("Large Mouth", "Small Mouth")
+                  tournamentSpecies.equals("Small Mouth", true)  -> arrayOf("Small Mouth", "Large Mouth")
+                  else                                           -> arrayOf(tournamentSpecies)
+              }
 
- //================START - ON CREATE =======================================
+              // Build the available clip colors array
+              val clipColorList = availableClipColors.map { it.name }.toTypedArray()
+
+              // Return your weight-entry DialogFragment stub
+              return MyWeightEntryDialogFragment(
+                  speciesList    = speciesList,
+                  clipColorList  = clipColorList
+              ) { inches, quarters, species, clipColor ->
+                  // Combine quarters → total quarters
+                  val totalLengthQuarters = inches * 4 + quarters
+                  saveTournamentCatch(totalLengthQuarters, species, clipColor)
+              }
+          }
+
+
+      //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
@@ -180,6 +209,12 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
      voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
 
      Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+
+          tts = TextToSpeech(this) { status ->
+              if (status == TextToSpeech.SUCCESS) {
+                  tts.language = Locale.getDefault()
+              }
+          }
 
      dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
@@ -222,13 +257,14 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
         txtColorLetter6 = findViewById(R.id.txtColorLetter6)
 
 
-        // GET VAlUES from SetUp page -----------
-        tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)       // Culling Values
-        typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"                 // Typical Markers colors
-        tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"      // Tournament Species
-        measurementSystem = intent.getStringExtra("unitType") ?: "weight"                 // Type of Measuring
-        isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)     // Is Culling / Tournament mode
-        voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
+          //>>>>  Get Values from Set-Up Page <<<<<<<<<
+          tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
+          typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
+          tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
+          measurementSystem = intent.getStringExtra("unitType") ?: "weight"
+          isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
+          voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)
+
 
         //----ADD a CATCH button is clicked -----------
      btnTournamentCatch.setOnClickListener {
@@ -270,6 +306,8 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
+        tts.stop()
+        tts.shutdown()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(catchReceiver)
         voiceHelper.shutdown()
         toastTts?.shutdown()
@@ -289,50 +327,49 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
     /** Launches the appropriate popup (VCC vs manual) */
+
     private fun showWeightPopup() {
         awaitingResult = true
 
-
-        // build the Intent with your fresh list
-        val intent = Intent(
-            this,
-            if (voiceControlEnabled) PopupVccTournLbs::class.java
-            else PopupWeightEntryTourLbs::class.java
-        ).apply {
-            intent.putExtra("isTournament", true)
-
-            if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
-                intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-            } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
-                intent.putExtra("tournamentSpecies", "Small Mouth Bass")
-            } else{
-                intent.putExtra("tournamentSpecies", tournamentSpecies)
-            }
-
-            // 🔥 Send available clip colors as String array
-            val colorNames = availableClipColors.map { it.name }.toTypedArray()
-            intent.putExtra("availableClipColors", colorNames)
+        // Pick the right popup class
+        val popupClass = if (voiceControlEnabled) {
+            PopupVccTournLbs::class.java
+        } else {
+            PopupWeightEntryTourLbs::class.java
         }
 
-        Log.d("CatchEntryTournament","▶️ Launching ${if (voiceControlEnabled) "VCC" else "Manual"} popup with colors=$availableClipColors")
+        // Build the intent and configure all extras in one place
+        val intent = Intent(this, popupClass).apply {
+            putExtra(EXTRA_IS_TOURNAMENT, true)
+
+            // Normalize the tournamentSpecies string
+            val normalizedSpecies = when (tournamentSpecies.trim().lowercase(Locale.US)) {
+                "large mouth", "largemouth" -> "Large Mouth Bass"
+                "small mouth", "smallmouth" -> "Small Mouth Bass"
+                else -> tournamentSpecies
+            }
+            putExtra(EXTRA_TOURNAMENT_SPECIES, normalizedSpecies)
+
+            // Send as an ArrayList so you can retrieve with getStringArrayListExtra
+            val colorArray = availableClipColors.map { it.name }.toTypedArray()
+            putExtra(EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
+        }
 
         entryLauncher.launch(intent)
     }
 
 
-
-    // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     private fun saveTournamentCatch(weightTotalOz: Int, species: String, clipColor: String) {
-        val availableColors = calculateAvailableClipColors(
-            dbHelper,
-            catchType = "LbsOzs",
-            date = getCurrentDate(),
-            tournamentCatchLimit = tournamentCatchLimit,
-            isCullingEnabled = isCullingEnabled
-        )
+
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = if (species == "Large Mouth") "L" else "S"
+        val speciesInitial = when (species) {
+            "Large Mouth" -> "L"
+            "Small Mouth" -> "S"
+            "Spotted"     -> "P"    // Spotted Bass for Southern States
+            else -> ""
+        }
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
@@ -450,7 +487,7 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
         )
-
+        Log.d("CLIP_COLOR", "🎨 Available Colors LBS: $availableClipColors")
         clearTournamentTextViews()
 
         runOnUiThread {
@@ -626,6 +663,7 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
         return when (species.uppercase()) {
             "LARGE MOUTH" -> "LM"
             "SMALL MOUTH" -> "SM"
+            "SPOTTED BASS"-> "SB"
             "WALLEYE"     -> "WE"
             "PIKE"        -> "PK"
             "PERCH"       -> "PH"
@@ -637,7 +675,8 @@ abstract class CatchEntryTournament : BaseCatchEntryActivity() {
     } //------------ END Get Species Codes ----------------
 
 
-        //******************* User EDIT Logged Weights ********************************
+        //******************* FOR User EDIT Logged Weights ********************************
+
         private fun showTournamentEditDialog(c: CatchItem) {
             // 1) inflate the custom layout
             val dialogView = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_lbs, null)

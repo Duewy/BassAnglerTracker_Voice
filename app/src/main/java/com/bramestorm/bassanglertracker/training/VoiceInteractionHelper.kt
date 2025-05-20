@@ -1,7 +1,9 @@
 package com.bramestorm.bassanglertracker.training
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +27,7 @@ class VoiceInteractionHelper(
     private var speechRecognizer: SpeechRecognizer? = null
     private var tts: TextToSpeech? = null
     private var isListening = false
+    private var lastIntent: Intent? = null
 
     private var awaitingConfirmation = false
     private var pendingCatch: CatchData? = null
@@ -72,6 +75,15 @@ class VoiceInteractionHelper(
 
                 Log.d("Voice", "✅ Result: $spokenText")
 
+                // 1) Try correcting to a known tournament command
+                VoiceCommandCorrector
+                    .bestMatch(transcript, VoiceCommandList.knownTournamentCommands)
+                    ?.let { cmd ->
+                        onCommandAction(cmd)    // e.g. “add a catch”
+                        return
+                    }
+
+                // 2) Otherwise proceed with weight/species/clip parsing…
                 if (awaitingConfirmation) {
 
                     val species = extractSpecies(spokenText)
@@ -131,12 +143,24 @@ class VoiceInteractionHelper(
                 restartListening(4000)
             }
 
+            private var vccRetryCount = 0
+
             override fun onError(error: Int) {
                 isListening = false
-                Log.e("Voice", "❌ Error: $error")
-                speak("Sorry, I didn't catch that. Try again.")
-                restartListening(2000)
+                VoiceErrorHandler.handleError(
+                    activity = activity,
+                    errorCode = error,
+                    retryCount = vccRetryCount,
+                    onRetry = {
+                        vccRetryCount++
+                        speechRecognizer?.startListening(lastIntent)
+                    },
+                    onFallback = {
+                        activity.finish() // drop back to your manual flow
+                    }
+                )
             }
+
 
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
@@ -183,7 +207,16 @@ class VoiceInteractionHelper(
             activity.setResult(Activity.RESULT_OK, resultIntent)
             activity.finish()
         }, 2000)
+
+        VoiceCommandCorrector
+            .bestMatch(input, VoiceCommandList.knownTournamentCommands)
+            ?.let { cmd ->
+                onCommandAction(cmd)
+                return
+            }
+
     }
+
 
 
     private fun extractWeight(text: String): Pair<Int, Int>? {
@@ -239,6 +272,14 @@ class VoiceInteractionHelper(
         }
 
         onTranscriptReady = onResult
+        // force the audio path for noise-reduced model
+        val audioManager = activity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+
+
+        lastIntent = intent
+        onTranscriptReady = onResult
+
         speechRecognizer?.startListening(intent)
         isListening = true
     }

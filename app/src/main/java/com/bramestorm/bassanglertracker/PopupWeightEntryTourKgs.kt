@@ -35,7 +35,7 @@ class PopupWeightEntryTourKgs : Activity() {
         //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
         isTournament = intent.getBooleanExtra("isTournament", false)
         catchType = intent.getStringExtra("catchType") ?: ""
-        selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
+
         val colorNames = intent.getStringArrayExtra("availableClipColors")
             ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
 
@@ -58,6 +58,9 @@ class PopupWeightEntryTourKgs : Activity() {
             }
             isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Small Mouth", "Large Mouth")
+            }
+            isTournament && tournamentSpecies.equals("Spotted Bass", ignoreCase = true) -> {
+                arrayOf("Spotted Bass","Small Mouth", "Large Mouth")    // Southern States Have All Three Bass Species
             }
             isTournament -> {
                 arrayOf(tournamentSpecies)
@@ -94,18 +97,21 @@ class PopupWeightEntryTourKgs : Activity() {
                 return@setOnClickListener
             }
 
-            Log.d("CLIPS", "✅ Sending Result - weightTotalOz: $totalweightKgs, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
+            Log.d(
+                "CLIPS",
+                "✅ Sending Result - weightTotalOz: $totalweightKgs, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor"
+            )
 
-            val resultIntent = Intent().apply {
+            Intent().apply {
                 putExtra("weightTotalKgs", totalweightKgs)
                 putExtra("selectedSpecies", selectedSpeciesValue)
                 putExtra("clip_color", selectedClipColor)
                 putExtra("catchType", catchType)
                 putExtra("isTournament", isTournament)
+            }.let { resultIntent ->
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
             }
-
-            setResult(Activity.RESULT_OK, resultIntent)
-            finish()
         }
 
         // ````````` CANCEL btn ```````````````````

@@ -20,7 +20,7 @@ import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
 import com.bramestorm.bassanglertracker.PopupVccTournLbs
 import com.bramestorm.bassanglertracker.R
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.util.ArrayDeque
 
 

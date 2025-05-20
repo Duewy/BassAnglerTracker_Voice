@@ -12,7 +12,7 @@ import com.bramestorm.bassanglertracker.SetUpActivity
 import com.bramestorm.bassanglertracker.adapters.ItemMoveCallback
 import com.bramestorm.bassanglertracker.adapters.SpeciesSelectAdapter
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 

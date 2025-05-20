@@ -56,9 +56,13 @@ class PopupLengthEntryTourInches : Activity() {
             isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Small Mouth", "Large Mouth")
             }
+
+            isTournament && tournamentSpecies.equals("Spotted Bass", ignoreCase = true) -> {
+                arrayOf("Spotted Bass","Small Mouth", "Large Mouth")    // Southern States Have All Three Bass Species
+            }
             isTournament -> {
                 arrayOf(tournamentSpecies)
-            }                   //todo Should this not get it from the SpeciesSelectionActivity ????
+            }
             else -> {
                 arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
             }

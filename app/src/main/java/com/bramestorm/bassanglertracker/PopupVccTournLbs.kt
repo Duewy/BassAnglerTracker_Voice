@@ -4,8 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -16,28 +19,31 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bramestorm.bassanglertracker.training.VoiceErrorHandler
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
-import com.bramestorm.bassanglertracker.util.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.validateClipColorFromVoice
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.util.Locale
 
 
 class PopupVccTournLbs: Activity() {
 
     // Flags and extras
-    private var isTournament: Boolean = false
-    private var catchType: String = ""
+
     private var selectedSpecies: String = ""
     private lateinit var availableClipColors: Array<String>
+    private var clipIndex = 0
     private var speechRecognizer: SpeechRecognizer? = null
     private var awaitingConfirmation = false
     private var lastConfirmedCatch: ConfirmedCatch? = null
     private lateinit var tts: TextToSpeech
+    private var silenceRunnable: Runnable? = null
+    private val vccHandler = Handler(Looper.getMainLooper())
 
     // 3333333333333 Error Handling Helpers  33333333333333
     private var retryCount = 0
     private val MAX_RETRIES = 3
-
 
     // UI Components
     private lateinit var tvSpecies: TextView
@@ -48,13 +54,14 @@ class PopupVccTournLbs: Activity() {
     private lateinit var btnCancel: Button
 
     companion object {
-        const val EXTRA_WEIGHT_OZ     = "weightTotalOz"
-        const val EXTRA_SPECIES       = "selectedSpecies"
-        const val EXTRA_CLIP_COLOR    = "clip_color"
-        const val EXTRA_CATCH_TYPE    = "catchType"
-        const val EXTRA_IS_TOURNAMENT = "isTournament"
-        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
-        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+        // ← outputs from this popup
+        const val EXTRA_WEIGHT_OZ              = "weightTotalOz"        // Send & receive this
+        const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
 
 
@@ -79,12 +86,14 @@ class PopupVccTournLbs: Activity() {
             // !!!!!!!!!!!!! VCC Says !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         speak("Please say the weight species and clip color used for the catch Over")
 
+
         //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
-        isTournament   = intent.getBooleanExtra(EXTRA_IS_TOURNAMENT, false)
-        catchType      = intent.getStringExtra(EXTRA_CATCH_TYPE) ?: ""
+
+
         selectedSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: ""
         availableClipColors = intent.getStringArrayExtra(EXTRA_AVAILABLE_CLIP_COLORS) ?:  arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
 
+        Log.d("Available", "colors = ${availableClipColors.joinToString()}")
 
         // UI Components
         tvSpecies = findViewById(R.id.tvSpeciesVCCLbs)
@@ -94,9 +103,11 @@ class PopupVccTournLbs: Activity() {
         edtWeightOz = findViewById(R.id.tvOunces)
         btnCancel = findViewById(R.id.btnCancel)
 
+        val firstClip = availableClipColors.first()
+        setClipColor(firstClip)
 
 
-            // ````````` CANCEL btn ```````````````````
+      // ````````` CANCEL btn ```````````````````
         btnCancel.setOnClickListener {
             setResult(RESULT_CANCELED)
             finish()
@@ -112,99 +123,88 @@ class PopupVccTournLbs: Activity() {
 
     //-------- User Speaking -------------------------
 
-    private fun speak(message: String) {
+    private fun speak(message: String, utteranceId: String = "TTS_DONE") {
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts.language = Locale.getDefault()
-                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, "TTS_DONE")
+                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
             }
         }
-
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {}
             override fun onDone(utteranceId: String?) {
-                if (utteranceId == "TTS_DONE") {
-                    runOnUiThread {
-                        startListening()  // 🎤 Start listening after TTS
-                    }
+                if (utteranceId == "TTS_DONE" || utteranceId == "TTS_CONFIRM") {
+                    vccHandler.post { startListening() }
                 }
             }
-            @Deprecated("Deprecated in Java")
-            override fun onError(utteranceId: String?) {}   // todo do we need something for Error catching?
+            override fun onError(utteranceId: String?) {}
         })
     }
 
-    //------------------- startListening --------------------------
     private fun startListening() {
+
+        // 1) Create / reset the recognizer
+        speechRecognizer?.destroy()
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+            setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {
+                    // nothing special here
+                }
+                override fun onBeginningOfSpeech() { /* user started talking */ }
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() { /* Android will fire onResults or onError next */ }
+
+                override fun onError(error: Int) {
+                   Log.e("VCC", "Recognition error: $error")
+
+                   VoiceErrorHandler.handleError(
+                       activity   = this@PopupVccTournLbs,
+                       errorCode = error,
+                        retryCount = retryCount,
+                       onRetry = { speak("Sorry, I did not get that. Please try again. Over.") },
+                        onFallback = {
+                          speak("I’m having trouble—please enter your catch manually. Over.")
+                         finish()
+                        }
+                   )
+                }
+
+                override fun onResults(results: Bundle?) {
+                        // reset *this* popup’s retry counter
+                    retryCount = 0
+
+                   val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                   val spokenText = matches?.firstOrNull() ?: ""
+                    Log.d("VCC", "Got: $spokenText")
+                   handleVoiceInput(spokenText)
+                }
+
+                override fun onPartialResults(partial: Bundle?) { /* optional */ }
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+        }
+
+        // 2) Build the intent
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-            )
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
 
-            // Give the user up to 2.5 seconds of silence to finish speaking
-            putExtra(
-                RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
-                2500L
-            )
-            // Require at least 1 second of speech before thinking user is done
-            putExtra(
-                RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
-                1000L
-            )
-            // Ask for partial results (optional)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            // Only need the best match
+            // Let Android wait up to 4s of silence at end-of-speech before firing onResults()
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
+                4000L)
+            // Require at least 1s of speech before thinking we're done
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
+                1000L)
+
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val spokenText = matches?.firstOrNull() ?: "No input"
-                Log.d("VCC", "🎤 User said: $spokenText")
-                handleVoiceInput(spokenText)
-            }
-
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onPartialResults(partialResults: Bundle?) {}
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-
-            override fun onError(error: Int) {
-                Log.e("VCC", "Speech recognition error: $error")
-
-                retryCount++
-                if (retryCount >= MAX_RETRIES) {
-                    tts.speak("There was a serious problem understanding you. For now please enter the information manually.Over", TextToSpeech.QUEUE_FLUSH, null, "TTS_FAIL")
-                    return
-                }
-
-                when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH,
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
-                        tts.speak(
-                            "I did not catch that. Please say your catch information again after the beep. Over",
-                            TextToSpeech.QUEUE_FLUSH, null, "TTS_REPEAT"
-                        )
-                        Handler(mainLooper).postDelayed({ startListening() }, 1200)
-                    }
-                    else -> {
-                        tts.speak(
-                            "Something went wrong with speech recognition. Please say your catch information again after the beep. Over",
-                            TextToSpeech.QUEUE_FLUSH, null, "TTS_ERROR"
-                        )
-                        Handler(mainLooper).postDelayed({ startListening() }, 2000)
-                    }
-                }
-            }
-        })
+        // 3) Kick it off
         speechRecognizer?.startListening(intent)
+
     }//------------------- End of startListening --------------------------
 
     //============= 👂Get the User's Info 📖 and Puts Everything for Database and Listing =======================
@@ -283,20 +283,16 @@ class PopupVccTournLbs: Activity() {
         if (ounces < 0) ounces = 0
         val totalOz = pounds * 16 + ounces
 
-        // === 6) Parse species ===
+        // === 6) Parse 🐟 SPECIES 🦈 ===
+
         val matchedSpecies = VoiceInputMapper.baseSpeciesVoiceMap
             .entries
             .firstOrNull { (key, _) -> cleaned.contains(key) }
             ?.value
 
-        val speciesCode = when {        // for any BASS both Large and Small Mouth Bass are good to enter
-            selectedSpecies.contains("bass", ignoreCase = true) &&
-                    (matchedSpecies == "Small Mouth" || matchedSpecies == "Largemouth") -> matchedSpecies
-            matchedSpecies == selectedSpecies -> matchedSpecies
-            else -> selectedSpecies
-        }
+        val finalSpecies = matchedSpecies ?: selectedSpecies
 
-        Log.d("VCC", "Parsed speciesCode = $speciesCode (Matched: $matchedSpecies, Tournament = $selectedSpecies)")
+        Log.d("VCC", "Parsed speciesCode = $finalSpecies (Matched: $matchedSpecies, Tournament = $selectedSpecies)")
 
 
         // === 7) Parse clip color ===
@@ -308,11 +304,11 @@ class PopupVccTournLbs: Activity() {
             Handler(mainLooper).postDelayed({ startListening() }, 2500)
             return
         }
-
+        Log.w("VCC", " Available colors: ${availableClipColors.joinToString()}")
 
         // === 8) 🚨🚨 Fail if any critical info missing  🚨🚨  ===
 
-       // 1) Check for too-many ounces
+       // 8a) Check for too-many ounces
         if (ounces > 15) {
             retryCount++
             if (retryCount >= MAX_RETRIES) {
@@ -324,8 +320,8 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
-        // 2) Now catch the other “nothing understood” cases
-        if (totalOz == 0 || speciesCode == null || selectedClip == null) {
+        // 8b) Now catch the other “nothing understood” cases
+        if (totalOz == 0 || finalSpecies.isBlank()) {
             retryCount++
             if (retryCount >= MAX_RETRIES) {
                 speak("I'm still having trouble. Please enter your catch manually. Over and Out")
@@ -336,24 +332,26 @@ class PopupVccTournLbs: Activity() {
             return
         }
 
-        // 3) When we reach here, everything parsed is OK — reset retry counter
+        // 8c) When we reach here, everything parsed is OK — reset retry counter
         retryCount = 0
 
 
         // === 9) Update UI for visual feedback ===
 
-        edtWeightTensLbs.text  = (pounds / 10).toString()
-        edtWeightLbs.text     = (pounds % 10).toString()
-        edtWeightOz.text = ounces.toString()
-        tvSpecies.text   = speciesCode
-        tvClipColor.text = selectedClip
+        edtWeightTensLbs.text= (pounds / 10).toString()
+        edtWeightLbs.text    = (pounds % 10).toString()
+        edtWeightOz.text     = ounces.toString()
+        tvSpecies.text       = finalSpecies
+        tvClipColor.text     = selectedClip
+
+        setClipColor(selectedClip)      // puts selectedClip Color into the background
 
 
         // === 10) Confirm with user ===
-        val question = "You said a $pounds pound $ounces ounce $speciesCode on the $selectedClip clip. Is that correct? Over."
+        val question = "You said a $pounds pound $ounces ounce $finalSpecies on the $selectedClip clip. Is that correct? Over."
         tts.speak(question, TextToSpeech.QUEUE_FLUSH, null, "TTS_CONFIRM")
 
-        lastConfirmedCatch = ConfirmedCatch(totalOz, speciesCode, selectedClip)
+        lastConfirmedCatch = ConfirmedCatch(totalOz, finalSpecies, selectedClip)
         awaitingConfirmation = true
 
         Handler(mainLooper).postDelayed({ startListening() }, 2500)
@@ -362,18 +360,46 @@ class PopupVccTournLbs: Activity() {
 
 
    // ^^^^^^^^^^ SENDING DATA back to CatchEntryTournament ^^^^^^^^^^^^^^^^
-    private fun Activity.returnTournamentResult(
-        weightOz: Int, species: String, clipColor: String) {
-       Intent(this, CatchEntryTournament::class.java).apply {
-           flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+   // PopupVccTournLbs.kt
+   private fun Activity.returnTournamentResult(
+       weightOz: Int, finalSpecies: String, clipColor: String
+   ) {
+       // send a local broadcast, not a new Activity start
+       val broadcastIntent = Intent("com.bramestorm.CATCH_TOURNAMENT").apply {
            putExtra(EXTRA_WEIGHT_OZ, weightOz)
-           putExtra(EXTRA_SPECIES, species)
+           putExtra(EXTRA_SPECIES, finalSpecies)
            putExtra(EXTRA_CLIP_COLOR, clipColor)
-       }.also {
-           startActivity(it)
-           speak( "Catch Saved, Over and Out")
-           finish()
-         }
+       }
+       LocalBroadcastManager.getInstance(this)
+           .sendBroadcast(broadcastIntent)
+
+       finish()
+   }//============ DATA SENT ===========================
+
+        // sets Background of Clip Color up
+    private fun setClipColor(name: String) {
+        // 1) Update the text
+        tvClipColor.text = name
+
+        // 2) Figure out the enum (defaulting to WHITE on error)
+        val clipEnum = try {
+            CatchEntryTournament.ClipColor.valueOf(name.uppercase())
+        } catch (e: IllegalArgumentException) {
+            CatchEntryTournament.ClipColor.WHITE
+        }
+
+        // 3) Grab the actual color int
+        val bgColor = ContextCompat.getColor(this, clipEnum.resId)
+
+        // 4) Build & apply the background drawable
+        val gd = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 8f
+            setColor(bgColor)
+            setStroke(2, Color.BLACK)
+        }
+        tvClipColor.background = gd
     }
+
 
 }//================== END  ==========================

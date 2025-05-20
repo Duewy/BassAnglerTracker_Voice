@@ -1,4 +1,4 @@
-package com.bramestorm.bassanglertracker.util
+package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
 import android.view.Gravity

@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.io.File
 
 class ShareFishingLogsActivity : AppCompatActivity() {

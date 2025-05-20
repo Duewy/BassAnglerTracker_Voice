@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
-import com.bramestorm.bassanglertracker.util.positionedToast
+import com.bramestorm.bassanglertracker.utils.positionedToast
 
 class UserTrainingVoiceCommands : AppCompatActivity() {
 

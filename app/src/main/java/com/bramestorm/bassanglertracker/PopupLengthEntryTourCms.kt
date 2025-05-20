@@ -56,6 +56,9 @@ class PopupLengthEntryTourCms : Activity() {
             isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Small Mouth", "Large Mouth")
             }
+            isTournament && tournamentSpecies.equals("Spotted Bass", ignoreCase = true) -> {
+                arrayOf("Spotted Bass","Small Mouth", "Large Mouth")    // Southern States Have All Three Bass Species
+            }
             isTournament -> {
                 arrayOf(tournamentSpecies)
             }

@@ -20,6 +20,7 @@ import android.provider.Settings
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -28,11 +29,13 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.CatchEntryTournament.Companion.EXTRA_AVAILABLE_CLIP_COLORS
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.ParsedCatch
 import com.bramestorm.bassanglertracker.training.VoiceCatchParse
+import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -107,6 +110,13 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     // Database Helper
     private lateinit var dbHelper: CatchDatabaseHelper
 
+    // Voice Helper
+    private lateinit var tts: TextToSpeech
+    private var toastTts: TextToSpeech? = null
+    private var voiceControlEnabled = false
+    private lateinit var voiceHelper: VoiceInteractionHelper
+    lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
+    private var awaitingResult = false
 
     // --- voice-to-text callback handler ---
     private val recognitionListener = object : RecognitionListener {
@@ -209,13 +219,15 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         txtKgsColorLetter5 = findViewById(R.id.txtKgsColorLetter5)
         txtKgsColorLetter6 = findViewById(R.id.txtKgsColorLetter6)
 
+        //>>>>  Get Values from Set-Up Page <<<<<<<<<
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
         tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
+        voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)
 
-        //************ onClickListener **************************
+     //************ onClickListener **************************
         btnStartFishingKgs.setOnClickListener { showWeightPopup() }
         btnSetUpKgs.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainKgs.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
@@ -250,6 +262,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
     private fun showWeightPopup() {
         val intent = Intent(this, PopupWeightEntryTourKgs::class.java)
+
         intent.putExtra("isTournament", true)
 
         if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
@@ -260,22 +273,16 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             intent.putExtra("tournamentSpecies", tournamentSpecies)
         }
 
-        // 🔥 Send available clip colors as String array
-        val colorNames = availableClipColors.map { it.name }.toTypedArray()
-        intent.putExtra("availableClipColors", colorNames)
+        // Send as an ArrayList so you can retrieve with getStringArrayListExtra
+        val colorArray = availableClipColors.map { it.name }.toTypedArray()
+        intent.putExtra(EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
 
         weightEntryLauncher.launch(intent)
     }
 
     // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     private fun saveTournamentCatch(weightTotalKgs: Int, bassType: String, clipColor: String) {
-        val availableColors = calculateAvailableClipColors(
-            dbHelper,
-            catchType = "kgs",
-            date = getCurrentDate(),
-            tournamentCatchLimit = tournamentCatchLimit,
-            isCullingEnabled = isCullingEnabled
-        )
+
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
         val speciesInitial = if (bassType == "Large Mouth") "L" else "S"
@@ -380,7 +387,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             isCullingEnabled = isCullingEnabled
         )
 
-        Log.d("CLIP_COLOR", "🎨 Available Colors: $availableClipColors")
+        Log.d("CLIP_COLOR", "🎨 Available Colors KGS: $availableClipColors")
 
         clearTournamentTextViews()
 
