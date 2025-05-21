@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.bramestorm.bassanglertracker"
     xmlns:tools="http://schemas.android.com/tools" >
 
     <!-- AndroidManifest.xml for Catch and Call (Voice Control Mode)
@@ -19,6 +20,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
 
     <!--  Bluetooth (Android 12+) - -->
+    <permission android:name="com.bramestorm.bassanglertracker.permission.VOICE_WAKE" android:protectionLevel="signature"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -230,13 +232,6 @@
             android:name=".voice.VoiceControlService"
             android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"
             android:exported="false" />
-        <service
-            android:name=".media.MediaButtonService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </service>
 
 
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
@@ -271,17 +266,26 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Receiver for ALARMS  -->
-        <receiver android:name=".alarm.AlarmReceiver" />
+        <!-- Receiver for ALARMS         <receiver android:name=".alarm.AlarmReceiver" /> todo hold for now we will see if remove all alarms -->
 
-        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+
+        <!-- Your foreground service -->
+        <service
+            android:name=".voice.VoiceControlService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"/>
+
+        <!-- Media‐ButtonReceiver forwards ACTION_MEDIA_BUTTON into your service -->
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.bramestorm.bassanglertracker.voice.VoiceWakeReceiver" />
+
+
 
     </application>
 

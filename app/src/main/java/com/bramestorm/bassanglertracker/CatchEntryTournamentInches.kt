@@ -4,10 +4,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -29,15 +26,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.PopupVccTournInches
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
-import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -152,14 +148,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     }
 
     //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is using Bluetooth
-    override val catchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) {
-            val oz   = intent.getIntExtra(PopupVccTournLbs.EXTRA_WEIGHT_OZ, 0)
-            val sp   = intent.getStringExtra(PopupVccTournLbs.EXTRA_TOURNAMENT_SPECIES).orEmpty()
-            val clip = intent.getStringExtra(PopupVccTournLbs.EXTRA_AVAILABLE_CLIP_COLORS).orEmpty()
-            saveTournamentCatch(oz, sp, clip)
-        }
-    }
+
 
 
     // ````````````` Retrieves data from the POPUP ````````````````````````
@@ -182,8 +171,6 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view_inches)
 
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(catchReceiver, IntentFilter("com.bramestorm.CATCH_TOURNAMENT"))   //todo does this need to be renamed??
 
         // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
         voiceHelper = VoiceInteractionHelper(
@@ -290,7 +277,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(catchReceiver)
+
         voiceHelper.shutdown()
         handler.removeCallbacksAndMessages(null)
         flashHandler.removeCallbacksAndMessages(null)

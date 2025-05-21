@@ -24,11 +24,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
-import com.bramestorm.bassanglertracker.voice.BluetoothTestDialogFragment
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.util.Date
 
@@ -357,7 +356,6 @@ class SetUpActivity : AppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 // user granted mic + no assistant conflict → start your service
                 startVoiceService()
-                BluetoothTestDialogFragment().show(supportFragmentManager, "bt_test")
             } else {
                 // setup failed or was canceled → roll back the toggle
                 prefs.edit().putBoolean("voice_enabled", false).apply()

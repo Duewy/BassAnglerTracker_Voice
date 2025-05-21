@@ -4,8 +4,6 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -44,11 +42,7 @@ import java.util.Locale.getDefault
 
 class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
-    override val catchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) {
-            // no-op for now – we don’t use tournament broadcasts here
-        }
-    }
+
 
 
     // Buttons

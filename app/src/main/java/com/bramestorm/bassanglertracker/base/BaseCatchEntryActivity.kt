@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.base
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,7 +13,6 @@ import android.os.SystemClock
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.bramestorm.bassanglertracker.utils.FishSpecies
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.voice.VoiceAudioUtils
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 
 /**
@@ -37,16 +36,17 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
     private var lastVolDownTap = 0L
     private var lastVolUpTap   = 0L
-    private var isWakeReceiverRegistered = false
-
-    protected open val catchReceiver: BroadcastReceiver
-            = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) { /* no-op */ }
-    }
 
     companion object {
         private const val AUDIO_REQUEST_CODE = 42
-        private const val VOICE_WAKE_ACTION = "com.bramestorm.bassanglertracker.VOICE_WAKE"
+        const val VOICE_WAKE_ACTION = "com.bramestorm.bassanglertracker.VOICE_WAKE"
+    }
+
+    private val wakeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context, intent: Intent) {
+            // whenever VOICE_WAKE arrives, trigger the UI flow:
+            onVoiceWake()
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -78,14 +78,8 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
     abstract val dialog: Any
     open lateinit var recognizer: SpeechRecognizer
     open lateinit var recognizerIntent: Intent
-    private val wakeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) {
-            if (intent.action == VOICE_WAKE_ACTION) {
-                onVoiceWake()
-            }
-        }
-    }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -101,22 +95,23 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         }
 
         // Start/stop service and register receiver based on user preference
-        val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
-        if (prefs.getBoolean("voice_enabled", false)) {
-            // 👇 Play silent audio to claim Bluetooth media button control
-            VoiceAudioUtils.playSilentAudio(this)
+        if (getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
+                .getBoolean("voice_enabled", false)
+        ) {
+            // 1) start the foreground service
             ContextCompat.startForegroundService(
                 this,
                 Intent(this, VoiceControlService::class.java)
             )
+            // 2) dynamically listen for your VOICE_WAKE broadcast
             ContextCompat.registerReceiver(
                 this,
                 wakeReceiver,
                 IntentFilter(VOICE_WAKE_ACTION),
-                ContextCompat.RECEIVER_NOT_EXPORTED
+                "$packageName.permission.VOICE_WAKE",  // enforce your signature permission
+                null,
+                ContextCompat.RECEIVER_NOT_EXPORTED    // only your own app can send
             )
-
-            isWakeReceiverRegistered = true
         }
 
         // Request microphone permission and initialize SpeechRecognizer
@@ -135,22 +130,16 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val voiceControlEnabled = prefs.getBoolean("VOICE_CONTROL_ENABLED", false)
-        if (voiceControlEnabled) {
-            VoiceAudioUtils.playSilentAudio(this)
+        val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("voice_enabled", false)) {
+            ContextCompat.startForegroundService(
+                this,Intent(this, VoiceControlService::class.java))
         }
     }
 
     override fun onDestroy() {
+        try { unregisterReceiver(wakeReceiver) } catch(_: Exception) {}
         recognizer.destroy()
-        try {
-            if (isWakeReceiverRegistered) {
-                unregisterReceiver(wakeReceiver)
-            }
-        } catch (e: IllegalArgumentException) {
-            Log.w("VCC", "Receiver not registered — skipping unregister.")
-        }
         super.onDestroy()
     }
 
@@ -188,11 +177,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
      * Called when the BroadcastReceiver sees a VOICE_WAKE action.
      * Default behavior: start listening if initialized.
      */
-    protected open fun onVoiceWake() {
-        if (::recognizer.isInitialized) {
-            recognizer.startListening(recognizerIntent)
-        }
-    }
+    protected open fun onVoiceWake() { /* default no-op */ }
 
     /**
      * Called on a Volume-Up double-tap.

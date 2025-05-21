@@ -35,17 +35,17 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
-import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 
-  class CatchEntryTournament : BaseCatchEntryActivity() {
+class CatchEntryTournament : BaseCatchEntryActivity() {
 
     // Buttons
     private lateinit var btnTournamentCatch: Button
@@ -61,9 +61,6 @@ import java.util.Locale
 
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
-
-    // For VCC to Wake UP
-    private var launchFromWake = false
 
     // Weight Display TextViews
     private lateinit var firstRealWeight: TextView
@@ -137,16 +134,12 @@ import java.util.Locale
     }
 
     //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is already using Bluetooth
-    override val catchReceiver = object : BroadcastReceiver() {
+    private val catchReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
             val oz   = intent.getIntExtra(PopupVccTournLbs.EXTRA_WEIGHT_OZ, 0)
             val sp   = intent.getStringExtra(PopupVccTournLbs.EXTRA_SPECIES).orEmpty()
             val clip = intent.getStringExtra(PopupVccTournLbs.EXTRA_CLIP_COLOR).orEmpty()
-            Log.d("CET-DEBUG", "Broadcast received: $oz, $sp, $clip")
             saveTournamentCatch(oz, sp, clip)
-
-            // now that data’s in your DB and UI’s updated:
-            tts.speak("Oh OK  your  Catch is Saved, Over and Out", TextToSpeech.QUEUE_FLUSH, null, "CATCH_SAVED")
         }
     }
 
@@ -195,8 +188,10 @@ import java.util.Locale
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
 
-     LocalBroadcastManager.getInstance(this)
-         .registerReceiver(catchReceiver, IntentFilter("com.bramestorm.CATCH_TOURNAMENT"))
+          LocalBroadcastManager.getInstance(this)
+              .registerReceiver(catchReceiver,
+                  IntentFilter("com.bramestorm.CATCH_TOURNAMENT"))
+
 
      // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
      voiceHelper = VoiceInteractionHelper(
@@ -281,14 +276,6 @@ import java.util.Locale
         updateTournamentList()
      handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
 
-     Handler(Looper.getMainLooper()).post {
-         if (launchFromWake) {
-             Log.d("VCC_DEBUG", "🔊 Wake trigger → launching popup with VCC=$voiceControlEnabled")
-             showWeightPopup()
-             launchFromWake = false
-         }
-     }
-
  } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // ------------- On RESUME --------- Check GPS  Statues --------------
@@ -302,6 +289,7 @@ import java.util.Locale
     override fun onManualWake() {
         showWeightPopup()
     }
+
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
@@ -330,7 +318,7 @@ import java.util.Locale
 
     private fun showWeightPopup() {
         awaitingResult = true
-
+        Log.d("CET-VCC", "showWeightPopup() called — launching PopupVccTournLbs")
         // Pick the right popup class
         val popupClass = if (voiceControlEnabled) {
             PopupVccTournLbs::class.java
@@ -660,16 +648,17 @@ import java.util.Locale
 
     //!!!!!!!!!!!!!!!! Get SPECIES Letters for Side Text !!!!!!!!!!!!!!!!!
     private fun getSpeciesCode(species: String): String {
-        return when (species.uppercase()) {
-            "LARGE MOUTH" -> "LM"
-            "SMALL MOUTH" -> "SM"
-            "SPOTTED BASS"-> "SB"
-            "WALLEYE"     -> "WE"
-            "PIKE"        -> "PK"
-            "PERCH"       -> "PH"
-            "PANFISH"     -> "PF"
-            "CATFISH"     -> "CF"
-            "CRAPPIE"     -> "CP"
+        val u = species.uppercase(Locale.US)
+        return when {
+            u.startsWith("LARGE MOUTH")  -> "LM"
+            u.startsWith("SMALL MOUTH")  -> "SM"
+            u == "SPOTTED BASS"   -> "SB"
+            u == "WALLEYE"        -> "WE"
+            u == "PIKE"           -> "PK"
+            u =="PERCH"           -> "PH"
+            u == "PANFISH"        -> "PF"
+            u =="CATFISH"         -> "CF"
+            u == "CRAPPIE"       -> "CP"
             else          -> "--"
         }
     } //------------ END Get Species Codes ----------------
@@ -920,15 +909,13 @@ import java.util.Locale
         }
     }
 
-    /**
-     * Also required by the base.  You could use this
-     * if you wanted the old “wake” event to kick off VCC,
-     * but we’re using a double-tap listener instead.
-     */
-        // ------------ Double Tap Wakes App Up for VCC --------------
-    override fun onVoiceWake() {
-        launchFromWake = true
-    }
+        // ------------ Tap Wakes App Up for VCC --------------
+        override fun onVoiceWake() {
+            Log.d("CET", "Voice woke – VCC_ENABLED=$voiceControlEnabled")
+            if (voiceControlEnabled) {
+                showWeightPopup()
+            }
+        }
 
 
 }//################## END  ################################
