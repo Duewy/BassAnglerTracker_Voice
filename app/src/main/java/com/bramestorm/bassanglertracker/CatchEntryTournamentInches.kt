@@ -26,7 +26,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import com.bramestorm.bassanglertracker.PopupVccTournInches
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -293,15 +292,14 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
-    /** Launches the appropriate popup (VCC vs manual) */
+
     private fun showWeightPopup() {
         awaitingResult = true
 
         // build the Intent with your fresh list
         val intent = Intent(
             this,
-            if (voiceControlEnabled) PopupVccTournInches::class.java
-            else PopupLengthEntryTourInches::class.java
+            PopupLengthEntryTourInches::class.java
         ).apply {
             intent.putExtra(EXTRA_IS_TOURNAMENT, true)
 

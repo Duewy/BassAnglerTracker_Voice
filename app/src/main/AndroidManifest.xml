@@ -187,34 +187,32 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
-        <!-- VCC Popup Activities  -->
-        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupVccTournLbs"
-            android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"/>
 
         <!-- Looking Up Catch Locations -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".MapCatchLocationsActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+
         <!-- Share all Catch Data  -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".ShareFishingLogsActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+
         <!-- Get the Top 5 Catches -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".TopFiveCatchesActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
+
         <!-- Share Specific Data with CSV files -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".LookUpShareDataActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
+        <!-- Get the Voice Training Section -->
         <activity android:name=".training.UserTrainingIndex"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
@@ -223,16 +221,11 @@
         <!-- For all VOICE CONTROL pages -->
 
         <!-- VoiceSetupActivity (the onboarding / permission check screen) -->
-        <activity
-            android:name=".voice.VoiceSetupActivity"
-            android:exported="false" />
-
-        <!-- VoiceControlService (the foreground service for double-tap wake) -->
-        <service
-            android:name=".voice.VoiceControlService"
-            android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"
-            android:exported="false" />
-
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".voice.VoiceSetupActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
 
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".training.UserTrainingVoiceCommands"
@@ -266,25 +259,18 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Receiver for ALARMS         <receiver android:name=".alarm.AlarmReceiver" /> todo hold for now we will see if remove all alarms -->
+        <!-- Receiver for ALARMS -->       <!--          <receiver android:name=".alarm.AlarmReceiver" /> todo hold for now we will see if remove all alarms -->
 
 
         <!-- Your foreground service -->
         <service
             android:name=".voice.VoiceControlService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback|microphone|connectedDevice"/>
-
-        <!-- Media‐ButtonReceiver forwards ACTION_MEDIA_BUTTON into your service -->
-        <receiver
-            android:name="androidx.media.session.MediaButtonReceiver"
-            android:exported="false">
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback|microphone|connectedDevice">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON"/>
             </intent-filter>
-        </receiver>
-
-
+        </service>
 
 
     </application>

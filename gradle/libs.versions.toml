@@ -27,6 +27,7 @@ supportAnnotations = "28.0.0"
 material = "1.12.0"
 playServicesMaps = "19.1.0"
 uiTestAndroid = "1.8.0"
+protoliteWellKnownTypes = "18.0.1"
 
 
 [libraries]
@@ -62,6 +63,7 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose-ui" }
 androidx-media = { module = "androidx.media:media", version.ref = "androidx-media" }
+protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -161,12 +161,9 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     }
 
     private fun openWeightPopup() {
-        val intent = if (voiceControlEnabled) {
-            Intent(this, PopupVccWeightEntryLbs::class.java)
-
-        } else {
+        // todo fix this
             Intent(this, PopupWeightEntryLbs::class.java)
-        }
+
         weightEntryLauncher.launch(intent)
     }
 

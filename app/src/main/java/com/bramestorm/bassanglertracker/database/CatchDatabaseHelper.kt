@@ -547,7 +547,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put("total_weight_oz", catchItem.totalWeightOz)
                 put("total_weight_hundredth_kg", catchItem.totalWeightHundredthKg)
                 put("total_length_quarters", catchItem.totalLengthQuarters)
-                put("total_length_tenths", catchItem.totalLengthTenthCm)
+                put(COLUMN_TOTAL_LENGTH_TENTHS, catchItem.totalLengthTenths)
                 put("marker_type", "")
                 put("clip_color", "")
                 put("latitude", catchItem.lat)
@@ -557,13 +557,13 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         }
     }
 
-    private  data class TestCatch(
+    data class TestCatch(
         val dateTime: String,
         val species: String,
         val totalWeightOz: Int,
         val totalWeightHundredthKg: Int,
         val totalLengthQuarters: Int,
-        val totalLengthTenthCm: Int,
+        val totalLengthTenths: Int,
         val lat: Double,
         val lon: Double
     )

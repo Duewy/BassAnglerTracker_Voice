@@ -27,7 +27,7 @@ object VoiceInputMapper {
         "orange" to "ORANGE",
         "white" to "WHITE"
     )
-
+            //  Ensure we set the ✔️🔊 correct wording for misspoken User Input or various accents
     val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
         put("clear list", "Clear List")
         put("clearlist", "Clear List")
@@ -49,6 +49,7 @@ object VoiceInputMapper {
         put("crap pie", "Crappie")
         put("crappy", "Crappie")
         put("crop e", "Crappie")
+        put("crop i", "Crappie")
 
         put("sunfish", "Sunfish")
         put("sun fish", "Sunfish")
@@ -69,6 +70,7 @@ object VoiceInputMapper {
         put("muskie", "Muskie")
         put("musky", "Muskie")
         put("musky fish", "Muskie")
+        put("muskellunge", "Muskie")
 
         put("walleye", "Walleye")
         put("wall eye", "Walleye")
@@ -98,13 +100,14 @@ object VoiceInputMapper {
 
         put("carp", "Carp")
         put("cart", "Carp")
-    }
+
+    }// ========== END of base Species Voice Map =========================
 
     /**
      * Normalize raw input → Title-cased species name,
      * or return null if it’s empty after cleaning.
      */
-    fun normalizeSpecies(raw: String): String? {
+    private fun normalizeSpecies(raw: String): String? {
         val words = raw
             .trim()
             .split(Regex("\\s+"))
@@ -118,24 +121,33 @@ object VoiceInputMapper {
         return result.ifBlank { null }
     }
 
-
     fun registerUserSpecies(name: String) {
         val cleaned = name.trim().lowercase()
         baseSpeciesVoiceMap[cleaned] = name
     }
 
+        // From STT set up in proper Casing and adjust to proper Grammar 📃🖋️
     fun getSpeciesFromVoice(text: String, speciesList: List<String>): String {
         val normalizedText = text.lowercase()
             .replace("clip", "")
             .replace(Regex("""[^a-z\s]"""), "")
             .trim()
+
         for (species in speciesList) {
             val simplified = species.lowercase()
             if (normalizedText.contains(simplified)) {
-                return species.trim()
+                // 🔁 Clean and normalize before returning
+                return unifySpeciesName(species.trim())
             }
         }
-        return "Unrecognized"
+
+        // 🧠 Try to resolve via baseSpeciesVoiceMap
+        val resolved = baseSpeciesVoiceMap[normalizedText]
+        return resolved ?: normalizeSpecies(normalizedText) ?: "Unknown"
+    }
+
+    private fun unifySpeciesName(raw: String): String {
+        return baseSpeciesVoiceMap[raw.lowercase()] ?: normalizeSpecies(raw) ?: "Unknown"
     }
 
     fun getClipColorFromVoice(text: String): String {
@@ -153,6 +165,7 @@ object VoiceInputMapper {
     }
 
     // (All 8 parse*Command functions are correctly left untouched for exact pattern matching)
+    //todo work on the Voice Mapping which will enable the clean correct input from the User's Voice Commands
 
     fun saveUserVoiceMap(context: Context, voiceMap: Map<String, String>) {
         val prefs = context.getSharedPreferences("user_voice_map", Context.MODE_PRIVATE)
@@ -166,4 +179,5 @@ object VoiceInputMapper {
         val type = object : TypeToken<Map<String, String>>() {}.type
         return Gson().fromJson(json, type)
     }
-}
+
+}//=================== END of Voice Input Mapper =======================

@@ -22,18 +22,34 @@ data class CatchItem(
     val clipColor: String? = null       // color for Tournament clips
 )
 
-//------------- for MOTIVATIONAL MESSAGES ----------------------
-fun CatchItem.getComparisonValueByMode(mode: String): Float {
-    return when (mode.lowercase()) {
-        "lbs" -> (this.totalWeightOz ?: 0).toFloat()
-        "kgs" -> (this.totalWeightHundredthKg ?: 0) / 100f
-        "inches" -> (this.totalLengthQuarters ?: 0) / 8f
-        "cms" -> (this.totalLengthTenths ?: 0) / 10f
-        else -> 0f
+// Modes for the TournamentVoiceFeedback to find which one to use
+enum class MeasurementMode {
+    LBS_OZ,
+    KG,
+    INCHES,
+    CM
+}
+
+fun CatchItem.getMeasurementMode(): MeasurementMode? {
+    return when {
+        totalWeightOz != null -> MeasurementMode.LBS_OZ
+        totalWeightHundredthKg != null -> MeasurementMode.KG
+        totalLengthQuarters != null -> MeasurementMode.INCHES
+        totalLengthTenths != null -> MeasurementMode.CM
+        else -> null
     }
 }
 
 
+//------------- for MOTIVATIONAL MESSAGES ----------------------
+fun CatchItem.getComparisonValueByMode(mode: MeasurementMode): Int {
+    return when (mode) {
+        MeasurementMode.LBS_OZ -> totalWeightOz ?: 0
+        MeasurementMode.KG     -> totalWeightHundredthKg ?: 0
+        MeasurementMode.INCHES -> totalLengthQuarters ?: 0
+        MeasurementMode.CM     -> totalLengthTenths ?: 0
+    }
+}
 
 fun formatWeightOzToLbsOz(totalOz: Int): String {
     val lbs = totalOz / 16

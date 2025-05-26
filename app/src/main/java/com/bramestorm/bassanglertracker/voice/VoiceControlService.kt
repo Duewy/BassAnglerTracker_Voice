@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.bramestorm.bassanglertracker.voice
 
 import android.app.Notification
@@ -18,55 +20,45 @@ import android.os.PowerManager
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.view.KeyEvent
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.bramestorm.bassanglertracker.R
-import com.bramestorm.bassanglertracker.utils.positionedToast
+import com.bramestorm.bassanglertracker.training.VoiceResponseManager
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 
+/**
+ * Foreground service that listens for Bluetooth/media button presses to start voice control.
+ */
 class VoiceControlService : Service() {
     companion object {
         private const val CHANNEL_ID = "vc_channel"
-        private const val NOTIFY_ID  = 1
-        private const val TAG        = "VoiceCtrlSvc"
-        private const val ACTION_VOICE_WAKE ="com.bramestorm.bassanglertracker.VOICE_WAKE"
+        private const val NOTIFY_ID = 1
+        private const val TAG = "VoiceCtrlSvc"
+        private const val ACTION_MEDIA_BUTTON = Intent.ACTION_MEDIA_BUTTON
+        private const val ACTION_START_VOICE = "com.bramestorm.START_VOICE_SEQUENCE"
     }
 
-    private var mediaSession: MediaSessionCompat?=null
+    private var mediaSession: MediaSessionCompat? = null
     private lateinit var audioManager: AudioManager
     private lateinit var wakeLock: PowerManager.WakeLock
-    private lateinit var mediaButtonReceiverIntent: PendingIntent
-
-
-    // focusRequest now nullable since used only on O+
+    private lateinit var mediaButtonReceiver: PendingIntent
     private var focusRequest: AudioFocusRequest? = null
     private val handler = Handler(Looper.getMainLooper())
+    private var alarmHour: Int = -1
+    private var alarmMinute: Int = -1
 
-    private val afChangeListener = AudioManager.OnAudioFocusChangeListener { change ->
-        when (change) {
-            AudioManager.AUDIOFOCUS_LOSS,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
-                mediaSession?.isActive = false
 
-            AudioManager.AUDIOFOCUS_GAIN ->
-                mediaSession?.isActive = true
-        }
-    }
-    
-    //============================ onCreate ===============================================
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate() {
         super.onCreate()
-
-        // 1) Grab AudioManager & PowerManager
+        // Audio & Power managers
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = pm.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "CatchAndCall:VoiceWakeLock"
-        )
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CatchAndCall:VoiceWakeLock")
 
-        // 2) Request audio focus so other apps duck or pause
+        // Request audio focus
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val attrs = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANT)
@@ -74,123 +66,121 @@ class VoiceControlService : Service() {
                 .build()
             focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setAudioAttributes(attrs)
-                .setWillPauseWhenDucked(false)
-                .setOnAudioFocusChangeListener(afChangeListener, handler)
+                .setOnAudioFocusChangeListener({ change ->  // handle focus changes if needed
+                }, handler)
                 .build()
             audioManager.requestAudioFocus(focusRequest!!)
         } else {
-            @Suppress("deprecation")
+            @Suppress("DEPRECATION")
             audioManager.requestAudioFocus(
-                afChangeListener,
+                null,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN
             )
         }
 
-
-        // 3) Create notification channel & go foreground
+        // Create notification channel & start foreground
         createChannel()
         startForeground(NOTIFY_ID, buildNotification())
 
-        // 4) Build your MediaSession
-        val session = MediaSessionCompat(this, "VoiceCtrl")
-        mediaSession = session
-        session.setCallback(object : MediaSessionCompat.Callback() {
-            override fun onMediaButtonEvent(intent: Intent): Boolean {
-                val key = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT) ?: return false
-                if (key.action == KeyEvent.ACTION_DOWN) {
-                    when (key.keyCode) {
-                        KeyEvent.KEYCODE_MEDIA_PLAY,
-                        KeyEvent.KEYCODE_MEDIA_PAUSE,
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                        KeyEvent.KEYCODE_MEDIA_NEXT,
-                        KeyEvent.KEYCODE_HEADSETHOOK -> {
-                            onWake()
-                            return true
-                        }
-                    }
-                }
-                return super.onMediaButtonEvent(intent)
-            }
-        })
-        session.setFlags(
-            MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-                    MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-        )
+        // Setup MediaSession for media-button events
+        val session = MediaSessionCompat(this, TAG)
+
+        session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         session.setPlaybackState(
             PlaybackStateCompat.Builder()
                 .setActions(
-                    PlaybackStateCompat.ACTION_PLAY or
-                            PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                            PlaybackStateCompat.ACTION_PAUSE or
-                            PlaybackStateCompat.ACTION_STOP
+                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                            PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE
                 )
                 .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1f)
                 .build()
         )
         session.isActive = true
 
-        // 5) Register your media-button PendingIntent
-        mediaButtonReceiverIntent = PendingIntent.getBroadcast(
+        // ← Re-attach the callback that turns key events into onWake()
+        session.setCallback(object : MediaSessionCompat.Callback() {
+            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+                onWake()
+                return true
+            }
+        })
+
+
+        mediaSession = session
+        // PendingIntent for media button
+        mediaButtonReceiver = PendingIntent.getBroadcast(
             this, 0,
-            Intent(Intent.ACTION_MEDIA_BUTTON).setPackage(packageName),
+            Intent(ACTION_MEDIA_BUTTON).setPackage(packageName),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        session.setMediaButtonReceiver(mediaButtonReceiverIntent)
-        audioManager.registerMediaButtonEventReceiver(mediaButtonReceiverIntent)
+        session.setMediaButtonReceiver(mediaButtonReceiver)
+        audioManager.registerMediaButtonEventReceiver(mediaButtonReceiver)
 
-        // 6) Play a very brief silent clip to lock in media focus immediately
-        val player = MediaPlayer.create(this, R.raw.silence_0_1s)
-        player?.setOnCompletionListener { it.release() }
-        player?.start()
+        // Play silent clip to establish focus
+        MediaPlayer.create(this, R.raw.silence_0_1s)?.apply {
+            setOnCompletionListener { it.release() }
+            start()
+        }
     }
-
-
-    //======================== END onCreate ==========================
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            "START_VOICE_SEQUENCE" -> {
-                startVoiceSequence()  // your function to begin voice capture
-            }
+            ACTION_START_VOICE -> onWake()
         }
         return START_STICKY
     }
 
-    private fun startVoiceSequence() {
-        Log.d("VCC", "🎙️ Voice Sequence Started (stub)")
-
-        // TODO: Trigger your voice interaction here
-        // This could open a CatchEntry popup, start SpeechRecognizer, etc.
-        positionedToast( "🎤 Starting Voice Capture")
-    }
-
-
     private fun onWake() {
-        Log.d(TAG, "🔥 onWake(): broadcasting VOICE_WAKE")
+        Log.d(TAG, "🔥 onWake(): starting voice sequence")
 
-        // 1) wake the CPU
+        // Acquire brief wake lock
         wakeLock.acquire(5_000L)
 
-        // 2) tell whichever Activity is in front that “voice woke”
-        val wakeIntent = Intent(VoiceControlService.ACTION_VOICE_WAKE)
-        sendBroadcast(wakeIntent,"${applicationContext.packageName}.permission.VOICE_WAKE")
+        // Determine mode: Fun-Day or Tournament
+        val type = SharedPreferencesManager.getCatchEntryType(applicationContext)
+        if (type in 5..8) {
+                       // build a small UI helper: routes TTS through VoiceResponseManager
+                       // and toasts via Android Toast on the main thread
+                       val uiHelper = object : VoiceUiHelper {
+                           private val vrm = VoiceResponseManager(applicationContext)
+                           private val mainHandler = Handler(Looper.getMainLooper())
 
-        // 3) clean up
+                           override fun speak(text: String) {
+                               vrm.speak(text)
+                           }
+
+                           override fun showToast(message: String) {
+                               mainHandler.post {
+                                   Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT)
+                                       .show()
+                                         }
+                                 }
+                        }
+
+                      // now pass both context and uiHelper
+            val sharedPref = applicationContext.getSharedPreferences("catch_and_call_prefs", Context.MODE_PRIVATE)
+
+            TournamentVoiceHandler.getInstance(
+                context = applicationContext,
+                uiHelper = uiHelper,
+                alarmHour = sharedPref.getInt("ALARM_HOUR", -1),
+                alarmMinute = sharedPref.getInt("ALARM_MINUTE", -1)
+            ).onWake()
+
+        } else {
+            // For fun-day: start manual or voice entry if still supported
+            sendBroadcast(Intent("com.bramestorm.SHOW_VCC_POPUP"))//todo we do not have Vcc Popup any more....
+        }
+
+        // Release wake lock
         wakeLock.release()
 
-        // pause & re-activate your MediaSession so you don’t double-fire
+        // Debounce media button presses
         mediaSession?.isActive = false
         handler.postDelayed({ mediaSession?.isActive = true }, 2000)
     }
-
-    private fun buildNotification(): Notification =
-        NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Voice Control Active")
-            .setContentText("Double-tap to wake voice input")
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setOngoing(true)
-            .build()
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -199,23 +189,30 @@ class VoiceControlService : Service() {
                 "Voice Control",
                 NotificationManager.IMPORTANCE_LOW
             )
-            getSystemService(NotificationManager::class.java)
-                ?.createNotificationChannel(channel)
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
         }
     }
 
+    private fun buildNotification(): Notification =
+        NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Voice Control Active")
+            .setContentText("Double-tap to start voice entry")  // todo it actually take just one tap of the play/pause button
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+            .setOngoing(true)
+            .build()
+
     override fun onDestroy() {
-        // Abandon audio focus appropriately
+        super.onDestroy()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
-            @Suppress("deprecation")
-            audioManager.abandonAudioFocus(afChangeListener)
+            @Suppress("DEPRECATION")
+            audioManager.abandonAudioFocus(null)
         }
-        audioManager.unregisterMediaButtonEventReceiver(mediaButtonReceiverIntent)
+        audioManager.unregisterMediaButtonEventReceiver(mediaButtonReceiver)
         mediaSession?.release()
-        super.onDestroy()
     }
+
 
     override fun onBind(intent: Intent?) = null
 }

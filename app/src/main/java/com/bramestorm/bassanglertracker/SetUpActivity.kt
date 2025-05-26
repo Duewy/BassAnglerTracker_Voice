@@ -58,6 +58,17 @@ class SetUpActivity : AppCompatActivity() {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         private const val REQUEST_VOICE_SETUP               = 2001
 
+            const val TYPE_FUN_LBS    = 1
+            const val TYPE_FUN_KGS    = 2
+            const val TYPE_FUN_INCH   = 3
+            const val TYPE_FUN_CM     = 4
+            const val TYPE_TOURN_LBS  = 5
+            const val TYPE_TOURN_KGS  = 6
+            const val TYPE_TOURN_CM   = 7
+            const val TYPE_TOURN_INCH = 8
+            const val TYPE_DEFAULT    = 0
+
+
         const val EXTRA_SPECIES       = "selectedSpecies"
         const val EXTRA_CATCH_TYPE    = "catchType"
         const val EXTRA_IS_TOURNAMENT = "isTournament"
@@ -316,36 +327,72 @@ class SetUpActivity : AppCompatActivity() {
 
         //---  Fishing Event Selection (Fun Day or Tournament)
         btnStartFishing.setOnClickListener {
-            val voiceOn = prefs.getBoolean(KEY_VOICE_CONTROL, false)
-            val nextActivity = when {
-                isFunDaySelected && isWeightSelected && isImperialSelected -> CatchEntryLbsOzs::class.java
-                isFunDaySelected && isWeightSelected && isMetricSelected -> CatchEntryKgs::class.java
-                isFunDaySelected && isLengthSelected && isImperialSelected -> CatchEntryInches::class.java
-                isFunDaySelected && isLengthSelected && isMetricSelected -> CatchEntryMetric::class.java
-
-                isTournamentSelected && isWeightSelected && isImperialSelected -> CatchEntryTournament::class.java
-                isTournamentSelected && isWeightSelected && isMetricSelected-> CatchEntryTournamentKgs::class.java
-                isTournamentSelected && isLengthSelected && isMetricSelected-> CatchEntryTournamentCentimeters::class.java
-                isTournamentSelected && isLengthSelected && isImperialSelected-> CatchEntryTournamentInches::class.java
-                else -> null
-            }
-
-            if (nextActivity != null) {
-                val intent = Intent(this, nextActivity).apply {
-                    if (isTournamentSelected) {
-                        putExtra("NUMBER_OF_CATCHES", if (tglCullingValue.isChecked) 5 else 4)
-                        putExtra("Color_Numbers", "Color")
-                        putExtra("TOURNAMENT_SPECIES", selectedSpecies)
-                        putExtra("unitType", if (isWeightSelected) "weight" else "length")
-                        putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
-                    }
-                        putExtra("VCC_ENABLED", tglVoice.isChecked)     // send to Fun Day and Tournament pages if Vcc is On
+            var catchEntryType = TYPE_DEFAULT
+            val nextActivity: Class<*>? = when {
+                // — Fun Day branches —
+                isFunDaySelected && isWeightSelected && isImperialSelected -> {
+                    catchEntryType = TYPE_FUN_LBS
+                    CatchEntryLbsOzs::class.java
+                }
+                isFunDaySelected && isWeightSelected && isMetricSelected -> {
+                    catchEntryType = TYPE_FUN_KGS
+                    CatchEntryKgs::class.java
+                }
+                isFunDaySelected && isLengthSelected && isMetricSelected -> {
+                    catchEntryType = TYPE_FUN_CM
+                    CatchEntryMetric::class.java
+                }
+                isFunDaySelected && isLengthSelected && isImperialSelected -> {
+                    catchEntryType = TYPE_FUN_INCH
+                    CatchEntryInches::class.java
                 }
 
-                startActivity(intent)
-            } else {
-               positionedToast("⚠️ Please select a Measurement and Unit Type!")
+
+                // — Tournament branches —
+                isTournamentSelected && isWeightSelected && isImperialSelected -> {
+                    catchEntryType = TYPE_TOURN_LBS
+                    CatchEntryTournament::class.java
+                }
+                isTournamentSelected && isWeightSelected && isMetricSelected -> {
+                    catchEntryType = TYPE_TOURN_KGS
+                    CatchEntryTournamentKgs::class.java
+                }
+                isTournamentSelected && isLengthSelected && isMetricSelected -> {
+                    catchEntryType = TYPE_TOURN_CM
+                    CatchEntryTournamentCentimeters::class.java
+                }
+                isTournamentSelected && isLengthSelected && isImperialSelected -> {
+                    catchEntryType = TYPE_TOURN_INCH
+                    CatchEntryTournamentInches::class.java
+                }
+
+                else -> null
             }
+            SharedPreferencesManager.saveCatchEntryType(this@SetUpActivity, catchEntryType)
+
+            Log.d(TAG,"🗃️G, $catchEntryType")
+
+            if (nextActivity != null) {
+                Intent(this@SetUpActivity, nextActivity).apply {
+                    putExtra("VCC_ENABLED", tglVoice.isChecked)
+                    // tournament‐only extras
+                    if (isTournamentSelected) {
+                        putExtra("NUMBER_OF_CATCHES", if (tglCullingValue.isChecked) 5 else 4)
+                        putExtra("TOURNAMENT_SPECIES", selectedSpecies)
+                        putExtra("CULLING_ENABLED", tglCullingValue.isChecked)
+                        // instead of SharedPreferencesManager.getInstance(this).apply { … }
+                        val ctx = this@SetUpActivity
+
+                            // persist tournament‐mode settings into prefs:
+                        SharedPreferencesManager.setVccEnabled(ctx, tglVoice.isChecked)
+                        SharedPreferencesManager.setTournamentSpecies(ctx, selectedSpecies)
+                        SharedPreferencesManager.setNumberOfCatches(ctx, if (tglCullingValue.isChecked) 5 else 4)
+                        SharedPreferencesManager.setCullingEnabled(ctx, tglCullingValue.isChecked)
+                    }
+                }.also { startActivity(it) }
+            } else {
+                positionedToast("⚠️ Please select a Measurement and Unit Type!")
+                }
         }
 
     }  //=================== END of ON CREATE ================================

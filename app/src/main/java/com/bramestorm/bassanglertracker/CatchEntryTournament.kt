@@ -39,6 +39,7 @@ import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
+import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -133,15 +134,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
 
-    //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is already using Bluetooth
-    private val catchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context, intent: Intent) {
-            val oz   = intent.getIntExtra(PopupVccTournLbs.EXTRA_WEIGHT_OZ, 0)
-            val sp   = intent.getStringExtra(PopupVccTournLbs.EXTRA_SPECIES).orEmpty()
-            val clip = intent.getStringExtra(PopupVccTournLbs.EXTRA_CLIP_COLOR).orEmpty()
-            saveTournamentCatch(oz, sp, clip)
-        }
-    }
 
     // ````````````` Retrieves data from the Manual Mode POPUP ````````````````````````
     private val entryLauncher = registerForActivityResult(
@@ -182,16 +174,22 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
               }
           }
 
+        // Show the VCC popup on command from the service
+        private val showVccReceiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                showWeightPopup()
+            }
+        }
 
       //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
 
-          LocalBroadcastManager.getInstance(this)
-              .registerReceiver(catchReceiver,
-                  IntentFilter("com.bramestorm.CATCH_TOURNAMENT"))
-
+          ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
+          LocalBroadcastManager.getInstance(this).registerReceiver(
+              voiceCatchReceiver, IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
+          )
 
      // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
      voiceHelper = VoiceInteractionHelper(
@@ -273,7 +271,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         updateVccLabel()
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
-        updateTournamentList()
+        updateTournamentList()      //todo ask if we need to put this in the onResume to update the list when we wake up the app???
      handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
 
  } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,7 +294,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         super.onDestroy()
         tts.stop()
         tts.shutdown()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(catchReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(showVccReceiver)
         voiceHelper.shutdown()
         toastTts?.shutdown()
         handler.removeCallbacksAndMessages(null)
@@ -304,6 +302,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         mediaPlayer?.release()
     }
 
+    private val voiceCatchReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("VCC_FLOW", "🧠 Voice catch saved — refreshing UI")
+            updateTournamentList()
+        }
+    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -318,15 +322,10 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
     private fun showWeightPopup() {
         awaitingResult = true
-        Log.d("CET-VCC", "showWeightPopup() called — launching PopupVccTournLbs")
-        // Pick the right popup class
-        val popupClass = if (voiceControlEnabled) {
-            PopupVccTournLbs::class.java
-        } else {
-            PopupWeightEntryTourLbs::class.java
-        }
 
-        // Build the intent and configure all extras in one place
+        val popupClass =
+            PopupWeightEntryTourLbs::class.java
+
         val intent = Intent(this, popupClass).apply {
             putExtra(EXTRA_IS_TOURNAMENT, true)
 
@@ -342,7 +341,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             val colorArray = availableClipColors.map { it.name }.toTypedArray()
             putExtra(EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
         }
-
         entryLauncher.launch(intent)
     }
 
@@ -354,6 +352,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         val speciesInitial = when (species) {
             "Large Mouth" -> "L"
+            "LargeMouth" -> "L"
+            "Largemouth" -> "L"
             "Small Mouth" -> "S"
             "Spotted"     -> "P"    // Spotted Bass for Southern States
             else -> ""
@@ -369,7 +369,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalWeightHundredthKg = null,
             totalLengthTenths = null,
-            catchType = "LbsOzs",
+            catchType = "lbsOzs",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -458,7 +458,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "LbsOzs", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "lbsOzs", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
 
         // These are the ones used for scoring and totals
@@ -470,7 +470,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "LbsOzs",
+            catchType = "lbsOzs",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
@@ -651,7 +651,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         val u = species.uppercase(Locale.US)
         return when {
             u.startsWith("LARGE MOUTH")  -> "LM"
+            u.startsWith("LARGEMOUTH")  -> "LM"
             u.startsWith("SMALL MOUTH")  -> "SM"
+            u.startsWith("SPOTTEDBASS")  -> "SB"
             u == "SPOTTED BASS"   -> "SB"
             u == "WALLEYE"        -> "WE"
             u == "PIKE"           -> "PK"
@@ -808,6 +810,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
                 val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
                 val timeString = "$displayHour:$formattedMinute $amPm"
+
+                // Send to Shared Preference for Vcc Alarm Notification
+                val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
+                prefs.edit()
+                    .putInt("ALARM_HOUR", alarmHour)
+                    .putInt("ALARM_MINUTE", alarmMinute)
+                    .apply()
 
                 // Update button and show toast
                 btnAlarm.text = getString(R.string.alarm_set_to, timeString)

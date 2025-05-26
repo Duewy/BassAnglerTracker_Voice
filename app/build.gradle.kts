@@ -128,4 +128,7 @@ android {
         implementation(kotlin("script-runtime"))
     }
 }
+dependencies {
+    implementation(libs.protolite.well.known.types)
+}
 
