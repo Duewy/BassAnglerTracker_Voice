@@ -24,6 +24,7 @@ class TournamentVoiceHandler(
     private val alarmMinute: Int = -1,
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context),) {
 
+    private var sessionRef: ((VoiceInteractionManager) -> Unit)? = null
     private val tournamentSpecies = SharedPreferencesManager.getTournamentSpecies(context) ?: ""
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
     private val cullingEnabled = SharedPreferencesManager.isCullingEnabled(context)  // not really needed as all Tournament are culling Enabled
@@ -64,6 +65,7 @@ class TournamentVoiceHandler(
 
     /** Called by VoiceControlService on wake */
     fun onWake() {
+
         startVoiceSession()         // todo find the sequence of Vcc communication to ensure proper flow and grammar with variables
     }
 
@@ -71,30 +73,33 @@ class TournamentVoiceHandler(
     private fun startVoiceSession() {
         // Inject a parser that wraps our static parse logic into the VoiceCommandParser interface
         val mode = SharedPreferencesManager.getTournamentUnit(context)
+        // ✅ Let the service track the session for call shutdown
+        sessionRef?.invoke(voiceManager)
+
 
         voiceManager.parser = object : VoiceCommandParser {
             override fun parse(input: String): VoiceCommandParser.ParseResult {
                 val parsed = when (mode) {
-                    MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatch(input, listOf(tournamentSpecies), availableClipColors)
-                    MeasurementMode.KG     -> VoiceParser.parseMetricCatch(input, listOf(tournamentSpecies), availableClipColors)
-                    MeasurementMode.INCHES -> VoiceParser.parseImperialLength(input, listOf(tournamentSpecies))
-                    MeasurementMode.CM     -> VoiceParser.parseMetricLength(input, listOf(tournamentSpecies))
+                    MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
+                    MeasurementMode.KG     -> VoiceParser.parseMetricCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
+                    MeasurementMode.INCHES -> VoiceParser.parseImperialLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
+                    MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                 }
 
                 val clip = parsed.clipColor ?: availableClipColors.firstOrNull().orEmpty()
 
                 val confirmationPrompt = when (mode) {
-                    MeasurementMode.LBS_OZ -> "To confirm, you caught a ${parsed.weightLbs} pound ${parsed.weightOz} ounce ${parsed.species} on the $clip clip. Is that correct? over"
-                    MeasurementMode.KG     -> "To confirm, you caught a ${parsed.weightKgWhole} kilogram ${parsed.weightGrams} gram ${parsed.species} on the $clip clip. Is that correct? over"
-                    MeasurementMode.INCHES -> "To confirm, your catch was ${parsed.lengthInches} and ${parsed.lengthQuarters} inches long  ${parsed.species} on the $clip clip. Is that correct? over"
-                    MeasurementMode.CM     -> "To confirm, your catch was ${parsed.lengthCm} centimeters ${parsed.species} on the $clip clip. Is that correct? over" //todo add the millimeters here Look into 0.0 or 0.5 as standards??
+                    MeasurementMode.LBS_OZ -> "To confirm, the ${parsed.species}  is ${parsed.weightLbs} pound and ${parsed.weightOz} ounces and is on the $clip clip. Is that correct? over"
+                    MeasurementMode.KG     -> "To confirm, the ${parsed.species}  is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms and is on the $clip clip. Is that correct? over"
+                    MeasurementMode.INCHES -> "To confirm, the  ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}  quarter inches long and is on the $clip clip. Is that correct? over"
+                    MeasurementMode.CM     -> "To confirm, the ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters long and is on the $clip clip. Is that correct? over" //todo add the millimeters here Look into 0.0 or 0.5 as standards??
                 }
 
                 val catchData = ConfirmedCatch(
                     weightOz = if (mode == MeasurementMode.LBS_OZ) ((parsed.weightLbs ?: 0) * 16 + (parsed.weightOz ?: 0)) else null,
-                    weightKgs = if (mode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) + (parsed.weightGrams ?: 0) / 100.0) else null,
+                    weightKgs = if (mode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) * 100 + (parsed.weightGrams ?: 0)) else null,
                     lengthQuarters = if (mode == MeasurementMode.INCHES) ((parsed.lengthInches ?: 0) * 4 + (parsed.lengthQuarters ?: 0)) else null,
-                    lengthTenths = if (mode == MeasurementMode.CM) ((parsed.lengthCm?.times(10))?.toInt() ?: 0) else null,
+                    lengthTenths = if (mode == MeasurementMode.CM) ((parsed.lengthCm ?: 0) * 10 + (parsed.lengthTenths ?: 0)) else null,
                     species = parsed.species ?: "Unknown",
                     clipColor = clip
                 )
@@ -137,7 +142,7 @@ class TournamentVoiceHandler(
             latitude = null,
             species = catch.species,
             totalWeightOz = catch.weightOz,
-            totalWeightHundredthKg = if (mode == MeasurementMode.KG) ((catch.weightKgs ?: 0.0) * 100).toInt() else null,
+            totalWeightHundredthKg = catch.weightKgs,
             totalLengthQuarters = catch.lengthQuarters,
             totalLengthTenths = catch.lengthTenths,
             catchType = mode.name.lowercase(Locale.ROOT),
@@ -186,6 +191,10 @@ class TournamentVoiceHandler(
             this.lengthTenths != null -> MeasurementMode.CM
             else -> null
         }
+    }
+
+    fun setSessionRef(ref: (VoiceInteractionManager) -> Unit) {
+        this.sessionRef = ref
     }
 
 

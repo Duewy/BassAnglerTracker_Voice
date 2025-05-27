@@ -10,6 +10,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import java.util.Locale
 
 /**
@@ -38,6 +39,8 @@ class VoiceInteractionManager(
     private var tts: TextToSpeech? = null
     private var recognizer: SpeechRecognizer? = null
     private val handler = Handler(Looper.getMainLooper())
+    private var retryCount = 0      // Hold Error Loop to 3 then exit Vcc
+    private val maxRetries = 3
 
     /**
      * Start a new voice session: speak the initial prompt, then listen.
@@ -81,11 +84,22 @@ class VoiceInteractionManager(
                 override fun onEndOfSpeech() {}
 
                 override fun onError(error: Int) {
-                    uiHelper.speak("Sorry, I didn't catch that. Please try again. Over.")
-                    handler.postDelayed({ startListening(onCatchConfirmed) }, 1500)
+                    retryCount++
+                    Log.w("VoiceSession", "⚠️ Voice retry #$retryCount (error=$error)")
+
+                    if (retryCount >= maxRetries) {
+                        uiHelper.speak("Sorry, I'm having trouble hearing you. Try again later.")
+                        Log.e("VoiceSession", "❌ Max retries reached. Ending voice session.")
+                        shutdown()
+                    } else {
+                        uiHelper.speak("Sorry, I didn't catch that. Please try again. Over.")
+                        handler.postDelayed({ startListening(onCatchConfirmed) }, 1500)
+                    }
                 }
 
+
                 override fun onResults(results: Bundle?) {
+                    retryCount = 0  // ✅ Reset on successful voice result
                     val spoken = results
                         ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         ?.firstOrNull() ?: ""
@@ -120,7 +134,8 @@ class VoiceInteractionManager(
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }.also { recognizer?.startListening(it) }
-    }
+
+    }// == END == Start Listening =================
 
     /**
      * Clean up TTS & recognizer when shutting down the service.
@@ -130,7 +145,7 @@ class VoiceInteractionManager(
         tts?.shutdown()
         recognizer?.destroy()
     }
-}
+} // === END== Voice Interaction Manager =========================
 
 /*****  Parser Interface & Data Class  *****/
 
@@ -166,10 +181,10 @@ interface VoiceCommandParser {
      */
     data class ConfirmedCatch(
         val weightOz: Int? = null,
-        val weightKgs: Double? = null,
+        val weightKgs: Int? = null,
         val lengthQuarters: Int? = null,
         val lengthTenths: Int? = null,
         val species: String,
         val clipColor: String
     )
-}
+} //=== END == Voice Command Parser =========

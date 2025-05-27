@@ -5,8 +5,8 @@ data class MotivationContext(
     val currentCount: Int,
     val totalNeeded: Int,
     val timeSinceLastCatchMillis: Long,
-    val comparisonValue: Float,
-    val smallestComparisonValue: Float,
+    val comparisonValue: Int,
+    val smallestComparisonValue: Int,
     val isNewBiggestOfDay: Boolean
 )
 

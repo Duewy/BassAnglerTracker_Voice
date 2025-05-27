@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
 import android.util.Log
+import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.getComparisonValueByMode
 import com.bramestorm.bassanglertracker.models.MotivationContext
@@ -9,9 +10,9 @@ import com.bramestorm.bassanglertracker.models.MotivationContext
 
 fun generateMotivationalMessage(context: MotivationContext): String {
         val remaining = context.totalNeeded - context.currentCount
-        val percent = if (context.smallestComparisonValue > 0)
+        val percent:Int = if (context.smallestComparisonValue > 0)
             ((context.comparisonValue - context.smallestComparisonValue) / context.smallestComparisonValue) * 100
-        else 0f
+        else 0
 
     return when {
         context.isNewBiggestOfDay && context.currentCount >= 4 -> {
@@ -39,36 +40,49 @@ fun generateMotivationalMessage(context: MotivationContext): String {
 
 }
 
-    fun getMotivationalMessage(
-        context: Context,
-        catchItemId: Int,
-        tournamentCatchLimit: Int,
-        comparisonMode: String): String? {
-        val dbHelper = CatchDatabaseHelper(context)
-        val catch = dbHelper.getCatchById(catchItemId) ?: return null
+fun getMotivationalMessage(
+    context: Context,
+    catchItemId: Int,
+    tournamentCatchLimit: Int,
+    comparisonModeRaw: String
+): String? {
+    val dbHelper = CatchDatabaseHelper(context)
+    val catch = dbHelper.getCatchById(catchItemId) ?: return null
 
-        val topCatches = dbHelper.getTopTournamentCatches(tournamentCatchLimit)
-        val smallest = topCatches.minByOrNull { it.getComparisonValueByMode(comparisonMode) }?.getComparisonValueByMode(comparisonMode)
-            ?: catch.getComparisonValueByMode(comparisonMode)
+    // 🔄 Convert raw string to MeasurementMode (safe fallback = LBS_OZ)
+    val mode = when (comparisonModeRaw.lowercase()) {
+        "lbsozs", "weight", "lbs" -> MeasurementMode.LBS_OZ
+        "kgs", "weightkg"         -> MeasurementMode.KG
+        "inches", "length"        -> MeasurementMode.INCHES
+        "cm", "lengthcm"          -> MeasurementMode.CM
+        else                      -> MeasurementMode.LBS_OZ
+    }
 
-        val isNewBiggestOfDay = topCatches.firstOrNull()?.id == catch.id
-        val lastCatchTime = dbHelper.getLastCatchTimeMillis()
-        val now = System.currentTimeMillis()
-        val timeSinceLastCatch = now - lastCatchTime
+    val topCatches = dbHelper.getTopTournamentCatches(tournamentCatchLimit)
+    val smallest = topCatches
+        .minByOrNull { it.getComparisonValueByMode(mode) }
+        ?.getComparisonValueByMode(mode)
+        ?: catch.getComparisonValueByMode(mode)
 
-        val contextObj = MotivationContext(
-            currentCount = topCatches.size,
-            totalNeeded = tournamentCatchLimit,
-            timeSinceLastCatchMillis = timeSinceLastCatch,
-            comparisonValue = catch.getComparisonValueByMode(comparisonMode),
-            smallestComparisonValue = smallest,
-            isNewBiggestOfDay = isNewBiggestOfDay
-        )
+    val isNewBiggestOfDay = topCatches.firstOrNull()?.id == catch.id
+    val lastCatchTime = dbHelper.getLastCatchTimeMillis()
+    val now = System.currentTimeMillis()
+    val timeSinceLastCatch = now - lastCatchTime
 
-        return generateMotivationalMessage(contextObj)
-       }
+    val contextObj = MotivationContext(
+        currentCount = topCatches.size,
+        totalNeeded = tournamentCatchLimit,
+        timeSinceLastCatchMillis = timeSinceLastCatch,
+        comparisonValue = catch.getComparisonValueByMode(mode),
+        smallestComparisonValue = smallest,
+        isNewBiggestOfDay = isNewBiggestOfDay
+    )
 
-    private val newBiggestCatchMessages = listOf(
+    return generateMotivationalMessage(contextObj)
+}
+
+
+private val newBiggestCatchMessages = listOf(
         "🐋 That’s your biggest of the day!",
         "🏆 That fish tops the charts today!",
         "📈 New personal best — for now!",
@@ -84,7 +98,7 @@ fun generateMotivationalMessage(context: MotivationContext): String {
     )
 
 
-private fun getBigImprovementMessage(percent: Float): String {
+private fun getBigImprovementMessage(percent: Number): String {
         val messageTemplates = listOf(
             "💥 That’s a monster upgrade!",
             "📈 Huge bump — that’ll change the board!",

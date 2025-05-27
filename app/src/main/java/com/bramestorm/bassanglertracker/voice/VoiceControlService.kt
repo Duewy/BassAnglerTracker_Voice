@@ -19,6 +19,8 @@ import android.os.Looper
 import android.os.PowerManager
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.telephony.PhoneStateListener
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -39,7 +41,21 @@ class VoiceControlService : Service() {
         private const val ACTION_MEDIA_BUTTON = Intent.ACTION_MEDIA_BUTTON
         private const val ACTION_START_VOICE = "com.bramestorm.START_VOICE_SEQUENCE"
     }
+    // for Incoming Telephone Calls
+    private lateinit var telephonyManager: TelephonyManager
+    private val callListener = object : PhoneStateListener() {
+        override fun onCallStateChanged(state: Int, incomingNumber: String?) {
+            when (state) {
+                TelephonyManager.CALL_STATE_RINGING,
+                TelephonyManager.CALL_STATE_OFFHOOK -> {
+                    Log.w(TAG, "📞 Phone call detected — stopping voice session if active")
+                    stopVoiceSessionIfActive()
+                }
+            }
+        }
+    }
 
+    private var activeVoiceSession: VoiceInteractionManager? = null
     private var mediaSession: MediaSessionCompat? = null
     private lateinit var audioManager: AudioManager
     private lateinit var wakeLock: PowerManager.WakeLock
@@ -55,6 +71,9 @@ class VoiceControlService : Service() {
         super.onCreate()
         // Audio & Power managers
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
+
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CatchAndCall:VoiceWakeLock")
 
@@ -135,31 +154,37 @@ class VoiceControlService : Service() {
     private fun onWake() {
         Log.d(TAG, "🔥 onWake(): starting voice sequence")
 
+        // Allow 📞Phone CAll while using VCC Mode So the VCC Will not Start 🚫
+        if (isInCall()) {
+            Log.w(TAG, "📞 Phone call detected — suppressing voice control startup")
+            Toast.makeText(this, "Call in progress — voice control paused.", Toast.LENGTH_SHORT).show()
+            return
+        }
         // Acquire brief wake lock
         wakeLock.acquire(5_000L)
 
-        // Determine mode: Fun-Day or Tournament
+        // Determine mode: Fun-Day or Tournament with Value from SetUp btnStartFishing saved in SharedPreferencesManager  getCatchEntryType()
         val type = SharedPreferencesManager.getCatchEntryType(applicationContext)
-        if (type in 5..8) {
-                       // build a small UI helper: routes TTS through VoiceResponseManager
-                       // and toasts via Android Toast on the main thread
-                       val uiHelper = object : VoiceUiHelper {
-                           private val vrm = VoiceResponseManager(applicationContext)
-                           private val mainHandler = Handler(Looper.getMainLooper())
+        // build a small UI helper: routes TTS through VoiceResponseManager
+        // and toasts via Android Toast on the main thread
+        val uiHelper = object : VoiceUiHelper {
+            private val vrm = VoiceResponseManager(applicationContext)
+            private val mainHandler = Handler(Looper.getMainLooper())
 
-                           override fun speak(text: String) {
-                               vrm.speak(text)
-                           }
+            override fun speak(text: String) {
+                vrm.speak(text)
+            }
 
-                           override fun showToast(message: String) {
-                               mainHandler.post {
-                                   Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT)
-                                       .show()
-                                         }
-                                 }
-                        }
-
-                      // now pass both context and uiHelper
+            override fun showToast(message: String) {
+                mainHandler.post {
+                    Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+                // Value from SetUp btnStartFishing sent to SharedPreferences getCatchEntryType
+        if (type in 5..8) {     // 1-4 Fund Day 5-8 Tournament CatchEntry files
+                      //  pass both context and uiHelper
             val sharedPref = applicationContext.getSharedPreferences("catch_and_call_prefs", Context.MODE_PRIVATE)
 
             TournamentVoiceHandler.getInstance(
@@ -168,10 +193,12 @@ class VoiceControlService : Service() {
                 alarmHour = sharedPref.getInt("ALARM_HOUR", -1),
                 alarmMinute = sharedPref.getInt("ALARM_MINUTE", -1)
             ).onWake()
-
         } else {
-            // For fun-day: start manual or voice entry if still supported
-            sendBroadcast(Intent("com.bramestorm.SHOW_VCC_POPUP"))//todo we do not have Vcc Popup any more....
+            // Fun Day mode → use FunDayVoiceHandler
+            FunDayVoiceHandler.getInstance(
+                context = applicationContext,
+                uiHelper = uiHelper
+            ).onWake()
         }
 
         // Release wake lock
@@ -203,6 +230,7 @@ class VoiceControlService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        telephonyManager.listen(callListener, PhoneStateListener.LISTEN_NONE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
@@ -215,4 +243,22 @@ class VoiceControlService : Service() {
 
 
     override fun onBind(intent: Intent?) = null
-}
+
+    private fun isInCall(): Boolean {
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        return telephonyManager.callState != TelephonyManager.CALL_STATE_IDLE
+    }
+
+    private fun stopVoiceSessionIfActive() {
+        try {
+            activeVoiceSession?.shutdown()
+            activeVoiceSession = null
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Failed to cancel voice session cleanly: ${e.message}")
+        }
+
+        Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
+    }
+
+
+}// ====== END = Voice Control Service ================

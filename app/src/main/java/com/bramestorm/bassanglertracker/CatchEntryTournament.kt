@@ -281,6 +281,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         super.onResume()
         updateVccLabel()            // just shows user if VCC is Enabled or not...
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+        updateTournamentList()
     }
 
     //----------- On Manual Wake ------------------------
@@ -906,25 +907,10 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-    // ------------ VCC Enabled Set Up Voice Control ----------------
-    override fun onSpeechResult(transcript: String) {       //todo not sure what to do with this, is it for voice wakeup?? can we use for other voice commands???
-        Log.d("VCC", "Speech Result Received: $transcript")
-
-        // 👇 Replace with your actual phrase recognition or command parsing
-        if (transcript.contains("add fish", ignoreCase = true)) {
-            showWeightPopup() // 🔥 Launches PopupWeightEntryTourLbs.kt
-        } else {
-            Toast.makeText(this, "Unrecognized command: $transcript", Toast.LENGTH_SHORT).show()
-        }
+    // ------------ VCC Enabled Set Up Voice Control to Keep the BaseCatchEntryActivity connected ----------------
+    override fun onSpeechResult(transcript: String) {
+        // No-op: VCC now handled entirely in VoiceControlService
     }
-
-        // ------------ Tap Wakes App Up for VCC --------------
-        override fun onVoiceWake() {
-            Log.d("CET", "Voice woke – VCC_ENABLED=$voiceControlEnabled")
-            if (voiceControlEnabled) {
-                showWeightPopup()
-            }
-        }
 
 
 }//################## END  ################################

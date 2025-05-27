@@ -43,7 +43,7 @@ object SharedPreferencesManager {
 
     fun getCatchEntryType(context: Context): Int {
         return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CATCH_TYPE, -1)
+            .getInt(KEY_CATCH_TYPE, -1) // Value is from StartUp btnStartFishing selection 1-4 Fun Day, 5-8 Tournament default 0
     }
 
     // --- Voice Control ---
@@ -74,6 +74,18 @@ object SharedPreferencesManager {
             else -> MeasurementMode.LBS_OZ
         }
     }
+
+    fun getFunDayUnit(context: Context): MeasurementMode {
+        val type = getCatchEntryType(context)
+        return when (type) {
+            1 -> MeasurementMode.LBS_OZ
+            2 -> MeasurementMode.KG
+            3 -> MeasurementMode.INCHES
+            4 -> MeasurementMode.CM
+            else -> MeasurementMode.LBS_OZ  // default fallback
+        }
+    }
+
 
     fun setTournamentSpecies(context: Context, species: String) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
