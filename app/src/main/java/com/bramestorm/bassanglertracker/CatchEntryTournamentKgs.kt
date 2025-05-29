@@ -31,8 +31,6 @@ import com.bramestorm.bassanglertracker.CatchEntryTournament.Companion.EXTRA_AVA
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.ParsedCatch
-import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -142,6 +140,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     // Request Codes
     private val requestAlarmSET = 1008
 
+    override fun onSpeechResult(transcript: String) {
+        TODO("Not yet implemented")
+    }
 
     // ----------------- wait for POPUP WEIGHT VALUES  ------------------------
     private val weightEntryLauncher = registerForActivityResult(
@@ -782,18 +783,5 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
     }
 
-    // --- Voice Control: override to receive speech transcripts ---
-
-    override fun onSpeechResult(transcript: String) {
-
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->
-            if (p.totalWeightHundredthKg > 0) saveTournamentCatch(p.totalWeightHundredthKg, p.species, p.clipColor)
-        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
-    }
-
-    // --- Voice Control: override to start listening on wake event ---
-    override fun onVoiceWake() {
-        recognizer.startListening(recognizerIntent)
-    }
 
 }//################## END  ################################

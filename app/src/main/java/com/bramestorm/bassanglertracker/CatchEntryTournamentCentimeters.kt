@@ -29,8 +29,6 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.ParsedCatch
-import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import java.text.SimpleDateFormat
@@ -126,6 +124,9 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         override fun onEvent(eventType: Int, params: Bundle?) {}
     }
 
+    override fun onSpeechResult(transcript: String) {
+        TODO("Not yet implemented")
+    }
     // Tournament Configuration
     private var tournamentCatchLimit: Int = 4
     private var measurementSystem: String = "weight"
@@ -771,20 +772,6 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         }
 
         return LayerDrawable(arrayOf(colorDrawable, borderDrawable))
-    }
-
-    // --- Voice Control: override to receive speech transcripts ---
-
-    override fun onSpeechResult(transcript: String) {
-
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p: ParsedCatch ->
-            if (p.totalLengthTenths> 0) saveTournamentCatch(p.totalLengthTenths, p.species, p.clipColor)
-        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
-    }
-
-    // --- Voice Control: override to start listening on wake event ---
-    override fun onVoiceWake() {
-        recognizer.startListening(recognizerIntent)
     }
 
 

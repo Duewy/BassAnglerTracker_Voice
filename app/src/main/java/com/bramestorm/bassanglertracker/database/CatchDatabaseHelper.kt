@@ -17,8 +17,8 @@ import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 6) {
+                                                          // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!!
+class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 7) {
 
     private val prefs by lazy { context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE) }
 
@@ -104,6 +104,10 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         }
 
         // future migrations (v2→v3, v3→v4, …) go here as additional if(oldVersion < X) blocks
+        if (oldVersion < 7) {
+            db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN total_length_quarters INTEGER DEFAULT 0;")
+        }
+
     }
 
 
@@ -493,6 +497,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         while (cursor.moveToNext()) {
             catchList.add(parseCatch(cursor))
         }
+
+        Log.d("DB_DEBUG", "🔎 getTopTournamentCatches: limit=$limit")
 
         cursor.close()
         db.close()

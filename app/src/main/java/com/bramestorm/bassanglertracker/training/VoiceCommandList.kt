@@ -18,12 +18,13 @@ object VoiceCommandList {
         PracticePhrase("Crappie", false),
         PracticePhrase("Gar Pike", false),
         PracticePhrase("Largemouth", false),
+        PracticePhrase("Smallmouth", false),
+        PracticePhrase("Spotted Bass", false),
         PracticePhrase("Muskie", false),
         PracticePhrase("Perch", false),
         PracticePhrase("Pike", false),
         PracticePhrase("Red Drum", false),
         PracticePhrase("Rock Bass", false),
-        PracticePhrase("Smallmouth", false),
         PracticePhrase("Sunfish", false),
         PracticePhrase("Walleye", false),
         PracticePhrase("White Bass", false)
@@ -36,6 +37,16 @@ object VoiceCommandList {
         "save that",
         "tag fish",
         "record fish",
+        "catch caddy",
+        "query question",
+        "list of tagged catches",
+        "time remaining",
+        "smallest fish on the list",
+        "largest fish on the list",
+        "smallest fish for today",
+        "time since last catch",
+        "how many are on the list",
+        "what is the weight",
         "log catch"
     )
 

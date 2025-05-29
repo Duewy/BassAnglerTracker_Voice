@@ -54,7 +54,7 @@ class VoiceControlService : Service() {
             }
         }
     }
-
+    private var sessionActive = false
     private var activeVoiceSession: VoiceInteractionManager? = null
     private var mediaSession: MediaSessionCompat? = null
     private lateinit var audioManager: AudioManager
@@ -154,6 +154,9 @@ class VoiceControlService : Service() {
     private fun onWake() {
         Log.d(TAG, "🔥 onWake(): starting voice sequence")
 
+        if (sessionActive) return  // Already running
+        sessionActive = true
+
         // Allow 📞Phone CAll while using VCC Mode So the VCC Will not Start 🚫
         if (isInCall()) {
             Log.w(TAG, "📞 Phone call detected — suppressing voice control startup")
@@ -192,7 +195,8 @@ class VoiceControlService : Service() {
                 uiHelper = uiHelper,
                 alarmHour = sharedPref.getInt("ALARM_HOUR", -1),
                 alarmMinute = sharedPref.getInt("ALARM_MINUTE", -1)
-            ).onWake()
+            ) .apply { setSessionRef { activeVoiceSession = it } }
+              .onWake()
         } else {
             // Fun Day mode → use FunDayVoiceHandler
             FunDayVoiceHandler.getInstance(
@@ -204,9 +208,6 @@ class VoiceControlService : Service() {
         // Release wake lock
         wakeLock.release()
 
-        // Debounce media button presses
-        mediaSession?.isActive = false
-        handler.postDelayed({ mediaSession?.isActive = true }, 2000)
     }
 
     private fun createChannel() {

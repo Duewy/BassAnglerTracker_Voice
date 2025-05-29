@@ -17,7 +17,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -77,6 +76,10 @@ class CatchEntryMetric : BaseCatchEntryActivity(){
         }
         override fun onPartialResults(partial: Bundle?) {}
         override fun onEvent(eventType: Int, params: Bundle?) {}
+
+    }
+    override fun onSpeechResult(transcript: String) {
+        TODO("Not yet implemented")
     }
 
 //========= onCreate =============================================
@@ -309,24 +312,5 @@ class CatchEntryMetric : BaseCatchEntryActivity(){
         return sdf.format(Date())
     }
 
-    // --- Voice Control: override to receive speech transcripts ---
-
-    override fun onSpeechResult(transcript: String) {
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p ->
-            if (p.totalLengthTenths > 0) {
-                // stash into your existing fields…
-                totalLengthTenths = p.totalLengthTenths
-                selectedSpecies     = normalizeSpeciesName(p.species)
-                // then call your no-arg saveCatch()
-                saveCatch()
-            }
-        } ?: Toast.makeText(this, "Could not parse: $transcript", Toast.LENGTH_LONG).show()
-    }
-
-
-    // --- Voice Control: override to start listening on wake event ---
-    override fun onVoiceWake() {
-        recognizer.startListening(recognizerIntent)
-    }
 
 }//+++++++++++++ END  od CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++

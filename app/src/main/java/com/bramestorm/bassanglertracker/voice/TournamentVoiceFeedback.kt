@@ -77,7 +77,7 @@ object TournamentVoiceFeedback {
 
             stats.smallestCatch?.let {
                 val oz = it.totalWeightOz ?: 0
-                append("Your smallest fish is ${it.species} at ${oz / 16} pounds ${oz % 16} ounces. ")
+                append("Your smallest fish is ${it.species} at ${oz / 16} pounds ${oz % 16} ounces. ")  //todo these are all for Lbs Ozs NEED to set up "when" for each of the four.
             }
 
             stats.largestCatch?.let {
@@ -86,7 +86,7 @@ object TournamentVoiceFeedback {
             }
 
             if (stats.thisCatchPosition > 0) {
-                append("This catch ranks number ${stats.thisCatchPosition}. ")
+                append("This catch is number ${stats.thisCatchPosition} on the list. ")
             }
 
             if (stats.timeSinceLastCatchMin != null && stats.timeSinceLastCatchMin > 0) {
@@ -99,7 +99,7 @@ object TournamentVoiceFeedback {
         }
     }
 
-    // ????????????? Find Out which Catch Entry Tournament we are Using  ?????????
+    //todo ????????????? Find Out which Catch Entry Tournament we are Using  ?????????
     private fun getTotalValue(list: List<CatchItem>, mode: MeasurementMode): Int{
         return list.sumOf { it.getComparisonValueByMode(mode) }
     }

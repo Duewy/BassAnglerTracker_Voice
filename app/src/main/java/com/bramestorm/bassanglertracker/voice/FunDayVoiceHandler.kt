@@ -32,16 +32,16 @@ class FunDayVoiceHandler(
                     MeasurementMode.CM     -> VoiceParser.parseMetricLengthSimple(input)
                 }
 
-                val confirmationPrompt = when (measurementMode) {
-                    MeasurementMode.LBS_OZ -> "To confirm, you caught a ${parsed.weightLbs} pound ${parsed.weightOz} ounce ${parsed.species}. Is that correct? over"
-                    MeasurementMode.KG     -> "To confirm, you caught a ${parsed.weightKgWhole} kilogram ${parsed.weightGrams} gram ${parsed.species}. Is that correct? over"
-                    MeasurementMode.INCHES -> "To confirm, your catch was ${parsed.lengthInches} and ${parsed.lengthQuarters} inches long, ${parsed.species}. Is that correct? over"
-                    MeasurementMode.CM     -> "To confirm, your catch was ${parsed.lengthCm} centimeters, ${parsed.species}. Is that correct? over"
+                val confirmationPrompt = when (measurementMode) {                                                               // May Need ReWording for User Preferences
+                    MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces . Is that correct? over"
+                    MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms . Is that correct? over"
+                    MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}quarter inches long. Is that correct? over"
+                    MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters,  Is that correct? over"
                 }
 
                 val catchData = ConfirmedCatch(
                     weightOz = if (measurementMode == MeasurementMode.LBS_OZ) (((parsed.weightLbs ?: 0) * 16) + (parsed.weightOz ?: 0)) else null,
-                    weightKgs = if (measurementMode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) + (parsed.weightGrams ?: 0) / 100.0) else null,
+                    weightKgs = if (measurementMode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) + (parsed.weightGrams ?: 0) / 100) else null,
                     lengthQuarters = if (measurementMode == MeasurementMode.INCHES) (((parsed.lengthInches ?: 0) * 4) + (parsed.lengthQuarters ?: 0)) else null,
                     lengthTenths = if (measurementMode == MeasurementMode.CM) ((parsed.lengthCm?.times(10))?.toInt() ?: 0) else null,
                     species = parsed.species ?: "Unknown",
@@ -72,7 +72,7 @@ class FunDayVoiceHandler(
             MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, and species of your catch. Over"
             MeasurementMode.KG     -> "Please say the kilograms, grams, and species of your catch. Over"
             MeasurementMode.INCHES -> "Please say the inches, quarters, and species of your catch. Over"
-            MeasurementMode.CM     -> "Please say the centimeters, and species of your catch. Over"
+            MeasurementMode.CM     -> "Please say the centimeters,  and species of your catch. Over"
         }
 
         sessionRef?.invoke(voiceManager)
@@ -108,10 +108,10 @@ class FunDayVoiceHandler(
         )
 
         val successMessage = when (mode) {
-            MeasurementMode.LBS_OZ -> "${catch.species} saved at ${catch.weightOz!! / 16} lbs ${catch.weightOz % 16} oz"
-            MeasurementMode.KG     -> "${catch.species} saved at ${catch.weightKgs} kg"
-            MeasurementMode.INCHES -> "${catch.species} saved at ${catch.lengthQuarters!! / 4} in ${catch.lengthQuarters % 4} quarters"
-            MeasurementMode.CM     -> "${catch.species} saved at ${catch.lengthTenths?.toDouble()?.div(10)} cm"
+            MeasurementMode.LBS_OZ -> "${catch.species} saved at ${catch.weightOz!! / 16} lbs and ${catch.weightOz % 16} oz"    // reworked for grammar flow (not too robotic)
+            MeasurementMode.KG     -> "${catch.species} saved at ${catch.weightKgs!! / 100} point ${catch.weightKgs % 100} kilograms"
+            MeasurementMode.INCHES -> "${catch.species} saved at ${catch.lengthQuarters!! / 4} inches and ${catch.lengthQuarters % 4} quarters"
+            MeasurementMode.CM     -> "${catch.species} saved at ${catch.lengthTenths!! / 10} point ${catch.lengthTenths % 10 } centimeters"
         }
 
         uiHelper.speak(successMessage)

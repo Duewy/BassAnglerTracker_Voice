@@ -351,14 +351,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {
-            "Large Mouth" -> "L"
-            "LargeMouth" -> "L"
-            "Largemouth" -> "L"
-            "Small Mouth" -> "S"
-            "Spotted"     -> "P"    // Spotted Bass for Southern States
-            else -> ""
-        }
+          val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
+              "Largemouth"   -> "L"
+              "Smallmouth"   -> "S"
+              "Spotted"      -> "P"
+              else           -> ""
+          }
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 

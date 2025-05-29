@@ -17,7 +17,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.VoiceCatchParse
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -25,7 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryInches : BaseCatchEntryActivity() {
+class CatchEntryInches : BaseCatchEntryActivity() {//+++++++++++++ END  od CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++
 
 
     private lateinit var btnSetUp3Inch: Button
@@ -51,6 +50,9 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             }
         }
     }
+    // For VCC to Wake UP
+    private var launchFromWake = false
+
 
     private var selectedSpecies: String = ""
     private var totalLengthQuarters: Int = 0
@@ -77,6 +79,10 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         }
         override fun onPartialResults(partial: Bundle?) {}
         override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
+
+    override fun onSpeechResult(transcript: String) {
+        TODO("Not yet implemented")
     }
 
 //========= onCreate =============================================
@@ -306,24 +312,4 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         return sdf.format(Date())
     }
 
-    // --- Voice Control: override to receive speech transcripts ---
-
-    override fun onSpeechResult(transcript: String) {
-        VoiceCatchParse().parseVoiceCommand(transcript)?.let { p ->
-            if (p.totalLengthQuarters> 0) {
-                // stash into your existing fields…
-                totalLengthQuarters = p.totalLengthQuarters
-                selectedSpecies     = normalizeSpeciesName(p.species)
-                // then call your no-arg saveCatch()
-                saveCatch()
-            }
-        } ?: Toast.makeText(this, " 👎Could not parse: $transcript", Toast.LENGTH_LONG).show()
-    }
-
-
-    // --- Voice Control: override to start listening on wake event ---
-    override fun onVoiceWake() {
-        recognizer.startListening(recognizerIntent)
-    }
-
-}//+++++++++++++ END  od CATCH ENTRY LBS OZS ++++++++++++++++++++++++++++++++++++++++
+}

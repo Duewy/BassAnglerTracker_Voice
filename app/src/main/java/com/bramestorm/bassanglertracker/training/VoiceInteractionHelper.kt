@@ -27,15 +27,15 @@ class VoiceInteractionHelper(
     private var lastIntent: Intent? = null
 
     private var retryCount = 0
-    private val MAX_RETRIES = 3
+    private val maxRETRIES = 3
 
     private var awaitingConfirmation = false
     private var pendingCatch: CatchData? = null
 
-    data class CatchData(val pounds: Int, val ounces: Int, val species: String, val clipColor: String)
+    data class CatchData(val pounds: Int, val ounces: Int, val species: String, val clipColor: String)//todo why only pounds ounces?????
 
     enum class MeasurementUnit {
-        LBS_OZ, KG_G, INCHES, CM
+        LBS_OZ, KG_G, INCHES, CM        //todo why is CM not Used???
     }
 
     init {
@@ -64,7 +64,7 @@ class VoiceInteractionHelper(
                 }
 
                 override fun onError(error: Int) {
-                    if (retryCount < MAX_RETRIES) {
+                    if (retryCount < maxRETRIES) {
                         retryCount++
                         speak("Sorry, I didn't catch that. Please try again. Over")
                         restartListening()
@@ -85,7 +85,7 @@ class VoiceInteractionHelper(
         }
     }
 
-    fun startListening(onResult: (String) -> Unit = {}) {
+    private fun startListening(onResult: (String) -> Unit = {}) {
         if (isListening) {
             activity.positionedToast("Already listening..👍.")
             return
@@ -107,7 +107,7 @@ class VoiceInteractionHelper(
         isListening = true
     }
 
-    fun stopListening() {
+    private fun stopListening() {
         speechRecognizer?.stopListening()
         isListening = false
     }

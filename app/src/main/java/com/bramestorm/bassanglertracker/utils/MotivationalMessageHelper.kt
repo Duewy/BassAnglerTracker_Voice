@@ -9,10 +9,10 @@ import com.bramestorm.bassanglertracker.models.MotivationContext
 
 
 fun generateMotivationalMessage(context: MotivationContext): String {
-        val remaining = context.totalNeeded - context.currentCount
-        val percent:Int = if (context.smallestComparisonValue > 0)
-            ((context.comparisonValue - context.smallestComparisonValue) / context.smallestComparisonValue) * 100
-        else 0
+    val remaining = context.totalNeeded - context.currentCount
+    val percent: Int = if (context.smallestComparisonValue > 0)
+        ((context.comparisonValue - context.smallestComparisonValue) / context.smallestComparisonValue) * 100
+    else 0
 
     return when {
         context.isNewBiggestOfDay && context.currentCount >= 4 -> {
@@ -31,6 +31,14 @@ fun generateMotivationalMessage(context: MotivationContext): String {
             Log.d("MOTIVATION", "Triggered: FinalCatch")
             finalCatchMessages.random()
         }
+        remaining == 2 -> {
+            Log.d("MOTIVATION", "Triggered: getTwoRemaining($remaining)")
+            getTwoRemainingMessage(remaining)
+        }
+        remaining == 1 -> {
+            Log.d("MOTIVATION", "Triggered: getOneRemaining($remaining)")
+            getOneRemainingMessage(remaining)
+        }
         else -> {
             Log.d("MOTIVATION", "Triggered: GeneralMessage")
             generalMessages.random()
@@ -38,7 +46,8 @@ fun generateMotivationalMessage(context: MotivationContext): String {
     }
 
 
-}
+
+}// ==== END == Generate Motivational Messages ===================
 
 fun getMotivationalMessage(
     context: Context,
@@ -139,11 +148,10 @@ private fun getBigImprovementMessage(percent: Number): String {
         "🏁 That’s your final catch — time to cull!",
         "✅ All slots filled. Let’s see who stays!",
         "⚖️ Let the sorting begin!",
-        "🔄 Now it’s about upgrades!",
+        "🔄 Now it is all about upgrades!",
         "🎒 Bag’s full — time to refine!",
-        "🌟 Team’s looking solid!",
+        "🌟 Team is looking solid!",
         "🎲 It’s game time now!",
-        "⛳ That was the last hole — now score it!",
         "📊 Time to analyze and cull!",
         "🏹 Hit the target. Let's optimize!",
         "🧠 Now comes the strategy!"
@@ -151,15 +159,15 @@ private fun getBigImprovementMessage(percent: Number): String {
 
     private val generalMessages = listOf(
         "🎣 Nice! Keep that line wet!",
-        "👏 Another one for the board!",
+        "👏 Another one for the score board!",
         "💯 Keep stacking them!",
         "🔥 You’re in the groove now!",
         "🎉 Another step toward the win!",
         "🚣 Smooth sailing!",
         "🦅 Sharp cast, solid catch!",
-        "🐟 That’ll play!",
+        "🐟 That's how to play!",
         "🌅 Fishing like a pro!",
-        "📸 One for the highlight reel!",
+        "📸 There is one for the highlight reel!",
         "⚓ Locked in and hauling!",
         "🥳 Reel ’em in!",
         "🛠️ Adding to the masterpiece!",
@@ -171,6 +179,26 @@ private fun getBigImprovementMessage(percent: Number): String {
         "🧃 Fresh pull!",
         "🎯 Right on mark!"
     )
+
+    private fun getTwoRemainingMessage(remaining: Number): String {
+        val messageTemplates = listOf(
+            "🎯 Just $remaining left — almost weigh-in ready!",
+            "⚙️ That bag's filling. $remaining more!",
+            "🐟 Still some room for the picture hogs",
+            "💡 You're setting up the perfect lineup!"
+        )
+        return messageTemplates.random()
+    }
+
+    private fun getOneRemainingMessage(remaining: Number): String {
+        val messageTemplates = listOf(
+            "🧨 $remaining more and you're ready to cull!",
+            "🎒 Just $remaining fish from a full weigh-in bag!",
+            "🦈 Perfect time to tag the next monster",
+            "🚀 One final push — make it count!"
+        )
+        return messageTemplates.random()
+    }
 
 
 

@@ -837,18 +837,6 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
-    // ------------ VCC Enabled Set Up Voice Control ----------------
-    override fun onSpeechResult(transcript: String) {       //todo not sure what to do with this, is it for voice wakeup?? can we use for other voice commands???
-        Log.d("VCC", "Speech Result Received: $transcript")
-
-        // 👇 Replace with your actual phrase recognition or command parsing  todo find out what we will do with this...
-        if (transcript.contains("add fish", ignoreCase = true)) {
-            showWeightPopup() // 🔥 Launches PopupLengthInches.kt
-        } else {
-            Toast.makeText(this, "Unrecognized command: $transcript", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     /**
      * Also required by the base.  You could use this
      * if you wanted the old “wake” event to kick off VCC,

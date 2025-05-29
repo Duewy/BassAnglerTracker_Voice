@@ -36,7 +36,7 @@ object SpeciesImageHelper {
             "bowfin" -> R.drawable.fish_bow_fin
             "gar" -> R.drawable.fish_gar
             "saugeye" -> R.drawable.fish_saugeye
-            "rock bass" -> R.drawable.fish_default
+            "rock bass" -> R.drawable.fish_rock_bass
             "white bass" -> R.drawable.fish_white_bass
             "striped bass" -> R.drawable.fish_striped_bass
             "sunfish" -> R.drawable.fish_sunfish

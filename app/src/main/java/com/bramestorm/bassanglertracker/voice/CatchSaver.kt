@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.voice
 import android.content.Context
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.training.ParsedCatch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -20,16 +21,16 @@ object CatchSaver {
         catchType: String
     ) {
         // Convert imperial weight to total ounces
-        val totalOz = (parsed.weightLbs ?: 0) * 16 + (parsed.weightOz ?: 0)
+        val totalOz = ((parsed.weightLbs ?: 0) * 16) + (parsed.weightOz ?: 0)
 
         // Convert kg + grams to hundredth-kg integer
-        val totalHundredthKg = (parsed.weightKgWhole ?: 0) * 100 + ((parsed.weightGrams ?: 0) / 10)
+        val totalHundredthKg = ((parsed.weightKgWhole ?: 0) * 100) + ((parsed.weightGrams ?: 0) / 10)
 
         // Convert inches + quarters to total quarters
-        val totalQuarters = (parsed.lengthInches ?: 0) * 4 + (parsed.lengthQuarters ?: 0)
+        val totalQuarters = ((parsed.lengthInches ?: 0) * 4) + (parsed.lengthQuarters ?: 0)
 
         // Convert cm + tenths to total tenths
-        val totalTenths = ((parsed.lengthCm ?: 0.0) * 10).toInt() + (parsed.lengthTenths ?: 0)
+        val totalTenths = ((parsed.lengthCm ?: 0) * 10) + (parsed.lengthTenths ?: 0)
 
         // Build the CatchItem
         val item = CatchItem(

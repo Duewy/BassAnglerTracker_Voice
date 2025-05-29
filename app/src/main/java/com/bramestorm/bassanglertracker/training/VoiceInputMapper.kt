@@ -21,13 +21,19 @@ object VoiceInputMapper {
 
     val baseColorMap = mapOf(
         "red" to "RED",
+        "read" to "RED",
+        "blu" to "BLUE",
         "blue" to "BLUE",
         "green" to "GREEN",
+        "gren" to "GREEN",
         "yellow" to "YELLOW",
+        "yelo" to "YELLOW",
         "orange" to "ORANGE",
-        "white" to "WHITE"
+        "white" to "WHITE",
+        "wite" to "WHITE"
     )
-            //  Ensure we set the ✔️🔊 correct wording for misspoken User Input or various accents
+
+    //  Ensure we set the ✔️🔊 correct wording for misspoken User Input or various accents
     val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
         put("clear list", "Clear List")
         put("clearlist", "Clear List")
@@ -104,7 +110,7 @@ object VoiceInputMapper {
     }// ========== END of base Species Voice Map =========================
 
     /**
-     * Normalize raw input → Title-cased species name,
+     * Normalize raw input → Title-Cased species name,
      * or return null if it’s empty after cleaning.
      */
     private fun normalizeSpecies(raw: String): String? {
@@ -150,19 +156,20 @@ object VoiceInputMapper {
         return baseSpeciesVoiceMap[raw.lowercase()] ?: normalizeSpecies(raw) ?: "Unknown"
     }
 
-    fun getClipColorFromVoice(text: String): String {
-        val colors = listOf("red", "blue", "green", "yellow", "orange", "white")
-        var normalized = text.lowercase()
-        normalized = normalized.replace("clip", "")
-        normalized = normalized.replace(Regex("""[^a-z\s]"""), "")
-        normalized = normalized.trim()
-        for (color in colors) {
-            if (normalized.contains(color)) {
-                return color.uppercase()
+    fun getClipColorFromVoice(text: String, clipColors: List<String>): String {
+        val cleaned = text.lowercase()
+            .replace("clip", "")
+            .replace(Regex("""[^a-z\s]"""), "")
+            .trim()
+        for ((alias, canonical) in baseColorMap) {
+            if (cleaned.contains(alias) && clipColors.any { it.equals(canonical, ignoreCase = true) }) {
+                return canonical
             }
         }
-        return "RED"
+        return "RED" // default fallback
     }
+
+
 
     // (All 8 parse*Command functions are correctly left untouched for exact pattern matching)
     //todo work on the Voice Mapping which will enable the clean correct input from the User's Voice Commands

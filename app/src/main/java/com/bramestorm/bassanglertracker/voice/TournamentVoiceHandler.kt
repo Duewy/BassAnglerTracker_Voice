@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker.voice
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchEntryTournament.ClipColor
 import com.bramestorm.bassanglertracker.CatchItem
@@ -24,10 +25,12 @@ class TournamentVoiceHandler(
     private val alarmMinute: Int = -1,
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context),) {
 
+
+    private var isSessionActive = false
     private var sessionRef: ((VoiceInteractionManager) -> Unit)? = null
     private val tournamentSpecies = SharedPreferencesManager.getTournamentSpecies(context) ?: ""
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
-    private val cullingEnabled = SharedPreferencesManager.isCullingEnabled(context)  // not really needed as all Tournament are culling Enabled
+
 
     // Track clip colors already used in official top catches
     private var availableClipColors: MutableList<String> =
@@ -62,6 +65,23 @@ class TournamentVoiceHandler(
         }
     }
 
+    data class ParsedCatch(
+        val species: String,
+        val weightLbs: Int = 0,
+        val weightOz: Int = 0,
+        val weightKgWhole: Int = 0,
+        val weightGrams: Int = 0,
+        val lengthCm: Int = 0,
+        val lengthTenths: Int = 0,
+        val lengthInches: Int = 0,
+        val lengthQuarters: Int = 0,
+        val clipColor: String = "",
+
+        val totalWeightOzs: Int = weightLbs * 16 + weightOz,
+        val totalWeightHundredthKg: Int = weightKgWhole * 100 + weightGrams,
+        val totalLengthTenths: Int = lengthCm * 10 + lengthTenths,
+        val totalLengthQuarters: Int = lengthInches * 4 + lengthQuarters,
+    )
 
     /** Called by VoiceControlService on wake */
     fun onWake() {
@@ -71,13 +91,21 @@ class TournamentVoiceHandler(
 
     /** Starts a new voice session for lbs/oz catches */
     private fun startVoiceSession() {
+        // ensure no double looping
+        if (isSessionActive) {
+            Log.w("VCC_PROTECT", "Session already active — aborting duplicate start.")
+            return
+        }
+
         // Inject a parser that wraps our static parse logic into the VoiceCommandParser interface
         val mode = SharedPreferencesManager.getTournamentUnit(context)
+
         // ✅ Let the service track the session for call shutdown
         sessionRef?.invoke(voiceManager)
 
+        isSessionActive = true// Tell the if that yes the Voice Session is Active
 
-        voiceManager.parser = object : VoiceCommandParser {
+        voiceManager.parser = object : VoiceCommandParser {     // SENDS everything to VoiceParser to get the values
             override fun parse(input: String): VoiceCommandParser.ParseResult {
                 val parsed = when (mode) {
                     MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
@@ -88,19 +116,26 @@ class TournamentVoiceHandler(
 
                 val clip = parsed.clipColor ?: availableClipColors.firstOrNull().orEmpty()
 
+                Log.d("VCC", "🧠 Parsed Voice Input → " +
+                        "Species=${parsed.species}, " +
+                        "WeightLbs=${parsed.weightLbs}, " +
+                        "WeightOz=${parsed.weightOz}, " +
+                        "TotalOz=${parsed.totalWeightOzs}, " +
+                        "ClipColor=${clip}")
+
                 val confirmationPrompt = when (mode) {
-                    MeasurementMode.LBS_OZ -> "To confirm, the ${parsed.species}  is ${parsed.weightLbs} pound and ${parsed.weightOz} ounces and is on the $clip clip. Is that correct? over"
-                    MeasurementMode.KG     -> "To confirm, the ${parsed.species}  is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms and is on the $clip clip. Is that correct? over"
-                    MeasurementMode.INCHES -> "To confirm, the  ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}  quarter inches long and is on the $clip clip. Is that correct? over"
-                    MeasurementMode.CM     -> "To confirm, the ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters long and is on the $clip clip. Is that correct? over" //todo add the millimeters here Look into 0.0 or 0.5 as standards??
+                    MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the $clip clip. Is that correct? over"
+                    MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the $clip clip. Is that correct? over"
+                    MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}quarter inches long on the $clip clip. Is that correct? over"
+                    MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters, on the $clip clip. Is that correct? over" //todo add the millimeters here Look into 0.0 or 0.5 as standards??
                 }
 
                 val catchData = ConfirmedCatch(
-                    weightOz = if (mode == MeasurementMode.LBS_OZ) ((parsed.weightLbs ?: 0) * 16 + (parsed.weightOz ?: 0)) else null,
-                    weightKgs = if (mode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) * 100 + (parsed.weightGrams ?: 0)) else null,
-                    lengthQuarters = if (mode == MeasurementMode.INCHES) ((parsed.lengthInches ?: 0) * 4 + (parsed.lengthQuarters ?: 0)) else null,
-                    lengthTenths = if (mode == MeasurementMode.CM) ((parsed.lengthCm ?: 0) * 10 + (parsed.lengthTenths ?: 0)) else null,
-                    species = parsed.species ?: "Unknown",
+                    weightOz = if (mode == MeasurementMode.LBS_OZ) parsed.totalWeightOzs else null,
+                    weightKgs = if (mode == MeasurementMode.KG) parsed.totalWeightHundredthKg else null,
+                    lengthQuarters = if (mode == MeasurementMode.INCHES) parsed.totalLengthQuarters else null,
+                    lengthTenths = if (mode == MeasurementMode.CM) parsed.totalLengthTenths else null,
+                    species = parsed.species,
                     clipColor = clip
                 )
 
@@ -109,6 +144,7 @@ class TournamentVoiceHandler(
 
             override fun awaitConfirmation(lastCatch: ConfirmedCatch, onConfirmed: (ConfirmedCatch) -> Unit) {
                 onConfirmed(lastCatch)
+
             }
         }
 
@@ -126,15 +162,39 @@ class TournamentVoiceHandler(
 
     }   // ====== END start Voice Session ====================
 
+    private fun endVoiceSession() {
+        isSessionActive = false
+        voiceManager.shutdown()
+    }
+
 
     private fun currentTimestamp(): String =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
     /** Called when user confirms a parsed catch via voice */
     private fun onCatchConfirmed(catch: ConfirmedCatch) {
-        // 1) Save new catch to database
-        val mode = catch.getMeasurementMode() ?: MeasurementMode.LBS_OZ
 
+        Log.d("VCC", "📥 Confirmed Catch: " +        // what are the actual values sent to database
+                "Species=${catch.species}, " +
+                "TotalOz=${catch.weightOz}, " +
+                "ClipColor=${catch.clipColor}")
+
+        // set the proper catchType, and markerType variables to send to the DataBase
+        val mode = catch.getMeasurementMode() ?: MeasurementMode.LBS_OZ
+        val typeEntry = when (mode) {
+            MeasurementMode.LBS_OZ -> "lbsOzs"
+            MeasurementMode.KG     -> "kgs"
+            MeasurementMode.INCHES -> "inches"
+            MeasurementMode.CM     -> "metric"
+        }
+        val speciesInitial = when (catch.species) {
+                "Largemouth"   -> "L"
+                "Smallmouth"   -> "S"
+                "Spotted"      -> "P"
+                else           -> ""
+        }
+
+        // 1) Save new catch to database
         val dbItem = CatchItem(
             id = 0,
             dateTime = currentTimestamp(),
@@ -145,8 +205,8 @@ class TournamentVoiceHandler(
             totalWeightHundredthKg = catch.weightKgs,
             totalLengthQuarters = catch.lengthQuarters,
             totalLengthTenths = catch.lengthTenths,
-            catchType = mode.name.lowercase(Locale.ROOT),
-            markerType = catch.clipColor,
+            catchType = typeEntry,
+            markerType = speciesInitial,
             clipColor = catch.clipColor
         )
 
@@ -159,6 +219,11 @@ class TournamentVoiceHandler(
         val allTopCatches = dbHelper.getTopTournamentCatches(tournamentCatchLimit + 1)
         val topCatches = allTopCatches.take(tournamentCatchLimit)
         val culled = allTopCatches.drop(tournamentCatchLimit)
+
+        Log.d("VCC", "📊 Top Tournament Catches Retrieved: ${topCatches.size}")
+        culled.forEach {
+            Log.d("VCC", "🗑️ Culled Catch: ${it.species}, ${it.totalWeightOz}oz, Clip=${it.clipColor}")
+        }
 
 
         val stats = TournamentVoiceFeedback.analyzeTournamentStats(
@@ -180,10 +245,15 @@ class TournamentVoiceHandler(
          // 4) Speak feedback
         val spokenSummary = TournamentVoiceFeedback.getCatchSummaryResponse(stats)
         uiHelper.speak(spokenSummary)
+        Log.d("VCC", "📣 Spoken Feedback: $spokenSummary")
+
+
+        // 5) Ensure Voice Session is over
+        endVoiceSession()
 
     }//=== END on Catch Confirm ================
 
-    fun ConfirmedCatch.getMeasurementMode(): MeasurementMode? {
+    private fun ConfirmedCatch.getMeasurementMode(): MeasurementMode? {
         return when {
             this.weightOz != null -> MeasurementMode.LBS_OZ
             this.weightKgs != null -> MeasurementMode.KG
@@ -195,7 +265,9 @@ class TournamentVoiceHandler(
 
     fun setSessionRef(ref: (VoiceInteractionManager) -> Unit) {
         this.sessionRef = ref
+        ref(voiceManager) // ✅ immediately pass reference back for tracking
     }
+
 
 
 }// =============== END ===========================================
