@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.bramestorm.bassanglertracker.MeasurementMode
-import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.Locale
@@ -219,11 +218,6 @@ object SharedPreferencesManager {
 
     fun normalizeSpeciesName(name: String): String =
         name.trim().lowercase().replace(Regex("\\s+"), " ")
-
-    fun validateClipColorFromVoice(cleaned: String, availableColors: Array<String>): String? {
-        val spoken = VoiceInputMapper.getClipColorFromVoice(cleaned).uppercase()
-        return if (availableColors.contains(spoken)) spoken else null
-    }
 
 
 }//------------- END -------------------------------------------

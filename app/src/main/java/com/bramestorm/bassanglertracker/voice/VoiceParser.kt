@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.voice
 
 
+import android.util.Log
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 
 
@@ -46,11 +47,22 @@ object VoiceParser {
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
-        val lbs = Regex("""(\d{1,2})\s*(?:pounds|lbs?)""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?:0
-        val oz = Regex("""(\d{1,2})\s*(?:ounces|ozs?)""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?:0
-        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
+        val cleanText = correctMisheardWords(transcript.lowercase())
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            cleanText
+                .replace(Regex("""\d+\s*(pounds?|lbs?|ounces?|ozs?)"""), "")
+                .replace(Regex("""\b(over|and|clip|color)\b"""), "")
+                .trim(),
+            speciesList
+        )
+
+        val lbs = Regex("""(\d{1,2})\s*(?:pound[s]?|lbs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val oz = Regex("""(\d{1,2})\s*(?:ounce[s]?|ozs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val color = VoiceInputMapper.getClipColorFromVoice(cleanText, clipColors)
+
+        Log.d("VCC_PARSE", "ParsedCatch → Species=$species, Lbs=$lbs, Oz=$oz, ClipColor=$color") // to see what info is gathered...
+        Log.d("VCC_STT_RAW", "Raw transcript: $transcript")
+        Log.d("VCC_STT_CLEAN", "Cleaned transcript: $cleanText")
 
         return ParsedCatch(
             species = species,

@@ -3,7 +3,7 @@ package com.bramestorm.bassanglertracker.voice
 import android.content.Context
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.ParsedCatch
+import com.bramestorm.bassanglertracker.voice.VoiceParser.ParsedCatch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

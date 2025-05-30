@@ -5,12 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import java.util.Locale
 
 /**
@@ -57,7 +60,13 @@ class VoiceInteractionManager(
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts!!.language = Locale.getDefault()
-                tts!!.speak(prompt, TextToSpeech.QUEUE_FLUSH, null, "TTS_PROMPT")
+
+                val isConfirmation = prompt.contains("is that correct?", ignoreCase = true)
+                val utteranceId = if (isConfirmation) "TTS_CONFIRM" else "TTS_PROMPT"
+
+                Log.d("VCC_TTS", "🗣️ Speaking with ID: $utteranceId → \"$prompt\"")
+                tts!!.speak(prompt, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+
             }
         }
 
@@ -66,13 +75,25 @@ class VoiceInteractionManager(
             override fun onError(uttId: String?) {}
             override fun onDone(uttId: String?) {
                 if (uttId == "TTS_PROMPT" || uttId == "TTS_CONFIRM") {
+                    Log.d("VCC_TTS", "✅ TTS finished: $uttId — starting STT...")
                     handler.post { startListening(onCatchConfirmed) }
                 }
             }
         })
     }
+    fun listenForConfirmation(onCatchConfirmed: (VoiceCommandParser.ConfirmedCatch) -> Unit) {
+        startListening(onCatchConfirmed)
+    }
 
     private fun startListening(onCatchConfirmed: (VoiceCommandParser.ConfirmedCatch) -> Unit) {
+
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (powerManager.isInteractive) {
+            val toast = Toast.makeText(context, "🎤 Listening now —\nsay 'Yes Over' or 'No Over'", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 100)
+            toast.show()
+        }
+
         // reset previous recognizer
         recognizer?.destroy()
         recognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
@@ -100,9 +121,16 @@ class VoiceInteractionManager(
 
                 override fun onResults(results: Bundle?) {
                     retryCount = 0  // ✅ Reset on successful voice result
-                    val spoken = results
-                        ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                        ?.firstOrNull() ?: ""
+                    val spoken = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull() ?: ""
+                    val transcript = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull() ?: return
+
+                    if (!transcript.lowercase().contains("over")) {
+                        tts?.speak("Did you forget to say over?", TextToSpeech.QUEUE_FLUSH, null, "TTS_MISSING_OVER")
+                        //todo Why do we need the  startListening(onCatchConfirmed) in brackets??? the startListening() did not work
+                        startListening(onCatchConfirmed)// restart listening
+                        return
+                    }
+
                     when (val result = parser.parse(spoken)) {
                         is VoiceCommandParser.ParseResult.Confirm -> {
                             tts?.speak(
@@ -115,7 +143,7 @@ class VoiceInteractionManager(
                         }
                         is VoiceCommandParser.ParseResult.Retry -> {
                             uiHelper.speak(result.retryPrompt)
-                            handler.postDelayed({ startListening(onCatchConfirmed) }, 2000)
+                            handler.postDelayed({ startListening(onCatchConfirmed) }, 1000)
                         }
                         is VoiceCommandParser.ParseResult.Failure -> {
                             uiHelper.speak(result.fallbackPrompt)
@@ -147,44 +175,45 @@ class VoiceInteractionManager(
     }
 } // === END== Voice Interaction Manager =========================
 
-/*****  Parser Interface & Data Class  *****/
+    /*****  Parser Interface & Data Class  *****/
 
-interface VoiceCommandParser {
-    /**
-     * Parse raw user speech into one of the outcomes:
-     * - Confirm with a catch object + prompt
-     * - Retry with a retry-prompt
-     * - Failure with a fallback-prompt
-     */
-    fun parse(input: String): ParseResult
+    interface VoiceCommandParser {
+        /**
+         * Parse raw user speech into one of the outcomes:
+         * - Confirm with a catch object + prompt
+         * - Retry with a retry-prompt
+         * - Failure with a fallback-prompt
+         */
+        fun parse(input: String): ParseResult
 
-    /**
-     * After speaking the confirmation, listen for yes/no and invoke onConfirmed.
-     */
-    fun awaitConfirmation(
-        lastCatch: ConfirmedCatch,
-        onConfirmed: (ConfirmedCatch) -> Unit
-    )
+        /**
+         * After speaking the confirmation, listen for yes/no and invoke onConfirmed.
+         */
+        fun awaitConfirmation(
+            lastCatch: ConfirmedCatch,  // todo should we add the "over" to this??? It works just not patterned
+            onConfirmed: (ConfirmedCatch) -> Unit
+        )
 
-    sealed class ParseResult {
-        data class Confirm(
-            val catch: ConfirmedCatch,
-            val confirmationPrompt: String
-        ) : ParseResult()
+        sealed class ParseResult {
+            data class Confirm(
+                val catch: ConfirmedCatch,
+                val confirmationPrompt: String
+            ) : ParseResult()
 
-        data class Retry(val retryPrompt: String) : ParseResult()
-        data class Failure(val fallbackPrompt: String) : ParseResult()
-    }
+            data class Retry(val retryPrompt: String) : ParseResult()
+            data class Failure(val fallbackPrompt: String) : ParseResult()
+        }
 
-    /**
-     * Unified catch representation, supports multiple measure types:
-     */
-    data class ConfirmedCatch(
-        val weightOz: Int? = null,
-        val weightKgs: Int? = null,
-        val lengthQuarters: Int? = null,
-        val lengthTenths: Int? = null,
-        val species: String,
-        val clipColor: String
-    )
-} //=== END == Voice Command Parser =========
+        /**
+         * Unified catch representation, supports multiple measure types:
+         */
+        data class ConfirmedCatch(
+            val weightOz: Int? = null,
+            val weightKgs: Int? = null,
+            val lengthQuarters: Int? = null,
+            val lengthTenths: Int? = null,
+            val species: String,
+            val clipColor: String
+        )
+
+    } //=== END == Voice Command Parser =========

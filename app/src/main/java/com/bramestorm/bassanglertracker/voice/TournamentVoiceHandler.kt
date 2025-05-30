@@ -2,13 +2,17 @@ package com.bramestorm.bassanglertracker.voice
 
 import android.content.Context
 import android.content.Intent
+import android.os.PowerManager
 import android.util.Log
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchEntryTournament.ClipColor
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.getMeasurementMode
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper
+import com.bramestorm.bassanglertracker.utils.FishSpecies
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.voice.VoiceCommandParser.ConfirmedCatch
 import java.text.SimpleDateFormat
@@ -28,7 +32,8 @@ class TournamentVoiceHandler(
 
     private var isSessionActive = false
     private var sessionRef: ((VoiceInteractionManager) -> Unit)? = null
-    private val tournamentSpecies = SharedPreferencesManager.getTournamentSpecies(context) ?: ""
+    private val rawSpecies = SharedPreferencesManager.getTournamentSpecies(context) ?: ""
+    private val tournamentSpecies = VoiceInputMapper.getSpeciesFromVoice(rawSpecies, FishSpecies.allSpeciesList)
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
 
 
@@ -40,7 +45,7 @@ class TournamentVoiceHandler(
     private val voiceManager = VoiceInteractionManager(
         context = context,
         uiHelper = uiHelper,
-                                //todo LOOK INTO the placeholder parser, which will be replaced in startVoiceSession()
+        // placeholder parser, replaced immediately in startVoiceSession()
         parser = object : VoiceCommandParser {
             override fun parse(input: String) =
                 VoiceCommandParser.ParseResult.Failure("Parser not initialized")
@@ -86,7 +91,7 @@ class TournamentVoiceHandler(
     /** Called by VoiceControlService on wake */
     fun onWake() {
 
-        startVoiceSession()         // todo find the sequence of Vcc communication to ensure proper flow and grammar with variables
+        startVoiceSession()
     }
 
     /** Starts a new voice session for lbs/oz catches */
@@ -96,6 +101,14 @@ class TournamentVoiceHandler(
             Log.w("VCC_PROTECT", "Session already active — aborting duplicate start.")
             return
         }
+        // SET UP the Available Clip Colors to double check for User Error
+        val usedColors = dbHelper.getTopTournamentCatches(tournamentCatchLimit)
+            .mapNotNull { it.clipColor?.uppercase() }
+            .toSet()
+
+        availableClipColors = ClipColor.entries.map { it.name }
+            .filterNot { usedColors.contains(it.uppercase()) }
+            .toMutableList()
 
         // Inject a parser that wraps our static parse logic into the VoiceCommandParser interface
         val mode = SharedPreferencesManager.getTournamentUnit(context)
@@ -107,14 +120,22 @@ class TournamentVoiceHandler(
 
         voiceManager.parser = object : VoiceCommandParser {     // SENDS everything to VoiceParser to get the values
             override fun parse(input: String): VoiceCommandParser.ParseResult {
+
+                Log.d("VCC_DEBUG", "🐟 SpeciesList sent to parser: ${listOf(tournamentSpecies)}")
+
                 val parsed = when (mode) {
                     MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.KG     -> VoiceParser.parseMetricCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.INCHES -> VoiceParser.parseImperialLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                 }
+                if (parsed.totalWeightOzs == 0 || parsed.species.isBlank() || parsed.clipColor.isBlank()) {
+                    Log.e("VCC_PARSE", "❌ Incomplete catch — skipping save. Weight=${parsed.totalWeightOzs}, Species='${parsed.species}', Clip='${parsed.clipColor}'")
+                    uiHelper.speak("Sorry, I couldn't understand your catch. Please try again. Over.")
+                    return VoiceCommandParser.ParseResult.Failure("Missing required info")
+                }
 
-                val clip = parsed.clipColor ?: availableClipColors.firstOrNull().orEmpty()
+                val clip = parsed.clipColor
 
                 Log.d("VCC", "🧠 Parsed Voice Input → " +
                         "Species=${parsed.species}, " +
@@ -124,10 +145,18 @@ class TournamentVoiceHandler(
                         "ClipColor=${clip}")
 
                 val confirmationPrompt = when (mode) {
-                    MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the $clip clip. Is that correct? over"
+                    MeasurementMode.LBS_OZ -> "To confirm, the ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces and is on the $clip clip. Is that correct? over"
                     MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the $clip clip. Is that correct? over"
                     MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}quarter inches long on the $clip clip. Is that correct? over"
-                    MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters, on the $clip clip. Is that correct? over" //todo add the millimeters here Look into 0.0 or 0.5 as standards??
+                    MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters, on the $clip clip. Is that correct? over"
+                }
+                Log.d("VCC_CONFIRM_PROMPT", "🧾 $confirmationPrompt")
+                    // TOAST just to be able to see what the VCC heard while learning the app...
+                val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                if (powerManager.isInteractive) {
+                   val toast= Toast.makeText(context, "Heard: $confirmationPrompt", Toast.LENGTH_LONG)
+                    toast.setGravity(android.view.Gravity.BOTTOM or android.view.Gravity.CENTER_HORIZONTAL, 0, -100)
+                    toast.show()
                 }
 
                 val catchData = ConfirmedCatch(
@@ -142,19 +171,68 @@ class TournamentVoiceHandler(
                 return VoiceCommandParser.ParseResult.Confirm(catchData, confirmationPrompt)
             }
 
-            override fun awaitConfirmation(lastCatch: ConfirmedCatch, onConfirmed: (ConfirmedCatch) -> Unit) {
-                onConfirmed(lastCatch)
+            override fun awaitConfirmation(
+                lastCatch: ConfirmedCatch,
+                onConfirmed: (ConfirmedCatch) -> Unit
+            ) {
+                Log.d("VCC_CONFIRM_PROMPT", "Awaiting confirmation for: ${lastCatch.species}, ${lastCatch.weightOz}oz, ${lastCatch.clipColor}")
 
-            }
-        }
+                // Inject confirmation parser FIRST
+                voiceManager.parser = object : VoiceCommandParser {
+                    override fun parse(input: String): VoiceCommandParser.ParseResult {
+                        val cleaned = input.trim().lowercase()
+
+                        val normalized = cleaned
+                            .replace(Regex("[^a-z\\s]"), "")
+                            .replace("clip", "")
+                            .trim()
+
+                        Log.d("VCC_CONFIRM_RAW", "Raw input: $cleaned")
+                        Log.d("VCC_CONFIRM_CLEAN", "Normalized: $normalized")
+
+                        return when {
+                            normalized.contains("yes over") -> {
+                                Log.d("VCC_CONFIRM", "✅ User confirmed catch.")
+                                onConfirmed(lastCatch)
+                                uiHelper.speak("Catch saved. Over and Out.")
+                                VoiceCommandParser.ParseResult.Confirm(lastCatch, "confirmed")
+                            }
+                            normalized.contains("no over") -> {
+                                Log.d("VCC_CONFIRM", "↩️ User rejected catch.")
+                                startVoiceSession()
+                                VoiceCommandParser.ParseResult.Confirm(lastCatch, "restarting")
+                            }
+                            normalized.contains("cancel that") -> {
+                                Log.d("VCC_CONFIRM", "❌ User canceled catch.")
+                                uiHelper.speak("All canceled. Over and Out.")
+                                endVoiceSession()
+                                VoiceCommandParser.ParseResult.Confirm(lastCatch, "cancelled")
+                            }
+                            else -> {
+                                Log.d("VCC_CONFIRM", "🤷 Unrecognized: $normalized")
+                                uiHelper.speak("Please say yes over, no over, or cancel that. Over.")
+                                awaitConfirmation(lastCatch, onConfirmed)
+                                VoiceCommandParser.ParseResult.Confirm(lastCatch, "retrying")
+                            }
+                        }
+                    }
+
+                    override fun awaitConfirmation(
+                        lastCatch: ConfirmedCatch,
+                        onConfirmed: (ConfirmedCatch) -> Unit
+                    ) { /* no-op */ }
+                }
+
+            }// === END override Await Confirmation ======
+
+        } //=== END Voice Command Parser =================
 
         val startPrompt = when (mode) {
-            MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species and clip color of your catch, over"
+            MeasurementMode.LBS_OZ -> "Please tell me the pounds and ounces, the species and the clip color of your catch, over"
             MeasurementMode.KG     -> "Please say the kilograms, grams, species and clip color of your catch, over"
             MeasurementMode.INCHES -> "Please say the inches, quarters, species and clip color of your catch, over"
             MeasurementMode.CM     -> "Please say the centimeters, millimeters, species and clip color of your catch, over"
         }
-
 
         voiceManager.startSession(
             prompt = startPrompt,
@@ -187,6 +265,7 @@ class TournamentVoiceHandler(
             MeasurementMode.INCHES -> "inches"
             MeasurementMode.CM     -> "metric"
         }
+
         val speciesInitial = when (catch.species) {
                 "Largemouth"   -> "L"
                 "Smallmouth"   -> "S"

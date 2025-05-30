@@ -48,7 +48,7 @@ class PopupWeightEntryTourLbs : Activity() {
         isTournament = intent.getBooleanExtra("isTournament", false)
         catchType    = intent.getStringExtra("catchType") ?: ""
 
-        val colorNames  = intent.getStringArrayExtra("availableClipColors")
+        val colorNames  = intent.getStringArrayExtra("availableClipColors") //todo we need to verify with mapper.???
             ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
 
         Log.d("PopupWeightEntry", "isTournament: $isTournament | catchType: $catchType | selectedSpecies: $selectedSpecies")

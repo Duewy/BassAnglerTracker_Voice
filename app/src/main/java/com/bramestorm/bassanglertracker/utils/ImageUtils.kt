@@ -2,7 +2,8 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.util.Log
 import com.bramestorm.bassanglertracker.R
-
+        // put images to each of the species..
+        //todo if all species go through the VoiceInput Mapper we should not require multiple names for each species
 fun getSpeciesImageResId(species: String?): Int {
     return when (species?.trim()?.lowercase()) {
         "largemouth", "large mouth" -> R.drawable.fish_large_mouth

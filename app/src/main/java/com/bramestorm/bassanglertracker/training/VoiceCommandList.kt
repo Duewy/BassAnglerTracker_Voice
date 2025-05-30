@@ -4,14 +4,26 @@ package com.bramestorm.bassanglertracker.training
 
 object VoiceCommandList {
     val phraseList = mutableListOf(
-                                                            //------ User Action Words / Phrases
+
+                 //------📃 User Action Words / Phrases
         PracticePhrase("Save the Catch", false),
         PracticePhrase("Caught", false),
         PracticePhrase("Log Entry", false),
         PracticePhrase("New Fish", false),
         PracticePhrase("Clear List", false),
+        PracticePhrase("Correct an Error", false),
+        PracticePhrase("Delete the Last Catch", false),
+        PracticePhrase("Edit the Last Catch", false),
+        PracticePhrase("Smallest Catch", false),
+        PracticePhrase("Smallest Catch on the List", false),
+        PracticePhrase("Largest Catch", false),
+        PracticePhrase("Read Board List", false),
+        PracticePhrase("Time Now", false),
+        PracticePhrase("Time Left", false),
+        PracticePhrase("Weight Total", false),
 
-        PracticePhrase("Bowfin", false),        //------ Fish Species
+            //------🦈 Fish Species
+        PracticePhrase("Bowfin", false),
         PracticePhrase("Bullhead", false),
         PracticePhrase("Carp", false),
         PracticePhrase("Cat Fish", false),
@@ -31,22 +43,29 @@ object VoiceCommandList {
 
     )
 
+        // Location for 📃 Commands Used
     val knownTournamentCommands = listOf(
         "add a catch",
-        "save fish",
+        "save the catch",
+        "edit last catch",
+        "delete last catch",
         "save that",
-        "tag fish",
-        "record fish",
+        "tag catch",
+        "record catch",
         "catch caddy",
         "query question",
         "list of tagged catches",
         "time remaining",
-        "smallest fish on the list",
-        "largest fish on the list",
-        "smallest fish for today",
+        "smallest catch on the list",
+        "shortest catch on the list",
+        "longest catch on the list",
+        "largest catch on the list",
+        "smallest catch for today",
         "time since last catch",
+        "time remaining",
         "how many are on the list",
-        "what is the weight",
+        "what is the total weight",
+        "what is the total length",
         "log catch"
     )
 
