@@ -1,6 +1,8 @@
 package com.bramestorm.bassanglertracker.training
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -44,12 +46,22 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         }
 
 
-        // GOOGLE DRIVE to save files on...
+        // GitHub has saved files on...
 
         btnWhatIsVCC.setOnClickListener {
-           positionedToast("Not available on this version\n Check out the Catch and Call with Voice Control")
-            // TODO: Create What is Voice Control with Video 
+
+            val url = "https://github.com/Duewy/Catch_and_Cull_Help_Files/blob/main/using_voice_controls.pdf"
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(url)
+            }
+
+            try {
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                positionedToast("No browser found to open link.")
+            }
         }
+
 
         btnEnableVCC.setOnClickListener {
           positionedToast("Not available on this version\n Check out the Catch and Call with Voice Control")

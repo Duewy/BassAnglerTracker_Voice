@@ -1,7 +1,6 @@
 package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.google.gson.Gson
@@ -26,15 +25,32 @@ object SharedPreferencesManager {
     private const val KEY_NUMBER_OF_CATCHES = "NUMBER_OF_CATCHES"
     private const val KEY_TOURNAMENT_SPECIES = "TOURNAMENT_SPECIES"
     private const val KEY_CULLING_ENABLED = "CULLING_ENABLED"
+    private const val KEY_VCC_DOZE_AGREEMENT = "USER_AGREED_TO_VCC_DOZE"
 
     private const val TAG = "SharedPreferencesManager"
 
-    /**
-     * Return the singleton instance (nothing to construct).
-     */
-    fun getInstance(context: Intent): SharedPreferencesManager = this
+    // === VOICE CONTROL ===
+    fun setVccEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_VOICE_CONTROL_ENABLED, enabled).apply()
+    }
 
-    // --- CatchEntryType ---
+    fun isVccEnabled(context: Context): Boolean {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_VOICE_CONTROL_ENABLED, false)
+    }
+
+    fun setUserAgreedToDeepDoze(context: Context, agreed: Boolean) {
+        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_VCC_DOZE_AGREEMENT, agreed).apply()
+    }
+
+    fun hasUserAgreedToDeepDoze(context: Context): Boolean {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_VCC_DOZE_AGREEMENT, false)
+    }
+
+    // === CatchEntry Type ===
     fun saveCatchEntryType(context: Context, type: Int) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .edit().putInt(KEY_CATCH_TYPE, type).apply()
@@ -42,24 +58,7 @@ object SharedPreferencesManager {
 
     fun getCatchEntryType(context: Context): Int {
         return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CATCH_TYPE, -1) // Value is from StartUp btnStartFishing selection 1-4 Fun Day, 5-8 Tournament default 0
-    }
-
-    // --- Voice Control ---
-    fun setVccEnabled(context: Context, enabled: Boolean) {
-           context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-           .edit().putBoolean(KEY_VOICE_CONTROL_ENABLED, enabled).apply()
-    }
-
-    // --- Tournament Settings ---
-    fun setNumberOfCatches(context: Context, number: Int) {
-        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .edit().putInt(KEY_NUMBER_OF_CATCHES, number).apply()
-    }
-
-    fun getNumberOfCatches(context: Context): Int {
-        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_NUMBER_OF_CATCHES, 5)
+            .getInt(KEY_CATCH_TYPE, -1)
     }
 
     fun getTournamentUnit(context: Context): MeasurementMode {
@@ -81,10 +80,21 @@ object SharedPreferencesManager {
             2 -> MeasurementMode.KG
             3 -> MeasurementMode.INCHES
             4 -> MeasurementMode.CM
-            else -> MeasurementMode.LBS_OZ  // default fallback
+            else -> MeasurementMode.LBS_OZ
         }
     }
 
+
+    // === Tournament Settings ===
+    fun setNumberOfCatches(context: Context, number: Int) {
+        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_NUMBER_OF_CATCHES, number).apply()
+    }
+
+    fun getNumberOfCatches(context: Context): Int {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getInt(KEY_NUMBER_OF_CATCHES, 5)
+    }
 
     fun setTournamentSpecies(context: Context, species: String) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
@@ -96,24 +106,16 @@ object SharedPreferencesManager {
             .getString(KEY_TOURNAMENT_SPECIES, null)
     }
 
-    fun loadAllSpecies(context: Context): List<String> =
-        getAllSpecies(context)
-
     fun setCullingEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .edit().putBoolean(KEY_CULLING_ENABLED, enabled).apply()
     }
 
-    fun isCullingEnabled(context: Context): Boolean {
-        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getBoolean(KEY_CULLING_ENABLED, false)
-    }
 
-    // --- Species Management ---
+    // === Species Handling ===
     fun initializeDefaultSpeciesIfNeeded(context: Context) {
         val prefs = getSpeciesPrefs(context)
         val gson = Gson()
-
         if (!prefs.contains(KEY_ALL_SPECIES_LIST)) {
             val defaultSpecies = FishSpecies.allSpeciesList
             prefs.edit().putString(KEY_ALL_SPECIES_LIST, gson.toJson(defaultSpecies)).apply()
@@ -147,10 +149,8 @@ object SharedPreferencesManager {
 
     private fun getAllSavedSpecies(context: Context): List<String> {
         val json = getSpeciesPrefs(context).getString(KEY_ALL_SPECIES_LIST, null)
-        return if (json != null) Gson().fromJson(
-            json,
-            object : TypeToken<List<String>>() {}.type
-        ) else emptyList()
+        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
+        else emptyList()
     }
 
     fun updateUserSpeciesName(context: Context, oldName: String, newName: String) {
@@ -175,10 +175,8 @@ object SharedPreferencesManager {
 
     fun getSelectedSpeciesList(context: Context): List<String> {
         val json = getSpeciesPrefs(context).getString(KEY_SELECTED_SPECIES_LIST, null)
-        return if (json != null) Gson().fromJson(
-            json,
-            object : TypeToken<List<String>>() {}.type
-        ) else emptyList()
+        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
+        else emptyList()
     }
 
     fun saveSelectedSpeciesList(context: Context, speciesList: List<String>) {
@@ -200,6 +198,9 @@ object SharedPreferencesManager {
         return saved.filterNot { it in default }
     }
 
+    fun loadAllSpecies(context: Context): List<String> =
+        getAllSpecies(context)
+
     fun getAllSpecies(context: Context): List<String> {
         val default = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
         return (default + getUserAddedSpeciesList(context)).distinct()
@@ -219,5 +220,4 @@ object SharedPreferencesManager {
     fun normalizeSpeciesName(name: String): String =
         name.trim().lowercase().replace(Regex("\\s+"), " ")
 
-
-}//------------- END -------------------------------------------
+}

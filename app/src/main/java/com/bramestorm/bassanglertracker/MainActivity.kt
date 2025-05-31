@@ -10,6 +10,7 @@ import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
 
+
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

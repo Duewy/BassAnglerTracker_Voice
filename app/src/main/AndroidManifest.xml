@@ -93,6 +93,12 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
+        <!-- User Agreement for the Deep Doze Battery Set UP -->
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".UserAgreementForDeepDozeActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+
         <!-- User can select species for list and can add species to list -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".activities.AllSpeciesSelectionActivity"

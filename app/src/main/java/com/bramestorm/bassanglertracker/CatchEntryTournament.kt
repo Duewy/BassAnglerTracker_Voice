@@ -174,12 +174,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
               }
           }
 
-        // Show the VCC popup on command from the service
-        private val showVccReceiver = object : BroadcastReceiver() {
-            override fun onReceive(ctx: Context, intent: Intent) {
-                showWeightPopup()
-            }
-        }
 
       //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -284,7 +278,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         updateTournamentList()
     }
 
-    //----------- On Manual Wake ------------------------
+      //----------- On Manual Wake ------------------------
     override fun onManualWake() {
         showWeightPopup()
     }
@@ -295,7 +289,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         super.onDestroy()
         tts.stop()
         tts.shutdown()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(showVccReceiver)
         voiceHelper.shutdown()
         toastTts?.shutdown()
         handler.removeCallbacksAndMessages(null)
@@ -319,7 +312,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     }
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
-    /** Launches the appropriate popup (VCC vs manual) */
 
     private fun showWeightPopup() {
         awaitingResult = true

@@ -5,10 +5,8 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothProfile
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
@@ -57,8 +55,10 @@ class SetUpActivity : AppCompatActivity() {
         private const val BT_REQUEST_CODE                   = 104
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         private const val REQUEST_VOICE_SETUP               = 2001
+        private const val REQUEST_DEEP_DOZE_AGREEMENT = 2002
 
-            const val TYPE_FUN_LBS    = 1
+
+        const val TYPE_FUN_LBS    = 1
             const val TYPE_FUN_KGS    = 2
             const val TYPE_FUN_INCH   = 3
             const val TYPE_FUN_CM     = 4
@@ -252,44 +252,40 @@ class SetUpActivity : AppCompatActivity() {
 
         //------ VOICE CONTROL ----------------
         tglVoice.setOnCheckedChangeListener { _, isChecked ->
+            SharedPreferencesManager.setVccEnabled(this, isChecked)
+
             if (isChecked) {
-                // 1) RECORD_AUDIO check
-                if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.RECORD_AUDIO
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.RECORD_AUDIO),
-                        REQUEST_RECORD_AUDIO
-                    )
+                // Check for Deep Doze consent
+                val hasAgreed = SharedPreferencesManager.hasUserAgreedToDeepDoze(this)
+                if (!hasAgreed) {
+                    // Launch agreement screen — handled in onActivityResult
+                    val intent = Intent(this, UserAgreementForDeepDozeActivity::class.java)
+                    startActivityForResult(intent, REQUEST_DEEP_DOZE_AGREEMENT)
                     tglVoice.isChecked = false
                     return@setOnCheckedChangeListener
                 }
 
-                // 2) BLUETOOTH_CONNECT check (only on Android 12+)
+                // 1) RECORD_AUDIO permission
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO)
+                    tglVoice.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+
+                // 2) BLUETOOTH_CONNECT permission (Android 12+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                        REQUEST_BLUETOOTH_CONNECT
-                    )
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), REQUEST_BLUETOOTH_CONNECT)
                     tglVoice.isChecked = false
                     return@setOnCheckedChangeListener
                 }
 
-                // 3) All permissions are granted → choose mic source
+                // 3) All permissions granted → continue
                 val usingBluetooth = isBluetoothConnectedSafe()
                 val sourceName = if (usingBluetooth) "Bluetooth mic" else "phone mic"
-               positionedToast("🤙 Voice control enabled using $sourceName 🤳")
 
-                // (Optional) persist which source we’ll use
+                positionedToast("🤙 Voice control enabled using $sourceName 🤳")
+
                 prefs.edit()
                     .putBoolean(KEY_USE_BLUETOOTH_MODE, usingBluetooth)
                     .putBoolean(KEY_VOICE_CONTROL, true)
@@ -297,18 +293,17 @@ class SetUpActivity : AppCompatActivity() {
 
                 startVoiceService()
             } else {
-                // disable
                 prefs.edit().putBoolean(KEY_VOICE_CONTROL, false).apply()
                 stopVoiceService()
                 positionedToast("⚠️ Voice control disabled 🚫️")
             }
 
-                // update toggle UI color
-                tglVoice.background = if (tglVoice.isChecked)
-                    ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
-                else
-                    ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
-        }//-------------------END -- tglVoice -------------------------------------------
+            tglVoice.background = if (tglVoice.isChecked)
+                ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
+            else
+                ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
+        }
+//-------------------END -- tglVoice -------------------------------------------
 
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
@@ -409,6 +404,16 @@ class SetUpActivity : AppCompatActivity() {
                 tglVoice.isChecked = false      //todo Should we add tglVoice.text = "Disabled" and tglVoice.background = orange ?????
             }
         }
+        if (requestCode == REQUEST_DEEP_DOZE_AGREEMENT) {
+            if (resultCode == RESULT_OK) {
+                // User agreed → re-trigger toggle to continue setup
+                tglVoice.isChecked = true
+            } else {
+                // User declined → keep it off
+                tglVoice.isChecked = false
+                positionedToast("Voice Control requires agreement to run in Deep Sleep mode.")
+            }
+        }
     }
 
     // ~~~~ Voice Services for Vcc ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -425,33 +430,9 @@ class SetUpActivity : AppCompatActivity() {
         stopService(Intent(this, VoiceControlService::class.java))
     }
 
-    private fun checkBluetoothHeadset(): Boolean {          //todo see if we need this anymore or if it just comes up on older Android Cell Phones???
-        // on Android 12+ we need BLUETOOTH_CONNECT at runtime
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                    BT_REQUEST_CODE
-                )
-                // bail out now; we’ll re–check once the user grants
-                return false
-            }
-        }
-
-        // safe to query SCO support and connection state now
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (!audioManager.isBluetoothScoAvailableOffCall) return false
-
-        val btAdapter = BluetoothAdapter.getDefaultAdapter() ?: return false
-        return btAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) ==
-                BluetoothAdapter.STATE_CONNECTED
-    }
-
-
 
     // ------------ Tournament Species Selector ------------------
+
     private fun loadTournamentSpeciesSpinner() {
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerTournamentSpecies)
 
@@ -572,8 +553,7 @@ class SetUpActivity : AppCompatActivity() {
 
         //!!!!!!!!!!!!!!! For Shared Sessions !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         private fun isVoiceModeEnabled(): Boolean {
-            val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
-            return prefs.getBoolean("VOICE_MODE_ENABLED", false)
+            return SharedPreferencesManager.isVccEnabled(this)
         }
 
     }
