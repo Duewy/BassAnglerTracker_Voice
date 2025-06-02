@@ -53,9 +53,10 @@ class SetUpActivity : AppCompatActivity() {
         private const val REQUEST_RECORD_AUDIO              = 100
         private const val REQUEST_BLUETOOTH_CONNECT         = 101
         private const val BT_REQUEST_CODE                   = 104
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+        private const val LOCATION_PERMISSION_REQUEST_CODE  = 1001
+        private const val REQUEST_PHONE_STATE               = 1003
         private const val REQUEST_VOICE_SETUP               = 2001
-        private const val REQUEST_DEEP_DOZE_AGREEMENT = 2002
+        private const val REQUEST_DEEP_DOZE_AGREEMENT       = 2002
 
 
         const val TYPE_FUN_LBS    = 1
@@ -101,6 +102,7 @@ class SetUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestPhoneStatePermissionIfNeeded()
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         //------------------- Ensures that the GPS must be Re-Enabled Every Day --------------------
@@ -418,13 +420,18 @@ class SetUpActivity : AppCompatActivity() {
 
     // ~~~~ Voice Services for Vcc ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     private fun startVoiceService() {
-        val svc = Intent(this, VoiceControlService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(svc)
+        if (SharedPreferencesManager.isVccEnabled(this)) {
+            val svc = Intent(this, VoiceControlService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(svc)
+            } else {
+                startService(svc)
+            }
         } else {
-            startService(svc)
+            stopService(Intent(this, VoiceControlService::class.java))
         }
     }
+
 
     private fun stopVoiceService() {
         stopService(Intent(this, VoiceControlService::class.java))
@@ -495,6 +502,21 @@ class SetUpActivity : AppCompatActivity() {
     }
 
     //--------------- Request Permissions for Bluetooth ----------------
+
+    private fun requestPhoneStatePermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_PHONE_STATE),
+                REQUEST_PHONE_STATE
+            )
+        }
+    }
+
+
     // ---------- Permission Callbacks ------------
         override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -528,6 +550,14 @@ class SetUpActivity : AppCompatActivity() {
                         positionedToast("🚫 GPS permission denied.")
                         tglGPS.isChecked = false
                         disableGps()
+                    }
+                }
+
+                REQUEST_PHONE_STATE -> {
+                    if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "✅ Phone State permission granted")
+                    } else {
+                        positionedToast("🚫 Phone permission denied.")
                     }
                 }
             }

@@ -52,7 +52,7 @@ class VoiceResponseManager(context: Context) {
                 }
             })
         }
-    }
+    }//==== END = Speak =========================
 
 
 
@@ -60,4 +60,4 @@ class VoiceResponseManager(context: Context) {
         tts?.stop()
         tts?.shutdown()
     }
-}
+}//========= END = Voice Response Manager ===============

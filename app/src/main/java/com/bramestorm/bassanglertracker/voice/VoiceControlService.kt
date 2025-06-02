@@ -9,6 +9,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -22,9 +23,11 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.training.VoiceResponseManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
@@ -44,6 +47,7 @@ class VoiceControlService : Service() {
     // for Incoming Telephone Calls
     private lateinit var telephonyManager: TelephonyManager
     private val callListener = object : PhoneStateListener() {
+        @Deprecated("Deprecated in Java")
         override fun onCallStateChanged(state: Int, incomingNumber: String?) {
             when (state) {
                 TelephonyManager.CALL_STATE_RINGING,
@@ -51,9 +55,32 @@ class VoiceControlService : Service() {
                     Log.w(TAG, "📞 Phone call detected — stopping voice session if active")
                     stopVoiceSessionIfActive()
                 }
+                TelephonyManager.CALL_STATE_IDLE -> {
+                    Log.i(TAG, "📞 Call ended — restoring Bluetooth listener")
+                    restartVoiceControlBluetoothListener()
+                }
             }
         }
     }
+    // after Phone call restart VCC again.
+    private fun restartVoiceControlBluetoothListener() {
+        mediaSession?.setCallback(object : MediaSessionCompat.Callback() {
+            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+                val keyEvent = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                if (keyEvent?.action == KeyEvent.ACTION_DOWN) {
+                    Log.d(TAG, "🎙️ Media button ACTION_DOWN → starting onWake()")
+                    onWake()
+                } else {
+                    Log.d(TAG, "🎙️ Media button ignored: action=${keyEvent?.action}")
+                }
+                return true
+            }
+        })
+
+        mediaSession?.isActive = true
+        Log.d(TAG, "✅ Media session reactivated")
+    }
+
     private var sessionActive = false
     private var activeVoiceSession: VoiceInteractionManager? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -62,8 +89,7 @@ class VoiceControlService : Service() {
     private lateinit var mediaButtonReceiver: PendingIntent
     private var focusRequest: AudioFocusRequest? = null
     private val handler = Handler(Looper.getMainLooper())
-    private var alarmHour: Int = -1
-    private var alarmMinute: Int = -1
+    private var lastMediaTapTime = 0L
 
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -72,7 +98,12 @@ class VoiceControlService : Service() {
         // Audio & Power managers
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
+
+        try {       // Lets Phone Call take over Bluetooth and Listener
+            telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "📵 PhoneStateListener blocked: ${e.message}")
+        }
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CatchAndCall:VoiceWakeLock")
@@ -121,6 +152,7 @@ class VoiceControlService : Service() {
         // ← Re-attach the callback that turns key events into onWake()
         session.setCallback(object : MediaSessionCompat.Callback() {
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+                Log.d(TAG, "🎙️ Media button event received!")
                 onWake()
                 return true
             }
@@ -130,12 +162,13 @@ class VoiceControlService : Service() {
         mediaSession = session
         // PendingIntent for media button
         mediaButtonReceiver = PendingIntent.getBroadcast(
-            this, 0,
-            Intent(ACTION_MEDIA_BUTTON).setPackage(packageName),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+             this, 0,
+           Intent(ACTION_MEDIA_BUTTON).setPackage(packageName),
+           PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
         session.setMediaButtonReceiver(mediaButtonReceiver)
-        audioManager.registerMediaButtonEventReceiver(mediaButtonReceiver)
+       audioManager.registerMediaButtonEventReceiver(mediaButtonReceiver)
 
         // Play silent clip to establish focus
         MediaPlayer.create(this, R.raw.silence_0_1s)?.apply {
@@ -145,8 +178,18 @@ class VoiceControlService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!SharedPreferencesManager.isVccEnabled(this)) {
+            Log.d(TAG, "Voice control is disabled — stopping service")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         when (intent?.action) {
-            ACTION_START_VOICE -> onWake()
+            ACTION_START_VOICE,
+            Intent.ACTION_MEDIA_BUTTON -> {
+                Log.d(TAG, "🔥 Media button pressed — invoking onWake()")
+                onWake()
+            }
         }
         return START_STICKY
     }
@@ -168,8 +211,8 @@ class VoiceControlService : Service() {
 
         // Determine mode: Fun-Day or Tournament with Value from SetUp btnStartFishing saved in SharedPreferencesManager  getCatchEntryType()
         val type = SharedPreferencesManager.getCatchEntryType(applicationContext)
-        // build a small UI helper: routes TTS through VoiceResponseManager
-        // and toasts via Android Toast on the main thread
+        // todo build a small UI helper: routes TTS through VoiceResponseManager
+        // todo and toasts via Android Toast on the main thread
         val uiHelper = object : VoiceUiHelper {
             private val vrm = VoiceResponseManager(applicationContext)
             private val mainHandler = Handler(Looper.getMainLooper())
@@ -195,8 +238,12 @@ class VoiceControlService : Service() {
                 uiHelper = uiHelper,
                 alarmHour = sharedPref.getInt("ALARM_HOUR", -1),
                 alarmMinute = sharedPref.getInt("ALARM_MINUTE", -1)
-            ) .apply { setSessionRef { activeVoiceSession = it } }
-              .onWake()
+            ) .apply { setSessionRef {
+                activeVoiceSession = it
+                sessionActive = false // ✅ Allow next tap to start a session again
+            } }
+
+                .onWake()
         } else {
             // Fun Day mode → use FunDayVoiceHandler
             FunDayVoiceHandler.getInstance(
@@ -247,8 +294,17 @@ class VoiceControlService : Service() {
 
     private fun isInCall(): Boolean {
         val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return telephonyManager.callState != TelephonyManager.CALL_STATE_IDLE
+        return if (
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            telephonyManager.callState != TelephonyManager.CALL_STATE_IDLE
+        } else {
+            Log.w(TAG, "📵 READ_PHONE_STATE permission not granted — assuming no call")
+            false
+        }
     }
+
 
     private fun stopVoiceSessionIfActive() {
         try {
@@ -257,8 +313,11 @@ class VoiceControlService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "❌ Failed to cancel voice session cleanly: ${e.message}")
         }
-
+        // Show a Message toast 📃
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
+        // Speak the status via TTS 🔊
+        val tts = VoiceResponseManager(applicationContext)
+        tts.speak("You have an incoming call. Voice control has ended. Please re-enter your catch afterward. Over and Out.")
     }
 
 

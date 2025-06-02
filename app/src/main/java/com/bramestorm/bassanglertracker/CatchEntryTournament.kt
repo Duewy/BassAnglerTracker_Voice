@@ -37,6 +37,7 @@ import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.MyWeightEntryDialogFragment
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -151,59 +152,59 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-      override val dialog: Any
-          get() {
-              // Build the species list for the dialog
-              val speciesList = when {
-                  tournamentSpecies.equals("Large Mouth", true)  -> arrayOf("Large Mouth", "Small Mouth")
-                  tournamentSpecies.equals("Small Mouth", true)  -> arrayOf("Small Mouth", "Large Mouth")
-                  else                                           -> arrayOf(tournamentSpecies)
-              }
+    override val dialog: Any
+        get() {
+            // Build the species list for the dialog
+            val speciesList = when {
+                tournamentSpecies.equals("Large Mouth", true)  -> arrayOf("Large Mouth", "Small Mouth")
+                tournamentSpecies.equals("Small Mouth", true)  -> arrayOf("Small Mouth", "Large Mouth")
+                else                                           -> arrayOf(tournamentSpecies)
+            }
 
-              // Build the available clip colors array
-              val clipColorList = availableClipColors.map { it.name }.toTypedArray()
+            // Build the available clip colors array
+            val clipColorList = availableClipColors.map { it.name }.toTypedArray()
 
-              // Return your weight-entry DialogFragment stub
-              return MyWeightEntryDialogFragment(
-                  speciesList    = speciesList,
-                  clipColorList  = clipColorList
-              ) { inches, quarters, species, clipColor ->
-                  // Combine quarters → total quarters
-                  val totalLengthQuarters = inches * 4 + quarters
-                  saveTournamentCatch(totalLengthQuarters, species, clipColor)
-              }
-          }
+            // Return your weight-entry DialogFragment stub
+            return MyWeightEntryDialogFragment(
+                speciesList    = speciesList,
+                clipColorList  = clipColorList
+            ) { inches, quarters, species, clipColor ->
+                // Combine quarters → total quarters
+                val totalLengthQuarters = inches * 4 + quarters
+                saveTournamentCatch(totalLengthQuarters, species, clipColor)
+            }
+        }
 
 
-      //================START - ON CREATE =======================================
+    //================START - ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view)
 
-          ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
-          LocalBroadcastManager.getInstance(this).registerReceiver(
-              voiceCatchReceiver, IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
-          )
+        ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            voiceCatchReceiver, IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
+        )
 
-     // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-     voiceHelper = VoiceInteractionHelper(
-         activity = this, //
-         measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
-         isTournament = true,
-         onCommandAction = { transcript -> onSpeechResult(transcript) }
-     )
+        // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
+        voiceHelper = VoiceInteractionHelper(
+            activity = this, //
+            measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+            isTournament = true,
+            onCommandAction = { transcript -> onSpeechResult(transcript) }
+        )
 
-     voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+        voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
 
-     Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+        Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
 
-          tts = TextToSpeech(this) { status ->
-              if (status == TextToSpeech.SUCCESS) {
-                  tts.language = Locale.getDefault()
-              }
-          }
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale.getDefault()
+            }
+        }
 
-     dbHelper = CatchDatabaseHelper(this)
+        dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
         btnMenu = findViewById(R.id.btnMenu)
         btnMainPg = findViewById(R.id.btnMainPg)
@@ -244,31 +245,31 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         txtColorLetter6 = findViewById(R.id.txtColorLetter6)
 
 
-          //>>>>  Get Values from Set-Up Page <<<<<<<<<
-          tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
-          typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
-          tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
-          measurementSystem = intent.getStringExtra("unitType") ?: "weight"
-          isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
-          voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)
+        //>>>>  Get Values from Set-Up Page <<<<<<<<<
+        tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
+        typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
+        tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
+        measurementSystem = intent.getStringExtra("unitType") ?: "weight"
+        isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
+        voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)
 
 
         //----ADD a CATCH button is clicked -----------
-     btnTournamentCatch.setOnClickListener {
-             showWeightPopup()
-     }
+        btnTournamentCatch.setOnClickListener {
+            showWeightPopup()
+        }
 
-     btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
-     btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
-     btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
+        btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
+        btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
+        btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
 
         updateVccLabel()
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()      //todo ask if we need to put this in the onResume to update the list when we wake up the app???
-     handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
+        handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
 
- } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
@@ -278,7 +279,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         updateTournamentList()
     }
 
-      //----------- On Manual Wake ------------------------
+    //----------- On Manual Wake ------------------------
     override fun onManualWake() {
         showWeightPopup()
     }
@@ -338,17 +339,17 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     }
 
 
-      // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     private fun saveTournamentCatch(weightTotalOz: Int, species: String, clipColor: String) {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-          val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
-              "Largemouth"   -> "L"
-              "Smallmouth"   -> "S"
-              "Spotted"      -> "P"
-              else           -> ""
-          }
+        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
+            "Largemouth"   -> "L"
+            "Smallmouth"   -> "S"
+            "Spotted"      -> "P"
+            else           -> ""
+        }
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
@@ -657,80 +658,80 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     } //------------ END Get Species Codes ----------------
 
 
-        //******************* FOR User EDIT Logged Weights ********************************
+    //******************* FOR User EDIT Logged Weights ********************************
 
-        private fun showTournamentEditDialog(c: CatchItem) {
-            // 1) inflate the custom layout
-            val dialogView = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_lbs, null)
+    private fun showTournamentEditDialog(c: CatchItem) {
+        // 1) inflate the custom layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_lbs, null)
 
-            // 2) pull out your in-layout buttons & fields
-            val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
-            val edtLbs       = dialogView.findViewById<EditText>(R.id.edtTourWeightLbs)
-            val edtOzs       = dialogView.findViewById<EditText>(R.id.edtTourWeightOzs)
-            val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourLbs)
-            val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourLbs)
+        // 2) pull out your in-layout buttons & fields
+        val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
+        val edtLbs       = dialogView.findViewById<EditText>(R.id.edtTourWeightLbs)
+        val edtOzs       = dialogView.findViewById<EditText>(R.id.edtTourWeightOzs)
+        val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourLbs)
+        val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourLbs)
 
-            // 3) pre-fill the fields
-            edtLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
-            edtOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
+        // 3) pre-fill the fields
+        edtLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
+        edtOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
 
 
-            val weightOz = c.totalWeightOz ?: 0
-            edtLbs.setText((weightOz / 16).toString())
-            edtOzs.setText((weightOz % 16).toString())
+        val weightOz = c.totalWeightOz ?: 0
+        edtLbs.setText((weightOz / 16).toString())
+        edtOzs.setText((weightOz % 16).toString())
 
-            // 4) color box
-            val clipColor = try {
-                ClipColor.valueOf(c.clipColor!!.uppercase())
-            } catch (_: Exception) {
-                ClipColor.RED
-            }
-            txtClipColor.background =
-                createLayeredDrawable(ContextCompat.getColor(this, clipColor.resId))
+        // 4) color box
+        val clipColor = try {
+            ClipColor.valueOf(c.clipColor!!.uppercase())
+        } catch (_: Exception) {
+            ClipColor.RED
+        }
+        txtClipColor.background =
+            createLayeredDrawable(ContextCompat.getColor(this, clipColor.resId))
 
-            // 5) build & show **one** dialog
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("Edit or Delete Catch")
-                .setView(dialogView)
-                .create()
-            dialog.show()
+        // 5) build & show **one** dialog
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Edit or Delete Catch")
+            .setView(dialogView)
+            .create()
+        dialog.show()
 
-            // 6) wire your in-layout Save
-            btnSave.setOnClickListener {
-                val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
-                val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
-                val newWeightOz = (newLbs * 16) + newOzs
+        // 6) wire your in-layout Save
+        btnSave.setOnClickListener {
+            val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
+            val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
+            val newWeightOz = (newLbs * 16) + newOzs
 
-                if (newWeightOz == 0) {
-                    edtLbs.setText("0")
-                    edtOzs.setText("0")
-                    edtLbs.requestFocus()
-                    edtLbs.setSelection(edtLbs.text.length)
+            if (newWeightOz == 0) {
+                edtLbs.setText("0")
+                edtOzs.setText("0")
+                edtLbs.requestFocus()
+                edtLbs.setSelection(edtLbs.text.length)
 
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(edtLbs, InputMethodManager.SHOW_IMPLICIT)
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(edtLbs, InputMethodManager.SHOW_IMPLICIT)
 
-                    positionedToast("🚫 Weight cannot be 0 lbs 0 oz!")
-                    return@setOnClickListener
-                }
-
-                dbHelper.updateCatch(
-                    catchId            = c.id,
-                    newWeightOz        = newWeightOz,
-                    newWeightKg        = null,
-                    newLengthQuarters  = null,
-                    newLengthCm        = null,
-                    species            = c.species
-                )
-                updateTournamentList()
-                dialog.dismiss()
+                positionedToast("🚫 Weight cannot be 0 lbs 0 oz!")
+                return@setOnClickListener
             }
 
-            // 7) …and Cancel
-            btnCancel.setOnClickListener {
-                dialog.dismiss()
-            }
-        }//========== END of User Editing Logged Weights ==============================
+            dbHelper.updateCatch(
+                catchId            = c.id,
+                newWeightOz        = newWeightOz,
+                newWeightKg        = null,
+                newLengthQuarters  = null,
+                newLengthCm        = null,
+                species            = c.species
+            )
+            updateTournamentList()
+            dialog.dismiss()
+        }
+
+        // 7) …and Cancel
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+    }//========== END of User Editing Logged Weights ==============================
 
     // ^^^^^^^^^^^^^^^  CHECK ALARM ++++++++++++++++++++++++
 
@@ -803,11 +804,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 val timeString = "$displayHour:$formattedMinute $amPm"
 
                 // Send to Shared Preference for Vcc Alarm Notification
-                val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
-                prefs.edit()
-                    .putInt("ALARM_HOUR", alarmHour)
-                    .putInt("ALARM_MINUTE", alarmMinute)
-                    .apply()
+                SharedPreferencesManager.setAlarmTime(this, alarmHour, alarmMinute)
 
                 // Update button and show toast
                 btnAlarm.text = getString(R.string.alarm_set_to, timeString)

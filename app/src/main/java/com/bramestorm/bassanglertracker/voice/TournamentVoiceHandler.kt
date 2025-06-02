@@ -28,6 +28,8 @@ class TournamentVoiceHandler(
     private val alarmHour: Int = -1,
     private val alarmMinute: Int = -1,
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context),) {
+    private fun now(): String {return SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault()).format(Date())}
+    private var lastWakeTime = 0L
 
 
     private var isSessionActive = false
@@ -90,17 +92,30 @@ class TournamentVoiceHandler(
 
     /** Called by VoiceControlService on wake */
     fun onWake() {
-
+        val now = System.currentTimeMillis()
+        if (now - lastWakeTime < 2000) {
+            Log.w("VCC_PROTECT", "⛔ Ignored wake — too soon")
+            return
+        }
+        lastWakeTime = now
         startVoiceSession()
     }
 
     /** Starts a new voice session for lbs/oz catches */
     private fun startVoiceSession() {
+
+        Log.d("VCC_SESSION", "🕒 ${now()} — 🔁 startVoiceSession() called")
+
         // ensure no double looping
         if (isSessionActive) {
+            Log.d("VCC_PROTECT", "🕒 ${now()} — ⚠️ Blocked duplicate session")
             Log.w("VCC_PROTECT", "Session already active — aborting duplicate start.")
             return
         }
+        // 🔐 Protect immediately
+        isSessionActive = true
+        Log.d("VCC_PROTECT", "🔒 Session marked active immediately")
+
         // SET UP the Available Clip Colors to double check for User Error
         val usedColors = dbHelper.getTopTournamentCatches(tournamentCatchLimit)
             .mapNotNull { it.clipColor?.uppercase() }
@@ -116,22 +131,44 @@ class TournamentVoiceHandler(
         // ✅ Let the service track the session for call shutdown
         sessionRef?.invoke(voiceManager)
 
-        isSessionActive = true// Tell the if that yes the Voice Session is Active
+        Log.d("VCC_SESSION", "🕒 ${now()} — ✅ Voice session marked active")
 
         voiceManager.parser = object : VoiceCommandParser {     // SENDS everything to VoiceParser to get the values
             override fun parse(input: String): VoiceCommandParser.ParseResult {
 
+                        val transcript = input.trim().lowercase(Locale.ROOT)
+
+                Log.d("VCC_PARSE", "🕒 ${now()} — 📥 Raw transcript received: $transcript")
+
+                if (transcript.startsWith("question ")) {        // for Questions❓❔ send -> to UserVccQuestionAnswer.kt page
+                    val questionText = transcript.removePrefix("question ").trim()
+                    Log.d("VCC_QNA", "Detected user question: $questionText")
+
+                    UserVccQuestionAnswer.handleVccQuestion(context, questionText)?.let { answer ->
+
+                        Log.d("VCC_TTS", "🕒 ${now()} — 🗣️ Speaking Over and Out")
+
+                        uiHelper.speak("$answer Over and Out.")
+
+                        Log.d("VCC_PARSE", "🕒 ${now()} — ✅ Catch parsed successfully. Awaiting confirmation.")
+
+                        return VoiceCommandParser.ParseResult.Failure("User asked a question instead of providing catch data")
+                    }
+                }
+
                 Log.d("VCC_DEBUG", "🐟 SpeciesList sent to parser: ${listOf(tournamentSpecies)}")
 
                 val parsed = when (mode) {
-                    MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
-                    MeasurementMode.KG     -> VoiceParser.parseMetricCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
+                    MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
+                    MeasurementMode.KG     -> VoiceParser.parseKgsCatchWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.INCHES -> VoiceParser.parseImperialLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                 }
                 if (parsed.totalWeightOzs == 0 || parsed.species.isBlank() || parsed.clipColor.isBlank()) {
                     Log.e("VCC_PARSE", "❌ Incomplete catch — skipping save. Weight=${parsed.totalWeightOzs}, Species='${parsed.species}', Clip='${parsed.clipColor}'")
-                    uiHelper.speak("Sorry, I couldn't understand your catch. Please try again. Over.")
+                    Log.d("VCC_TTS", "🕒 ${now()} — 🗣️ Speaking Incomplete confirmation prompt")
+
+                    uiHelper.speak("Sorry, I couldn't understand everything. Please say your catch information again. Over.")
                     return VoiceCommandParser.ParseResult.Failure("Missing required info")
                 }
 
@@ -176,6 +213,7 @@ class TournamentVoiceHandler(
                 onConfirmed: (ConfirmedCatch) -> Unit
             ) {
                 Log.d("VCC_CONFIRM_PROMPT", "Awaiting confirmation for: ${lastCatch.species}, ${lastCatch.weightOz}oz, ${lastCatch.clipColor}")
+                Log.d("VCC_CONFIRM", "🕒 ${now()} — 🔄 Entering awaitConfirmation()")
 
                 // Inject confirmation parser FIRST
                 voiceManager.parser = object : VoiceCommandParser {
@@ -192,26 +230,37 @@ class TournamentVoiceHandler(
 
                         return when {
                             normalized.contains("yes over") -> {
+
+                                Log.d("VCC_CONFIRM", "🕒 ${now()} — 👍 Heard 'yes over'")
+
                                 Log.d("VCC_CONFIRM", "✅ User confirmed catch.")
                                 onConfirmed(lastCatch)
-                                uiHelper.speak("Catch saved. Over and Out.")
+                                uiHelper.speak("Catch is saved. Over and Out.")
                                 VoiceCommandParser.ParseResult.Confirm(lastCatch, "confirmed")
                             }
                             normalized.contains("no over") -> {
                                 Log.d("VCC_CONFIRM", "↩️ User rejected catch.")
+                                Log.d("VCC_CONFIRM", "🕒 ${now()} — ↩️ Heard 'no over'")
+
+                                uiHelper.speak("Okay, let's try again. Please say your catch information. Over.")
                                 startVoiceSession()
                                 VoiceCommandParser.ParseResult.Confirm(lastCatch, "restarting")
                             }
                             normalized.contains("cancel that") -> {
+
+                                Log.d("VCC_CONFIRM", "🕒 ${now()} — ❌ Heard 'cancel that'")
+
                                 Log.d("VCC_CONFIRM", "❌ User canceled catch.")
                                 uiHelper.speak("All canceled. Over and Out.")
                                 endVoiceSession()
                                 VoiceCommandParser.ParseResult.Confirm(lastCatch, "cancelled")
                             }
                             else -> {
+
+                                Log.d("VCC_CONFIRM", "🕒 ${now()} — 🤔 Unrecognized input, retrying confirmation")
                                 Log.d("VCC_CONFIRM", "🤷 Unrecognized: $normalized")
-                                uiHelper.speak("Please say yes over, no over, or cancel that. Over.")
-                                awaitConfirmation(lastCatch, onConfirmed)
+                                uiHelper.speak("Please say, yes over, no over, or cancel that. Over.")
+                                voiceManager.parser = this
                                 VoiceCommandParser.ParseResult.Confirm(lastCatch, "retrying")
                             }
                         }
@@ -229,9 +278,9 @@ class TournamentVoiceHandler(
 
         val startPrompt = when (mode) {
             MeasurementMode.LBS_OZ -> "Please tell me the pounds and ounces, the species and the clip color of your catch, over"
-            MeasurementMode.KG     -> "Please say the kilograms, grams, species and clip color of your catch, over"
-            MeasurementMode.INCHES -> "Please say the inches, quarters, species and clip color of your catch, over"
-            MeasurementMode.CM     -> "Please say the centimeters, millimeters, species and clip color of your catch, over"
+            MeasurementMode.KG     -> "Please tell me the kilograms and grams, the species and clip color of your catch, over"
+            MeasurementMode.INCHES -> "Please tell me the inches and quarters, the species and clip color of your catch, over"
+            MeasurementMode.CM     -> "Please tell me the centimeters, and millimeters, the species and clip color of your catch, over"
         }
 
         voiceManager.startSession(
@@ -241,8 +290,15 @@ class TournamentVoiceHandler(
     }   // ====== END start Voice Session ====================
 
     private fun endVoiceSession() {
+
+        Log.d("VCC_SESSION", "🕒 ${now()} — 🧹 Ending voice session")
+
         isSessionActive = false
         voiceManager.shutdown()
+        // 🔁 Re-attach session for the next tap
+        sessionRef?.invoke(voiceManager)
+        Log.d("VCC_SESSION", "🕒 ${now()} — 🔁 Session re-armed for next tap")
+
     }
 
 
@@ -326,6 +382,7 @@ class TournamentVoiceHandler(
         uiHelper.speak(spokenSummary)
         Log.d("VCC", "📣 Spoken Feedback: $spokenSummary")
 
+        Log.d("VCC_SESSION", "🕒 ${now()} — 🧹 Ending voice session")
 
         // 5) Ensure Voice Session is over
         endVoiceSession()
@@ -346,7 +403,6 @@ class TournamentVoiceHandler(
         this.sessionRef = ref
         ref(voiceManager) // ✅ immediately pass reference back for tracking
     }
-
 
 
 }// =============== END ===========================================

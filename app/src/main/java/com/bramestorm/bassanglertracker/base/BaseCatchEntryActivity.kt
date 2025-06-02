@@ -131,11 +131,15 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
-        if (prefs.getBoolean("voice_enabled", false)) {
-            ContextCompat.startForegroundService(
-                this,Intent(this, VoiceControlService::class.java))
+        val voiceEnabled = prefs.getBoolean("voice_enabled", false)
+
+        if (voiceEnabled) {
+            ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
+        } else {
+            stopService(Intent(this, VoiceControlService::class.java))
         }
     }
+
 
     override fun onDestroy() {
         try { unregisterReceiver(wakeReceiver) } catch(_: Exception) {}

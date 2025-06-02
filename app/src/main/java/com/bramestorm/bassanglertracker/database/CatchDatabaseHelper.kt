@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
                                                           // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!!
-class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 7) {
+class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 8) {
 
     private val prefs by lazy { context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE) }
 
@@ -58,17 +58,22 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.execSQL(createCatchesTable)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // v1 → v2 migration: preserve all existing rows
-        if (oldVersion < 2) {
-            // 1) Rename the old table out of the way
-            db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO ${TABLE_NAME}_old;")
+      private fun columnExists(db: SQLiteDatabase, table: String, column: String): Boolean {
+          val cursor = db.rawQuery("PRAGMA table_info($table)", null)
+          cursor.use {
+              while (it.moveToNext()) {
+                  if (it.getString(it.getColumnIndexOrThrow("name")) == column) return true
+              }
+          }
+          return false
+      }
 
-            // 2) Re-create the new table with the updated schema
-            onCreate(db)
 
-            // 3) Copy every row from the old table into the new one
-            db.execSQL("""
+      override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+          if (oldVersion < 2) {
+              db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO ${TABLE_NAME}_old;")
+              onCreate(db)
+              db.execSQL("""
             INSERT INTO $TABLE_NAME (
                 $COLUMN_ID,
                 $COLUMN_DATE_TIME,
@@ -98,17 +103,21 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 $COLUMN_CLIP_COLOR
             FROM ${TABLE_NAME}_old;
         """.trimIndent())
+              db.execSQL("DROP TABLE IF EXISTS ${TABLE_NAME}_old;")
+          }
 
-            // 4) Drop the temporary backup
-            db.execSQL("DROP TABLE IF EXISTS ${TABLE_NAME}_old;")
-        }
+          if (oldVersion < 7) {
+              // Only add columns *not already present in onCreate()* or if you plan to modify them
+              if (!columnExists(db, TABLE_NAME, "length_decimal_tenth_cm")) {
+                  db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN length_decimal_tenth_cm INTEGER DEFAULT 0;")
+              }
+          }
 
-        // future migrations (v2→v3, v3→v4, …) go here as additional if(oldVersion < X) blocks
-        if (oldVersion < 7) {
-            db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN total_length_quarters INTEGER DEFAULT 0;")
-        }
-
-    }
+          if (oldVersion < 8) {
+              // Add future column upgrades here
+          }
+      }
+//=== END on Up Grade ================================
 
 
     fun insertCatch(catch: CatchItem): Boolean {
@@ -553,7 +562,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put("total_weight_oz", catchItem.totalWeightOz)
                 put("total_weight_hundredth_kg", catchItem.totalWeightHundredthKg)
                 put("total_length_quarters", catchItem.totalLengthQuarters)
-                put(COLUMN_TOTAL_LENGTH_TENTHS, catchItem.totalLengthTenths)
+                put("total_length_tenths", catchItem.totalLengthTenths)
                 put("marker_type", "")
                 put("clip_color", "")
                 put("latitude", catchItem.lat)
@@ -702,4 +711,4 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     }
 
 
-}//----------------- END ---------------------
+}//----------------- END Catch Database Helper---------------------

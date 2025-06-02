@@ -1,8 +1,13 @@
 package com.bramestorm.bassanglertracker.utils
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import com.bramestorm.bassanglertracker.MeasurementMode
+import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
+import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.Locale
@@ -10,6 +15,7 @@ import java.util.Locale
 object SharedPreferencesManager {
 
     // Preferences files
+    private const val KEY_VCC_DOZE_AGREEMENT = "USER_AGREED_TO_VCC_DOZE"
     private const val SPECIES_PREFS = "SpeciesPrefs"
     private const val APP_PREFS = "BassAnglerTrackerPrefs"
 
@@ -25,9 +31,26 @@ object SharedPreferencesManager {
     private const val KEY_NUMBER_OF_CATCHES = "NUMBER_OF_CATCHES"
     private const val KEY_TOURNAMENT_SPECIES = "TOURNAMENT_SPECIES"
     private const val KEY_CULLING_ENABLED = "CULLING_ENABLED"
-    private const val KEY_VCC_DOZE_AGREEMENT = "USER_AGREED_TO_VCC_DOZE"
+
+
+    // ALARM values for VCC to Use
+    private const val KEY_ALARM_HOUR = "ALARM_HOUR"
+    private const val KEY_ALARM_MINUTE = "ALARM_MINUTE"
 
     private const val TAG = "SharedPreferencesManager"
+
+        // Ensures the App Voice Services all shut down when app is closed
+    fun Context.cleanupAppServices() {
+        Log.d("AppCleanup", "🧹 Cleaning up background services")
+        stopService(Intent(this, VoiceControlService::class.java))
+
+        val alarmIntent = Intent(this, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        (getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.cancel(pendingIntent)
+    }
+
 
     // === VOICE CONTROL ===
     fun setVccEnabled(context: Context, enabled: Boolean) {
@@ -48,6 +71,26 @@ object SharedPreferencesManager {
     fun hasUserAgreedToDeepDoze(context: Context): Boolean {
         return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_VCC_DOZE_AGREEMENT, false)
+    }
+
+    // ALARM Values from any Tournament Activity
+
+    fun setAlarmTime(context: Context, hour: Int, minute: Int) {
+        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(KEY_ALARM_HOUR, hour)
+            .putInt(KEY_ALARM_MINUTE, minute)
+            .apply()
+    }
+
+    fun getAlarmHour(context: Context): Int {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getInt(KEY_ALARM_HOUR, -1)
+    }
+
+    fun getAlarmMinute(context: Context): Int {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getInt(KEY_ALARM_MINUTE, -1)
     }
 
     // === CatchEntry Type ===
@@ -109,6 +152,11 @@ object SharedPreferencesManager {
     fun setCullingEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .edit().putBoolean(KEY_CULLING_ENABLED, enabled).apply()
+    }
+
+    fun isCullingEnabled(context: Context): Boolean {
+        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_CULLING_ENABLED, false)
     }
 
 

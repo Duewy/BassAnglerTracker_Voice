@@ -268,6 +268,14 @@
 
         <!-- Receiver for ALARMS -->       <!--          <receiver android:name=".alarm.AlarmReceiver" /> todo hold for now we will see if remove all alarms -->
 
+        <!-- Receiver for Bluetooth Button Press Play/Pause -->
+        <receiver android:name=".voice.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
 
         <!-- Your foreground service -->
         <service

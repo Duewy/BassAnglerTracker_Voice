@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.voice
 
 import android.util.Log
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.getClipColorFromVoice
 
 
 object VoiceParser {
@@ -25,6 +26,8 @@ object VoiceParser {
         val totalLengthQuarters: Int = ((lengthInches * 4) + lengthQuarters),
     )
 
+    private val clipColorWords = listOf("blue", "red", "green", "yellow", "orange", "white")
+
 
             /**  GOTO VoiceInputMapper to
              * Apply misheard-word Corrections ✅ using alias map 📃
@@ -42,14 +45,17 @@ object VoiceParser {
 
     // ======== 🏆 TOURNAMENT MODE PARSERS ==========
 
-    fun parseImperialCatchWithClips(
+    fun parseLbsOzsCatchWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
+
         val species = VoiceInputMapper.getSpeciesFromVoice(
-            cleanText
+            inputWithoutClip
                 .replace(Regex("""\d+\s*(pounds?|lbs?|ounces?|ozs?)"""), "")
                 .replace(Regex("""\b(over|and|clip|color)\b"""), "")
                 .trim(),
@@ -58,9 +64,8 @@ object VoiceParser {
 
         val lbs = Regex("""(\d{1,2})\s*(?:pound[s]?|lbs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val oz = Regex("""(\d{1,2})\s*(?:ounce[s]?|ozs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
-        val color = VoiceInputMapper.getClipColorFromVoice(cleanText, clipColors)
 
-        Log.d("VCC_PARSE", "ParsedCatch → Species=$species, Lbs=$lbs, Oz=$oz, ClipColor=$color") // to see what info is gathered...
+        Log.d("VCC_PARSE", "ParsedCatch → Species=$species, Lbs=$lbs, Oz=$oz, ClipColor=$detectedClipColor")
         Log.d("VCC_STT_RAW", "Raw transcript: $transcript")
         Log.d("VCC_STT_CLEAN", "Cleaned transcript: $cleanText")
 
@@ -68,11 +73,13 @@ object VoiceParser {
             species = species,
             weightLbs = lbs,
             weightOz = oz,
-            clipColor = color
+            clipColor = detectedClipColor
         )
     }
 
-    fun parseMetricCatchWithClips(
+
+
+    fun parseKgsCatchWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
@@ -219,4 +226,15 @@ object VoiceParser {
             lengthTenths = tenths
         )
     }
+
+    private fun removeClipColor(input: String, color: String?): String {
+        if (color.isNullOrBlank()) return input
+
+        // Only remove exact match of color as a word
+        return input.replace("\\b${Regex.escape(color)}\\b".toRegex(RegexOption.IGNORE_CASE), "")
+            .replace(Regex("\\s+"), " ") // clean double spaces
+            .trim()
+    }
+
+
 }
