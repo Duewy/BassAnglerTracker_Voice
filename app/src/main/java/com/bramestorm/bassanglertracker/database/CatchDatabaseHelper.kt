@@ -222,14 +222,17 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.close()
     }
 
-    fun updateCatch(
-        catchId: Int,
-        newWeightOz: Int? = null,
-        newWeightKg: Int? = null,
-        newLengthQuarters: Int? = null,
-        newLengthCm: Int? = null,
-        species: String
-    ) {
+      fun updateCatch(
+          catchId: Int,
+          newWeightOz: Int? = null,
+          newWeightKg: Int? = null,
+          newLengthQuarters: Int? = null,
+          newLengthCm: Int? = null,
+          species: String,
+          clipColor: String? = null,
+          markerType: String? = null
+      )
+ {
         val db = writableDatabase
         val values = ContentValues()
         values.put(COLUMN_SPECIES, species)
@@ -237,7 +240,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         if (newWeightKg != null) values.put(COLUMN_TOTAL_WEIGHT_KG, newWeightKg)
         if (newLengthQuarters != null) values.put(COLUMN_TOTAL_LENGTH_QUARTERS, newLengthQuarters)
         if (newLengthCm != null) values.put(COLUMN_TOTAL_LENGTH_TENTHS, newLengthCm)
-        db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
+        if (clipColor != null) values.put("clip_color", clipColor)
+        if (markerType != null) values.put("marker_type", markerType)
+     db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
     }
 

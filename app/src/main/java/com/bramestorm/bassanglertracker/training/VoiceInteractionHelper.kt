@@ -31,6 +31,8 @@ class VoiceInteractionHelper(
 
     private var awaitingConfirmation = false
     private var pendingCatch: CatchData? = null
+    private val sessionId = System.currentTimeMillis()
+
 
     data class CatchData(val pounds: Int, val ounces: Int, val species: String, val clipColor: String)//todo why only pounds ounces?????
 
@@ -53,17 +55,22 @@ class VoiceInteractionHelper(
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
-                    Log.d("Voice", "🎙️ Ready for speech...")
+                    Log.d("VCC_HELPER", "🎙️ [$sessionId] Ready for speech...")
+
                     speak("I'm listening. Over")
                 }
 
                 override fun onResults(results: Bundle?) {
+                    Log.d("VCC_HELPER", "📥 [$sessionId] onResults() fired in VoiceInteractionHelper")
+
                     // existing onResults logic remains unchanged
                     onCommandAction(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         ?.firstOrNull()?.trim()?.lowercase(Locale.getDefault()) ?: "")
                 }
 
                 override fun onError(error: Int) {
+                    Log.d("VCC_HELPER", "❌ onError() — retry $retryCount in VoiceInteractionHelper")
+
                     if (retryCount < maxRETRIES) {
                         retryCount++
                         speak("Sorry, I didn't catch that. Please try again. Over")
@@ -86,6 +93,9 @@ class VoiceInteractionHelper(
     }
 
     private fun startListening(onResult: (String) -> Unit = {}) {
+
+        Log.d("VCC_HELPER", "▶️ startListening() called in VoiceInteractionHelper")
+
         if (isListening) {
             activity.positionedToast("Already listening..👍.")
             return
@@ -121,6 +131,8 @@ class VoiceInteractionHelper(
     }
 
     fun shutdown() {
+        Log.d("VCC_HELPER", "🧹 VoiceInteractionHelper shutdown() called")
+
         stopListening()
         tts?.shutdown()
         speechRecognizer?.destroy()

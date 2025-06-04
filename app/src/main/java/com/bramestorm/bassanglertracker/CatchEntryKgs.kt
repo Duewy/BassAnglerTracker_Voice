@@ -107,6 +107,7 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
             isTournament = false,
             onCommandAction = { transcript -> onSpeechResult(transcript) }
         )
+
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
         dbHelper = CatchDatabaseHelper(this)
 

@@ -34,6 +34,7 @@ import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
+import com.bramestorm.bassanglertracker.voice.VoiceInteractionManager
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -105,7 +106,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private lateinit var tts: TextToSpeech
     private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
-    private lateinit var voiceHelper: VoiceInteractionHelper
+    private lateinit var voiceHelper: VoiceInteractionManager
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
     private var awaitingResult = false
 

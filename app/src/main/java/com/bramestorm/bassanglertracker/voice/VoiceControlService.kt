@@ -32,6 +32,9 @@ import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.training.VoiceResponseManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 
+        // variable and value for ensuring no double loop of Vcc
+private var lastWakeTimeMs = 0L
+private const val MIN_WAKE_INTERVAL_MS = 2500L
 
 /**
  * Foreground service that listens for Bluetooth/media button presses to start voice control.
@@ -89,7 +92,6 @@ class VoiceControlService : Service() {
     private lateinit var mediaButtonReceiver: PendingIntent
     private var focusRequest: AudioFocusRequest? = null
     private val handler = Handler(Looper.getMainLooper())
-    private var lastMediaTapTime = 0L
 
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -195,6 +197,15 @@ class VoiceControlService : Service() {
     }
 
     private fun onWake() {
+
+        // ENSURES only one call happens (typically happens at first time VCC)
+        val now = System.currentTimeMillis()
+        if (now - lastWakeTimeMs < MIN_WAKE_INTERVAL_MS) {
+            Log.w(TAG, "⛔ Suppressing duplicate wake — fired too soon.")
+            return
+        }
+        lastWakeTimeMs = now
+
         Log.d(TAG, "🔥 onWake(): starting voice sequence")
 
         if (sessionActive) return  // Already running
