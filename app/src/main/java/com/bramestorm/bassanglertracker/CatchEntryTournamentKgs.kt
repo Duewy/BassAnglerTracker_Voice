@@ -24,6 +24,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -31,7 +32,6 @@ import com.bramestorm.bassanglertracker.CatchEntryTournament.Companion.EXTRA_AVA
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.voice.VoiceInteractionManager
@@ -407,21 +407,12 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                 decWeightKgs[i].text = weightDec.toString().padStart(2, '0')
 
 
-                realWeightKgs[i].setOnLongClickListener {
-                    showTournamentEditDialog(sortedCatches[i])
-                    true
-                }
-                decWeightKgs[i].setOnLongClickListener {
-                    showTournamentEditDialog(sortedCatches[i])
-                    true
-                }
-
-
                 val baseColor = ContextCompat.getColor(this, clipColor.resId)
                 val layeredDrawable = createLayeredDrawable(baseColor)
                 realWeightKgs[i].background = layeredDrawable
                 decWeightKgs[i].background = layeredDrawable
 
+                //------------- If Clip is Blue then Text is White
                 val textColor = if (clipColor == ClipColor.BLUE)
                     resources.getColor(R.color.clip_white, theme)
                 else
@@ -444,6 +435,17 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                 }
 
                 typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+
+
+                // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
+                realWeightKgs[i].setOnLongClickListener {
+                    showTournamentEditDialog(sortedCatches[i])
+                    true
+                }
+                decWeightKgs[i].setOnLongClickListener {
+                    showTournamentEditDialog(sortedCatches[i])
+                    true
+                }
             }
 
             updateTotalWeight(tournamentCatches)
@@ -580,11 +582,12 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         )
 
         // 2) find in-layout views
-        val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
+        val spnClipColor = dialogView.findViewById<Spinner>(R.id.spnClipColorKgs)
         val edtKgs       = dialogView.findViewById<EditText>(R.id.edtTourWeightKgs)
         val edtGrams     = dialogView.findViewById<EditText>(R.id.edtTourWeightGrams)
         val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourKgss)
         val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourKgs)
+        val btnDelete    = dialogView.findViewById<Button>(R.id.btnDeleteEdtTourKgs)
 
         // 3) prefill the fields from the CatchItem
         val totalHundredth = c.totalWeightHundredthKg ?: 0
@@ -592,14 +595,16 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         edtGrams.setText((totalHundredth % 100).toString())
 
         // 4) set the clip-color box
-        val clip = try {
-            ClipColor.valueOf(c.clipColor!!.uppercase())
-        } catch (_: Exception) {
-            ClipColor.RED
+        val allClipColors = CatchEntryTournament.ClipColor.entries.map { it.name }.toMutableList()
+        val currentColor = c.clipColor ?: "RED"
+        val availableColors = allClipColors.toMutableList().apply {
+            remove(currentColor)
+            add(0, currentColor)
         }
-        txtClipColor.background = createLayeredDrawable(
-            ContextCompat.getColor(this, clip.resId)
-        )
+
+        val colorAdapter = ClipColorSpinnerAdapter(this, availableColors)
+        spnClipColor.adapter = colorAdapter
+
 
         // 5) build & show the AlertDialog (rename to 'dlg' to avoid collision)
         dialogInstance = AlertDialog.Builder(this)
@@ -613,6 +618,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             val newKgs   = edtKgs.text.toString().toIntOrNull() ?: 0
             val newGrams = edtGrams.text.toString().toIntOrNull() ?: 0
             val newTotalKg = (newKgs * 100 + newGrams)
+            val selectedClipColor = spnClipColor.selectedItem.toString()
 
             dbHelper.updateCatch(
                 catchId           = c.id,
@@ -620,8 +626,10 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                 newWeightKg       = newTotalKg,
                 newLengthQuarters = null,
                 newLengthCm       = null,
-                species           = c.species
+                species           = c.species,
+                clipColor = selectedClipColor
             )
+
             updateTournamentList()
             dialogInstance.dismiss()
         }
@@ -629,6 +637,13 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         // 7) Cancel button
         btnCancel.setOnClickListener {
             dialogInstance.dismiss()
+        }
+
+        // 8) Delete button
+        btnDelete.setOnClickListener {
+            dbHelper.deleteCatch(c.id)
+            updateTournamentList()
+            dialog.dismiss()
         }
     }
 

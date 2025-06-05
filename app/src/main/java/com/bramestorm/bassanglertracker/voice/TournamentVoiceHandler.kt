@@ -145,8 +145,18 @@ class TournamentVoiceHandler(
                     MeasurementMode.INCHES -> VoiceParser.parseImperialLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                     MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(input, listOf(tournamentSpecies), availableClipColors)
                 }
-                if (parsed.totalWeightOzs == 0 || parsed.species.isBlank() || parsed.clipColor.isBlank()) {
-                    Log.e("VCC_PARSE", "❌ Incomplete catch — skipping save. Weight=${parsed.totalWeightOzs}, Species='${parsed.species}', Clip='${parsed.clipColor}'")
+
+                // 🧠 Unified validation based on mode
+                val isMissingMeasurement = when (mode) {
+                    MeasurementMode.LBS_OZ -> (parsed.totalWeightOzs == 0)
+                    MeasurementMode.KG     -> (parsed.totalWeightHundredthKg == null || parsed.totalWeightHundredthKg == 0)
+                    MeasurementMode.INCHES -> (parsed.totalLengthQuarters == null || parsed.totalLengthQuarters == 0)
+                    MeasurementMode.CM     -> (parsed.totalLengthTenths == null || parsed.totalLengthTenths == 0)
+                }
+
+                if (isMissingMeasurement || parsed.species.isBlank() || parsed.species.equals("unknown", true) || parsed.clipColor.isBlank()) {
+                    Log.e("VCC_PARSE", "❌ Incomplete catch — skipping save. Mode=$mode, Species='${parsed.species}', Clip='${parsed.clipColor}'")
+                    Toast.makeText(context, "Sorry, I missed some of your catch information. Let's try again. Over.", Toast.LENGTH_SHORT).show()
                     return VoiceCommandParser.ParseResult.Retry("Sorry, I missed some of your catch information. Let's try again. Over.")
                 }
 
@@ -215,6 +225,7 @@ class TournamentVoiceHandler(
                             }
                             normalized.contains("no over") -> {
                                 Log.d("VCC_CONFIRM", "↩️ User rejected catch.")
+                                isSessionActive = false// So we restart the Voice Session is Active
                                 startVoiceSession()
                                 VoiceCommandParser.ParseResult.Confirm(lastCatch, "restarting")
                             }

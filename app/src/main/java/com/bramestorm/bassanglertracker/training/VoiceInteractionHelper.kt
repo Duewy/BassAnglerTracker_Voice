@@ -1,5 +1,7 @@
 package com.bramestorm.bassanglertracker.training
 
+// This is for the User Training Section where we evaluate the User's ability to have the words/phrase recognized by the STT function.
+
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
@@ -122,7 +124,7 @@ class VoiceInteractionHelper(
         isListening = false
     }
 
-    private fun restartListening(delay: Long = 1500) {
+    private fun restartListening(delay: Long = 1000) {
         Handler(Looper.getMainLooper()).postDelayed({ startListening() }, delay)
     }
 

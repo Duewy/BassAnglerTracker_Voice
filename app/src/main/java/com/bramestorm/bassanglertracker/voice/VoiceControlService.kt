@@ -35,6 +35,8 @@ import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
         // variable and value for ensuring no double loop of Vcc
 private var lastWakeTimeMs = 0L
 private const val MIN_WAKE_INTERVAL_MS = 2500L
+    // for ensuring this app gets control of Bluetooth by being last audio player (Android thing)
+private var isReclaimingAudio = false
 
 /**
  * Foreground service that listens for Bluetooth/media button presses to start voice control.
@@ -160,7 +162,6 @@ class VoiceControlService : Service() {
             }
         })
 
-
         mediaSession = session
         // PendingIntent for media button
         mediaButtonReceiver = PendingIntent.getBroadcast(
@@ -177,7 +178,7 @@ class VoiceControlService : Service() {
             setOnCompletionListener { it.release() }
             start()
         }
-    }
+    }// ==== END == On Create ========================
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!SharedPreferencesManager.isVccEnabled(this)) {
@@ -190,6 +191,8 @@ class VoiceControlService : Service() {
             ACTION_START_VOICE,
             Intent.ACTION_MEDIA_BUTTON -> {
                 Log.d(TAG, "🔥 Media button pressed — invoking onWake()")
+                // ✅ START reclaim loop even if we got control briefly
+                reclaimAudioFocusIfIdle()
                 onWake()
             }
         }
@@ -296,6 +299,7 @@ class VoiceControlService : Service() {
             @Suppress("DEPRECATION")
             audioManager.abandonAudioFocus(null)
         }
+        abandonAudioFocusCompat(audioManager)
         audioManager.unregisterMediaButtonEventReceiver(mediaButtonReceiver)
         mediaSession?.release()
     }
@@ -330,6 +334,75 @@ class VoiceControlService : Service() {
         val tts = VoiceResponseManager(applicationContext)
         tts.speak("You have an incoming call. Voice control has ended. Please re-enter your catch afterward. Over and Out.")
     }
+
+        // to recapture the Last Audio Use so we have Bluetooth button input (Android thing)
+        private fun reclaimAudioFocusIfIdle() {
+            if (isReclaimingAudio) return
+            isReclaimingAudio = true
+
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val focusResult = requestAudioFocusCompat(audioManager)
+
+            if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                try {
+                    val afd = assets.openFd("silence_0_1s.m4a")
+                    val player = MediaPlayer()
+                    player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                    player.prepare()
+                    player.setOnCompletionListener {
+                        it.release()
+                        isReclaimingAudio = false
+                    }
+                    player.start()
+                } catch (e: Exception) {
+                    isReclaimingAudio = false
+                    Log.e("VCC_AUDIO", "❌ Failed to play silent audio: ${e.message}")
+                }
+            } else {
+                isReclaimingAudio = false
+                Log.d("VCC_AUDIO", "⚠️ Audio still in use by another app")
+            }
+        }
+
+    // For Android to work with various OS Versions
+    private fun requestAudioFocusCompat(audioManager: AudioManager): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (focusRequest == null) {
+                val attrs = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+
+                focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(attrs)
+                    .setOnAudioFocusChangeListener({}, handler)
+                    .build()
+            }
+            audioManager.requestAudioFocus(focusRequest!!)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(
+                null,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+    }
+
+            // to clear out of the controlling Bluetooth when app is closed
+    private fun abandonAudioFocusCompat(audioManager: AudioManager) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest?.let {
+                audioManager.abandonAudioFocusRequest(it)
+                Log.d("VCC_AUDIO", "🛑 Abandoned audio focus (API 26+)")
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.abandonAudioFocus(null)
+            Log.d("VCC_AUDIO", "🛑 Abandoned audio focus (legacy API)")
+        }
+    }
+
 
 
 }// ====== END = Voice Control Service ================

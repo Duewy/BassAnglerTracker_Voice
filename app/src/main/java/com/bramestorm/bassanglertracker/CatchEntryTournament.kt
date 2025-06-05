@@ -25,6 +25,7 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -516,7 +517,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 }
                 typeLetters[i].text  = getSpeciesCode(item.species ?: "")
 
-                // **long-press to EDIT or DELETE this exact item**
+                // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realWeights[i].setOnLongClickListener {
                     showTournamentEditDialog(item)
                     true
@@ -658,18 +659,19 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     } //------------ END Get Species Codes ----------------
 
 
-    //******************* FOR User EDIT Logged Weights ********************************
+    //******************* FOR 🥸 User 📝 EDIT Logged Weights ********************************
 
     private fun showTournamentEditDialog(c: CatchItem) {
         // 1) inflate the custom layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_tournament_catch_lbs, null)
 
         // 2) pull out your in-layout buttons & fields
-        val txtClipColor = dialogView.findViewById<TextView>(R.id.txtClipColor)
+        val spnClipColor = dialogView.findViewById<Spinner>(R.id.spnClipColor)
         val edtLbs       = dialogView.findViewById<EditText>(R.id.edtTourWeightLbs)
         val edtOzs       = dialogView.findViewById<EditText>(R.id.edtTourWeightOzs)
         val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourLbs)
         val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourLbs)
+        val btnDelete    = dialogView.findViewById<Button>(R.id.btnDeleteEdtTourLbs)
 
         // 3) pre-fill the fields
         edtLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
@@ -681,13 +683,17 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         edtOzs.setText((weightOz % 16).toString())
 
         // 4) color box
-        val clipColor = try {
-            ClipColor.valueOf(c.clipColor!!.uppercase())
-        } catch (_: Exception) {
-            ClipColor.RED
+            // Find available clip colors
+        val allClipColors = ClipColor.entries.map { it.name }.toMutableList()
+        val currentColor = c.clipColor ?: "RED"
+        val availableColors = allClipColors.toMutableList().apply {
+            remove(currentColor) // temporarily remove current
+            add(0, currentColor) // so it's first in the list
         }
-        txtClipColor.background =
-            createLayeredDrawable(ContextCompat.getColor(this, clipColor.resId))
+        // Load spinner with clip color of Catch Id
+        val colorAdapter = ClipColorSpinnerAdapter(this, availableColors)
+        spnClipColor.adapter = colorAdapter
+
 
         // 5) build & show **one** dialog
         val dialog = AlertDialog.Builder(this)
@@ -698,6 +704,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         // 6) wire your in-layout Save
         btnSave.setOnClickListener {
+            val selectedClipColor = spnClipColor.selectedItem.toString().uppercase()
             val newLbs     = edtLbs.text.toString().toIntOrNull() ?: 0
             val newOzs     = edtOzs.text.toString().toIntOrNull() ?: 0
             val newWeightOz = (newLbs * 16) + newOzs
@@ -715,21 +722,31 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 return@setOnClickListener
             }
 
+
+
             dbHelper.updateCatch(
                 catchId            = c.id,
                 newWeightOz        = newWeightOz,
                 newWeightKg        = null,
                 newLengthQuarters  = null,
                 newLengthCm        = null,
-                species            = c.species
+                species            = c.species,
+                clipColor          = selectedClipColor
             )
             updateTournamentList()
             dialog.dismiss()
         }
 
-        // 7) …and Cancel
+        // 7)  Cancel button
         btnCancel.setOnClickListener {
             dialog.dismiss()
+        }
+
+        // 8) Delete button
+        btnDelete.setOnClickListener {
+            dbHelper.deleteCatch(c.id) // ensure `catch.id` is in scope
+            dialog.dismiss()
+            updateTournamentList()
         }
     }//========== END of User Editing Logged Weights ==============================
 

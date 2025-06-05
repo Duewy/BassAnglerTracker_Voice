@@ -22,6 +22,7 @@ import java.util.Locale
 interface VoiceUiHelper {
     /** Speak the given text via TTS. */
     fun speak(text: String)
+    fun speak(text: String, utteranceId: String)
     /** Show a brief toast with the given message. */
     fun showToast(message: String)
 }
@@ -121,12 +122,11 @@ class VoiceInteractionManager(
                     Log.d("VCC_MANAGER", "❌ [$sessionId] onError $error — retry #$retryCount")
 
                     if (retryCount >= maxRetries) {
-                        uiHelper.speak("Sorry, I'm having trouble hearing you. Try again later.")
+                        uiHelper.speak("Sorry, I'm having trouble hearing you. Enter Your catch manually or try again later.")
                         Log.e("VoiceSession", "❌ Max retries reached. Ending voice session.")
                         shutdown()
                     } else {
-                        uiHelper.speak("Sorry, I didn't catch that. Please try again. Over.")
-                        handler.postDelayed({ startListening(onCatchConfirmed) }, 1500)
+                        speakWithId("Sorry, I didn't catch that. Please enter you catch again. Over.", "TTS_RETRY")
                     }
                 }
 
@@ -167,11 +167,11 @@ class VoiceInteractionManager(
             })
         }
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName) // Ensures the User hears the "ding" when to start talking
         }.also { recognizer?.startListening(it) }
 
     }// == END == Start Listening =================

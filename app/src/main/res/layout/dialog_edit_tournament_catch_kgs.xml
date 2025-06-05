@@ -28,13 +28,20 @@
         android:layout_gravity="center"
         android:gravity="center">
 
-        <TextView
-            android:id="@+id/txtClipColor"
+        <Spinner
+            android:id="@+id/spnClipColorKgs"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="0.5"
             android:layout_marginEnd="15dp"
-            android:background="@color/clip_red"/>
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@color/lite_grey"
+            android:entries="@array/clip_colors"
+            android:spinnerMode="dialog"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
 
         <EditText
             android:id="@+id/edtTourWeightKgs"
@@ -122,6 +129,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnDeleteEdtTourKgs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_marginHorizontal="5dp"
+            android:background="@drawable/btn_outline_red"
+            android:text="delete"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/btnCancelEdtTourKgs"

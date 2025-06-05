@@ -22,6 +22,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -481,7 +482,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
                 }
                 typeLetters[i].text = getSpeciesCode(catch.species ?: "")
 
-                // **long-press to EDIT or DELETE this exact item**
+                // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realLengthInches[i].setOnLongClickListener {
                     showTournamentEditDialog(catch)
                     true
@@ -627,11 +628,12 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         )
 
         // 2) find your views
-        val txtClipColor          = dialogView.findViewById<TextView>(R.id.txtClipColor)
-        val edtInches             = dialogView.findViewById<EditText>(R.id.edtTourWeightKgs)            // hint="inches"
-        val edtQuartersOfInch     = dialogView.findViewById<EditText>(R.id.edtTourWeightGrams)          // hint="⁄4ths"
+        val spnClipColor = dialogView.findViewById<Spinner>(R.id.spnClipColorInches)
+        val edtInches             = dialogView.findViewById<EditText>(R.id.edtTourLengthInches)            // hint="inches"
+        val edtQuartersOfInch     = dialogView.findViewById<EditText>(R.id.edtTourLengthQuarters)          // hint="⁄4ths"
         val btnSave               = dialogView.findViewById<Button>(R.id.btnSaveEdtTourInches)
         val btnCancel             = dialogView.findViewById<Button>(R.id.btnCancelEdtTourInches)
+        val btnDelete = dialogView.findViewById<Button>(R.id.btnDeleteEdtTourInches)
 
         // 3) prefill from CatchItem.totalLengthQuarters (which stores quarters)
         val totalQuarters = c.totalLengthQuarters ?: 0
@@ -639,14 +641,15 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         edtQuartersOfInch.setText((totalQuarters % 4).toString())
 
         // 4) show clip-color box
-        val clip = try {
-            ClipColor.valueOf(c.clipColor!!.uppercase())
-        } catch (_: Exception) {
-            ClipColor.RED
+        val allClipColors = CatchEntryTournament.ClipColor.entries.map { it.name }.toMutableList()
+        val currentColor = c.clipColor ?: "RED"
+        val availableColors = allClipColors.toMutableList().apply {
+            remove(currentColor)
+            add(0, currentColor)
         }
-        txtClipColor.background = createLayeredDrawable(
-            ContextCompat.getColor(this, clip.resId)
-        )
+
+        val colorAdapter = ClipColorSpinnerAdapter(this, availableColors)
+        spnClipColor.adapter = colorAdapter
 
         // 5) build & show **one** dialog
         val dialog = AlertDialog.Builder(this)
@@ -660,6 +663,8 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
             val newInches   = edtInches.text.toString().toIntOrNull() ?: 0
             val newQuarters = edtQuartersOfInch.text.toString().toIntOrNull() ?: 0
             val newTotalInches    = (newInches * 4 + newQuarters)
+            val selectedClipColor = spnClipColor.selectedItem.toString()
+
 
             dbHelper.updateCatch(
                 catchId           = c.id,
@@ -667,17 +672,26 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
                 newWeightKg       = null,
                 newLengthQuarters = newTotalInches,
                 newLengthCm       = null,
-                species           = c.species
+                species           = c.species,
+                clipColor = selectedClipColor
             )
+
             updateTournamentList()
             dialog.dismiss()
         }
 
-        // 7) Cancel just dismisses
+        // 7)  Cancel button
         btnCancel.setOnClickListener {
             dialog.dismiss()
         }
-    }
+
+        // 8) Delete button
+        btnDelete.setOnClickListener {
+            dbHelper.deleteCatch(c.id) // ensure `catch.id` is in scope
+            dialog.dismiss()
+            updateTournamentList()
+        }
+    }//========== END of User Editing Logged Length ==============================
 
     // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
 

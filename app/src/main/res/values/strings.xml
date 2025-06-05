@@ -254,6 +254,7 @@
     <string name="_0">0</string>
     <string name="user_header"><u>User Agreement\n for \nVoice Control Modification</u></string>
     <string name="user_agreement">To honour the Google User policy\n Catch and Call application is informing you that the application Voice Control works while the cellphone is in sleep mode.\nTo ensure that voice control remains active while your phone is asleep or locked, Catch and Call must request that you allow the app to disable battery optimization only while using this app.\n \n This setting allows Catch and Call to:\n • Listen for Bluetooth or headset triggers\n • Record the Users voice commands using a foreground service\n • Keep Voice Control responsive even in Deep Sleep (Doze Mode)\n \n Important:\n • This setting does NOT affect any other apps or system functions.\n • The service only runs when Voice Control is enabled from the Setup page.\n • You can disable Voice Control at any time.\n If you agree, Catch and Call will ask Android to ignore battery optimization for this app. If you disagree, Voice Control may not function when your phone is idle or asleep.\n \n By clicking “AGREE,” you confirm you understand and accept this behavior. If you select “DISAGREE,” Voice Control will be disabled while your phone is in sleep mode.</string>
+    <string name="edit_tournament_length_inches">Edit Tournament\nLength Inches</string>
 
 
     //species
