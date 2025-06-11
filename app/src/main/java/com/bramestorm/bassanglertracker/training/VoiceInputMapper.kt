@@ -20,17 +20,17 @@ object VoiceInputMapper {
     val userVoiceMap = mutableMapOf<String, String>()
 
     val baseColorMap = mapOf(
-        "red" to "RED",
-        "read" to "RED",
         "blu" to "BLUE",
         "blue" to "BLUE",
-        "green" to "GREEN",
-        "gren" to "GREEN",
         "yellow" to "YELLOW",
         "yelo" to "YELLOW",
+        "green" to "GREEN",
+        "gren" to "GREEN",
         "orange" to "ORANGE",
         "white" to "WHITE",
-        "wite" to "WHITE"
+        "wite" to "WHITE",
+        "red" to "RED",
+        "read" to "RED"
     )
 
     //  Ensure we set the ✔️🔊 correct wording for misspoken User Input or various accents

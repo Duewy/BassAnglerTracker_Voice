@@ -37,7 +37,7 @@ class PopupLengthEntryTourInches : Activity() {
         catchType = intent.getStringExtra("catchType") ?: ""
         selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
         val colorNames = intent.getStringArrayExtra("availableClipColors")
-            ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
+            ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
         // UI Components
         spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)

@@ -2,12 +2,13 @@ package com.bramestorm.bassanglertracker.voice
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.voice.VoiceCommandParser.ConfirmedCatch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,122 +18,93 @@ class FunDayVoiceHandler(
     private val uiHelper: VoiceUiHelper,
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context)
 ) {
-    private var sessionRef: ((VoiceInteractionManager) -> Unit)? = null
+
     private val measurementMode = SharedPreferencesManager.getFunDayUnit(context)
 
     private val voiceManager = VoiceInteractionManager(
         context = context,
         uiHelper = uiHelper,
-        parser = object : VoiceCommandParser {
-            override fun parse(input: String): VoiceCommandParser.ParseResult {
-                val parsed = when (measurementMode) {
-                    MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchSimple(input)
-                    MeasurementMode.KG     -> VoiceParser.parseMetricCatchSimple(input)
-                    MeasurementMode.INCHES -> VoiceParser.parseImperialLengthSimple(input)
-                    MeasurementMode.CM     -> VoiceParser.parseMetricLengthSimple(input)
-                }
-
-                val confirmationPrompt = when (measurementMode) {                                                               // May Need ReWording for User Preferences
-                    MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces . Is that correct? over"
-                    MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms . Is that correct? over"
-                    MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} and ${parsed.lengthQuarters}quarter inches long. Is that correct? over"
-                    MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters,  Is that correct? over"
-                }
-
-                val catchData = ConfirmedCatch(
-                    weightOz = if (measurementMode == MeasurementMode.LBS_OZ) (((parsed.weightLbs ?: 0) * 16) + (parsed.weightOz ?: 0)) else null,
-                    weightKgs = if (measurementMode == MeasurementMode.KG) ((parsed.weightKgWhole ?: 0) + (parsed.weightGrams ?: 0) / 100) else null,
-                    lengthQuarters = if (measurementMode == MeasurementMode.INCHES) (((parsed.lengthInches ?: 0) * 4) + (parsed.lengthQuarters ?: 0)) else null,
-                    lengthTenths = if (measurementMode == MeasurementMode.CM) ((parsed.lengthCm?.times(10))?.toInt() ?: 0) else null,
-                    species = parsed.species ?: "Unknown",
-                    clipColor = null.toString() // Not used in Fun Day mode
-                )
-
-                return VoiceCommandParser.ParseResult.Confirm(catchData, confirmationPrompt)
-            }
-
-            override fun awaitConfirmation(lastCatch: ConfirmedCatch, onConfirmed: (ConfirmedCatch) -> Unit) {
-                onConfirmed(lastCatch)
-            }
-        }
-    )// === END == Voice Interaction Manager ========
-
-    companion object {
-        fun getInstance(
-            context: Context,
-            uiHelper: VoiceUiHelper
-        ): FunDayVoiceHandler {
-            val dbHelper = CatchDatabaseHelper(context)
-            return FunDayVoiceHandler(context, uiHelper, dbHelper)
-        }
-    }
+        parser = VoiceParser
+    )
 
     fun onWake() {
         val startPrompt = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, and species of your catch. Over"
-            MeasurementMode.KG     -> "Please say the kilograms, grams, and species of your catch. Over"
-            MeasurementMode.INCHES -> "Please say the inches, quarters, and species of your catch. Over"
-            MeasurementMode.CM     -> "Please say the centimeters,  and species of your catch. Over"
+            MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, and species of your catch. Over."
+            MeasurementMode.KG     -> "Please say the kilograms, grams, and species of your catch. Over."
+            MeasurementMode.INCHES -> "Please say the inches, quarters, and species of your catch. Over."
+            MeasurementMode.CM     -> "Please say the centimeters and species of your catch. Over."
         }
-
-        sessionRef?.invoke(voiceManager)
 
         voiceManager.startSession(
             prompt = startPrompt,
-            onCatchConfirmed = ::onCatchConfirmed
+            onResult = ::onCatchConfirmed
         )
     }
 
-    private fun onCatchConfirmed(catch: ConfirmedCatch) {
-        val mode = catch.getMeasurementMode() ?: MeasurementMode.LBS_OZ
+    private fun onCatchConfirmed(transcript: String) {
+        val parsed = when (measurementMode) {
+            MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchSimple(transcript)
+            MeasurementMode.KG     -> VoiceParser.parseMetricCatchSimple(transcript)
+            MeasurementMode.INCHES -> VoiceParser.parseImperialLengthSimple(transcript)
+            MeasurementMode.CM     -> VoiceParser.parseMetricLengthSimple(transcript)
+        }
 
-        val dbItem = CatchItem(
+        val confirmPrompt = when (measurementMode) {
+            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? Over."
+            MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? Over."
+            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? Over."
+            MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? Over."
+        }
+
+        uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            voiceManager.startSession(
+                prompt = "Please say yes over, no over, or cancel that. Over.",
+                onResult = { followUp ->
+                    when {
+                        followUp.contains("yes over", ignoreCase = true) -> saveCatch(parsed)
+                        followUp.contains("no over", ignoreCase = true) -> onWake()
+                        followUp.contains("cancel", ignoreCase = true) -> uiHelper.speak("Okay, canceling. Over and Out.")
+                        else -> onWake()
+                    }
+                }
+            )
+        }, 3500)
+    }
+
+    private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
+        val catchItem = CatchItem(
             id = 0,
             dateTime = currentTimestamp(),
             longitude = null,
             latitude = null,
-            species = catch.species,
-            totalWeightOz = catch.weightOz,
-            totalWeightHundredthKg = catch.weightKgs,
-            totalLengthQuarters = catch.lengthQuarters,
-            totalLengthTenths = catch.lengthTenths,
-            catchType = mode.name.lowercase(Locale.ROOT),
+            species = parsed.species ?: "Unknown",      // todo we need to separate the Parse from the Save Catch function... Not like this set up.
+            totalWeightOz = parsed.weightLbs?.times(16)?.plus(parsed.weightOz ?: 0),
+            totalWeightHundredthKg = parsed.weightKgWhole?.times(100)?.plus(parsed.weightGrams ?: 0),
+            totalLengthQuarters = parsed.lengthInches?.times(4)?.plus(parsed.lengthQuarters ?: 0),
+            totalLengthTenths = parsed.lengthCm?.times(10)?.plus(parsed.lengthTenths ?: 0),
+            catchType = measurementMode.name.lowercase(Locale.ROOT),
             markerType = null,
             clipColor = null
         )
 
-        dbHelper.insertCatch(dbItem)
+        dbHelper.insertCatch(catchItem)
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(
             Intent("com.bramestorm.VOICE_CATCH_SAVED")
         )
 
-        val successMessage = when (mode) {
-            MeasurementMode.LBS_OZ -> "${catch.species} saved at ${catch.weightOz!! / 16} lbs and ${catch.weightOz % 16} oz"    // reworked for grammar flow (not too robotic)
-            MeasurementMode.KG     -> "${catch.species} saved at ${catch.weightKgs!! / 100} point ${catch.weightKgs % 100} kilograms"
-            MeasurementMode.INCHES -> "${catch.species} saved at ${catch.lengthQuarters!! / 4} inches and ${catch.lengthQuarters % 4} quarters"
-            MeasurementMode.CM     -> "${catch.species} saved at ${catch.lengthTenths!! / 10} point ${catch.lengthTenths % 10 } centimeters"
+        val spoken = when (measurementMode) {
+            MeasurementMode.LBS_OZ -> "${parsed.species} saved at ${parsed.weightLbs} lbs and ${parsed.weightOz} oz."
+            MeasurementMode.KG     -> "${parsed.species} saved at ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms."
+            MeasurementMode.INCHES -> "${parsed.species} saved at ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters."
+            MeasurementMode.CM     -> "${parsed.species} saved at ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters."
         }
 
-        uiHelper.speak(successMessage)
-    }// == END == on Catch Confirmed ====================
+        uiHelper.speak(spoken, "TTS_SAVED")
+    }
 
     private fun currentTimestamp(): String =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-
-    fun ConfirmedCatch.getMeasurementMode(): MeasurementMode? {
-        return when {
-            this.weightOz != null -> MeasurementMode.LBS_OZ
-            this.weightKgs != null -> MeasurementMode.KG
-            this.lengthQuarters != null -> MeasurementMode.INCHES
-            this.lengthTenths != null -> MeasurementMode.CM
-            else -> null
-        }
-    }
-
-    fun setSessionRef(ref: (VoiceInteractionManager) -> Unit) {
-        this.sessionRef = ref
-    }
-
-
-}//=== END == Fun Day Voice Handler ============
+}

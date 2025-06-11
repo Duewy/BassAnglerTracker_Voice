@@ -24,11 +24,15 @@ class VoiceResponseManager(context: Context) {
         }
     }
 
-    fun speak(message: String, onDone: (() -> Unit)? = null) {
+   fun speak(text: String, utteranceId: String) {
+           tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+         }
+
+    fun speak(message: String, onDone: (() -> String)? = null) {
         val params = Bundle()
         val utteranceId = "VoiceFeedback" + System.currentTimeMillis()
 
-        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
 
         if (onDone != null) {
             tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {

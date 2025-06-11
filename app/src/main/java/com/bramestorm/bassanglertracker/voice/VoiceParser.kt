@@ -26,7 +26,7 @@ object VoiceParser {
         val totalLengthQuarters: Int = ((lengthInches * 4) + lengthQuarters),
     )
 
-    private val clipColorWords = listOf("blue", "red", "green", "yellow", "orange", "white")
+    private val clipColorWords = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
 
             /**  GOTO VoiceInputMapper to

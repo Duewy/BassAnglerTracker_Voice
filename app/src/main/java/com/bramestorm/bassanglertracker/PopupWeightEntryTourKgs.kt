@@ -37,7 +37,7 @@ class PopupWeightEntryTourKgs : Activity() {
         catchType = intent.getStringExtra("catchType") ?: ""
 
         val colorNames = intent.getStringArrayExtra("availableClipColors")
-            ?: arrayOf("RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "WHITE")
+            ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
         Log.d("PopupWeightEntry", "isTournament: $isTournament | catchType: $catchType | selectedSpecies: $selectedSpecies")
         Log.d("PopupWeightEntry", "Available clip colors: ${colorNames.joinToString()}")
