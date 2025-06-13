@@ -31,6 +31,7 @@ import com.bramestorm.bassanglertracker.voice.VoiceControlService
  *  - SpeechRecognizer initialization & lifecycle
  *  - Delivery of recognized speech via onSpeechResult()
  */
+
 abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
 
@@ -130,15 +131,20 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val prefs = getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)
-        val voiceEnabled = prefs.getBoolean("voice_enabled", false)
+
+        // read the same flag you set in SetupActivity
+        val voiceEnabled = SharedPreferencesManager.isVccEnabled(this)
 
         if (voiceEnabled) {
-            ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
+            ContextCompat.startForegroundService(
+                this,
+                Intent(this, VoiceControlService::class.java)
+            )
         } else {
             stopService(Intent(this, VoiceControlService::class.java))
         }
     }
+
 
 
     override fun onDestroy() {

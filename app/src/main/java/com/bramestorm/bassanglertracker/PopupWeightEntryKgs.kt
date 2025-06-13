@@ -23,7 +23,7 @@ class PopupWeightEntryKgs : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_weight_entry_kgs)
-
+        Log.d("Popup", "Popup KGS Opened")
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         val edtWeightKgs: EditText = findViewById(R.id.edtWeightKgs)

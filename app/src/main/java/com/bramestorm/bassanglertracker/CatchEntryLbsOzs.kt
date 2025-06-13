@@ -163,11 +163,11 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     }
 
     private fun openWeightPopup() {
-        // todo fix this
-            Intent(this, PopupWeightEntryLbs::class.java)
 
-        weightEntryLauncher.launch(intent)
-    }
+            Log.d("Popup", "Popup LBS Asked to Open")
+            val popupIntent = Intent(this, PopupWeightEntryLbs::class.java)
+            weightEntryLauncher.launch(popupIntent)
+        }
 
 
     // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

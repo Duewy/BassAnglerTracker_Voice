@@ -37,7 +37,6 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
-import com.bramestorm.bassanglertracker.utils.MyWeightEntryDialogFragment
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
@@ -131,6 +130,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         const val EXTRA_MEASURING_TYPE         = "measuringType"
         const val EXTRA_IS_TOURNAMENT          = "isTournament"
         const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+
         // → inputs into this popup
         const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
         const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
@@ -153,51 +153,38 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     }
 
-    override val dialog: Any
-        get() {
-            // Build the species list for the dialog
-            val speciesList = when {
-                tournamentSpecies.equals("Large Mouth", true)  -> arrayOf("Large Mouth", "Small Mouth")
-                tournamentSpecies.equals("Small Mouth", true)  -> arrayOf("Small Mouth", "Large Mouth")
-                else                                           -> arrayOf(tournamentSpecies)
-            }
-
-            // Build the available clip colors array
-            val clipColorList = availableClipColors.map { it.name }.toTypedArray()
-
-            // Return your weight-entry DialogFragment stub
-            return MyWeightEntryDialogFragment(
-                speciesList    = speciesList,
-                clipColorList  = clipColorList
-            ) { inches, quarters, species, clipColor ->
-                // Combine quarters → total quarters
-                val totalLengthQuarters = inches * 4 + quarters
-                saveTournamentCatch(totalLengthQuarters, species, clipColor)
-            }
-        }
 
 
     //================START - ON CREATE =======================================
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tournament_view)
 
-        ContextCompat.startForegroundService(this, Intent(this, VoiceControlService::class.java))
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            voiceCatchReceiver, IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
-        )
+        override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+               setContentView(R.layout.activity_tournament_view)
 
-        // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-        voiceHelper = VoiceInteractionHelper(
-            activity = this, //
-            measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
-            isTournament = true,
-            onCommandAction = { transcript -> onSpeechResult(transcript) }
-        )
+                // 1️⃣ Read the VCC flag first
+                voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+                Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
 
-        voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+                // 2️⃣ Launch your VoiceControlService *only* if VCC is on
+                if (voiceControlEnabled) {
+                                ContextCompat.startForegroundService(
+                                this,
+                                Intent(this, VoiceControlService::class.java)
+                                    )
+                        LocalBroadcastManager.getInstance(this)
+                            .registerReceiver(
+                                        voiceCatchReceiver,
+                                IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
+                            )
 
-        Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+                        // 3️⃣ And only then wire up your helper
+                        voiceHelper = VoiceInteractionHelper(
+                                activity        = this,
+                                measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+                                isTournament    = true,
+                                onCommandAction = { transcript -> onSpeechResult(transcript) }
+                                    )
+                }
 
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
@@ -271,6 +258,9 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
 
     } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    override val dialog: Any
+        get() = throw UnsupportedOperationException("BaseCatchEntryActivity.dialog is unused in this subclass")
 
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
@@ -577,12 +567,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 
     enum class ClipColor(val resId: Int) {
-        RED(R.color.clip_red),
         BLUE(R.color.clip_blue),
-        GREEN(R.color.clip_green),
         YELLOW(R.color.clip_yellow),
+        GREEN(R.color.clip_green),
         ORANGE(R.color.clip_orange),
-        WHITE(R.color.clip_white);
+        WHITE(R.color.clip_white),
+        RED(R.color.clip_red);
     }
 
     //????????????? AVAILABLE COLORS   ???????????????????????

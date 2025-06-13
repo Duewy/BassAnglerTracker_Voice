@@ -1,9 +1,11 @@
 package com.bramestorm.bassanglertracker.voice
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchItem
@@ -15,6 +17,11 @@ import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+/**
+ * Handles voice-driven tournament catch entries and queries.
+ * Logs extensively for end-to-end tracing.
+ */
 
 class TournamentVoiceHandler(
     private val context: Context,
@@ -37,6 +44,7 @@ class TournamentVoiceHandler(
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
 
+    // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
         MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species, and clip color of your catch. Over."
         MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."
@@ -44,10 +52,13 @@ class TournamentVoiceHandler(
         MeasurementMode.CM     -> "Please say the centimeters, species, and clip color of your catch. Over."
     }
 
+    /** Entry point for service wake or media-button tap. */
     fun onWake() {
+        Log.d(TAG, "onWake() called")
         startVoiceSession()
     }
 
+    /** Begins a catch or question session. */
     private fun startVoiceSession() {
         if (inQuestionMode) return            // don’t restart the “catch” flow mid-question
 
@@ -65,6 +76,7 @@ class TournamentVoiceHandler(
                }
     }
 
+    /** Parses numeric + text components, then confirms with the user. */
     private fun parseAndConfirm(transcript: String) {
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(transcript, speciesList, clipColors)
@@ -80,6 +92,8 @@ class TournamentVoiceHandler(
             MeasurementMode.CM     -> parsed.totalLengthTenths == 0
         }
 
+        Log.d(TAG, "Parsed result: \$parsed")
+
         if (missingInfo) {  parseRetryCount++
             if (parseRetryCount > MAX_PARSE_RETRIES) {
                 uiHelper.speak("Okay, let’s try again later. Over.", "TTS_FAIL")
@@ -94,6 +108,8 @@ class TournamentVoiceHandler(
         }
         parseRetryCount = 0     // successful parse → reset counter
 
+        // Build confirmation prompt
+
         val confirmPrompt = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct? Over."
             MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct? Over."
@@ -101,8 +117,11 @@ class TournamentVoiceHandler(
             MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct? Over."
         }
 
+        Log.d(TAG, "Confirm prompt: \$confirmPrompt")
         uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
 
+
+        // Listen for yes/no/cancel
         Handler(Looper.getMainLooper()).postDelayed({
             (context as? VoiceControlService)?.let { svc ->
                 svc.startVoiceSession(
@@ -128,7 +147,7 @@ class TournamentVoiceHandler(
         }, 3500)
     }
 
-
+    /** Persists the parsed catch and provides feedback. */
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
         val typeEntry = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "lbsOzs"
@@ -160,14 +179,18 @@ class TournamentVoiceHandler(
         )
 
         dbHelper.insertCatch(dbItem)
-
         lastCatchItem = dbItem// remember this one for question mode
+
+        Log.d(TAG, "DB insert succeeded: \$dbItem")
+
+        // Notify UI
+        Log.d(TAG, "Broadcasting catch saved event")
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(
             Intent("com.bramestorm.VOICE_CATCH_SAVED")
         )
 
-        // after you insert the new catch...
+        // Feedback summary if on last or penultimate catch
         val stats = TournamentVoiceFeedback.analyzeTournamentStats(
             dbHelper,
             tournamentCatchLimit,
@@ -186,10 +209,11 @@ class TournamentVoiceHandler(
     }
 
 
-
+    /** Switch into question mode for stats queries. */
     private fun handleQuestionMode() {
         questionRetryCount = 0
         inQuestionMode = true
+        Log.d(TAG, "Question mode activated")
         uiHelper.speak(
             "Question mode activated. Ask smallest, largest, total weight, position, or time left. Over.",
             "TTS_QUESTION_INTRO"
@@ -198,20 +222,37 @@ class TournamentVoiceHandler(
             "Which stat would you like? Over.",
             uiHelper
         ) { followUp ->
+            Log.d(TAG, "Question received: '\$followUp'")
             routeQuestion(followUp)
         }
     }
 
+    /** Routes a user question to the appropriate response. */
     private fun routeQuestion(question: String) {
+        Log.d(TAG, "routeQuestion('\$question')")
+        // Prepare list and stats
+
+        //  Check for “cancel” command ❌ to get out of the VCC Question section
+        if (question.contains("cancel", ignoreCase = true)) {
+            uiHelper.speak("Okay, exiting question mode. Over.", "TTS_CANCEL")
+            inQuestionMode     = false
+            questionRetryCount = 0
+            return
+        }
+
         // 1️⃣ rebuild your top-N list here
         val fullList = dbHelper.getTopTournamentCatches(tournamentCatchLimit + 6)
         val sortedDesc = fullList.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
-            val cullList = sortedDesc.take(tournamentCatchLimit)     // “cull list” = your tournamentCatchLimit biggest fish
-        val catch = lastCatchItem
-               if (catch == null) {
-                       uiHelper.speak("I don't have a catch to ask about yet. Please catch and record one first. Over.","TTS_ERROR")
-                   return
-               }
+        val cullList = sortedDesc.take(tournamentCatchLimit)     // “cull list” = your tournamentCatchLimit biggest fish
+        val catch = lastCatchItem ?: run {
+            Log.w(TAG, "No last catch—cannot answer questions yet")
+            uiHelper.speak(
+                "I don't have a catch to ask about … Over.",
+                "TTS_ERROR"
+            )
+            return
+        }
+
         // re-compute stats once
                val stats = TournamentVoiceFeedback.analyzeTournamentStats(
                    dbHelper,
@@ -225,6 +266,7 @@ class TournamentVoiceHandler(
         when {
 
             question.contains("smallest", true) -> {
+                Log.d(TAG, "Answering smallest fish")
                 if (cullList.isEmpty()) {
                     uiHelper.speak("I don’t have enough catches yet to tell you the smallest. Over.","TTS_ANSWER")
                 } else {
@@ -234,12 +276,14 @@ class TournamentVoiceHandler(
             }
 
             question.contains("largest", true) -> {
+                Log.d(TAG, "Answering largest fish")
                 cullList.firstOrNull()?.let { fish ->
                     speakFish( fish, "Your largest fish on the list is" )
                 } ?: uiHelper.speak("You do not have any catches logged yet. Over.","TTS_ANSWER")
             }
 
             question.contains("total weight", true) -> {
+                Log.d(TAG, "Answering total weight")
                 val msg = when (measurementMode) {
                     MeasurementMode.LBS_OZ ->
                         "Your total weight is ${stats.totalWeightLbs} pounds ${stats.totalWeightRemainingOz} ounces. Over."
@@ -255,6 +299,7 @@ class TournamentVoiceHandler(
             }
 
             question.contains("total length", true) -> {
+                Log.d(TAG, "Answering total length")
                 val msg = when (measurementMode) {
                     MeasurementMode.LBS_OZ ->
                         // if they ask length in a weight-mode, fall back or say “length not available”
@@ -269,21 +314,27 @@ class TournamentVoiceHandler(
                 uiHelper.speak(msg, "TTS_ANSWER")
             }
 
-            question.contains("position", true) ->
+            question.contains("position", true) ->{
+                Log.d(TAG, "Answering position of catch")
                 uiHelper.speak(
                     "This catch is number ${stats.thisCatchPosition} on the culling list. Over.",
                     "TTS_ANSWER"
-                )
-            question.contains("time since", true) ->
+                )}
+
+            question.contains("time since", true) ->{
+                Log.d(TAG, "Answering time since last catch")
                 uiHelper.speak(
                     "It’s been ${stats.timeSinceLastCatchMin} minutes since your last catch. Over.",
                     "TTS_ANSWER"
-                )
-            question.contains("time remain", true) ->
+                )}
+
+            question.contains("time remaining", true) ->{
+                Log.d(TAG, "Answering time remaining")
                 uiHelper.speak(
                     "${stats.timeUntilAlarmMin} minutes remain in the tournament. Over.",
                     "TTS_ANSWER"
-                )
+                )}
+
             else -> {
                 questionRetryCount++
                 if (questionRetryCount > MAX_QUESTION_RETRIES) {
@@ -292,7 +343,7 @@ class TournamentVoiceHandler(
                     questionRetryCount = 0
                 } else {
                     uiHelper.speak(
-                        "Sorry, I didn’t catch that. Say smallest, largest, total weight, position or time left. Over.",
+                        "Sorry, I did not catch that. Say smallest, largest, total weight, position or time left. Over.",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -301,11 +352,10 @@ class TournamentVoiceHandler(
                 }
             }
         }
-        questionRetryCount = 0
-        inQuestionMode = false
+
     }
 
-    // helper to pick the right units:
+    // helper to pick the corresponding units:
     private fun speakFish(fish: CatchItem, prefix: String) {
         when (measurementMode) {
             MeasurementMode.LBS_OZ -> {

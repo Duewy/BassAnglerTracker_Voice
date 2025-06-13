@@ -9,7 +9,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -91,33 +90,18 @@ class VoiceControlService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate() {
-        super.onCreate()
+            super.onCreate()
 
-        telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        audioManager     = getSystemService(Context.AUDIO_SERVICE)       as AudioManager
-        telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
+            // 1️⃣ Promote to foreground immediately
+            createChannel()
+            startForeground(NOTIFY_ID, buildNotification())
 
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:WakeLock")
-
-        // audio focus
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val attrs = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ASSISTANT)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .build()
-            focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(attrs)
-                .setOnAudioFocusChangeListener({}, handler)
-                .build()
-            audioManager.requestAudioFocus(focusRequest!!)
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-        }
-
-        createChannel()
-        startForeground(NOTIFY_ID, buildNotification())
+            // 2️⃣ THEN do the rest of your initialization
+            telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            audioManager     = getSystemService(Context.AUDIO_SERVICE)       as AudioManager
+            telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
+            wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager)
+                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:WakeLock")
 
         // 3️⃣ Single mediaSession, hooked to our callback
         mediaSession = MediaSessionCompat(this, TAG).apply {

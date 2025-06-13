@@ -235,6 +235,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
         super.onResume()
@@ -496,12 +497,12 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 
     enum class ClipColor(val resId: Int) {
-        RED(R.color.clip_red),
         BLUE(R.color.clip_blue),
-        GREEN(R.color.clip_green),
         YELLOW(R.color.clip_yellow),
+        GREEN(R.color.clip_green),
         ORANGE(R.color.clip_orange),
-        WHITE(R.color.clip_white);
+        WHITE(R.color.clip_white),
+        RED(R.color.clip_red);
     }
 
     //????????????? AVAILABLE COLORS   ???????????????????????

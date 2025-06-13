@@ -61,7 +61,8 @@
             android:background="@drawable/btn_outline_orange"
             android:padding="10dp"
             android:text="Main"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
         <!-- btn Goto Set Up Page -->
         <Button
@@ -73,7 +74,8 @@
             android:background="@drawable/btn_menu_setup"
             android:padding="10dp"
             android:text="@string/goto_SetUp_description"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
         <!-- btn Goto Look-Up Page -->
         <Button
@@ -85,7 +87,8 @@
             android:background="@drawable/btn_outline_green"
             android:padding="10dp"
             android:text="@string/back"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
     </LinearLayout>
 
@@ -100,14 +103,16 @@
         app:layout_constraintTop_toBottomOf="@id/llAllButtons" />
 
     <!-- List of Todays Catch -->
-    <ListView
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/userGenCsvListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:divider="@color/Log_brown"
-        android:dividerHeight="2dp"
+        android:dividerHeight="4dp"
         android:padding="8dp"
         android:scrollbars="vertical"
+        android:textColor="@color/black"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

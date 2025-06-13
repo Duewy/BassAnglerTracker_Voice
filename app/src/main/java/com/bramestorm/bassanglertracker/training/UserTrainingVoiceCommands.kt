@@ -16,7 +16,6 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
     private lateinit var btnSetUpUser: Button
     private lateinit var btnMenuUser: Button
     private lateinit var btnWhatIsVCC: Button
-    private lateinit var btnEnableVCC : Button
     private lateinit var btnTeachVCC : Button
 
 
@@ -29,7 +28,6 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         btnSetUpUser = findViewById(R.id.btnSetUpUser)
         btnMenuUser = findViewById(R.id.btnMenuUser)
         btnWhatIsVCC = findViewById(R.id.btnWhatIsVCC)
-        btnEnableVCC = findViewById(R.id.btnEnableVCC)
         btnTeachVCC = findViewById(R.id.btnTeachVCC)
 
 
@@ -45,16 +43,18 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
             startActivity(intent)
         }
 
+        btnTeachVCC.setOnClickListener {
+            val intent = Intent(this, TrainingWords::class.java)
+            startActivity(intent)
+        }
 
         // GitHub has saved files on...
 
         btnWhatIsVCC.setOnClickListener {
-
-            val url = "https://github.com/Duewy/Catch_and_Cull_Help_Files/blob/main/using_voice_controls.pdf"
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(url)
+            val pdfUrl = "https://raw.githubusercontent.com/Duewy/Catch_and_Cull_Help_Files/main/Voice_Control_Guide.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl)).apply {
+                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             }
-
             try {
                 startActivity(intent)
             } catch (e: ActivityNotFoundException) {
@@ -62,19 +62,9 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
             }
         }
 
+// — remove the stray try/catch here —
 
-        btnEnableVCC.setOnClickListener {
-          positionedToast("Not available on this version\n Check out the Catch and Call with Voice Control")
-            // TODO: Create How to Set Up Voice Control on your Cellphone with Video 
-        }
-
-        btnTeachVCC.setOnClickListener {
-            val intent = Intent(this, TrainingWords::class.java)
-            startActivity(intent)
-        }
 
     }//_____________ END On Create ____________________
 
-
-
-}
+    }

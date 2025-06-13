@@ -15,7 +15,7 @@ class ListCatchLogView : AppCompatActivity() {
     private lateinit var btnLookUpCLV: Button
     private lateinit var btnSetUpCLV : Button
     private lateinit var btnMainCLV : Button
-    private lateinit var listView : ListView
+    private lateinit var userGenCsvListView : ListView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,8 +25,9 @@ class ListCatchLogView : AppCompatActivity() {
         btnLookUpCLV = findViewById(R.id.btnLookUpCLV)
         btnMainCLV = findViewById(R.id.btnMainCLV)
         btnSetUpCLV= findViewById(R.id.btnSetUpCLV)
+        userGenCsvListView = findViewById(R.id.userGenCsvListView)
 
-            // --- Go Back to Share Fishing Logs Activity ---
+        // --- Go Back to Share Fishing Logs Activity ---
         btnLookUpCLV.setOnClickListener {
             val intent = Intent(this, ShareFishingLogsActivity::class.java)
             startActivity(intent)
@@ -66,9 +67,10 @@ class ListCatchLogView : AppCompatActivity() {
         }
 
         // 4) Hook up an ArrayAdapter to display each row as a single list item
-        listView.adapter = ArrayAdapter(
+        userGenCsvListView.adapter = ArrayAdapter(
             this,
-            android.R.layout.simple_list_item_1,
+            R.layout.list_item_black,  // your custom item
+            R.id.text1,                // the TextView ID in that layout Ensure the Text is Black
             rows
         )
 

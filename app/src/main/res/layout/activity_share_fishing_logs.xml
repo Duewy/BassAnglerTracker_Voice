@@ -93,23 +93,23 @@
 
         <!-- Generate CSV Button -->
         <Button
-            android:id="@+id/btnViewFile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/btn_outline_green"
-            android:text="View your file"
-            android:textColor="@color/clip_blue"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <Button
             android:id="@+id/btnGenerateCSV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:background="@drawable/btn_outline_blue"
             android:text="@string/generate_csv_file"
+            android:textColor="@color/clip_blue"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnViewFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/btn_outline_green"
+            android:text="View your file"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -142,6 +142,7 @@
             android:gravity="center" >
 
             <Button
+                android:id="@+id/btnMainSFL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

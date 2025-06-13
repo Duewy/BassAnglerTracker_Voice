@@ -18,6 +18,7 @@ fun getSpeciesImageResId(species: String?): Int {
         "brook trout" -> R.drawable.fish_brown_trout
         "brown trout" -> R.drawable.fish_brown_trout
         "lake trout" -> R.drawable.fish_lake_trout
+        "spotted bass"-> R.drawable.fish_spotted_bass
         "carp" -> R.drawable.fish_carp
         "salmon" -> R.drawable.fish_salmon
         "burbot", "ling" -> R.drawable.fish_ling

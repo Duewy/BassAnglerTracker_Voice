@@ -31,6 +31,7 @@ object SpeciesImageHelper {
             "lake trout" -> R.drawable.fish_lake_trout
             "ling" -> R.drawable.fish_ling
             "salmon"-> R.drawable.fish_salmon
+            "spotted bass"-> R.drawable.fish_spotted_bass
             "carp" -> R.drawable.fish_carp
             "muskie", "muskellunge" -> R.drawable.fish_muskie
             "bowfin" -> R.drawable.fish_bow_fin

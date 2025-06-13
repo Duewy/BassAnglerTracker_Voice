@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker
 
 import android.content.Intent
+import android.content.Intent.createChooser
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
@@ -21,6 +22,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
     private lateinit var btnViewFile : Button
     private lateinit var btnShareCSV: Button
     private lateinit var btnSetUpSFLogs :Button
+    private lateinit var btnMainSFL :Button
 
 
     private var generatedCsvFile: File? = null
@@ -40,45 +42,54 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         btnViewFile = findViewById(R.id.btnViewFile)
         btnShareCSV = findViewById(R.id.btnShareCSV)
         btnSetUpSFLogs= findViewById(R.id.btnSetUpSFLogs)
+        btnMainSFL  = findViewById(R.id.btnMainSFL)
 
-        //------------- Create Data into CSV -------------------
+        //  start with View/Share disabled
+        btnViewFile.isEnabled = false
+        btnShareCSV.isEnabled = false
+
+
+        //------------- Create Data into CSV ️🖋️-------------------
+        //  generate CSV
         btnGenerateCSV.setOnClickListener {
             generatedCsvFile = generateDummyCatchLogCsv()
-
             if (generatedCsvFile != null) {
                 positionedToast("CSV generated to cache!")
+                // now enable the other two buttons
+                btnViewFile.isEnabled = true
+                btnShareCSV.isEnabled = true
             } else {
-                positionedToast("⚠️ Warning: Failed to generate CSV 📄",)
+                positionedToast("⚠️ Warning: Failed to generate CSV 📄")
             }
         }
 
-        //--------------- Share the Data with CSV ----------------------
+
+        //--------------- Share the Data with CSV 📝----------------------
+        // share via other text email apps
         btnShareCSV.setOnClickListener {
             generatedCsvFile?.let { file ->
                 val uri = FileProvider.getUriForFile(
                     this,
-                    "com.bramestorm.bassanglertracker.fileprovider", // match manifest
+                    "${packageName}.fileprovider",
                     file
                 )
-
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                Intent(Intent.ACTION_SEND).run {
                     type = "text/csv"
                     putExtra(Intent.EXTRA_STREAM, uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    startActivity(createChooser(this, "Share fishing log via:"))
                 }
-                startActivity(Intent.createChooser(shareIntent, "Share fishing log via:"))
-            } ?: run {
-                positionedToast("⚠️ Warning: Please generate the CSV first")
             }
         }
 
         // ----------🥽 See the Files Yourself 😍----------------------------
+        //  view the CSV in your ListCatchLogView
         btnViewFile.setOnClickListener {
-            val csvFile = File(getExternalFilesDir(null), "your_exported_log.csv")
-            val intent = Intent(this, ListCatchLogView::class.java).apply {
-                putExtra("CSV_FILE_PATH", csvFile.absolutePath)
-            }
-            startActivity(intent)
+            generatedCsvFile?.let { file ->
+                Intent(this, ListCatchLogView::class.java).apply {
+                    putExtra("CSV_FILE_PATH", file.absolutePath)
+                }.also { startActivity(it) }
+            } ?: positionedToast("⚠️ Please generate the CSV first")
         }
 
 
@@ -88,6 +99,11 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // ---------- Goto Main Page ------------------------
+        btnMainSFL.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
 
     }//----------------- END OnCreate -------------------------------
 
@@ -104,7 +120,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
 
     }//-------------- END onResume --------------------
 
-
+            //todo Remove for APP Release 🚨
     private fun generateDummyCatchLogCsv(): File? {
         return try {
             val file = File(cacheDir, "catch_log.csv")

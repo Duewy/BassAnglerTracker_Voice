@@ -51,6 +51,11 @@ object VoiceInputMapper {
         put("small mouth", "Small Mouth")
         put("smile mouth", "Small Mouth")
 
+        put("spotted bass", "Spotted Bass")
+        put("spot", "Spotted Bass")
+        put("spottedbass", "Spotted Bass")
+        put("spot bass", "Spotted Bass")
+
         put("crappie", "Crappie")
         put("crap pie", "Crappie")
         put("crappy", "Crappie")

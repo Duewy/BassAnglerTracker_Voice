@@ -160,11 +160,14 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
         voiceHelper.shutdown()
         recognizer.destroy()
     }
+
     // 00000000000 open Weight Pop Up Kgs   0000000000000000
     private fun openWeightPopupKgs() {
-        //todo redirect from the inputs..
-            Intent(this, PopupWeightEntryKgs::class.java)
-        weightEntryLauncher.launch(intent)
+        Log.d("Popup", "Popup KGS Asked to Open")
+
+        val popupIntent = Intent(this, PopupWeightEntryKgs::class.java)
+
+        weightEntryLauncher.launch(popupIntent)
     }
 
 

@@ -21,13 +21,6 @@ class LookUpShareDataActivity : AppCompatActivity() {
         }
 
         //---------------- GoTo Google Map Lookup button ----------------
-        val btnListCatch = findViewById<Button>(R.id.btnListCatch)
-        btnListCatch.setOnClickListener {
-            val intent = Intent(this, ListCatchLogView::class.java)
-            startActivity(intent)
-        }
-
-        //---------------- GoTo Google Map Lookup button ----------------
         val btnLookUpMap = findViewById<Button>(R.id.btnLookUpMap)
         btnLookUpMap.setOnClickListener {
             val intent = Intent(this, MapCatchLocationsActivity::class.java)
@@ -48,7 +41,7 @@ class LookUpShareDataActivity : AppCompatActivity() {
         }
 
         //--- FAKE DATA For TESTING ONLY ------   REMOVE For Real App !!!!!
-        val dbHelper = CatchDatabaseHelper(this)
+        val dbHelper = CatchDatabaseHelper(this)        //todo remove for RELEASE 🚨
         dbHelper.insertFakeCatchesForTesting(dbHelper.writableDatabase)
 
 

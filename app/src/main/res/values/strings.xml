@@ -163,7 +163,7 @@
     <string name="_0_to_99">0 to 99</string>
     <string name="_0_to_15">0 to 15</string>
     <string name="centimeters">Centimeters</string>
-    <string name="_0_99_inches">0-99 Inches</string>
+    <string name="_0_99_inches">0–99 Inches</string>
     <string name="_00_0_cms">00.0 Cms</string>
     <string name="alter_species_list">Alter Species List</string>
     <string name="just_say_the_word">Just Say the Word</string>
@@ -196,8 +196,8 @@
     <string name="fun_day_catch_lbs">Fun Day Catch -Lbs-</string>
     <string name="_00_xx">00.XX</string>
     <string name="tournament_catch_lbs">Tournament Catch Lbs</string>
-    <string name="_0_99">0-99</string>
-    <string name="_0_15">0-15</string>
+    <string name="_0_99">0–99</string>
+    <string name="_0_15">0–15</string>
     <string name="color_patch">Color Patch</string>
     <string name="set_up_gps">Set Up GPS</string>
     <string name="mapping_gps">Mapping GPS</string>
@@ -236,14 +236,14 @@
     <string name="vcc_tournament_lbs">Voice Control\n Tournament Lbs</string>
     <string name="clip_color">Clip Color</string>
     <string name="vcc_on">VCC\nON</string>
-    <string name="manual_mode">Manual\\nMode</string>
+    <string name="manual_mode">Manual\nMode</string>
     <string name="voice_tourn_kgs">Voice Control\nTournament Kgs</string>
     <string name="if_voice_control_fails">If Voice Control Fails Use Manual Mode</string>
     <string name="voice_control_inches">Voice Control\nTournament Inches</string>
     <string name="voice_control_tournament_inches">Voice Control\nTournament Inches</string>
     <string name="voice_control_tournament_cms">Voice Control\nTournament Cms</string>
     <string name="voice_control_fun_day_lbs">Voice Control\nFun-Day Lbs</string>
-    <string name="voice_control_nfun_day_kgs">Voice Control\nFun-Day Kgs</string>
+    <string name="voice_control_fun_day_kgs">Voice Control\nFun-Day Kgs</string>
     <string name="vcc_weight_lbs">VCC Weight Lbs</string>
     <string name="list_of_your_catch">List of your catch</string>
     <string name="select_the_logged_fields_data_of_your_catches_for_the_list">select the logged fields data of your catches for the list</string>

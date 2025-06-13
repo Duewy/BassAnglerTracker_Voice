@@ -4,7 +4,10 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -15,11 +18,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.speech.RecognitionListener
-import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -27,6 +30,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -34,13 +38,14 @@ import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
+import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 
-abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
+class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
 
     // Buttons
@@ -48,7 +53,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private lateinit var btnMainInches: Button
     private lateinit var btnAlarmInches: Button
     private lateinit var btnSetUpInches: Button
-    private lateinit var editDialog: AlertDialog
+
 
     // Alarm Variables
     private var alarmHour: Int = -1
@@ -104,30 +109,13 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     // Voice Helper
+    private lateinit var tts: TextToSpeech
+    private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
     private var awaitingResult = false
 
-    // --- voice-to-text callback handler ---
-    private val recognitionListener = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle?) {}
-        override fun onBeginningOfSpeech() {}
-        override fun onRmsChanged(rmsdB: Float) {}
-        override fun onBufferReceived(buffer: ByteArray?) {}
-        override fun onEndOfSpeech() {}
-        override fun onError(error: Int) {
-            Toast.makeText(this@CatchEntryTournamentInches, "Speech error $error", Toast.LENGTH_SHORT).show()
-            }
-        override fun onResults(results: Bundle) {
-            results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                ?.firstOrNull()
-                ?.let { onSpeechResult(it) }
-        }
-        override fun onPartialResults(partial: Bundle?) {}
-        override fun onEvent(eventType: Int, params: Bundle?) {}
-    }
 
     // Tournament Configuration
     private var tournamentCatchLimit: Int = 4
@@ -138,20 +126,21 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private var lastTournamentCatch: CatchItem? = null
 
     companion object {
-        const val EXTRA_LENGTH_INCHES     = "lengthTotalInches"
-        const val EXTRA_SPECIES       = "selectedSpecies"
-        const val EXTRA_CLIP_COLOR    = "clip_color"
-        const val EXTRA_CATCH_TYPE    = "catchType"
-        const val EXTRA_IS_TOURNAMENT = "isTournament"
-        const val EXTRA_AVAILABLE_CLIP_COLORS = "availableClipColors"
-        const val EXTRA_TOURNAMENT_SPECIES = "tournamentSpecies"
+        const val EXTRA_LENGTH_INCHES          = "lengthTotalInches"    // Send & receive this from this popup
+        const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+        const val EXTRA_MEASURING_TYPE         = "measuringType"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
 
-    //!!!!!!!!!!!!!!!!!! Forces Android to Receive data from PopupVcc that is using Bluetooth
 
 
-
-    // ````````````` Retrieves data from the POPUP ````````````````````````
+    // ````````````` Retrieves data from the Manual Mode POPUP ````````````````````````
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -165,22 +154,41 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
-
     //================ ON CREATE =======================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view_inches)
 
-
-        // Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-        voiceHelper = VoiceInteractionHelper(
-            activity = this, //
-            measurementUnit = VoiceInteractionHelper.MeasurementUnit.INCHES,
-            isTournament = true,
-            onCommandAction = { transcript -> onSpeechResult(transcript) }
-        )
-
+        // 1️⃣ Read the VCC flag first
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+        Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+
+        // 2️⃣ Launch your VoiceControlService *only* if VCC is on
+        if (voiceControlEnabled) {
+            ContextCompat.startForegroundService(
+                this,
+                Intent(this, VoiceControlService::class.java)
+            )
+            LocalBroadcastManager.getInstance(this)
+                .registerReceiver(
+                    voiceCatchReceiver,
+                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
+                )
+
+            // 3️⃣ And only then wire up your helper
+            voiceHelper = VoiceInteractionHelper(
+                activity        = this,
+                measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+                isTournament    = true,
+                onCommandAction = { transcript -> onSpeechResult(transcript) }
+            )
+        }
+
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale.getDefault()
+            }
+        }
 
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishingInches)
@@ -261,6 +269,9 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+override val dialog: Any
+    get() = throw UnsupportedOperationException("BaseCatchEntryActivity.dialog is unused in this subclass")
+
 
     // ------------- On RESUME --------- Check GPS  Statues --------------
     override fun onResume() {
@@ -282,6 +293,13 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         handler.removeCallbacksAndMessages(null)
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
+    }
+
+    private val voiceCatchReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("VCC_FLOW", "🧠 Voice catch saved — refreshing UI")
+            updateTournamentList()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -322,7 +340,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
 
     // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    fun saveTournamentCatch(totalLengthQuarters: Int, bassType: String, clipColor: String) {
+    private fun saveTournamentCatch(totalLengthQuarters: Int, bassType: String, clipColor: String) {
         val availableColors = calculateAvailableClipColors(
             dbHelper,
             catchType = "inches",
@@ -541,12 +559,12 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 
     enum class ClipColor(val resId: Int) {
-        RED(R.color.clip_red),
         BLUE(R.color.clip_blue),
-        GREEN(R.color.clip_green),
         YELLOW(R.color.clip_yellow),
+        GREEN(R.color.clip_green),
         ORANGE(R.color.clip_orange),
-        WHITE(R.color.clip_white);
+        WHITE(R.color.clip_white),
+        RED(R.color.clip_red);
     }
 
     //????????????? AVAILABLE COLORS   ???????????????????????
@@ -665,6 +683,18 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
             val newTotalInches    = (newInches * 4 + newQuarters)
             val selectedClipColor = spnClipColor.selectedItem.toString()
 
+            if (newTotalInches == 0) {
+                edtInches.setText("0")
+                edtQuartersOfInch.setText("0")
+                edtInches.requestFocus()
+                edtQuartersOfInch.setSelection(edtInches.text.length)
+
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(edtInches, InputMethodManager.SHOW_IMPLICIT)
+
+                positionedToast("🚫 Length cannot be 0 Inches 0/4 !")
+                return@setOnClickListener
+            }
 
             dbHelper.updateCatch(
                 catchId           = c.id,
@@ -673,7 +703,7 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
                 newLengthQuarters = newTotalInches,
                 newLengthCm       = null,
                 species           = c.species,
-                clipColor = selectedClipColor
+                clipColor         = selectedClipColor
             )
 
             updateTournamentList()
@@ -743,7 +773,13 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
     //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
 
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API" +
+            "which brings increased type safety via an {@link ActivityResultContract} and the prebuilt " +
+            "contracts for common intents available in {@link androidx.activity.result.contract.ActivityResultContracts}, " +
+            "provides hooks for testing, and allow receiving results in separate, testable classes independent from the " +
+            "activity. Use {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}with the appropriate " +
+            "{@link ActivityResultContract} and handling the result in the {@link ActivityResultCallback#onActivityResult(Object) callback}.")
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -851,15 +887,11 @@ abstract class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         }
     }
 
-    /**
-     * Also required by the base.  You could use this
-     * if you wanted the old “wake” event to kick off VCC,
-     * but we’re using a double-tap listener instead.
-     */
-    // ------------ Double Tap Wakes App Up for VCC --------------
-    override fun onVoiceWake() {
-        launchFromWake = true
+
+    override fun onSpeechResult(transcript: String) {
+        // VCC handled elsewhere; no-op or forward to your VoiceControlService
     }
+
 
 
 }//################## END  ################################

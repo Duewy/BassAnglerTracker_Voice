@@ -58,8 +58,8 @@ class SetUpActivity : AppCompatActivity() {
         private const val REQUEST_VOICE_SETUP               = 2001
         private const val REQUEST_DEEP_DOZE_AGREEMENT       = 2002
 
-
-        const val TYPE_FUN_LBS    = 1
+        // values for the VoiceHandlers to identify which MeasurementMode in use
+            const val TYPE_FUN_LBS    = 1
             const val TYPE_FUN_KGS    = 2
             const val TYPE_FUN_INCH   = 3
             const val TYPE_FUN_CM     = 4
@@ -252,60 +252,82 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
 
-        //------ VOICE CONTROL ----------------
+        // ------ VOICE CONTROL ENABLE ----------------
         tglVoice.setOnCheckedChangeListener { _, isChecked ->
-            SharedPreferencesManager.setVccEnabled(this, isChecked)
-
             if (isChecked) {
-                // Check for Deep Doze consent
-                val hasAgreed = SharedPreferencesManager.hasUserAgreedToDeepDoze(this)
-                if (!hasAgreed) {
-                    // Launch agreement screen — handled in onActivityResult
-                    val intent = Intent(this, UserAgreementForDeepDozeActivity::class.java)
-                    startActivityForResult(intent, REQUEST_DEEP_DOZE_AGREEMENT)
+                // a) BT device must be connected
+                if (!isBluetoothConnectedSafe()) {
+                    positionedToast("⚠️Please connect a 🎤 Bluetooth 🎧device for voice control")
                     tglVoice.isChecked = false
                     return@setOnCheckedChangeListener
                 }
 
-                // 1) RECORD_AUDIO permission
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO)
+                // b) Deep‐doze agreement
+                if (!SharedPreferencesManager.hasUserAgreedToDeepDoze(this)) {
+                    startActivityForResult(
+                        Intent(this, UserAgreementForDeepDozeActivity::class.java),
+                        REQUEST_DEEP_DOZE_AGREEMENT
+                    )
                     tglVoice.isChecked = false
                     return@setOnCheckedChangeListener
                 }
 
-                // 2) BLUETOOTH_CONNECT permission (Android 12+)
+                // c) RECORD_AUDIO permission
+                if (ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.RECORD_AUDIO
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.RECORD_AUDIO),
+                        REQUEST_RECORD_AUDIO
+                    )
+                    tglVoice.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+
+                // d) BLUETOOTH_CONNECT permission (Android S+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), REQUEST_BLUETOOTH_CONNECT)
+                    ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                        REQUEST_BLUETOOTH_CONNECT
+                    )
                     tglVoice.isChecked = false
                     return@setOnCheckedChangeListener
                 }
 
-                // 3) All permissions granted → continue
-                val usingBluetooth = isBluetoothConnectedSafe()
-                val sourceName = if (usingBluetooth) "Bluetooth mic" else "phone mic"
-
-                positionedToast("🤙 Voice control enabled using $sourceName 🤳")
-
+                // e) All checks passed → save prefs & start the service
                 prefs.edit()
-                    .putBoolean(KEY_USE_BLUETOOTH_MODE, usingBluetooth)
+                    .putBoolean(KEY_USE_BLUETOOTH_MODE, true)
                     .putBoolean(KEY_VOICE_CONTROL, true)
                     .apply()
 
+                positionedToast("🤙 Voice Control Enabled using🎧 Bluetooth mic 🎙️")
                 startVoiceService()
+
             } else {
-                prefs.edit().putBoolean(KEY_VOICE_CONTROL, false).apply()
+                // Turning OFF
+                prefs.edit()
+                    .putBoolean(KEY_VOICE_CONTROL, false)
+                    .apply()
+
                 stopVoiceService()
                 positionedToast("⚠️ Voice control disabled 🚫️")
             }
 
+            // Update toggle background colors
             tglVoice.background = if (tglVoice.isChecked)
                 ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
             else
                 ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
         }
-//-------------------END -- tglVoice -------------------------------------------
+// ---------------- END tglVoice ----------------
+
 
         btnMainSetup.setOnClickListener {
             val intent2 = Intent(this, MainActivity::class.java)
@@ -422,6 +444,7 @@ class SetUpActivity : AppCompatActivity() {
     private fun startVoiceService() {
         if (SharedPreferencesManager.isVccEnabled(this)) {
             val svc = Intent(this, VoiceControlService::class.java)
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(svc)
             } else {
