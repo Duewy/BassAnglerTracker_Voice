@@ -10,13 +10,15 @@ import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
 import com.bramestorm.bassanglertracker.utils.positionedToast
+import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 
 class UserTrainingVoiceCommands : AppCompatActivity() {
 
-    private lateinit var btnSetUpUser: Button
-    private lateinit var btnMenuUser: Button
-    private lateinit var btnWhatIsVCC: Button
-    private lateinit var btnTeachVCC : Button
+    private lateinit var btnSetUpUser   : Button
+    private lateinit var btnMenuUser    : Button
+    private lateinit var btnWhatIsVCC   : Button
+    private lateinit var btnTeachVCC    : Button
+    private lateinit var btnVoiceSetup  :Button
 
 
 
@@ -29,6 +31,7 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         btnMenuUser = findViewById(R.id.btnMenuUser)
         btnWhatIsVCC = findViewById(R.id.btnWhatIsVCC)
         btnTeachVCC = findViewById(R.id.btnTeachVCC)
+        btnVoiceSetup = findViewById(R.id.btnVoiceSetup)
 
 
 
@@ -62,7 +65,10 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
             }
         }
 
-// — remove the stray try/catch here —
+        // Goto the Voice Set Up page for Bixby or STT / TTS issues
+        btnVoiceSetup.setOnClickListener {
+            startActivity(Intent(this, VoiceSetupActivity::class.java))
+        }
 
 
     }//_____________ END On Create ____________________

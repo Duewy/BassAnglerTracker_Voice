@@ -1,32 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#808080</color>
     <color name="lite_grey">#DFAEACAC</color>
     <color name="very_lite_grey">#B0AEACAC</color>
+    <color name="clip_bright_green">#66CC33</color>
     <color name="bright_green">#EB24A108</color>
     <color name="purple_500">#FF6200EE</color>
+    <color name="lt_brown">#C19268</color>
+    <color name="dark_yellow">#CCAA00</color>
+    <color name="golden">#FFB700</color>
 
+    <color name="main_background">#5196DB</color>
     <color name="secondary">#4169E1</color>
     <color name="secondary_variant">#41B4E1</color>
 
+    <color name="material_dynamic_primary70">#72B0D1</color>
+    <color name="material_dynamic_neutral90">#9CA1EC</color>
+
+    <color name="highlight_yellow">#F6DF0E</color>
+    <color name="selection_list">#EAB383</color>
 
     <!-- SoftLock Culling Clip Colors -->
-    <color name="clip_red">#D50019</color>
+
+    <color name="clip_blue">#00007F</color>
     <color name="clip_yellow">#FEFE20</color>
     <color name="clip_green">#00800D</color>
-    <color name="clip_blue">#00007F</color>
-    <color name="clip_white">#FDFDFD</color>
     <color name="clip_orange">#FE671E</color>
-
-    <color name="main_background">#5196DB</color>
-
-
-    <color name="dark_yellow">#CCAA00</color>
-    <color name="clip_bright_green">#66CC33</color>
-
+    <color name="clip_white">#FDFDFD</color>
+    <color name="clip_red">#D50019</color>
 
     <!-- Brand Colors -->
     <color name="softlock_blue">#212199</color>      <!-- Deep navy blue (primary brand color) -->
@@ -38,19 +43,6 @@
     <color name="softlock_teal">#0EAEAE</color>      <!-- Teal for secondary buttons and highlights -->
 
 
-    <!-- res/values-night/colors.xml (Dark theme) -->
-
-    <!-- Brand Colors (modified for visibility on dark backgrounds) -->
-    <!-- Brightened blue for dark mode (more visible on dark backgrounds) -->
-    <!-- Same green (already bright enough for dark mode) -->
-    <!-- Extended Palette (inverted or adjusted for dark theme) -->
-    <!-- Near-black background (dark equivalent of “sand”) -->
-    <!-- Light grey for contrast (e.g. text on dark background) -->
-    <!-- Same orange (high contrast on dark background) -->
-    <!-- Same teal (medium contrast on dark background) -->
-
-
-
     <!-- Logging Page colors-->
 
     <color name="Log_red">#C3D50011</color>
@@ -60,16 +52,6 @@
     <color name="Log_white">#85FDFDFD</color>
     <color name="Log_orange">#80FE671E</color>
     <color name="Log_brown">#805E3A29</color>
-
-    <!-- Light green -->
-
-    <color name="material_dynamic_primary70">#72B0D1</color>
-    <color name="material_dynamic_neutral90">#9CA1EC</color>
-    <color name="highlight_yellow">#F6DF0E</color>
-    <color name="golden">#FFB700</color>
-    <color name="selection_list">#EAB383</color>
-
-    <color name="lt_brown">#C19268</color>
 
 
 </resources>

@@ -40,13 +40,12 @@ class VoiceControlService : Service() {
     }
 
     private lateinit var telephonyManager: TelephonyManager
-    private lateinit var audioManager: AudioManager
+    private val audioManager by lazy {getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private lateinit var wakeLock: PowerManager.WakeLock
     private var focusRequest: AudioFocusRequest? = null
     private var mediaSession: MediaSessionCompat? = null
     private lateinit var mediaButtonReceiver: PendingIntent
 
-    private val handler = Handler(Looper.getMainLooper())
     private var sessionActive = false
     private var activeVoiceSession: VoiceInteractionManager? = null
 
@@ -98,7 +97,6 @@ class VoiceControlService : Service() {
 
             // 2️⃣ THEN do the rest of your initialization
             telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            audioManager     = getSystemService(Context.AUDIO_SERVICE)       as AudioManager
             telephonyManager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE)
             wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager)
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:WakeLock")

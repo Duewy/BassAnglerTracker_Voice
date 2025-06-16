@@ -6,14 +6,14 @@ object VoiceCommandList {
     val phraseList = mutableListOf(
 
                  //------📃 User Action Words / Phrases
-        PracticePhrase("Save the Catch", false),
+        PracticePhrase("Catch", false),
         PracticePhrase("Caught", false),
         PracticePhrase("Log Entry", false),
         PracticePhrase("New Fish", false),
         PracticePhrase("Clear List", false),
         PracticePhrase("Correct an Error", false),
-        PracticePhrase("Delete the Last Catch", false),
-        PracticePhrase("Edit the Last Catch", false),
+        PracticePhrase("Delete Last Catch", false),
+        PracticePhrase("Edit Last Catch", false),
         PracticePhrase("Smallest Catch", false),
         PracticePhrase("Smallest Catch on the List", false),
         PracticePhrase("Largest Catch", false),
@@ -69,6 +69,7 @@ object VoiceCommandList {
         "log catch"
     )
 
+                //todo this is for the misspoken words due to accents and dialects
     fun isKnownTournamentCommand(command: String): Boolean {
         return knownTournamentCommands.contains(command.lowercase())
     }

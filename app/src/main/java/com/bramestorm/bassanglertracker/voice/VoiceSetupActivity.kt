@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker.voice
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
 import android.content.Intent
@@ -14,10 +15,12 @@ import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.utils.positionedToast
 
@@ -29,15 +32,23 @@ class VoiceSetupActivity : AppCompatActivity() {
         private val ASSIST_KEYS = listOf("assistant", "voice_interaction_service")
     }
 
+    private lateinit var btnMainVSU : Button
+    private lateinit var btnPDF : Button
     private lateinit var txtDefaultAssist: TextView
     private lateinit var txtDefaultRecognizer: TextView
     private lateinit var btnAssistantSettings: Button
     private lateinit var btnVoiceInputSettings: Button
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_voice_setup)
 
+        positionedToast("ℹ️ Tap the info icons for setup tips.")    // give users the hint for added information
+
+
+        btnMainVSU            = findViewById(R.id.btnMainVSU)
+        btnPDF                = findViewById(R.id.btnPDF)
         // Bind UI
         txtDefaultAssist      = findViewById(R.id.txtDefaultAssist)
         txtDefaultRecognizer  = findViewById(R.id.txtDefaultRecognizer)
@@ -56,6 +67,61 @@ class VoiceSetupActivity : AppCompatActivity() {
         } else {
             checkBluetoothDevices()
         }
+
+
+        btnMainVSU .setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+
+
+        btnPDF.setOnClickListener {
+            // Assuming PDF is in assets or served via GitHub
+            val url = "https://raw.githubusercontent.com/Duewy/Catch_and_Cull_Help_Files/main/Voice_Assistant_Setup_Guide_CatchAndCall.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+
+        val infoAssist = findViewById<ImageView>(R.id.infoAssist)
+        infoAssist.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Default Assistant")
+                .setMessage("Set your assistant to Google for best voice control compatibility. Tap 'Assistant Settings' to open the right page.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
+        //infoManufacturesRecognizer
+        val infoManufacturesRecognizer = findViewById<ImageView>(R.id.infoManufacturesRecognizer)
+        infoManufacturesRecognizer.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Manufacturer Voice Service")
+                .setMessage("Your device may come with a manufacturer voice assistant (like Bixby or others). "
+                        + "These may interfere with the Catch and Call voice system.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
+        //infoVoiceRecognizer
+        val infoRecognizer = findViewById<ImageView>(R.id.infoVoiceRecognizer)
+        infoRecognizer.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Voice Recognizer")
+                .setMessage("Make sure the default speech recognizer is set to Google. Tap 'Voice Input Settings' to configure it.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
+        //infoBixbySettings
+        val infoBixbySettings = findViewById<ImageView>(R.id.infoBixbySettings)
+        infoBixbySettings.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Disable Bixby")
+                .setMessage("If you're on a Samsung device, Bixby might be the default assistant. "
+                        + "Use this button to force-stop Bixby or turn it off in App Info.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
 
         // Discover all assistants & recognizers
         val assistants  = getAllVoiceInteractionServices()
@@ -80,6 +146,8 @@ class VoiceSetupActivity : AppCompatActivity() {
             openAppInfo(getDefaultVoiceRecognizerPackage())
         }
     }
+
+
 
     private fun updateVoiceSetupUI() {
         // Assistant check

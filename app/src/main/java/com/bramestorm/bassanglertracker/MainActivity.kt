@@ -1,5 +1,6 @@
 package com.bramestorm.bassanglertracker
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.training.UserTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-
+import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,7 +18,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-    //--------------------- Set the Initial List for Species ---------------------
+        // Check if this is the First time the Catch and Call app has opened
+        checkFirstLaunch()
+
+        //--------------------- Set the Initial List for Species ---------------------
         if (!SharedPreferencesManager.isSpeciesInitialized(this)) {
             val default8 = listOf("Large Mouth", "Small Mouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
             SharedPreferencesManager.saveSelectedSpeciesList(this, default8)
@@ -59,6 +63,23 @@ class MainActivity : AppCompatActivity() {
         }
 
     }// `````````` END On Create  ``````````````````````
+
+    // Check if this is the User's first Time Opening the Catch and Call App
+    // if so then they will have to set up the proper STT and TTS as well as
+    // turn off back ground apps such as Bixby
+
+    private fun checkFirstLaunch() {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
+        val firstLaunch = prefs.getBoolean("FIRST_LAUNCH_COMPLETE", false)
+
+        if (!firstLaunch) {
+            // Launch voice setup guide
+            startActivity(Intent(this, VoiceSetupActivity::class.java))
+
+            // Prevent this from running again
+            prefs.edit().putBoolean("FIRST_LAUNCH_COMPLETE", true).apply()
+        }
+    }
 
 
 }// !!!!!!!!!!!!!!! END MainActivity !!!!!!!!!!!!!!!!!!!!!!!

@@ -118,7 +118,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Open How to PDF"
+            android:text="@string/open_how_to_pdf"
             android:typeface="serif"
             android:textColor="@color/black"
             android:textSize="18sp"
@@ -142,6 +142,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/txtWhatIsVCC" />
 
+        <Button
+            android:id="@+id/btnVoiceSetup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_outline_softlock_blue"
+            android:padding="15dp"
+            android:text="@string/voice_assistant_setup"
+            android:textColor="@color/clip_white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnWhatIsVCC" />
+
         <View
             android:id="@+id/divider19"
             android:layout_width="0dp"
@@ -152,7 +167,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnWhatIsVCC" />
+            app:layout_constraintTop_toBottomOf="@id/btnVoiceSetup" />
 
         <TextView
             android:id="@+id/txtTeachVoice"
