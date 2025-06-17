@@ -4,6 +4,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
 }
 
 // ---------------------------------------------
@@ -66,7 +67,7 @@ android {
             }
         }
 
-    }
+    } //=== END == Default Config ====================
 
 // ---------------------------------------------
 // 🔗 Dependencies - Core, Compose, Google, Testing
@@ -115,20 +116,21 @@ android {
 
 
         // ✅ Android Media
-        implementation(libs.androidx.media)
-        implementation("androidx.media:media:1.6.0")
-        implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+        implementation(libs.androidx.media.v170)
+        implementation(libs.androidx.localbroadcastmanager)
 
 
         // 🧪 Compose UI Testing
         androidTestImplementation(platform(libs.androidx.compose.bom))
-        androidTestImplementation(libs.androidx.ui.test.junit4)
         debugImplementation(libs.androidx.ui.tooling)
         debugImplementation(libs.androidx.ui.test.manifest)
-        implementation(kotlin("script-runtime"))
-    }
-}
-dependencies {
-    implementation(libs.protolite.well.known.types)
-}
+
+
+        // 📝 Google Ad Services
+        implementation(libs.play.services.ads)
+        implementation(libs.protolite.well.known.types)
+    }   //========== END == Dependencies =================
+
+} //==== END === Gradle =========================
+
 

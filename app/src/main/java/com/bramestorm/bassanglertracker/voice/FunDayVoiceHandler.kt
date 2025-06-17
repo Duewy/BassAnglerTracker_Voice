@@ -93,7 +93,28 @@ class FunDayVoiceHandler(
                   MeasurementMode.INCHES -> parsed.totalLengthQuarters == 0
                   MeasurementMode.CM     -> parsed.totalLengthTenths == 0
                 }
-            if (missingSpecies || missingValue) {
+
+        // Simple sanity check for measurement unit overflow
+        val oz     = parsed.weightOz
+        val grams  = parsed.weightGrams
+        val quarters = parsed.lengthQuarters
+        val tenths = parsed.lengthTenths
+
+        if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
+            (measurementMode == MeasurementMode.KG     && grams > 99) ||
+            (measurementMode == MeasurementMode.INCHES && quarters > 3) ||
+            (measurementMode == MeasurementMode.CM     && tenths > 9)) {
+
+            Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
+            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT")
+            Handler(Looper.getMainLooper()).postDelayed({
+                startSession()
+            }, 1500)
+            return
+        }
+
+
+        if (missingSpecies || missingValue) {
                   parseRetryCount++
                   if (parseRetryCount > MAX_PARSE_RETRIES) {
                         uiHelper.speak("Sorry, I still can’t understand—let’s try again later. Over.", "TTS_FAIL")

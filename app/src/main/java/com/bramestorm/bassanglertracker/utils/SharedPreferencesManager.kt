@@ -268,4 +268,25 @@ object SharedPreferencesManager {
     fun normalizeSpeciesName(name: String): String =
         name.trim().lowercase().replace(Regex("\\s+"), " ")
 
+    fun logAdCloseTime(context: Context, adSource: String, durationMs: Long) {
+        val prefs = context.getSharedPreferences("AdStatsPrefs", Context.MODE_PRIVATE)
+        val key = "duration_${adSource}_${System.currentTimeMillis()}"
+        prefs.edit().putLong(key, durationMs).apply()
+        Log.d("AdTracker", "⏱️ $adSource ad closed after ${durationMs / 1000.0} sec")
+    }
+
+    fun logAdImpression(context: Context, adSource: String) {
+        val prefs = context.getSharedPreferences("AdStatsPrefs", Context.MODE_PRIVATE)
+        val key = "impressions_$adSource"
+        val count = prefs.getInt(key, 0)
+        prefs.edit().putInt(key, count + 1).apply()
+        Log.d("AdTracker", "📊 Impression logged for $adSource → Total: ${count + 1}")
+    }
+
+    fun getAdImpressionCount(context: Context, adSource: String): Int {
+        val prefs = context.getSharedPreferences("AdStatsPrefs", Context.MODE_PRIVATE)
+        return prefs.getInt("impressions_$adSource", 0)
+    }
+
+
 }

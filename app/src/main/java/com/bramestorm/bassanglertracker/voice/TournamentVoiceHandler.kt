@@ -31,8 +31,8 @@ class TournamentVoiceHandler(
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context)
 ) {
 
-    private val MAX_PARSE_RETRIES    = 3
-    private val MAX_QUESTION_RETRIES = 3
+    private val maxParseRetries    = 3
+    private val maxQuestionRetries = 3
 
     private var parseRetryCount    = 0
     private var questionRetryCount = 0
@@ -85,6 +85,26 @@ class TournamentVoiceHandler(
             MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(transcript, speciesList, clipColors)
         }
 
+        // Simple sanity check for measurement unit overflow
+        val oz     = parsed.weightOz
+        val grams  = parsed.weightGrams
+        val quarters = parsed.lengthQuarters
+        val tenths = parsed.lengthTenths
+
+        if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
+            (measurementMode == MeasurementMode.KG     && grams > 99) ||
+            (measurementMode == MeasurementMode.INCHES && quarters > 3) ||
+            (measurementMode == MeasurementMode.CM     && tenths > 9)) {
+
+            Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
+            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT")
+            Handler(Looper.getMainLooper()).postDelayed({
+                startVoiceSession()
+            }, 1500)
+            return
+        }
+
+
         val missingInfo = parsed.species.isBlank() || parsed.clipColor.isBlank() || when (measurementMode) {
             MeasurementMode.LBS_OZ -> parsed.totalWeightOzs == 0
             MeasurementMode.KG     -> parsed.totalWeightHundredthKg == 0
@@ -95,7 +115,7 @@ class TournamentVoiceHandler(
         Log.d(TAG, "Parsed result: \$parsed")
 
         if (missingInfo) {  parseRetryCount++
-            if (parseRetryCount > MAX_PARSE_RETRIES) {
+            if (parseRetryCount > maxParseRetries) {
                 uiHelper.speak("Okay, let’s try again later. Over.", "TTS_FAIL")
                 parseRetryCount = 0
                 return
@@ -106,6 +126,8 @@ class TournamentVoiceHandler(
             }, 1500)
             return
         }
+
+
         parseRetryCount = 0     // successful parse → reset counter
 
         // Build confirmation prompt
@@ -337,7 +359,7 @@ class TournamentVoiceHandler(
 
             else -> {
                 questionRetryCount++
-                if (questionRetryCount > MAX_QUESTION_RETRIES) {
+                if (questionRetryCount > maxQuestionRetries) {
                     uiHelper.speak("Okay, exiting question mode. Over.", "TTS_FAIL")
                     inQuestionMode = false
                     questionRetryCount = 0

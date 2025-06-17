@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:elevation="16dp"
+    android:background="@color/clip_white"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adViewPopup"
+        android:layout_width="320dp"
+        android:layout_height="50dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"  >
+    </com.google.android.gms.ads.AdView>
+
+        <!-- Google test ad -->
+
+    <Button
+        android:id="@+id/btnCloseAd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="10dp"
+        android:layout_gravity="center"
+        android:background="@drawable/btn_outline_gold"
+        android:text="@string/close"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="22sp"/>
+
+</LinearLayout>

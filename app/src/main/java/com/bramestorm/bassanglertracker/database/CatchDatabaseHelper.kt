@@ -715,5 +715,19 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return list
     }
 
+  fun getAllCatchesExcludingPractice(): List<CatchItem> {
+      val db = readableDatabase
+      val list = mutableListOf<CatchItem>()
+      val cursor = db.rawQuery(
+          "SELECT * FROM catches WHERE LOWER(catch_type) != 'practice'",
+          null
+      )
+      while (cursor.moveToNext()) {
+          list.add(parseCatch(cursor))
+      }
+      cursor.close()
+      db.close()
+      return list
+  }
 
 }//----------------- END Catch Database Helper---------------------

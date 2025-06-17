@@ -52,7 +52,6 @@ class SetUpActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_RECORD_AUDIO              = 100
         private const val REQUEST_BLUETOOTH_CONNECT         = 101
-        private const val BT_REQUEST_CODE                   = 104
         private const val LOCATION_PERMISSION_REQUEST_CODE  = 1001
         private const val REQUEST_PHONE_STATE               = 1003
         private const val REQUEST_VOICE_SETUP               = 2001
@@ -92,6 +91,8 @@ class SetUpActivity : AppCompatActivity() {
     private var isFunDaySelected = false
     private var isTournamentSelected = false
     private var selectedSpecies: String = ""
+    private var isGPSInitializingToggle = true
+
 
     private var isValUnits = false
     private var isValMeasuring = false
@@ -240,7 +241,11 @@ class SetUpActivity : AppCompatActivity() {
             tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
         }
 
+        isGPSInitializingToggle = false
+
         tglGPS.setOnCheckedChangeListener { _, isChecked ->
+            if (isGPSInitializingToggle) return@setOnCheckedChangeListener
+
             if (isChecked) {
                 checkAndRequestLocationPermission()
                 // ✅ Change background to green

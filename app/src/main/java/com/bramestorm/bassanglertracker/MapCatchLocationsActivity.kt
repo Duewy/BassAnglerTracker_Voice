@@ -5,13 +5,23 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.mappopups.PopupMapQuery
 import com.bramestorm.bassanglertracker.models.MapQueryFilters
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.positionedToast
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -34,6 +44,8 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_catch_locations)
+
+        MobileAds.initialize(this) {}
 
         btnApplyFilters = findViewById(R.id.btnApplyFilters)
         btnCloseMap = findViewById(R.id.btnCloseMap)
@@ -255,4 +267,63 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return sdf.format(Date())
     }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        if (hasFocus && shouldShowMapAdToday()) {
+            window.decorView.post {
+                showAdPopup("map")
+            }
+        }
+    }
+
+
+    private fun shouldShowMapAdToday(): Boolean {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+        val lastShownDate = prefs.getString("LAST_MAP_AD_DATE", "")
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        return if (lastShownDate != today) {
+            prefs.edit().putString("LAST_MAP_AD_DATE", today).apply()
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun showAdPopup(adSource: String = "map") {
+        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val parent = findViewById<View>(android.R.id.content)
+        val popupView = inflater.inflate(R.layout.popup_advertisement, parent as ViewGroup, false)
+
+        val width = LinearLayout.LayoutParams.WRAP_CONTENT
+        val height = LinearLayout.LayoutParams.WRAP_CONTENT
+        val focusable = true
+
+        val popupWindow = PopupWindow(popupView, width, height, focusable)
+        popupWindow.elevation = 10f
+        if (!isFinishing && !isDestroyed) {
+            popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0)
+        } else {
+            Log.w("MapAd", "Activity not in valid state to show popup.")
+        }
+
+        val adViewPopup = popupView.findViewById<AdView>(R.id.adViewPopup)
+        adViewPopup.loadAd(AdRequest.Builder().build())
+
+        // Start time when popup is shown
+        val startTime = System.currentTimeMillis()
+
+        val closeBtn = popupView.findViewById<Button>(R.id.btnCloseAd)
+        closeBtn.setOnClickListener {
+            val durationMs = System.currentTimeMillis() - startTime
+            SharedPreferencesManager.logAdCloseTime(this, adSource, durationMs)
+            popupWindow.dismiss()
+        }
+
+        SharedPreferencesManager.logAdImpression(this, adSource)
+    }
+
+
 }

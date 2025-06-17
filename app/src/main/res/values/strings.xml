@@ -261,6 +261,9 @@
     <string name="open_how_to_pdf">Open How to PDF</string>
     <string name="voice_assistant_setup">Voice Assistant Setup</string>
     <string name="info_assist_desc">info Assistant icon for accessing Popups to assist user</string>
+    <string name="close">Close</string>
+
+    <string name="test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">
