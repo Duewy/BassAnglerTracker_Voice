@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -30,6 +31,21 @@ class VoiceSetupActivity : AppCompatActivity() {
         private const val REQ_BT_CONNECT = 101
         private const val TAG = "VoiceSetup"
         private val ASSIST_KEYS = listOf("assistant", "voice_interaction_service")
+
+
+        fun isVoiceAssistantReady(context: Context): Boolean {
+            val hasMicPermission = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+
+            val sttIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            val sttResolved = sttIntent.resolveActivity(context.packageManager) != null
+
+            // You can enhance this if you later check for TTS readiness
+            val ttsInstalled = true
+
+            return hasMicPermission && sttResolved && ttsInstalled
+        }
     }
 
     private lateinit var btnMainVSU : Button
@@ -146,7 +162,6 @@ class VoiceSetupActivity : AppCompatActivity() {
             openAppInfo(getDefaultVoiceRecognizerPackage())
         }
     }
-
 
 
     private fun updateVoiceSetupUI() {

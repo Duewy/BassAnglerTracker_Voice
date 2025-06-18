@@ -47,7 +47,9 @@ class VoiceControlService : Service() {
     private lateinit var mediaButtonReceiver: PendingIntent
 
     private var sessionActive = false
-    private var activeVoiceSession: VoiceInteractionManager? = null
+    private var activeVoiceSession: VoiceSessionHandler? = null
+    private var voiceEngine: VoiceInteractionManager? = null
+
 
     /** 1️⃣ Only one callback, wired to call onWake() on ACTION_DOWN */
     private val mediaButtonCallback = object : MediaSessionCompat.Callback() {
@@ -141,7 +143,6 @@ class VoiceControlService : Service() {
         return START_STICKY
     }
 
-
     /**
      * Kicks off a new STT/TTS session using our VoiceInteractionManager.
      */
@@ -150,25 +151,24 @@ class VoiceControlService : Service() {
         uiHelper: VoiceUiHelper,
         onResult: (String) -> Unit
     ) {
-        // cancel any in‐flight session
-        activeVoiceSession?.shutdown()
+        // cancel in‐flight engine session (TTS/STT engine)
+        voiceEngine?.shutdown()
 
-        // launch a fresh one
-        activeVoiceSession = VoiceInteractionManager(
+        voiceEngine = VoiceInteractionManager(
             context = applicationContext,
-            uiHelper  = uiHelper,
-            parser   = VoiceParser
+            uiHelper = uiHelper,
+            parser = VoiceParser
         ).also {
             it.startSession(prompt, onResult)
         }
     }
-
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */
     private fun onWake() {
         if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) return
         sessionActive = true
         wakeLock.acquire(5_000L)
+        Log.d(TAG, "🔁 onWake() called — sessionActive=$sessionActive")
 
         val uiHelper = object : VoiceUiHelper {
             private val vrm = VoiceResponseManager(applicationContext)
@@ -206,6 +206,12 @@ class VoiceControlService : Service() {
 
         wakeLock.release()
     }//==== END = on Wake =====================
+
+
+    fun markSessionComplete() {
+        sessionActive = false
+        Log.d(TAG, "✅ Voice session marked complete")
+    }
 
     private fun isInCall(): Boolean =
         ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE)

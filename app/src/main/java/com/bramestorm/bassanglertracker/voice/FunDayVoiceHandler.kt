@@ -22,7 +22,7 @@ class FunDayVoiceHandler(
     private val context: Context,
     private val uiHelper: VoiceUiHelper,
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context)
-) {
+) : VoiceSessionHandler {
     companion object {
         private const val TAG = "FunDayVoiceHandler"
         private const val ACTION_CATCH_SAVED = "com.bramestorm.VOICE_CATCH_SAVED"
@@ -45,7 +45,7 @@ class FunDayVoiceHandler(
     private var questionRetryCount  = 0
 
     /** Entry point when voice activated. */
-    fun onWake() {
+    override fun onWake() {
         Log.d(TAG, "onWake() called")
         startSession()
     }
@@ -106,7 +106,7 @@ class FunDayVoiceHandler(
             (measurementMode == MeasurementMode.CM     && tenths > 9)) {
 
             Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
-            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT")
+            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT") // Restarts startVoiceSession with new TTS "Please tell me ...
             Handler(Looper.getMainLooper()).postDelayed({
                 startSession()
             }, 1500)
@@ -162,6 +162,12 @@ class FunDayVoiceHandler(
         }, 3500)
     }
 
+    override fun shutdown() {
+        // Add cleanup logic if needed in the future
+        Log.d("FunDayVoiceHandler", "🔻 shutdown called")
+    }
+
+
     /** Persists the catch and notifies UI. */
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
         Log.d(TAG, "saveCatch(parsed=\$parsed)")
@@ -185,17 +191,9 @@ class FunDayVoiceHandler(
         LocalBroadcastManager.getInstance(context)
             .sendBroadcast(Intent(ACTION_CATCH_SAVED))
 
-        val spoken = when (measurementMode) {
-            MeasurementMode.LBS_OZ ->
-                "\${parsed.species} saved at \${parsed.weightLbs} lbs and \${parsed.weightOz} oz."
-            MeasurementMode.KG ->
-                "\${parsed.species} saved at \${parsed.weightKgWhole}.\${parsed.weightGrams} kilograms."
-            MeasurementMode.INCHES ->
-                "\${parsed.species} saved at \${parsed.lengthInches} inches and \${parsed.lengthQuarters} quarters."
-            MeasurementMode.CM ->
-                "\${parsed.species} saved at \${parsed.lengthCm}.\${parsed.lengthTenths} centimeters."
-        }
-        uiHelper.speak(spoken, "TTS_SAVED")
+        uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+        (context as? VoiceControlService)?.markSessionComplete()
+
     }
 
     /** Activates interactive question mode for stats. */
@@ -204,7 +202,7 @@ class FunDayVoiceHandler(
         questionRetryCount = 0
         Log.d(TAG, "Question mode activated")
         uiHelper.speak(
-            "Question mode activated. Ask largest, smallest, total weight or total length. Over.",
+            "Question mode activated. Ask largest, smallest, total weight or total length.Over and out.",
             "TTS_QUESTION_INTRO"
         )
         Handler(Looper.getMainLooper()).postDelayed({
@@ -218,9 +216,11 @@ class FunDayVoiceHandler(
     private fun routeQuestion(question: String) {
         Log.d(TAG, "routeQuestion('\$question')")
 
+        val overOut = "Over and Out."   // just a cute way to add the "Over and out." to all TTS endings
+
         // 1) Check for “cancel” command
         if (question.contains("cancel", ignoreCase = true)) {
-            uiHelper.speak("Okay, exiting question mode. Over.", "TTS_CANCEL")
+            uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_CANCEL")
             inQuestionMode     = false
             questionRetryCount = 0
             return
@@ -239,14 +239,14 @@ class FunDayVoiceHandler(
 
         if (filtered.isEmpty()) {
             uiHelper.speak(
-                "No ${speciesMentioned ?: ""} catches today. Over.",
+                "No ${speciesMentioned ?: ""} catches today. $overOut",
                 "TTS_ERROR"
             )
             return
         }
         // redundant but it is OK to keep for catching blank questions
         if (allCatches.isEmpty()) {
-            uiHelper.speak("No catches recorded today to answer that. Over.", "TTS_ERROR")
+            uiHelper.speak("No catches recorded today to answer that. $overOut", "TTS_ERROR")
             return
         }
 
@@ -258,7 +258,7 @@ class FunDayVoiceHandler(
                 val prefix = speciesMentioned
                     ?.let { "Your largest ${it.uppercase()} today is" }
                     ?: "Your largest catch today is"
-                speakFish(fish, prefix)
+                speakFish(fish, prefix, overOut)
             }
 
             question.contains("smallest", true) -> {
@@ -266,13 +266,13 @@ class FunDayVoiceHandler(
                 val prefix = speciesMentioned
                     ?.let { "Your smallest ${it.uppercase()} today is" }
                     ?: "Your smallest catch today is"
-                speakFish(fish, prefix)
+                speakFish(fish, prefix, overOut)
             }
 
             question.contains("total weight", true) -> {
                 val total = allCatches.sumOf { it.getComparisonValueByMode(measurementMode).toDouble() }
                 uiHelper.speak(
-                    "Your total weight today is \$total. Over.",
+                    "Your total weight today is \$total. $overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -280,7 +280,7 @@ class FunDayVoiceHandler(
             question.contains("total length", true) -> {
                 val total = allCatches.sumOf { it.getComparisonValueByMode(measurementMode).toDouble() }
                 uiHelper.speak(
-                    "Your total length today is \$total. Over.",
+                    "Your total length today is \$total. $overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -288,12 +288,12 @@ class FunDayVoiceHandler(
             else -> {
                 questionRetryCount++
                 if (questionRetryCount > 3) {
-                    uiHelper.speak("Exiting question mode. Over.", "TTS_FAIL")
+                    uiHelper.speak("Exiting question mode. $overOut", "TTS_FAIL")
                     inQuestionMode = false
                     questionRetryCount = 0
                 } else {
                     uiHelper.speak(
-                        "Sorry, I didn't catch that. Say largest, smallest, total weight or total length. Over.",
+                        "Sorry, I didn't catch that. Say largest, smallest, total weight or total length. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({ handleQuestionMode() }, 1500)
@@ -305,14 +305,14 @@ class FunDayVoiceHandler(
     /** Speaks a single fish description. */
 
     // helper to pick the corresponding units:
-    private fun speakFish(fish: CatchItem, prefix: String) {
+    private fun speakFish(fish: CatchItem, prefix: String, overOut: String) {
         when (measurementMode) {
             MeasurementMode.LBS_OZ -> {
                 val oz = fish.totalWeightOz ?: 0
                 val lbs = oz / 16
                 val remOz = oz % 16
                 uiHelper.speak(
-                    "$prefix ${fish.species} at $lbs pounds and $remOz ounces. Over.",
+                    "$prefix ${fish.species} at $lbs pounds and $remOz ounces.$overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -321,7 +321,7 @@ class FunDayVoiceHandler(
                 val kgs = hundredths / 100
                 val grams = hundredths % 100
                 uiHelper.speak(
-                    "$prefix ${fish.species} at $kgs point $grams kilograms. Over.",
+                    "$prefix ${fish.species} at $kgs point $grams kilograms.  $overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -330,7 +330,7 @@ class FunDayVoiceHandler(
                 val inches = quarters / 4
                 val remQuarters = quarters % 4
                 uiHelper.speak(
-                    "$prefix ${fish.species} at $inches inches and $remQuarters quarters. Over.",
+                    "$prefix ${fish.species} at $inches inches and $remQuarters quarters.  $overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -339,7 +339,7 @@ class FunDayVoiceHandler(
                 val cms = tenths / 10
                 val remTenths = tenths % 10
                 uiHelper.speak(
-                    "$prefix ${fish.species} at $cms point $remTenths centimeters. Over.",
+                    "$prefix ${fish.species} at $cms point $remTenths centimeters. $overOut",
                     "TTS_ANSWER"
                 )
             }

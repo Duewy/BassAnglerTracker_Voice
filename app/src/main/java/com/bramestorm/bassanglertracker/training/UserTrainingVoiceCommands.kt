@@ -33,8 +33,21 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         btnTeachVCC = findViewById(R.id.btnTeachVCC)
         btnVoiceSetup = findViewById(R.id.btnVoiceSetup)
 
+        // Simple check using helper from VoiceSetupActivity
+        // Goto the Voice Set Up page for Bixby or STT / TTS issues
+        val isReady = VoiceSetupActivity.isVoiceAssistantReady(this)
 
-
+        if (isReady) {  // if all the VCC STT/TTS are good then 👍
+            btnVoiceSetup.alpha = 0.5f  // visually grey it out
+            btnVoiceSetup.setOnClickListener {
+                positionedToast(getString(R.string.voice_assistant_ready))
+            }
+        } else {
+            btnVoiceSetup.setOnClickListener { // open the page to make changes
+                val intent = Intent(this, VoiceSetupActivity::class.java)
+                startActivity(intent)
+            }
+        }
 
         btnSetUpUser.setOnClickListener {
             val intent = Intent(this, SetUpActivity::class.java)
@@ -63,11 +76,6 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
             } catch (e: ActivityNotFoundException) {
                 positionedToast("No browser found to open link.")
             }
-        }
-
-        // Goto the Voice Set Up page for Bixby or STT / TTS issues
-        btnVoiceSetup.setOnClickListener {
-            startActivity(Intent(this, VoiceSetupActivity::class.java))
         }
 
 

@@ -1,5 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- todo look🔍 for the use of poor English or mashed 🥣 words 👉 can't is to be 👍 can not  -->
+
+
     <string name="app_name">Catch Call</string>
     <string name="app_image_description">SoftLock Culling System with Voice Controlled Culling</string>
     <string name="enter_catch_lbs_and_ozs">Enter Catch (Lbs and ozs)</string>
@@ -263,6 +266,40 @@
     <string name="info_assist_desc">info Assistant icon for accessing Popups to assist user</string>
     <string name="close">Close</string>
 
+
+    <!-- STT error message with numeric error code -->
+    <string name="speech_error_error">Speech error code %1$d</string>
+
+    <!-- 😢 No catches available -->
+    <string name="no_catches_available">😢 No catches available</string>
+
+    <!-- $selectedSpecies Catch Saved! -->
+    <string name="selectedSpecies_catch_saved">$selectedSpecies Catch Saved!</string>
+
+    <!-- ⚠️ Failed to save catch! -->
+    <string name="failed_to_save_catch">⚠️ Failed to save catch!</string>
+
+    <!-- Catch deleted! -->
+    <string name="catch_deleted">Catch deleted!</string>
+
+    <!-- Catch updated! -->
+    <string name="catch_updated">Catch updated!</string>
+
+    <!-- $species Catch Saved! -->
+    <string name="species_catch_saved">$species Catch Saved!</string>
+
+    <!-- 🚫 Weight cannot be 0 lbs 0 oz! -->
+    <string name="weight_cannot_be_0_lbs_0_oz">🚫 Weight can not be 0 lbs 0 oz!</string>
+
+    <!-- $bassType Catch Saved! -->
+    <string name="bassType_catch_saved">$bassType Catch Saved!</string>
+
+    <!-- Voice Assistant is already set up.👍 -->
+    <string name="voice_assistant_ready">Voice Assistant is already set up.👍</string>
+
+
+
+    //Google Mob Ad Holder value for Testing
     <string name="test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
     //species List for start of session but Users can modify the list as they desire
