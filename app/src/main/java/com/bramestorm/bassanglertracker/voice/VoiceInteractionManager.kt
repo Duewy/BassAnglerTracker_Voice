@@ -27,8 +27,15 @@ class VoiceInteractionManager(
     private var retryCount = 0
     private val maxRetries = 3
     private val sessionId = System.currentTimeMillis()
+    private var onFailureCallback: (() -> Unit)? = null
 
-    fun startSession(prompt: String, onResult: (String) -> Unit) {
+
+    fun startSession(
+        prompt: String,
+        onResult: (String) -> Unit,
+        onFailure: (() -> Unit)? = null )
+    {
+        this.onFailureCallback = onFailure
         tts?.stop()
         tts?.shutdown()
         tts = TextToSpeech(context) { status ->
@@ -100,6 +107,7 @@ class VoiceInteractionManager(
         retryCount++
         if (retryCount > maxRetries) {
             uiHelper.speak("Too many errors. Please try again later.", "TTS_FAIL")
+            onFailureCallback?.invoke()
         } else {
             uiHelper.speak("Sorry, please repeat your catch. Over.", "TTS_RETRY")
             handler.postDelayed({

@@ -520,13 +520,13 @@ class SetUpActivity : AppCompatActivity() {
             .putBoolean("GPS_ENABLED", true)
             .apply()
         // one call, always positioned the same
-        positionedToast("GPS is Enabled")
+        positionedToast("GPS is Enabled👍")
     }
 
     //------------------------ Disable GPS ------------------------
     private fun disableGps() {
         sharedPreferences.edit().putBoolean("GPS_ENABLED", false).apply()
-        positionedToast("GPS Logging is disabled.\nThe GPS Logging MUST BE Enable\nif you want to log catch locations.")
+        positionedToast("GPS Logging is Disabled.\nyou can not log catch locations.")
     }
 
     //--------------- Request Permissions for Bluetooth ----------------

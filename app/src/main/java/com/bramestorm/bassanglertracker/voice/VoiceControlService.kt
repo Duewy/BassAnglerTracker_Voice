@@ -159,7 +159,14 @@ class VoiceControlService : Service() {
             uiHelper = uiHelper,
             parser = VoiceParser
         ).also {
-            it.startSession(prompt, onResult)
+            it.startSession(
+                prompt,
+                onResult = { result -> onResult(result) },
+                onFailure = {
+                    sessionActive = false
+                    Log.w(TAG, "Voice session failed or cancelled — resetting sessionActive")
+                }
+            )
         }
     }
 

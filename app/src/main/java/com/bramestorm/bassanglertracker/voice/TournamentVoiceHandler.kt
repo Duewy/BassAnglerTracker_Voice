@@ -148,13 +148,16 @@ class TournamentVoiceHandler(
         Handler(Looper.getMainLooper()).postDelayed({
             (context as? VoiceControlService)?.let { svc ->
                 svc.startVoiceSession(
-                    "Please say yes over no over or cancel that Over.",
+                    "Please say yes, no, or cancel that, Over.",
                     uiHelper
                 ) { response ->
                     when {
                         response.contains("yes ", true)    -> saveCatch(parsed)
                         response.contains("no ",  true)    -> startVoiceSession()
-                        response.contains("cancel", true)  -> uiHelper.speak("Catch cancelled. Over and Out.","TTS_CANCEL")
+                        response.contains("cancel", true) -> {
+                            uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
+                            (context as? VoiceControlService)?.markSessionComplete()  // ✅ RESET SESSION HERE
+                        }
                         else -> {
                             uiHelper.speak("Sorry, please say yes over no over or cancel that. Over.","TTS_RETRY")
                             Handler(Looper.getMainLooper()).postDelayed({ parseAndConfirm(transcript) }, 3500)
