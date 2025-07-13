@@ -12,8 +12,8 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
-import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.io.File
 import java.io.FileOutputStream
 
@@ -152,6 +152,18 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                     maxOz = maxOz,
                     limit = 5
                 )
+            }
+            "pounds" -> {
+                val minPounds = (minValue * 100).toInt()
+                val maxPounds = (maxValue * 100).toInt()
+
+                db.getTopCatchesByPoundsForSpeciesThisMonth(
+                    species = selectedSpecies,
+                    minHundredthsPounds = minPounds,
+                    maxHundredthsPounds = maxPounds,
+                    limit = 5
+                )
+
             }
             "kgs" -> {
                 val minHg = (minValue * 100).toInt()

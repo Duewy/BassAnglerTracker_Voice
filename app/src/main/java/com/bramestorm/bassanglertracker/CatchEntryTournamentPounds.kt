@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryTournamentLBS : BaseCatchEntryActivity() {
+class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
     private lateinit var btnStartFishingLBS: Button
     private lateinit var btnSetUpLBS: Button
@@ -96,21 +96,21 @@ class CatchEntryTournamentLBS : BaseCatchEntryActivity() {
     private fun updateTournamentList() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val sorted = dbHelper.getCatchesForToday("decimalLBS", todaysDate)
-            .sortedByDescending { it.totalWeightPounds ?: 0 }
+            .sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
             .take(tournamentCatchLimit)
 
         val realViews = listOf(firstRealWeightLBS, secondRealWeightLBS, thirdRealWeightLBS, fourthRealWeightLBS, fifthRealWeightLBS, sixthRealWeightLBS)
         val decViews = listOf(firstDecWeightLBS, secondDecWeightLBS, thirdDecWeightLBS, fourthDecWeightLBS, fifthDecWeightLBS, sixthDecWeightLBS)
 
-        val total = sorted.sumOf { it.totalWeightPounds ?: 0 }
+        val total = sorted.sumOf { it.totalWeightHundredthPounds ?: 0 }
         val lbs = total / 100
         val dec = total % 100
         totalRealWeightLBS.text = lbs.toString()
         totalDecWeightLBS.text = String.format("%02d", dec)
 
         for (i in sorted.indices) {
-            val valLbs = (sorted[i].totalWeightPounds ?: 0) / 100
-            val valDec = (sorted[i].totalWeightPounds ?: 0) % 100
+            val valLbs = (sorted[i].totalWeightHundredthPounds ?: 0) / 100
+            val valDec = (sorted[i].totalWeightHundredthPounds ?: 0) % 100
             realViews[i].text = valLbs.toString()
             decViews[i].text = String.format("%02d", valDec)
         }

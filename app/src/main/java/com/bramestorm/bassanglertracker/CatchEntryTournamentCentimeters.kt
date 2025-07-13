@@ -343,6 +343,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = species,
             totalWeightOz = null,
+            totalWeightHundredthPounds = null,
             totalLengthQuarters = null,
             totalWeightHundredthKg = null,
             totalLengthTenths = totalLengthTenths,

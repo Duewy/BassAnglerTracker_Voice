@@ -351,6 +351,7 @@ override val dialog: Any
             dateTime = getCurrentDateTime(),
             species = species,
             totalWeightOz = null,
+            totalWeightHundredthPounds = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
             totalLengthQuarters = totalLengthQuarters,

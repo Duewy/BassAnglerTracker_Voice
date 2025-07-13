@@ -12,6 +12,8 @@ object VoiceParser {
         val species: String,
         val weightLbs: Int = 0,
         val weightOz: Int = 0,
+        val weightPounds: Int = 0,
+        val weightDec: Int = 0,
         val weightKgWhole: Int = 0,
         val weightGrams: Int = 0,
         val lengthCm: Int = 0,
@@ -19,8 +21,10 @@ object VoiceParser {
         val lengthInches: Int = 0,
         val lengthQuarters: Int = 0,
         val clipColor: String = "",
+
             // math functions for values
         val totalWeightOzs: Int = ((weightLbs * 16) + weightOz),
+        val totalWeightHundredthPounds: Int = (( weightPounds * 100) + weightDec),
         val totalWeightHundredthKg: Int = ((weightKgWhole * 100) + weightGrams),
         val totalLengthTenths: Int = ((lengthCm * 10) + lengthTenths),
         val totalLengthQuarters: Int = ((lengthInches * 4) + lengthQuarters),
@@ -51,7 +55,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)//todo why is there the input WithOutClip????? should never happen??????
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -77,7 +81,26 @@ object VoiceParser {
         )
     }
 
+    fun parsePoundsCatchWithClips(      //todo check this over there are likely errors...
+        transcript: String,
+        speciesList: List<String>,
+        clipColors: List<String>
+    ): ParsedCatch {
+        val text = correctMisheardWords(transcript.lowercase())
+        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
+        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(text)
+        val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
+        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
 
+
+        return ParsedCatch(
+            species = species,
+            weightPounds = lbs,
+            weightDec = dec,
+            clipColor = color
+        )
+    }
 
     fun parseKgsCatchWithClips(
         transcript: String,
@@ -168,6 +191,20 @@ object VoiceParser {
             species = species,
             weightLbs = lbs,
             weightOz = oz
+        )
+    }
+
+    fun parsePoundsCatchSimple(transcript: String): ParsedCatch {   //todo check for erros
+        val text = correctMisheardWords(transcript.lowercase())
+        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
+        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(text)
+        val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
+
+        return ParsedCatch(
+            species = species,
+            weightPounds = lbs,
+            weightDec = dec,
         )
     }
 

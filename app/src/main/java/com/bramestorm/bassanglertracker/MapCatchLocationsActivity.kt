@@ -209,24 +209,30 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 val info = when {
                     filters.sizeType.equals("weight", ignoreCase = true) -> {
-                        if (filters.measurementType.contains("kg", true)) {
-                            catch.totalWeightHundredthKg?.let { formatWeightKg(this, it) } ?: "No weight"
-                        } else {
-                            catch.totalWeightOz?.let { formatWeightOzToLbsOz(it) } ?: "No weight"
+                        when {
+                            filters.measurementType.contains("kg", ignoreCase = true) -> {
+                                catch.totalWeightHundredthKg?.let { formatWeightKg(this, it) } ?: "No weight"
+                            }
+                            filters.measurementType.contains("pounds", ignoreCase = true) -> {
+                                catch.totalWeightHundredthPounds?.let { formatWeightPounds(this, it) } ?: "No weight"
+                            }
+                            else -> {
+                                catch.totalWeightOz?.let { formatWeightOzToLbsOz(it) } ?: "No weight"
+                            }
                         }
                     }
 
                     filters.sizeType.equals("length", ignoreCase = true) -> {
-                        if (filters.measurementType.contains("cm", true)) {
+                        if (filters.measurementType.contains("cm", ignoreCase = true)) {
                             catch.totalLengthTenths?.let { formatLengthCm(this, it) } ?: "No length"
                         } else {
-                            catch.totalLengthQuarters?.let { formatLengthQuartersToInches(it) }
-                                ?: "No length"
+                            catch.totalLengthQuarters?.let { formatLengthQuartersToInches(it) } ?: "No length"
                         }
                     }
 
                     else -> "Unknown"
                 }
+
 
                 map.addMarker(
                     MarkerOptions()

@@ -29,11 +29,11 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_LATITUDE = "latitude"
         private const val COLUMN_LONGITUDE = "longitude"
         private const val COLUMN_SPECIES = "species"
-        private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"
-        private const val COLUMN_TOTAL_WEIGHT_POUNDS = "total_weight_pounds"
-        private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters"
-        private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"
-        private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"
+        private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"            // Stored in pounds ounces: 34 = 2 lbs and 2 oz
+        private const val COLUMN_TOTAL_WEIGHT_POUNDS = "total_weight_pounds"    // Stored in hundredths of pounds: 225 = 2.25 lbs
+        private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters" // Stored in 4ths of inch:  18 = 2 inches and 2/4 inch
+        private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"  // Stored in hundredths of Kgs : 255 = 2.55 Kgs
+        private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"    // Stored in millimeters: 135 = 13.5 Cm
         private const val COLUMN_CATCH_TYPE = "catch_type"
         private const val COLUMN_MARKER_TYPE = "marker_type"
         private const val COLUMN_CLIP_COLOR = "clip_color"
@@ -133,7 +133,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_DATE_TIME, catch.dateTime)
                 put(COLUMN_SPECIES, catch.species)
                 put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
-                put(COLUMN_TOTAL_WEIGHT_POUNDS, catch.totalWeightPounds)
+                put(COLUMN_TOTAL_WEIGHT_POUNDS, catch.totalWeightHundredthPounds)
                 put(COLUMN_TOTAL_LENGTH_QUARTERS, catch.totalLengthQuarters)
                 put(COLUMN_TOTAL_LENGTH_TENTHS, catch.totalLengthTenths)
                 put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
@@ -265,7 +265,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
             species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
             totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
-            totalWeightPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_POUNDS)),
+            totalWeightHundredthPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_POUNDS)),
             totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS)),
             totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
             totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
@@ -361,8 +361,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
         // Apply default date range if not provided
         val today = getCurrentDateTime().substringBefore(" ")
-        val from = if (fromDate.isBlank()) today else fromDate
-        val to = if (toDate.isBlank()) today else toDate
+        val from = fromDate.ifBlank { today }
+        val to = toDate.ifBlank { today }
 
         whereClauses.add("$COLUMN_DATE_TIME BETWEEN ? AND ?")
         args.add(from)
@@ -456,7 +456,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val list = mutableListOf<CatchItem>()
         val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
-        val cursor = db.rawQuery(
+        val cursor = db.rawQuery(       //todo ?? why only total Weight Oz ????
             """
             SELECT * FROM $TABLE_NAME
             WHERE LOWER(species) = ?
@@ -548,6 +548,45 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         cursor.close()
         db.close()
     }
+
+      fun getTopCatchesByPoundsForSpeciesThisMonth(
+          species: String,
+          minHundredthsPounds: Int,
+          maxHundredthsPounds: Int,
+          limit: Int
+      ): List<CatchItem> {
+          val db = readableDatabase
+          val list = mutableListOf<CatchItem>()
+          val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+
+          val cursor = db.rawQuery(
+              """
+        SELECT * FROM catches
+        WHERE LOWER(species) = ?
+        AND $COLUMN_TOTAL_WEIGHT_POUNDS BETWEEN ? AND ?
+        AND strftime('%Y-%m', $COLUMN_DATE_TIME) = ?
+          ORDER BY $COLUMN_TOTAL_WEIGHT_POUNDS DESC
+          LIMIT ?
+        """.trimIndent(),
+              arrayOf(
+                  species.lowercase(),
+                  minHundredthsPounds.toString(),
+                  maxHundredthsPounds.toString(),
+                  monthPrefix,
+                  limit.toString()
+              )
+          )
+
+          while (cursor.moveToNext()) {
+              list.add(parseCatch(cursor))
+          }
+
+          cursor.close()
+          db.close()
+          return list
+      }
+
+
         //todo ensure this works for all 5 measurement types
     fun getTopCatchesByKgForSpeciesThisMonth(
         species: String,

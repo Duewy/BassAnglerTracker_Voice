@@ -54,6 +54,7 @@ class FunDayVoiceHandler(
         }
         val prompt = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, and species of your catch. Over."
+            MeasurementMode.POUNDS -> "Please say the Pounds, and species of your catch. Over."
             MeasurementMode.KG -> "Please say the kilograms, grams, and species of your catch. Over."
             MeasurementMode.INCHES -> "Please say the inches, quarters, and species of your catch. Over."
             MeasurementMode.CM -> "Please say the centimeters and species of your catch. Over."
@@ -80,6 +81,7 @@ class FunDayVoiceHandler(
         Log.d(TAG, "onCatchConfirmed('$transcript')")
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchSimple(transcript)
+            MeasurementMode.POUNDS -> VoiceParser.parsePoundsCatchSimple(transcript)
             MeasurementMode.KG -> VoiceParser.parseMetricCatchSimple(transcript)
             MeasurementMode.INCHES -> VoiceParser.parseImperialLengthSimple(transcript)
             MeasurementMode.CM -> VoiceParser.parseMetricLengthSimple(transcript)
@@ -88,17 +90,20 @@ class FunDayVoiceHandler(
         val missingSpecies = parsed.species.isBlank()
         val missingValue = when (measurementMode) {
             MeasurementMode.LBS_OZ -> parsed.totalWeightOzs == 0
+            MeasurementMode.POUNDS -> parsed.totalWeightHundredthPounds == 0
             MeasurementMode.KG -> parsed.totalWeightHundredthKg == 0
             MeasurementMode.INCHES -> parsed.totalLengthQuarters == 0
             MeasurementMode.CM -> parsed.totalLengthTenths == 0
         }
 
         val oz = parsed.weightOz
+        val dec = parsed.weightDec
         val grams = parsed.weightGrams
         val quarters = parsed.lengthQuarters
         val tenths = parsed.lengthTenths
 
         if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
+            (measurementMode == MeasurementMode.POUNDS && dec > 99) ||
             (measurementMode == MeasurementMode.KG && grams > 99) ||
             (measurementMode == MeasurementMode.INCHES && quarters > 3) ||
             (measurementMode == MeasurementMode.CM && tenths > 9)) {
@@ -125,6 +130,7 @@ class FunDayVoiceHandler(
 
         val confirmPrompt = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? Over."
+            MeasurementMode.POUNDS -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} Pounds. Is that correct? Over."
             MeasurementMode.KG -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? Over."
             MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? Over."
             MeasurementMode.CM -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? Over."
@@ -165,6 +171,7 @@ class FunDayVoiceHandler(
             latitude = null,
             species = parsed.species,
             totalWeightOz = parsed.totalWeightOzs.takeIf { measurementMode == MeasurementMode.LBS_OZ },
+            totalWeightHundredthPounds = parsed.totalWeightHundredthPounds.takeIf { measurementMode == MeasurementMode.POUNDS },
             totalWeightHundredthKg = parsed.totalWeightHundredthKg.takeIf { measurementMode == MeasurementMode.KG },
             totalLengthQuarters = parsed.totalLengthQuarters.takeIf { measurementMode == MeasurementMode.INCHES },
             totalLengthTenths = parsed.totalLengthTenths.takeIf { measurementMode == MeasurementMode.CM },
@@ -266,6 +273,12 @@ class FunDayVoiceHandler(
                 val lbs = oz / 16
                 val remOz = oz % 16
                 uiHelper.speak("$prefix ${fish.species} at $lbs pounds and $remOz ounces. $overOut", "TTS_ANSWER")
+            }
+            MeasurementMode.POUNDS -> {
+                val hundredthsPounds = fish.totalWeightHundredthPounds ?: 0
+                val pounds = hundredthsPounds / 100
+                val dec = hundredthsPounds % 100
+                uiHelper.speak("$prefix ${fish.species} at $pounds point $dec pounds. $overOut", "TTS_ANSWER")
             }
             MeasurementMode.KG -> {
                 val hundredths = fish.totalWeightHundredthKg ?: 0

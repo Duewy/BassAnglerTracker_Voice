@@ -129,6 +129,7 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = selectedSpecies,
             totalWeightOz = null,
+            totalWeightHundredthPounds = null,
             totalLengthQuarters = null,
             totalLengthTenths = totalLengthTenths,
             totalWeightHundredthKg = null,

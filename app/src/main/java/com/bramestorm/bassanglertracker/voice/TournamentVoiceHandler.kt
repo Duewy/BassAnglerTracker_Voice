@@ -48,6 +48,7 @@ class TournamentVoiceHandler(
     // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
         MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species, and clip color of your catch. Over."
+        MeasurementMode.POUNDS -> "Please say the Pounds, species, and clip color of your catch. Over."
         MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."
         MeasurementMode.INCHES -> "Please say the inches, quarters, species, and clip color of your catch. Over."
         MeasurementMode.CM     -> "Please say the centimeters, species, and clip color of your catch. Over."
@@ -81,6 +82,7 @@ class TournamentVoiceHandler(
     private fun parseAndConfirm(transcript: String) {
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(transcript, speciesList, clipColors)
+            MeasurementMode.POUNDS -> VoiceParser.parsePoundsCatchWithClips(transcript, speciesList, clipColors)
             MeasurementMode.KG     -> VoiceParser.parseKgsCatchWithClips(transcript, speciesList, clipColors)
             MeasurementMode.INCHES -> VoiceParser.parseImperialLengthWithClips(transcript, speciesList, clipColors)
             MeasurementMode.CM     -> VoiceParser.parseMetricLengthWithClips(transcript, speciesList, clipColors)
@@ -88,11 +90,13 @@ class TournamentVoiceHandler(
 
         // Simple sanity check for measurement unit overflow
         val oz     = parsed.weightOz
+        val dec     = parsed.weightDec
         val grams  = parsed.weightGrams
         val quarters = parsed.lengthQuarters
         val tenths = parsed.lengthTenths
 
         if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
+            (measurementMode == MeasurementMode.POUNDS && dec > 99) ||
             (measurementMode == MeasurementMode.KG     && grams > 99) ||
             (measurementMode == MeasurementMode.INCHES && quarters > 3) ||
             (measurementMode == MeasurementMode.CM     && tenths > 9)) {
@@ -108,9 +112,11 @@ class TournamentVoiceHandler(
 
         val missingInfo = parsed.species.isBlank() || parsed.clipColor.isBlank() || when (measurementMode) {
             MeasurementMode.LBS_OZ -> parsed.totalWeightOzs == 0
+            MeasurementMode.POUNDS -> parsed.totalWeightHundredthPounds == 0
             MeasurementMode.KG     -> parsed.totalWeightHundredthKg == 0
             MeasurementMode.INCHES -> parsed.totalLengthQuarters == 0
             MeasurementMode.CM     -> parsed.totalLengthTenths == 0
+
         }
 
         Log.d(TAG, "Parsed result: \$parsed")
@@ -135,6 +141,7 @@ class TournamentVoiceHandler(
 
         val confirmPrompt = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct? Over."
+            MeasurementMode.POUNDS     -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} pounds on the ${parsed.clipColor} clip. Is that correct? Over."
             MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct? Over."
             MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters on the ${parsed.clipColor} clip. Is that correct? Over."
             MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct? Over."
@@ -177,6 +184,7 @@ class TournamentVoiceHandler(
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
         val typeEntry = when (measurementMode) {
             MeasurementMode.LBS_OZ -> "lbsOzs"
+            MeasurementMode.POUNDS -> "pounds"
             MeasurementMode.KG -> "kgs"
             MeasurementMode.INCHES -> "inches"
             MeasurementMode.CM -> "metric"
@@ -196,6 +204,7 @@ class TournamentVoiceHandler(
             latitude = null,
             species = parsed.species,
             totalWeightOz = parsed.totalWeightOzs.takeIf { measurementMode == MeasurementMode.LBS_OZ },
+            totalWeightHundredthPounds = parsed.totalWeightHundredthPounds.takeIf { measurementMode == MeasurementMode.POUNDS },
             totalWeightHundredthKg = parsed.totalWeightHundredthKg.takeIf { measurementMode == MeasurementMode.KG },
             totalLengthQuarters = parsed.totalLengthQuarters.takeIf { measurementMode == MeasurementMode.INCHES },
             totalLengthTenths = parsed.totalLengthTenths.takeIf { measurementMode == MeasurementMode.CM },
@@ -324,6 +333,8 @@ class TournamentVoiceHandler(
                 val msg = when (measurementMode) {
                     MeasurementMode.LBS_OZ ->
                         "Your total weight is ${stats.totalWeightLbs} pounds ${stats.totalWeightRemainingOz} ounces. $overOut"
+                    MeasurementMode.POUNDS ->
+                        "Your total weight is ${stats.totalWeightPounds}.${stats.totalWeightDec} Pounds. $overOut"
                     MeasurementMode.KG ->
                         "Your total weight is ${stats.totalWeightKgs}.${stats.totalWeightGrams} kilograms. $overOut"
                     MeasurementMode.INCHES ->
@@ -341,6 +352,8 @@ class TournamentVoiceHandler(
                     MeasurementMode.LBS_OZ ->
                         // if they ask length in a weight-mode, fall back or say “length not available”
                         "Length stats aren’t available in pounds/ounces mode. $overOut"
+                    MeasurementMode.POUNDS ->
+                        "Length stats aren’t available in Pounds mode. $overOut"
                     MeasurementMode.KG ->
                         "Length stats aren’t available in kilograms mode. $overOut"
                     MeasurementMode.INCHES ->
@@ -401,6 +414,15 @@ class TournamentVoiceHandler(
                 val remOz = oz % 16
                 uiHelper.speak(
                     "$prefix ${fish.species} at $lbs pounds and $remOz ounces.$overOut",
+                    "TTS_ANSWER"
+                )
+            }
+            MeasurementMode.POUNDS -> {
+                val hundredthsPounds = fish.totalWeightHundredthPounds ?: 0
+                val pounds = hundredthsPounds / 100
+                val dec = hundredthsPounds % 100
+                uiHelper.speak(
+                    "$prefix ${fish.species} at $pounds point $dec pounds. $overOut",
                     "TTS_ANSWER"
                 )
             }
