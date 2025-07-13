@@ -18,7 +18,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.10"
+        android:alpha="0.15"
         android:scaleY="1.5"
         android:contentDescription="@string/bass_fighting"
         android:scrollbarAlwaysDrawVerticalTrack="true"
@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp"
             android:gravity="center"
-            android:text="@string/type_of_measuring"
+            android:text="Weight Measurements"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -96,24 +96,35 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnWeight"
+                android:id="@+id/btnLbsOzs"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_blue"
-                android:text="@string/weight"
+                android:background="@drawable/btn_outline_green"
+                android:text="@string/lbs_ozs"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnLength"
+                android:id="@+id/btnPounds"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:background="@drawable/btn_outline_dk_blue"
-                android:text="@string/length"
+                android:text="@string/pounds"
                 android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnKilograms"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_outline_softlock_blue"
+                android:text="@string/kgs"
+                android:textColor="@color/clip_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -134,7 +145,7 @@
                 android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:text="@string/type_of_units"
+                android:text="@string/length_measurements"
                 android:textColor="@color/black"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -148,28 +159,28 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnImperial"
+                android:id="@+id/btnInches"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_green"
+                android:background="@drawable/btn_outline_lt_brown"
                 android:shadowDx="1"
-                android:text="@string/imperial"
+                android:text="@string/inches"
                 android:textColor="@color/black"
                 android:textColorHighlight="@color/clip_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnMetric"
+                android:id="@+id/btnCentimeters"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_mid_green"
-                android:text="@string/metric"
+                android:background="@drawable/btn_outline_orange"
+                android:text="@string/centimeters"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
         <LinearLayout
@@ -203,7 +214,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_gold"
+                android:background="@drawable/btn_outline_dk_yellow"
                 android:text="@string/fun_day"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -214,7 +225,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:background="@drawable/btn_outline_lt_brown"
+                android:background="@drawable/btn_outline_yellow"
                 android:text="@string/tournament"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -368,10 +379,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:gravity="center"
-                android:background="@drawable/btn_outline_orange"
+                android:background="@drawable/btn_mid_green"
                 android:contentDescription="@string/gps_info"
                 android:fontFamily="sans-serif-medium"
+                android:gravity="center"
                 android:paddingStart="24dp"
                 android:paddingTop="5dp"
                 android:paddingEnd="24dp"
@@ -388,7 +399,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="30dp"
-                android:background="@drawable/btn_outline_gold"
+                android:background="@drawable/btn_outline_green"
                 android:contentDescription="@string/voice_info"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"

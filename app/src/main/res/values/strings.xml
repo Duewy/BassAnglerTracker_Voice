@@ -210,6 +210,7 @@
     <string name="place_marker">place marker</string>
     <string name="alarm_set_to">⏰ %1$s</string>
     <string name="alarm_toast_message">Alarm Set for %1$s</string>
+    <string name="weight_format_pounds">%.2f pounds</string>
     <string name="weight_format_kg">%.2f kg</string>
     <string name="length_format_cm">%.1f cm</string>
     <string name="date_iso"> %1$04d-%2$02d-%3$02d</string>
@@ -301,6 +302,15 @@
 
     //Google Mob Ad Holder value for Testing
     <string name="test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="weight_lbs">weight lbs</string>
+    <string name="x_xx_lbs">X.XX Lbs</string>
+    <string name="tournament_catch_pounds">Tournament Catch Pounds</string>
+    <string name="length_measurements">Length Measurements</string>
+    <string name="pounds">Pounds</string>
+    <string name="_0_00_lbs">0.00 Lbs</string>
+    <string name="fun_day_catch_pounds">Fun Day Catch -Pounds-</string>
+    <string name="enter_catch_pounds">enter catch pounds</string>
+    <string name="_00_to_99">00 to 99</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">

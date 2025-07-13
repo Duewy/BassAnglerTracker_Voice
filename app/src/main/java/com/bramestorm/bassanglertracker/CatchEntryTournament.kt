@@ -141,22 +141,19 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        Log.d("CET-DEBUG", "⌚ entryLauncher fired: resultCode=${result.resultCode}, data=${result.data}")
-
         awaitingResult = false
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val oz = result.data!!.getIntExtra(EXTRA_WEIGHT_OZ, 0)
             val sp = result.data!!.getStringExtra(EXTRA_SPECIES).orEmpty()
             val clip = result.data!!.getStringExtra(EXTRA_CLIP_COLOR).orEmpty()
-            Log.d("TournRecv", "🏁 Got result → $oz oz, $sp, $clip")
-            saveTournamentCatch(oz, sp, clip)
+
+            if (oz > 0) {
+                saveTournamentCatch(oz, sp, clip)
+            }
         }
     }
 
-
-
     //================START - ON CREATE =======================================
-
         override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                setContentView(R.layout.activity_tournament_view)
@@ -186,11 +183,11 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                                     )
                 }
 
-        tts = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts.language = Locale.getDefault()
-            }
-        }
+                tts = TextToSpeech(this) { status ->
+                    if (status == TextToSpeech.SUCCESS) {
+                        tts.language = Locale.getDefault()
+                    }
+                }
 
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
@@ -243,21 +240,18 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
 
         //----ADD a CATCH button is clicked -----------
-        btnTournamentCatch.setOnClickListener {
-            showWeightPopup()
-        }
-
+        btnTournamentCatch.setOnClickListener { showWeightPopup() }
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainPg.setOnClickListener { startActivity(Intent(this,MainActivity::class.java)) }
         btnAlarm.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
 
-        updateVccLabel()
+        updateVccLabel()         // just shows user if VCC is Enabled or not...
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()      //todo ask if we need to put this in the onResume to update the list when we wake up the app???
         handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
-
-    } // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+  // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     override val dialog: Any
         get() = throw UnsupportedOperationException("BaseCatchEntryActivity.dialog is unused in this subclass")
@@ -274,7 +268,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     override fun onManualWake() {
         showWeightPopup()
     }
-
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
@@ -359,7 +352,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         val result = dbHelper.insertCatch(catch)
         Log.d("DB_DEBUG", "✅ Catch Insert Result: $result, Stored Clip Color: ${catch.clipColor}")
-
+        // ✅ Save the most recent catch for motivational messaging
         Toast.makeText(this, "$species Catch Saved!", Toast.LENGTH_SHORT).show()
         if (result) {
             lastTournamentCatch = catch
@@ -648,7 +641,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         }
     } //------------ END Get Species Codes ----------------
 
-
     //******************* FOR 🥸 User 📝 EDIT Logged Weights ********************************
 
     private fun showTournamentEditDialog(c: CatchItem) {
@@ -667,7 +659,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         edtLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
         edtOzs.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
 
-
         val weightOz = c.totalWeightOz ?: 0
         edtLbs.setText((weightOz / 16).toString())
         edtOzs.setText((weightOz % 16).toString())
@@ -677,8 +668,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         val allClipColors = ClipColor.entries.map { it.name }.toMutableList()
         val currentColor = c.clipColor ?: "RED"
         val availableColors = allClipColors.toMutableList().apply {
-            remove(currentColor) // temporarily remove current
-            add(0, currentColor) // so it's first in the list
+            remove(currentColor)                // temporarily remove current
+            add(0, currentColor)          // so it's first in the list
         }
         // Load spinner with clip color of Catch Id
         val colorAdapter = ClipColorSpinnerAdapter(this, availableColors)
@@ -711,8 +702,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 positionedToast("🚫 Weight cannot be 0 lbs 0 oz!")
                 return@setOnClickListener
             }
-
-
 
             dbHelper.updateCatch(
                 catchId            = c.id,

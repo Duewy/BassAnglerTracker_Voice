@@ -20,6 +20,12 @@ class PopupWeightEntryKgs : Activity() {
 
     private var selectedSpecies: String = ""
 
+    companion object {
+        const val EXTRA_WEIGHT_KGS            = "totalWeightHundredthKg"
+        const val EXTRA_SPECIES               = "selectedSpecies"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_weight_entry_kgs)
@@ -48,7 +54,7 @@ class PopupWeightEntryKgs : Activity() {
                 return@setOnClickListener
             }
 
-            resultIntent.putExtra("weightTotalKg", totalWeightHundredthKg)
+            resultIntent.putExtra(EXTRA_WEIGHT_KGS, totalWeightHundredthKg)
             resultIntent.putExtra("selectedSpecies", selectedSpecies)
 
             setResult(Activity.RESULT_OK, resultIntent)

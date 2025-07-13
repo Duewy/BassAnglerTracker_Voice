@@ -18,12 +18,12 @@ import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 
-class PopupWeightEntryLbs : Activity() {
+class PopupWeightEntryPounds : Activity() {
 
     private var selectedSpecies: String = ""
 
     companion object {
-        const val EXTRA_WEIGHT_OZ = "weightTotalOz"
+        const val EXTRA_WEIGHT_POUNDS = "weightTotalPounds"
         const val EXTRA_SPECIES   = "selectedSpecies"
     }
 
@@ -33,30 +33,30 @@ class PopupWeightEntryLbs : Activity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
-        setContentView(R.layout.popup_weight_entry_lbs)
+        setContentView(R.layout.popup_weight_entry_pounds)
 
-        val edtWeightLbs: EditText = findViewById(R.id.edtWeightLbs)
-        val edtWeightOzs: EditText = findViewById(R.id.edtWeightOzs)
+        val edtWeightLbs: EditText = findViewById(R.id.edtWeightPounds)
+        val edtWeightDec: EditText = findViewById(R.id.edtWeightDec)
         val btnSaveWeight: Button = findViewById(R.id.btnSaveWeight)
         val btnCancel: Button = findViewById(R.id.btnCancel)
 
         loadSpeciesSpinner() // Populates spinner and sets up listener
 
         edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99))
-        edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15))
+        edtWeightDec.filters = arrayOf(MinMaxInputFilter(0, 99))
 
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
             val weightLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
-            val weightOz = edtWeightOzs.text.toString().toIntOrNull() ?: 0
-            val totalWeightOz = (weightLbs * 16) + weightOz
+            val weightDec = edtWeightDec.text.toString().toIntOrNull() ?: 0
+            val totalWeightPounds = (weightLbs * 100) + weightDec
 
-            if (totalWeightOz == 0) {
-                Toast.makeText(this, "Weight cannot be 0 lbs 0 oz!", Toast.LENGTH_SHORT).show()
+            if (totalWeightPounds == 0) {
+                Toast.makeText(this, "Weight cannot be 0.00 Pounds!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            resultIntent.putExtra(EXTRA_WEIGHT_OZ, totalWeightOz)
+            resultIntent.putExtra(EXTRA_WEIGHT_POUNDS, totalWeightPounds)
             resultIntent.putExtra(EXTRA_SPECIES, selectedSpecies)
 
             setResult(Activity.RESULT_OK, resultIntent)
@@ -76,7 +76,7 @@ class PopupWeightEntryLbs : Activity() {
     }
 //------------- END On Create ---------------------------------
 
- // -------------- Min & Max Input Filter to enforce value limits --------------------------
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(
             source: CharSequence?,

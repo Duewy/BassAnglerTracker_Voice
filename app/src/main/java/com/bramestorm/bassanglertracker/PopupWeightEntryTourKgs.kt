@@ -26,6 +26,20 @@ class PopupWeightEntryTourKgs : Activity() {
     private lateinit var btnSaveWeightKgs: Button
     private lateinit var btnCancelKgs: Button
 
+    companion object {
+        // ← outputs from this popup
+        const val EXTRA_WEIGHT_KGS             = "totalWeightHundredthKg"        // Send & receive this
+        const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+        const val EXTRA_CATCH_TYPE             = "catchType"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
+    }
+
     //============== ON CREATE ===============================
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,30 +98,30 @@ class PopupWeightEntryTourKgs : Activity() {
 
         // `````````` SAVE btn ````````````````
         btnSaveWeightKgs.setOnClickListener {
-            val selectedSpeciesValue = spinnerSpecies.selectedItem.toString()
+            val selectedSpeciesValue = spinnerSpecies.selectedItem?.toString() ?: tournamentSpecies
             val selectedClipColor = spinnerClipColor.selectedItem?.toString()?.uppercase() ?: "RED"
             Log.d("CLIPS", "🎨 Selected Clip Color: $selectedClipColor")
 
             val weightKgs = edtWeightTourKgs.text.toString().toIntOrNull() ?: 0
             val weightGrams = edtWeightTourGrams.text.toString().toIntOrNull() ?: 0
-            val totalweightKgs = (weightKgs * 100) + weightGrams
+            val totalWeightHundredthKg = (weightKgs * 100) + weightGrams
 
-            if (totalweightKgs == 0) {
+            if (totalWeightHundredthKg == 0) {
                 Toast.makeText(this, "Weight cannot be 0.00 Kgs!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             Log.d(
                 "CLIPS",
-                "✅ Sending Result - weightTotalOz: $totalweightKgs, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor"
+                "✅ Sending Result - weightTotalKgs: $totalWeightHundredthKg, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor"
             )
 
             Intent().apply {
-                putExtra("weightTotalKgs", totalweightKgs)
-                putExtra("selectedSpecies", selectedSpeciesValue)
-                putExtra("clip_color", selectedClipColor)
-                putExtra("catchType", catchType)
-                putExtra("isTournament", isTournament)
+                putExtra(EXTRA_WEIGHT_KGS, totalWeightHundredthKg)
+                putExtra(EXTRA_SPECIES, selectedSpeciesValue)
+                putExtra(EXTRA_CLIP_COLOR, selectedClipColor)
+                putExtra(EXTRA_CATCH_TYPE, catchType)
+                putExtra(EXTRA_IS_TOURNAMENT, isTournament)
             }.let { resultIntent ->
                 setResult(Activity.RESULT_OK, resultIntent)
                 finish()

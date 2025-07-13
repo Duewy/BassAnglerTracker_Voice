@@ -26,6 +26,19 @@ class PopupLengthEntryTourInches : Activity() {
     private lateinit var btnSaveLengthInches: Button
     private lateinit var btnCancelInches: Button
 
+    companion object {
+        const val EXTRA_LENGTH_INCHES = "totalLengthQuarters"
+        const val EXTRA_SPECIES = "selectedSpecies"
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+        const val EXTRA_CATCH_TYPE             = "catchType"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
+    }
+
     //============== ON CREATE ===============================
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,11 +111,11 @@ class PopupLengthEntryTourInches : Activity() {
             Log.d("CLIPS", "✅ Sending Result - weightLengthInches: $totalLengthQuarters, selectedSpecies: $selectedSpeciesValue, clipColor: $selectedClipColor")
 
             val resultIntent = Intent().apply {
-                putExtra("lengthTotalInches", totalLengthQuarters)
-                putExtra("selectedSpecies", selectedSpeciesValue)
-                putExtra("clip_color", selectedClipColor)
-                putExtra("catchType", catchType)
-                putExtra("isTournament", isTournament)
+                putExtra(EXTRA_LENGTH_INCHES, totalLengthQuarters)
+                putExtra(EXTRA_SPECIES, selectedSpeciesValue)
+                putExtra(EXTRA_CLIP_COLOR, selectedClipColor)
+                putExtra(EXTRA_CATCH_TYPE, catchType)
+                putExtra(EXTRA_IS_TOURNAMENT, isTournament)
             }
 
             setResult(Activity.RESULT_OK, resultIntent)

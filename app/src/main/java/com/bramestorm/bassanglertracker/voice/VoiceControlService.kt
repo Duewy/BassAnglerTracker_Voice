@@ -259,8 +259,14 @@ class VoiceControlService : Service() {
             ?: @Suppress("DEPRECATION") audioManager.abandonAudioFocus(null)
         audioManager.unregisterMediaButtonEventReceiver(mediaButtonReceiver)
         mediaSession?.release()
+
+        // 🔐 Important cleanup
+        voiceEngine?.shutdown()
+        if (wakeLock.isHeld) wakeLock.release()
+
         super.onDestroy()
     }
+
 
     override fun onBind(intent: Intent?) = null
 

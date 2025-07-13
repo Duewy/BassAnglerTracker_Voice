@@ -54,7 +54,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private lateinit var btnAlarmInches: Button
     private lateinit var btnSetUpInches: Button
 
-
     // Alarm Variables
     private var alarmHour: Int = -1
     private var alarmMinute: Int = -1
@@ -64,8 +63,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private val handler = Handler(Looper.getMainLooper())
     private var mediaPlayer: MediaPlayer? = null
 
-    // For VCC to Wake UP
-    private var launchFromWake = false
 
     // Weight Display TextViews
     private lateinit var firstRealLengthInches: TextView
@@ -126,7 +123,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private var lastTournamentCatch: CatchItem? = null
 
     companion object {
-        const val EXTRA_LENGTH_INCHES          = "lengthTotalInches"    // Send & receive this from this popup
+        const val EXTRA_LENGTH_INCHES          = "totalLengthQuarters"    // Send & receive this from this popup
         const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
         const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
         const val EXTRA_MEASURING_TYPE         = "measuringType"
@@ -150,7 +147,10 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
             val totalLengthQuarters = result.data!!.getIntExtra(EXTRA_LENGTH_INCHES, 0)
             val sp = result.data!!.getStringExtra(EXTRA_SPECIES).orEmpty()
             val clip = result.data!!.getStringExtra(EXTRA_CLIP_COLOR).orEmpty()
-            saveTournamentCatch(totalLengthQuarters, sp, clip)
+
+           if(totalLengthQuarters > 0 ) {
+               saveTournamentCatch(totalLengthQuarters, sp, clip)
+           }
         }
     }
 
@@ -246,26 +246,16 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
 
         //----ADD a CATCH button is clicked -----------
-        btnTournamentCatch.setOnClickListener {
-            showWeightPopup()
-        }
-
+        btnTournamentCatch.setOnClickListener {showLengthInchesPopup()}
         btnSetUpInches.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainInches.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
         btnAlarmInches.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
 
-        updateVccLabel()
+        updateVccLabel()         // just shows user if VCC is Enabled or not...
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
         handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
-
-        Handler(Looper.getMainLooper()).post {
-            if (launchFromWake) {
-                showWeightPopup()
-                launchFromWake = false
-            }
-        }
     }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -278,18 +268,21 @@ override val dialog: Any
         super.onResume()
         updateVccLabel()            // just shows user if VCC is Enabled or not...
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+        updateTournamentList()
     }
 
     //----------- On Manual Wake ------------------------
     override fun onManualWake() {
-        showWeightPopup()
+        showLengthInchesPopup()
     }
 
     //------------- ON DESTROY ----- Disarm the ALARM -----------------
     override fun onDestroy() {
         super.onDestroy()
-
+        tts.stop()
+        tts.shutdown()
         voiceHelper.shutdown()
+        toastTts?.shutdown()
         handler.removeCallbacksAndMessages(null)
         flashHandler.removeCallbacksAndMessages(null)
         mediaPlayer?.release()
@@ -312,7 +305,7 @@ override val dialog: Any
 
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
-    private fun showWeightPopup() {
+    private fun showLengthInchesPopup() {
         awaitingResult = true
 
         // build the Intent with your fresh list
@@ -340,24 +333,23 @@ override val dialog: Any
 
 
     // ^^^^^^^^^^^^^ SAVE TOURNAMENT CATCH ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    private fun saveTournamentCatch(totalLengthQuarters: Int, bassType: String, clipColor: String) {
-        val availableColors = calculateAvailableClipColors(
-            dbHelper,
-            catchType = "inches",
-            date = getCurrentDate(),
-            tournamentCatchLimit = tournamentCatchLimit,
-            isCullingEnabled = isCullingEnabled
-        )
+    private fun saveTournamentCatch(totalLengthQuarters: Int, species: String, clipColor: String) {
+
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = if (bassType == "Large Mouth") "L" else "S"
+        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
+            "Largemouth"   -> "L"
+            "Smallmouth"   -> "S"
+            "Spotted"      -> "P"
+            else           -> ""
+        }
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
         val catch = CatchItem(
             id = 0,
             dateTime = getCurrentDateTime(),
-            species = bassType,
+            species = species,
             totalWeightOz = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
@@ -368,7 +360,7 @@ override val dialog: Any
         )
         val result = dbHelper.insertCatch(catch)
 
-        Toast.makeText(this, "$bassType Catch Saved!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "$species Catch Saved!", Toast.LENGTH_SHORT).show()
 
         if (result) {
             lastTournamentCatch = catch
@@ -389,10 +381,11 @@ override val dialog: Any
         val totalDec = (totalLengthInches % 4)
 
         totalRealLengthInches.text = totalInches.toString()
-        totalDecLengthInches.text = "$totalDec /8"
+        totalDecLengthInches.text = totalDec.toString()
 
-// !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
-        val currentCount = dbHelper             //todo create better set points for motivational toasts
+        // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // todo Set up Better Scenarios
+        val currentCount = dbHelper
             .getCatchesForToday("inches", getCurrentDate())
             .sortedByDescending { it.totalLengthQuarters ?: 0 }
             .take(tournamentCatchLimit)
@@ -400,12 +393,28 @@ override val dialog: Any
 
         if (currentCount >= 2) {
             lastTournamentCatch?.let {
-                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "inches")
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "lbs")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+                    if (voiceControlEnabled) {
+                        toastTts = TextToSpeech(this) { status ->
+                            if (status == TextToSpeech.SUCCESS) {
+                                toastTts?.language = Locale.getDefault()
+                                toastTts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "TTS_MOTIVATION")
+
+                                // Optional: shut down after 4 seconds to free memory
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    toastTts?.shutdown()
+                                    toastTts = null
+                                }, 4000)
+                            }
+                        }
+                    }
                 }
             }
         }
+
     }
 
     //################## UPDATE TOURNAMENT LIST   ###################################
@@ -620,23 +629,28 @@ override val dialog: Any
                 sixthDecLengthInches.isEnabled = true
             }
         }
-    }
+    } //---------------- END Adjust the Text View Visibility ----------------
 
-    //!!!!!!!!!!!!!!!! Get SPECIES Letter !!!!!!!!!!!!!!!!!
-
+    //!!!!!!!!!!!!!!!! Get SPECIES Letters for Side Text !!!!!!!!!!!!!!!!!
     private fun getSpeciesCode(species: String): String {
-        return when (species.uppercase()) {
-            "LARGE MOUTH" -> "LM"
-            "SMALL MOUTH" -> "SM"
-            "WALLEYE"     -> "WE"
-            "PIKE"        -> "PK"
-            "PERCH"       -> "PH"
-            "PANFISH"     -> "PF"
-            "CATFISH"     -> "CF"
-            "CRAPPIE"     -> "CP"
+        val u = species.uppercase(Locale.US)
+        return when {
+            u.startsWith("LARGE MOUTH")  -> "LM"
+            u.startsWith("LARGEMOUTH")  -> "LM"
+            u.startsWith("SMALL MOUTH")  -> "SM"
+            u.startsWith("SPOTTEDBASS")  -> "SB"
+            u == "SPOTTED BASS"   -> "SB"
+            u == "WALLEYE"        -> "WE"
+            u == "PIKE"           -> "PK"
+            u =="PERCH"           -> "PH"
+            u == "PANFISH"        -> "PF"
+            u =="CATFISH"         -> "CF"
+            u == "CRAPPIE"       -> "CP"
             else          -> "--"
         }
-    }
+    } //------------ END Get Species Codes ----------------
+
+    //******************* FOR 🥸 User 📝 EDIT Logged Lengths ********************************
 
     private fun showTournamentEditDialog(c: CatchItem) {
         // 1) inflate your 4ths layout

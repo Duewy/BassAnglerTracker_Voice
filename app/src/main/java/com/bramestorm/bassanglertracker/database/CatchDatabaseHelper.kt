@@ -30,6 +30,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_LONGITUDE = "longitude"
         private const val COLUMN_SPECIES = "species"
         private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"
+        private const val COLUMN_TOTAL_WEIGHT_POUNDS = "total_weight_pounds"
         private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters"
         private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"
         private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"
@@ -47,6 +48,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             $COLUMN_LONGITUDE REAL,
             $COLUMN_SPECIES TEXT NOT NULL,
             $COLUMN_TOTAL_WEIGHT_OZ INTEGER DEFAULT 0,
+            $COLUMN_TOTAL_WEIGHT_POUNDS INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_QUARTERS INTEGER DEFAULT 0,
             $COLUMN_TOTAL_WEIGHT_KG INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_TENTHS INTEGER DEFAULT 0,
@@ -81,6 +83,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 $COLUMN_LONGITUDE,
                 $COLUMN_SPECIES,
                 $COLUMN_TOTAL_WEIGHT_OZ,
+                $COLUMN_TOTAL_WEIGHT_POUNDS,
                 $COLUMN_TOTAL_WEIGHT_KG,
                 $COLUMN_TOTAL_LENGTH_QUARTERS,
                 $COLUMN_TOTAL_LENGTH_TENTHS,
@@ -95,6 +98,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 $COLUMN_LONGITUDE,
                 $COLUMN_SPECIES,
                 $COLUMN_TOTAL_WEIGHT_OZ,
+                $COLUMN_TOTAL_WEIGHT_POUNDS,
                 $COLUMN_TOTAL_WEIGHT_KG,
                 $COLUMN_TOTAL_LENGTH_QUARTERS,
                 $COLUMN_TOTAL_LENGTH_TENTHS,
@@ -129,6 +133,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_DATE_TIME, catch.dateTime)
                 put(COLUMN_SPECIES, catch.species)
                 put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
+                put(COLUMN_TOTAL_WEIGHT_POUNDS, catch.totalWeightPounds)
                 put(COLUMN_TOTAL_LENGTH_QUARTERS, catch.totalLengthQuarters)
                 put(COLUMN_TOTAL_LENGTH_TENTHS, catch.totalLengthTenths)
                 put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
@@ -193,7 +198,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     }
 
 
-
+        // todo why is this only Weight_Oz ?????
     fun getCatchesForToday(catchType: String, todaysDate: String): List<CatchItem> {
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
@@ -225,6 +230,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
       fun updateCatch(
           catchId: Int,
           newWeightOz: Int? = null,
+          newWeightPounds: Int? = null,
           newWeightKg: Int? = null,
           newLengthQuarters: Int? = null,
           newLengthCm: Int? = null,
@@ -237,6 +243,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val values = ContentValues()
         values.put(COLUMN_SPECIES, species)
         if (newWeightOz != null) values.put(COLUMN_TOTAL_WEIGHT_OZ, newWeightOz)
+        if (newWeightPounds!= null) values.put(COLUMN_TOTAL_WEIGHT_POUNDS, newWeightPounds)
         if (newWeightKg != null) values.put(COLUMN_TOTAL_WEIGHT_KG, newWeightKg)
         if (newLengthQuarters != null) values.put(COLUMN_TOTAL_LENGTH_QUARTERS, newLengthQuarters)
         if (newLengthCm != null) values.put(COLUMN_TOTAL_LENGTH_TENTHS, newLengthCm)
@@ -258,6 +265,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
             species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
             totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
+            totalWeightPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_POUNDS)),
             totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS)),
             totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
             totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
@@ -372,6 +380,11 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                     whereClauses.add("$COLUMN_TOTAL_WEIGHT_OZ BETWEEN ? AND ?")
                     args.add((minValue * 16).toInt().toString())
                     args.add((maxValue * 16).toInt().toString())
+                }
+                "weightpounds", "pounds", "pound" -> {
+                    whereClauses.add("$COLUMN_TOTAL_WEIGHT_POUNDS BETWEEN ? AND ?")
+                    args.add((minValue * 100).toInt().toString())
+                    args.add((maxValue * 100).toInt().toString())
                 }
                 "lengthcm", "cm" -> {
                     whereClauses.add("$COLUMN_TOTAL_LENGTH_TENTHS BETWEEN ? AND ?")
@@ -491,8 +504,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         cursor.close()
         return catchItem
     }
+
     //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
-    fun getTopTournamentCatches(limit: Int): List<CatchItem> {
+    fun getTopTournamentCatches(limit: Int): List<CatchItem> {      //todo ensure that it works for all 5 types
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -517,77 +531,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         cursor.close()
         db.close()
         return catchList
-    }
+    }//------------- END -- MOTIVATIONAL MESSAGE INFORMATION  ---------------------------
 
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO BE REMOVED FOR FULL RELEASE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    fun insertFakeCatchesForTesting(db: SQLiteDatabase) {
-        val testCatches = listOf(
-            // ----- February 2025 -----
-            TestCatch("2025-02-01 08:00:00", "Largemouth", 80, 0, 160, 0, 44.7801, -76.2155),
-            TestCatch("2025-02-02 09:15:00", "Crappie", 24, 0, 104, 0, 44.7910, -76.2377),
-            TestCatch("2025-02-03 07:45:00", "Smallmouth", 72, 0, 144, 0, 44.7772, -76.2312),
-            TestCatch("2025-02-04 10:20:00", "Walleye", 96, 0, 192, 0, 44.7993, -76.2451),
-            TestCatch("2025-02-05 11:10:00", "Perch", 20, 0, 112, 0, 44.7655, -76.2104),
-            TestCatch("2025-02-06 08:45:00", "Largemouth", 0, 230, 0, 560, 44.7833, -76.2288),
-            TestCatch("2025-02-07 12:00:00", "Walleye", 0, 280, 0, 620, 44.7871, -76.2133),
-            TestCatch("2025-02-08 09:35:00", "Crappie", 0, 60, 0, 350, 44.8002, -76.2399),
-            TestCatch("2025-02-09 07:20:00", "Perch", 0, 45, 0, 320, 44.7734, -76.2001),
-            TestCatch("2025-02-10 10:50:00", "Smallmouth", 0, 180, 0, 480, 44.7748, -76.2209),
-
-            // ----- March 2025 -----
-            TestCatch("2025-03-01 08:00:00", "Largemouth", 88, 0, 168, 0, 44.7811, -76.2220),
-            TestCatch("2025-03-02 09:15:00", "Crappie", 28, 0, 112, 0, 44.7923, -76.2384),
-            TestCatch("2025-03-03 07:45:00", "Smallmouth", 75, 0, 152, 0, 44.7764, -76.2295),
-            TestCatch("2025-03-04 10:20:00", "Walleye", 90, 0, 200, 0, 44.7988, -76.2445),
-            TestCatch("2025-03-05 11:10:00", "Perch", 22, 0, 120, 0, 44.7650, -76.2115),
-            TestCatch("2025-03-06 08:45:00", "Largemouth", 0, 250, 0, 580, 44.7820, -76.2277),
-            TestCatch("2025-03-07 12:00:00", "Walleye", 0, 290, 0, 640, 44.7885, -76.2144),
-            TestCatch("2025-03-08 09:35:00", "Crappie", 0, 65, 0, 370, 44.8010, -76.2410),
-            TestCatch("2025-03-09 07:20:00", "Perch", 0, 50, 0, 330, 44.7720, -76.1995),
-            TestCatch("2025-03-10 10:50:00", "Smallmouth", 0, 200, 0, 500, 44.7756, -76.2198),
-
-            // ----- April 2025 -----
-            TestCatch("2025-04-01 08:00:00", "Largemouth", 92, 0, 176, 0, 44.7827, -76.2231),
-            TestCatch("2025-04-02 09:15:00", "Crappie", 30, 0, 120, 0, 44.7930, -76.2366),
-            TestCatch("2025-04-03 07:45:00", "Smallmouth", 78, 0, 160, 0, 44.7752, -76.2278),
-            TestCatch("2025-04-04 10:20:00", "Walleye", 100, 0, 208, 0, 44.7975, -76.2438),
-            TestCatch("2025-04-05 11:10:00", "Perch", 26, 0, 128, 0, 44.7644, -76.2126),
-            TestCatch("2025-04-06 08:45:00", "Largemouth", 0, 270, 0, 600, 44.7842, -76.2266),
-            TestCatch("2025-04-07 12:00:00", "Walleye", 0, 310, 0, 660, 44.7899, -76.2155),
-            TestCatch("2025-04-08 09:35:00", "Crappie", 0, 70, 0, 390, 44.8020, -76.2403),
-            TestCatch("2025-04-09 07:20:00", "Perch", 0, 55, 0, 340, 44.7712, -76.1987),
-            TestCatch("2025-04-10 10:50:00", "Smallmouth", 0, 220, 0, 520, 44.7768, -76.2185)
-        )
-
-        for (catchItem in testCatches) {
-            val values = ContentValues().apply {
-                put("date_time", catchItem.dateTime)
-                put("species", catchItem.species)
-                put("catch_type", "Fun Day")
-                put("total_weight_oz", catchItem.totalWeightOz)
-                put("total_weight_hundredth_kg", catchItem.totalWeightHundredthKg)
-                put("total_length_quarters", catchItem.totalLengthQuarters)
-                put("total_length_tenths", catchItem.totalLengthTenths)
-                put("marker_type", "")
-                put("clip_color", "")
-                put("latitude", catchItem.lat)
-                put("longitude", catchItem.lon)
-            }
-            db.insert("catches", null, values)
-        }
-    }
-
-    data class TestCatch(
-        val dateTime: String,
-        val species: String,
-        val totalWeightOz: Int,
-        val totalWeightHundredthKg: Int,
-        val totalLengthQuarters: Int,
-        val totalLengthTenths: Int,
-        val lat: Double,
-        val lon: Double
-    )
-
+    //============ Functions for Various Data Retrieval  =================================
 
     fun logAllCatches() {
         val db = readableDatabase
@@ -602,7 +548,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         cursor.close()
         db.close()
     }
-
+        //todo ensure this works for all 5 measurement types
     fun getTopCatchesByKgForSpeciesThisMonth(
         species: String,
         minHundredthsKg: Int,
@@ -639,7 +585,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.close()
         return list
     }
+
 // ------------------ TOP 5 Look UP -------------------------
+            //todo Is there ways for the Lbs Pounds and Kgs to have -TOP 5 Look Up-??
 
     fun getTopCatchesByInchesForSpeciesThisMonth(
         species: String,
@@ -714,7 +662,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.close()
         return list
     }
-
+            // todo NOT Sure what this is excluding??? Tournament from Fun Days????
   fun getAllCatchesExcludingPractice(): List<CatchItem> {
       val db = readableDatabase
       val list = mutableListOf<CatchItem>()

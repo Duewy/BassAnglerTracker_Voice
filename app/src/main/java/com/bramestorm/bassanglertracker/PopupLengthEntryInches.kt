@@ -20,6 +20,11 @@ class PopupLengthEntryInches : Activity() {
 
     private var selectedSpecies: String = ""
 
+    companion object {
+        const val EXTRA_LENGTH_INCHES = "totalLengthQuarters"
+        const val EXTRA_SPECIES       = "selectedSpecies"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_length_entry_inches)
@@ -48,8 +53,8 @@ class PopupLengthEntryInches : Activity() {
                 return@setOnClickListener
             }
 
-            resultIntent.putExtra("lengthTotalInches", lengthTotalInches)
-            resultIntent.putExtra("selectedSpecies", selectedSpecies)
+            resultIntent.putExtra(EXTRA_LENGTH_INCHES, lengthTotalInches)
+            resultIntent.putExtra(EXTRA_SPECIES, selectedSpecies)
 
             Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $lengthTotalInches (in 1/4ths), Species: $selectedSpecies")
 

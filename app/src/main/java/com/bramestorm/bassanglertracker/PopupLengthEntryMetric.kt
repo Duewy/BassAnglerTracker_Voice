@@ -20,6 +20,11 @@ class PopupLengthEntryMetric : Activity() {
 
     private var selectedSpecies: String = ""
 
+    companion object {
+        const val EXTRA_LENGTH_CMS            = "totalLengthTenths"
+        const val EXTRA_SPECIES               = "selectedSpecies"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_length_entry_metric)
@@ -48,8 +53,8 @@ class PopupLengthEntryMetric : Activity() {
                 return@setOnClickListener
             }
 
-            resultIntent.putExtra("lengthTotalCms", totalLengthCms)
-            resultIntent.putExtra("selectedSpecies", selectedSpecies)
+            resultIntent.putExtra(EXTRA_LENGTH_CMS, totalLengthCms)
+            resultIntent.putExtra(EXTRA_SPECIES, selectedSpecies)
 
             Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $totalLengthCms mm, Species: $selectedSpecies")
 

@@ -4,9 +4,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -21,12 +18,12 @@ import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
+import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class CatchEntryKgs : BaseCatchEntryActivity() {
-
 
     private lateinit var btnSetUp3Kgs: Button
     private lateinit var btnOpenWeightPopupKgs: Button
@@ -34,30 +31,30 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
 
-    // Voice Helper
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
-    lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
-    private var awaitingResult = false
+
+    private var selectedSpecies: String = ""
+    private var totalWeightHundredthKg: Int = 0
+    private lateinit var dialogInstance: AlertDialog
+    override val dialog: Any get() = dialogInstance
 
     companion object {
-        const val EXTRA_WEIGHT_KGS     = "totalWeightHundredthKg"
-        const val EXTRA_SPECIES       = "selectedSpecies"
+        const val EXTRA_WEIGHT_KGS = "totalWeightHundredthKg"
+        const val EXTRA_SPECIES = "selectedSpecies"
     }
 
-    //@@@@@@@@@@@@@ Get Data Back from Pop Up (Vcc or Manual )   @@@@@@@@@@@
     private val weightEntryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
-                totalWeightHundredthKg = data.getIntExtra(EXTRA_WEIGHT_KGS , 0)
+                totalWeightHundredthKg = data.getIntExtra(EXTRA_WEIGHT_KGS, 0)
                 selectedSpecies = data.getStringExtra(EXTRA_SPECIES) ?: selectedSpecies
 
-                if (totalWeightHundredthKg> 0) {
+                if (totalWeightHundredthKg > 0) {
                     selectedSpecies = normalizeSpeciesName(selectedSpecies)
                     saveCatch()
-                    Log.d("DB_DEBUG", "✅ saveCatch() called via launcher")
                 } else {
                     Log.e("DB_DEBUG", "⚠️ Invalid weight—nothing saved")
                 }
@@ -65,115 +62,66 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
         }
     }
 
-    private var selectedSpecies: String = ""
-    private var  totalWeightHundredthKg: Int = 0
-    private lateinit var dialogInstance: AlertDialog
-    override val dialog: Any
-        get() = dialogInstance
-
-
-    // --- voice-to-text callback handler ---
-    private val recognitionListener = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle?) {}
-        override fun onBeginningOfSpeech() {}
-        override fun onRmsChanged(rmsdB: Float) {}
-        override fun onBufferReceived(buffer: ByteArray?) {}
-        override fun onEndOfSpeech() {}
-        override fun onError(error: Int) {
-            Toast.makeText(this@CatchEntryKgs, "Speech error $error", Toast.LENGTH_SHORT).show()
-        }
-        override fun onResults(results: Bundle) {
-            results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                ?.firstOrNull()
-                ?.let { onSpeechResult(it) }
-        }
-        override fun onPartialResults(partial: Bundle?) {}
-        override fun onEvent(eventType: Int, params: Bundle?) {}
-    }
-    override fun onSpeechResult(transcript: String) {
-        TODO("Not yet implemented")
-    }
-//=========START onCreate =============================================
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_catch_entry_kgs)
 
-        //-- Set Up the Voice Helper interaction with VoiceInteractionHelper ------
-        voiceHelper = VoiceInteractionHelper(
-            activity = this, //
-            measurementUnit = VoiceInteractionHelper.MeasurementUnit.KG_G,
-            isTournament = false,
-            onCommandAction = { transcript -> onSpeechResult(transcript) }
-        )
-
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+        Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+
+        if (voiceControlEnabled) {
+            startService(Intent(this, VoiceControlService::class.java).apply {
+                action = VoiceControlService.ACTION_START_VOICE
+            })
+
+            voiceHelper = VoiceInteractionHelper(
+                activity = this,
+                measurementUnit = VoiceInteractionHelper.MeasurementUnit.KG_G,
+                isTournament = false,
+                onCommandAction = { transcript -> onSpeechResult(transcript) }
+            )
+        }
+
         dbHelper = CatchDatabaseHelper(this)
 
-        //******  Initialize speech recognizer ***********************
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
-            setRecognitionListener(recognitionListener)
-        }
-        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
-
-        // ******** Set Up Values ****************
         btnSetUp3Kgs = findViewById(R.id.btnSetUp3Kgs)
         btnOpenWeightPopupKgs = findViewById(R.id.btnOpenWeightPopupKgs)
         simpleKgsListView = findViewById(R.id.simpleKgsListView)
 
-        updateListViewKgs() // Load today's catches into ListView
+        updateListViewKgs()
 
-        // $$$$$$$$ ADD a Catch  $$$$$$$$$$$$$$$$$$$$$$$
         btnOpenWeightPopupKgs.setOnClickListener {
             openWeightPopupKgs()
         }
 
         btnSetUp3Kgs.setOnClickListener {
-            val intent2 = Intent(this, SetUpActivity::class.java)
-            startActivity(intent2)
+            startActivity(Intent(this, SetUpActivity::class.java))
         }
 
         simpleKgsListView.setOnItemLongClickListener { _, _, position, _ ->
-            if (catchList.isEmpty()) {
-                Toast.makeText(this, "No catches available", Toast.LENGTH_SHORT).show()
-                return@setOnItemLongClickListener true
-            }
-
-            if (position >= catchList.size) {
-                Log.e("DB_DEBUG", "⚠️ Invalid position: $position, Catch List Size: ${catchList.size}")
-                return@setOnItemLongClickListener true
-            }
-            val selectedCatch = catchList[position]
-            showEditDeleteDialog(selectedCatch)
+            if (position >= catchList.size) return@setOnItemLongClickListener true
+            showEditDeleteDialog(catchList[position])
             true
         }
-
-    }//`````````` END ON-CREATE `````````````
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        voiceHelper.shutdown()
-        recognizer.destroy()
     }
 
-    // 00000000000 open Weight Pop Up Kgs   0000000000000000
+    override fun onDestroy() {
+        stopService(Intent(this, VoiceControlService::class.java))
+        if (::voiceHelper.isInitialized) voiceHelper.shutdown()
+        super.onDestroy()
+    }
+
+    override fun onSpeechResult(transcript: String) {
+        Log.d("VCC_TRANSCRIPT", "Received: $transcript")
+        // TODO: implement actual parser
+    }
+
     private fun openWeightPopupKgs() {
-        Log.d("Popup", "Popup KGS Asked to Open")
-
         val popupIntent = Intent(this, PopupWeightEntryKgs::class.java)
-
         weightEntryLauncher.launch(popupIntent)
     }
 
-
-    // %%%%%%%%%%% SAVE CATCH  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     private fun saveCatch() {
-        Log.d("DB_DEBUG", "🔍 We are in saveCatch().")
         val newCatch = CatchItem(
             id = 0,
             latitude = null,
@@ -190,38 +138,24 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
         )
 
         val success = dbHelper.insertCatch(newCatch)
-
         if (success) {
             Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
+            totalWeightHundredthKg = 0
         } else {
             Toast.makeText(this, "⚠️ Failed to save catch!", Toast.LENGTH_SHORT).show()
         }
-
-        if (success) {
-            totalWeightHundredthKg = 0 // ✅ Move this after successful save
-        }
-
-        updateListViewKgs()  // ✅ Now only updates the UI, no extra insert
+        updateListViewKgs()
     }
 
-
-    //:::::::::::::::: UPDATE LIST VIEW in time_Date Order ::::::::::::::::::::::::::::::::
-
     private fun updateListViewKgs() {
-       val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-       val todaysCatches = dbHelper.getCatchesForToday("kgs", todaysDate)
-            .sortedByDescending { it.dateTime }  // Sort by dateTime (newest first)
+        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val todaysCatches = dbHelper.getCatchesForToday("kgs", todaysDate).sortedByDescending { it.dateTime }
 
-        Log.d("DB_DEBUG", "🔍 Catches retrieved from DB: ${todaysCatches.size}")
-
-        // ✅ Make sure catchList is updated BEFORE updating the ListView
         catchList.clear()
         catchList.addAll(todaysCatches)
 
-        // ✅ MOTIVATIONAL TOAST FOR FUN DAY (when 2+ catches exist)
         if (catchList.size >= 2) {
-            val lastCatch = catchList.firstOrNull() // Most recent (sorted by dateTime)
-            lastCatch?.let {
+            catchList.firstOrNull()?.let {
                 val message = getMotivationalMessage(this, it.id, catchList.size, "Kgs")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -229,25 +163,15 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
             }
         }
 
-        runOnUiThread {
-            val adapter = CatchItemAdapter(this, catchList)
-            simpleKgsListView.adapter = adapter
-        }
-
+        simpleKgsListView.adapter = CatchItemAdapter(this, catchList)
     }
-
-
-    //*************** DELETE ENTRY from list View of Catches ********************
 
     private fun showEditDeleteDialog(catchItem: CatchItem) {
         AlertDialog.Builder(this)
             .setTitle("Edit or Delete")
             .setMessage("Do you want to edit or delete this entry?")
-            .setPositiveButton("Edit") { _, _ ->
-                showEditDialog(catchItem) // Call the new edit function
-            }
+            .setPositiveButton("Edit") { _, _ -> showEditDialog(catchItem) }
             .setNegativeButton("Delete") { _, _ ->
-                val dbHelper = CatchDatabaseHelper(this)
                 dbHelper.deleteCatch(catchItem.id)
                 updateListViewKgs()
                 Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
@@ -256,15 +180,12 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
             .show()
     }
 
-    //*************** EDIT list View of Catches ********************
-
     private fun showEditDialog(catchItem: CatchItem) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_kgs, null)
         val edtWeightKgs = dialogView.findViewById<EditText>(R.id.edtDialogWeightKgs)
         val edtWeightGrams = dialogView.findViewById<EditText>(R.id.edtDialogWeightGrams)
         val spinnerSpecies = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditKgs)
 
-        // --- 1. Load user-selected species list ---
         val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
@@ -273,16 +194,13 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpecies.adapter = adapter
 
-        // --- 2. Set current values ---
-        val totalWeightKgs = catchItem.totalWeightHundredthKg ?: 0 // Default to 0 if null
+        val totalWeightKgs = catchItem.totalWeightHundredthKg ?: 0
         edtWeightKgs.setText((totalWeightKgs / 100).toString())
         edtWeightGrams.setText((totalWeightKgs % 100).toString())
 
-        // --- 3. Set spinner selection based on normalized match ---
         val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
         spinnerSpecies.setSelection(if (speciesIndex != -1) speciesIndex else 0)
 
-        // --- 4. Show dialog and handle save ---
         AlertDialog.Builder(this)
             .setTitle("Edit Catch")
             .setView(dialogView)
@@ -291,8 +209,6 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
                 val newGrams = edtWeightGrams.text.toString().toIntOrNull() ?: 0
                 val totalWeightHundredthKg = (newKgs * 100) + newGrams
                 val species = spinnerSpecies.selectedItem.toString()
-
-                val dbHelper = CatchDatabaseHelper(this)
 
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
@@ -303,8 +219,6 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
                     species = species
                 )
 
-                Log.d("DB_DEBUG", "✅ Updating ID=${catchItem.id}, New Weight=$totalWeightHundredthKg, New Species=$species")
-
                 updateListViewKgs()
                 Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
             }
@@ -312,14 +226,7 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
             .show()
     }
 
-
-    // ############## GET DATE and TIME  ############################
-
     private fun getCurrentDateTime(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        return sdf.format(Date())
+        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
     }
-
-
-
-}//+++++++++++++ END  od CATCH ENTRY Kgs ++++++++++++++++++++++++++++++++++++++++
+}

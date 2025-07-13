@@ -26,6 +26,19 @@ class PopupLengthEntryTourCms : Activity() {
     private lateinit var btnSaveLengthCms: Button
     private lateinit var btnCancelCms: Button
 
+    companion object {
+        const val EXTRA_LENGTH_CMS              = "totalLengthTenths"
+        const val EXTRA_SPECIES                 = "selectedSpecies"
+        const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
+        const val EXTRA_CATCH_TYPE             = "catchType"
+        const val EXTRA_IS_TOURNAMENT          = "isTournament"
+        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
+
+        // → inputs into this popup
+        const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
+        const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
+    }
+
     //============== ON CREATE ===============================
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,11 +108,11 @@ class PopupLengthEntryTourCms : Activity() {
             }
 
             val resultIntent = Intent().apply {
-                putExtra("lengthTotalCms", totalLengthTenths)
-                putExtra("selectedSpecies", selectedSpeciesValue)
-                putExtra("clip_color", selectedClipColor)
-                putExtra("catchType", catchType)
-                putExtra("isTournament", isTournament)
+                putExtra(EXTRA_LENGTH_CMS, totalLengthTenths)
+                putExtra(EXTRA_SPECIES, selectedSpeciesValue)
+                putExtra(EXTRA_CLIP_COLOR, selectedClipColor)
+                putExtra(EXTRA_CATCH_TYPE, catchType)
+                putExtra(EXTRA_IS_TOURNAMENT, isTournament)
             }
 
             setResult(Activity.RESULT_OK, resultIntent)

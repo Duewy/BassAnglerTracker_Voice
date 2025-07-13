@@ -40,9 +40,6 @@ class LookUpShareDataActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        //--- FAKE DATA For TESTING ONLY ------   REMOVE For Real App !!!!!
-        val dbHelper = CatchDatabaseHelper(this)        //todo remove for RELEASE 🚨
-        dbHelper.insertFakeCatchesForTesting(dbHelper.writableDatabase)
 
 
         // TODO: Remove the Toast and the 20 catches from the DataBase

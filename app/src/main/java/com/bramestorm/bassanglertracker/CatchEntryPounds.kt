@@ -23,11 +23,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryLbsOzs : BaseCatchEntryActivity() {
+class CatchEntryPounds : BaseCatchEntryActivity() {
 
     private lateinit var btnSetUp3: Button
-    private lateinit var btnOpenWeightPopup: Button
-    private lateinit var simpleLbsListView: ListView
+    private lateinit var btnOpenWeightPopupPounds: Button
+    private lateinit var simplePoundsListView: ListView
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
 
@@ -35,12 +35,12 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     private lateinit var voiceHelper: VoiceInteractionHelper
 
     private var selectedSpecies: String = ""
-    private var totalWeightOz: Int = 0
+    private var totalWeightPounds: Int = 0
     private lateinit var dialogInstance: AlertDialog
     override val dialog: Any get() = dialogInstance
 
     companion object {
-        const val EXTRA_WEIGHT_OZ = "weightTotalOz"
+        const val EXTRA_WEIGHT_POUNDS = "weightTotalPounds"
         const val EXTRA_SPECIES = "selectedSpecies"
     }
 
@@ -49,10 +49,10 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
-                totalWeightOz = data.getIntExtra(EXTRA_WEIGHT_OZ, 0)
+                totalWeightPounds = data.getIntExtra(EXTRA_WEIGHT_POUNDS, 0)
                 selectedSpecies = data.getStringExtra(EXTRA_SPECIES) ?: selectedSpecies
 
-                if (totalWeightOz > 0) {
+                if (totalWeightPounds> 0) {
                     selectedSpecies = normalizeSpeciesName(selectedSpecies)
                     saveCatch()
                 } else {
@@ -62,9 +62,10 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         }
     }
 
+//=============== On Create ====================================================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_catch_entry_lbs_ozs)
+        setContentView(R.layout.activity_catch_entry_pounds)
 
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
         Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
@@ -85,20 +86,20 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         dbHelper = CatchDatabaseHelper(this)
 
         btnSetUp3 = findViewById(R.id.btnSetUp3)
-        btnOpenWeightPopup = findViewById(R.id.btnOpenWeightPopup)
-        simpleLbsListView = findViewById(R.id.simpleLbsListView)
+        btnOpenWeightPopupPounds = findViewById(R.id.btnOpenWeightPopupPounds)
+        simplePoundsListView = findViewById(R.id.simplePoundsListView)
 
-        updateListViewLb()
+        updateListViewPounds()
 
-        btnOpenWeightPopup.setOnClickListener {
-            openWeightPopup()
+        btnOpenWeightPopupPounds.setOnClickListener {
+            openWeightPopupPounds()
         }
 
         btnSetUp3.setOnClickListener {
             startActivity(Intent(this, SetUpActivity::class.java))
         }
 
-        simpleLbsListView.setOnItemLongClickListener { _, _, position, _ ->
+        simplePoundsListView.setOnItemLongClickListener { _, _, position, _ ->
             if (position >= catchList.size) return@setOnItemLongClickListener true
             showEditDeleteDialog(catchList[position])
             true
@@ -116,8 +117,8 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         // TODO: implement actual parser or use broadcast response
     }
 
-    private fun openWeightPopup() {
-        val popupIntent = Intent(this, PopupWeightEntryLbs::class.java)
+    private fun openWeightPopupPounds() {
+        val popupIntent = Intent(this, PopupWeightEntryPounds::class.java)
         weightEntryLauncher.launch(popupIntent)
     }
 
@@ -128,8 +129,8 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             longitude = null,
             dateTime = getCurrentDateTime(),
             species = selectedSpecies,
-            totalWeightOz = totalWeightOz,
-            totalWeightPounds = null,
+            totalWeightOz = null,
+            totalWeightPounds = totalWeightPounds,
             totalLengthQuarters = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
@@ -141,17 +142,17 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         val success = dbHelper.insertCatch(newCatch)
         if (success) {
             Toast.makeText(this, "$selectedSpecies Catch Saved!", Toast.LENGTH_SHORT).show()
-            totalWeightOz = 0
+            totalWeightPounds = 0
         } else {
             Toast.makeText(this, "⚠️ Failed to save catch!", Toast.LENGTH_SHORT).show()
         }
 
-        updateListViewLb()
+        updateListViewPounds()
     }
 
-    private fun updateListViewLb() {
+    private fun updateListViewPounds() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("lbsOzs", todaysDate).sortedByDescending { it.dateTime }
+        val todaysCatches = dbHelper.getCatchesForToday("pounds", todaysDate).sortedByDescending { it.dateTime } //todo check the correct catchType
 
         catchList.clear()
         catchList.addAll(todaysCatches)
@@ -165,7 +166,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             }
         }
 
-        simpleLbsListView.adapter = CatchItemAdapter(this, catchList)
+        simplePoundsListView.adapter = CatchItemAdapter(this, catchList)
     }
 
     private fun showEditDeleteDialog(catchItem: CatchItem) {
@@ -175,7 +176,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             .setPositiveButton("Edit") { _, _ -> showEditDialog(catchItem) }
             .setNegativeButton("Delete") { _, _ ->
                 dbHelper.deleteCatch(catchItem.id)
-                updateListViewLb()
+                updateListViewPounds()
                 Toast.makeText(this, "Catch deleted!", Toast.LENGTH_SHORT).show()
             }
             .setNeutralButton("Cancel", null)
@@ -183,9 +184,9 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     }
 
     private fun showEditDialog(catchItem: CatchItem) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_lbs, null)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_pounds, null)
         val edtWeightLbs = dialogView.findViewById<EditText>(R.id.edtWeightLbs)
-        val edtWeightOzs = dialogView.findViewById<EditText>(R.id.edtWeightOzs)
+        val edtWeightDec = dialogView.findViewById<EditText>(R.id.edtWeightDec)
         val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditLbs)
 
         val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
@@ -197,8 +198,8 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         spinnerSpeciesLbs.adapter = adapter
 
         val totalWeightOz = catchItem.totalWeightOz ?: 0
-        edtWeightLbs.setText((totalWeightOz / 16).toString())
-        edtWeightOzs.setText((totalWeightOz % 16).toString())
+        edtWeightLbs.setText((totalWeightOz / 100).toString())
+        edtWeightDec.setText((totalWeightOz % 100).toString())
 
         val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
         spinnerSpeciesLbs.setSelection(if (speciesIndex != -1) speciesIndex else 0)
@@ -208,20 +209,21 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
                 val newLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
-                val newOzs = edtWeightOzs.text.toString().toIntOrNull() ?: 0
-                val totalWeightOz = (newLbs * 16) + newOzs
+                val newOzs = edtWeightDec.text.toString().toIntOrNull() ?: 0
+                val totalWeightPounds = (newLbs * 100) + newOzs
                 val species = spinnerSpeciesLbs.selectedItem.toString()
 
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
-                    newWeightOz = totalWeightOz,
+                    newWeightOz = null,
+                    newWeightPounds = totalWeightPounds,
                     newWeightKg = null,
                     newLengthQuarters = null,
                     newLengthCm = null,
                     species = species
                 )
 
-                updateListViewLb()
+                updateListViewPounds()
                 Toast.makeText(this, "Catch updated!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
@@ -233,6 +235,6 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
     }
 
     override fun onManualWake() {
-        openWeightPopup()
+        openWeightPopupPounds()
     }
 }

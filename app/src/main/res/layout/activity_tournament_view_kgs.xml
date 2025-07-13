@@ -557,6 +557,22 @@
         app:layout_constraintBottom_toBottomOf="@id/totalDecWeightKgs"
         app:layout_constraintStart_toEndOf="@id/totalDecWeightKgs" />
 
+    <TextView
+        android:id="@+id/txtVCCTourKgs"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="@string/vcc_on"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/totalRealWeightKgs"
+        app:layout_constraintStart_toEndOf="@id/txtHolderOzs"
+        app:layout_constraintTop_toTopOf="@id/totalRealWeightKgs"
+        app:layout_constraintVertical_bias="0.0" />
     <Button
         android:id="@+id/btnMainKgs"
         android:layout_width="wrap_content"

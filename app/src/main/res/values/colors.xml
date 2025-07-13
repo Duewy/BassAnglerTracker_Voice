@@ -7,6 +7,7 @@
     <color name="grey">#808080</color>
     <color name="lite_grey">#DFAEACAC</color>
     <color name="very_lite_grey">#B0AEACAC</color>
+    <color name="clip_very_green">#C0F448</color>
     <color name="clip_bright_green">#66CC33</color>
     <color name="bright_green">#EB24A108</color>
     <color name="purple_500">#FF6200EE</color>

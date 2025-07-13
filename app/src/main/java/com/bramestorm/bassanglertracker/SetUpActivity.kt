@@ -32,10 +32,11 @@ import java.util.Date
 
 class SetUpActivity : AppCompatActivity() {
 
-    private lateinit var btnWeight: Button
-    private lateinit var btnLength: Button
-    private lateinit var btnImperial: Button
-    private lateinit var btnMetric: Button
+    private lateinit var btnLbsOzs: Button
+    private lateinit var btnPounds: Button
+    private lateinit var btnKilograms: Button
+    private lateinit var btnInches: Button
+    private lateinit var btnCentimeters: Button
     private lateinit var txtLimitMarker :TextView
     private lateinit var txtSpeciesSelector :TextView
     private lateinit var btnFunDay: Button
@@ -58,15 +59,17 @@ class SetUpActivity : AppCompatActivity() {
         private const val REQUEST_DEEP_DOZE_AGREEMENT       = 2002
 
         // values for the VoiceHandlers to identify which MeasurementMode in use
-            const val TYPE_FUN_LBS    = 1
-            const val TYPE_FUN_KGS    = 2
-            const val TYPE_FUN_INCH   = 3
-            const val TYPE_FUN_CM     = 4
-            const val TYPE_TOURN_LBS  = 5
-            const val TYPE_TOURN_KGS  = 6
-            const val TYPE_TOURN_CM   = 7
-            const val TYPE_TOURN_INCH = 8
-            const val TYPE_DEFAULT    = 0
+            const val TYPE_FUN_LBS      = 1
+            const val TYPE_FUN_KGS      = 2
+            const val TYPE_FUN_INCH     = 3
+            const val TYPE_FUN_CM       = 4
+            const val TYPE_TOURN_LBS    = 5
+            const val TYPE_TOURN_KGS    = 6
+            const val TYPE_TOURN_CM     = 7
+            const val TYPE_TOURN_INCH   = 8
+            const val TYPE_FUN_POUNDS   = 9
+            const val TYPE_TOURN_POUNDS = 10
+            const val TYPE_DEFAULT      = 0
 
 
         const val EXTRA_SPECIES       = "selectedSpecies"
@@ -84,18 +87,28 @@ class SetUpActivity : AppCompatActivity() {
     private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
     private val prefs by lazy { getSharedPreferences(PREFS_NAME, MODE_PRIVATE) }
 
-    private var isWeightSelected = false
-    private var isLengthSelected = false
-    private var isImperialSelected = false
-    private var isMetricSelected = false
+
     private var isFunDaySelected = false
     private var isTournamentSelected = false
     private var selectedSpecies: String = ""
     private var isGPSInitializingToggle = true
 
 
-    private var isValUnits = false
-    private var isValMeasuring = false
+    private var isLbsOzsSelected = false
+    private var isPoundsDecimalSelected = false
+    private var isKilogramsSelected = false
+    private var isInchesSelected = false
+    private var isCentimetersSelected = false
+
+
+    // ----------- Set the BackGround of Unselected to lt Grey
+    private fun resetUnitSelectionHighlights() {
+        btnLbsOzs.setBackgroundResource(R.color.lite_grey)
+        btnPounds.setBackgroundResource(R.color.lite_grey)
+        btnKilograms.setBackgroundResource(R.color.lite_grey)
+        btnInches.setBackgroundResource(R.color.lite_grey)
+        btnCentimeters.setBackgroundResource(R.color.lite_grey)
+    }//--------------------------------------------------------
 
 
     //--------------------------------------------------------------
@@ -122,10 +135,11 @@ class SetUpActivity : AppCompatActivity() {
 
 
         // Initialize UI components
-        btnWeight = findViewById(R.id.btnWeight)
-        btnLength = findViewById(R.id.btnLength)
-        btnImperial = findViewById(R.id.btnImperial)
-        btnMetric = findViewById(R.id.btnMetric)
+        btnLbsOzs = findViewById(R.id.btnLbsOzs)
+        btnPounds = findViewById(R.id.btnPounds)
+        btnKilograms = findViewById(R.id.btnKilograms)
+        btnInches = findViewById(R.id.btnInches)
+        btnCentimeters = findViewById(R.id.btnCentimeters)
         btnFunDay = findViewById(R.id.btnFunDay)
         btnTournament = findViewById(R.id.btnTournament)
         btnStartFishing = findViewById(R.id.btnStartFishing)
@@ -147,45 +161,56 @@ class SetUpActivity : AppCompatActivity() {
         spinnerTournamentSpecies.isEnabled = false
 
         // Toggle Weight Selection
-        btnWeight.setOnClickListener {
-            Log.d("DEBUG", "Weight Is Selected ")
-            isWeightSelected = true
-            isLengthSelected = false
-            isValMeasuring = true
-            btnImperial.text = "Lbs Ozs"
-            btnMetric.text = " Kgs"
-            btnWeight.setBackgroundResource(R.color.bright_green)
-            btnLength.setBackgroundResource(R.color.lite_grey)
+        btnLbsOzs.setOnClickListener {
+            isLbsOzsSelected = true
+            isPoundsDecimalSelected = false
+            isKilogramsSelected = false
+            isInchesSelected = false
+            isCentimetersSelected = false
+            resetUnitSelectionHighlights()
+            btnLbsOzs.setBackgroundResource(R.color.bright_green)
         }
 
-        btnLength.setOnClickListener {
-            Log.d("DEBUG", "Length Is Selected ")
-            isLengthSelected = true
-            isWeightSelected = false
-            isValMeasuring = true
-            btnImperial.text = "Inches 4ths"
-            btnMetric.text = "Cms"
-            btnLength.setBackgroundResource(R.color.bright_green)
-            btnWeight.setBackgroundResource(R.color.lite_grey)
+        btnPounds.setOnClickListener {
+            isLbsOzsSelected = false
+            isPoundsDecimalSelected = true
+            isKilogramsSelected = false
+            isInchesSelected = false
+            isCentimetersSelected = false
+            resetUnitSelectionHighlights()
+            btnPounds.setBackgroundResource(R.color.bright_green)
         }
 
-        // Toggle Units Selection
-        btnImperial.setOnClickListener {
-            Log.d("DEBUG", "Imperial Is Selected ")
-            isImperialSelected = true
-            isMetricSelected = false
-            isValUnits = true
-            btnImperial.setBackgroundResource(R.color.bright_green)
-            btnMetric.setBackgroundResource(R.color.lite_grey)
+
+        btnKilograms.setOnClickListener {
+            isLbsOzsSelected = false
+            isPoundsDecimalSelected = false
+            isKilogramsSelected = true
+            isInchesSelected = false
+            isCentimetersSelected = false
+            resetUnitSelectionHighlights()
+            btnKilograms.setBackgroundResource(R.color.bright_green)
+                    }
+
+        // Toggle Length Selection
+        btnInches.setOnClickListener {
+            isLbsOzsSelected = false
+            isPoundsDecimalSelected = false
+            isKilogramsSelected = false
+            isInchesSelected = true
+            isCentimetersSelected = false
+            resetUnitSelectionHighlights()
+            btnInches.setBackgroundResource(R.color.bright_green)
         }
 
-        btnMetric.setOnClickListener {
-            Log.d("DEBUG", "Metric Is Selected ")
-            isMetricSelected = true
-            isImperialSelected = false
-            isValUnits = true
-            btnMetric.setBackgroundResource(R.color.bright_green)
-            btnImperial.setBackgroundResource(R.color.lite_grey)
+        btnCentimeters.setOnClickListener {
+            isLbsOzsSelected = false
+            isPoundsDecimalSelected = false
+            isKilogramsSelected = false
+            isInchesSelected = false
+            isCentimetersSelected = true
+            resetUnitSelectionHighlights()
+            btnCentimeters.setBackgroundResource(R.color.bright_green)
         }
 
         // Toggle Fun Day/Tournament Selection
@@ -195,8 +220,6 @@ class SetUpActivity : AppCompatActivity() {
             isTournamentSelected = false
             btnFunDay.setBackgroundResource(R.color.bright_green)
             btnTournament.setBackgroundResource(R.color.lite_grey)
-            btnLength.visibility = View.VISIBLE
-            btnMetric.visibility = View.VISIBLE
             txtLimitMarker.alpha = 0.3f
             txtSpeciesSelector.alpha = 0.3f
             tglCullingValue.alpha = 0.3f
@@ -209,11 +232,8 @@ class SetUpActivity : AppCompatActivity() {
             Log.d("DEBUG", "Tournament Is Selected ")
             isTournamentSelected = true
             isFunDaySelected = false
-          //  isLengthSelected = false
-          //  isWeightSelected = true
             btnTournament.setBackgroundResource(R.color.bright_green)
             btnFunDay.setBackgroundResource(R.color.lite_grey)
-            btnLength.visibility = View.VISIBLE
             tglCullingValue.alpha = 1.0f
             txtLimitMarker.alpha = 1.0f
             txtSpeciesSelector.alpha = 1.0f
@@ -354,38 +374,46 @@ class SetUpActivity : AppCompatActivity() {
             var catchEntryType = TYPE_DEFAULT
             val nextActivity: Class<*>? = when {
                 // — Fun Day branches —
-                isFunDaySelected && isWeightSelected && isImperialSelected -> {
+                isFunDaySelected && isLbsOzsSelected-> {
                     catchEntryType = TYPE_FUN_LBS
                     CatchEntryLbsOzs::class.java
                 }
-                isFunDaySelected && isWeightSelected && isMetricSelected -> {
+                isFunDaySelected && isPoundsDecimalSelected-> {
+                    catchEntryType = TYPE_FUN_POUNDS
+                    CatchEntryPounds::class.java
+                }
+                isFunDaySelected && isKilogramsSelected -> {
                     catchEntryType = TYPE_FUN_KGS
                     CatchEntryKgs::class.java
                 }
-                isFunDaySelected && isLengthSelected && isMetricSelected -> {
+                isFunDaySelected && isCentimetersSelected -> {
                     catchEntryType = TYPE_FUN_CM
                     CatchEntryMetric::class.java
                 }
-                isFunDaySelected && isLengthSelected && isImperialSelected -> {
+                isFunDaySelected && isInchesSelected -> {
                     catchEntryType = TYPE_FUN_INCH
                     CatchEntryInches::class.java
                 }
 
 
                 // — Tournament branches —
-                isTournamentSelected && isWeightSelected && isImperialSelected -> {
+                isTournamentSelected && isLbsOzsSelected-> {
                     catchEntryType = TYPE_TOURN_LBS
                     CatchEntryTournament::class.java
                 }
-                isTournamentSelected && isWeightSelected && isMetricSelected -> {
+                isTournamentSelected && isPoundsDecimalSelected-> {
+                    catchEntryType = TYPE_TOURN_POUNDS
+                    CatchEntryTournamentPounds::class.java
+                }
+                isTournamentSelected && isKilogramsSelected-> {
                     catchEntryType = TYPE_TOURN_KGS
                     CatchEntryTournamentKgs::class.java
                 }
-                isTournamentSelected && isLengthSelected && isMetricSelected -> {
+                isTournamentSelected && isCentimetersSelected -> {
                     catchEntryType = TYPE_TOURN_CM
                     CatchEntryTournamentCentimeters::class.java
                 }
-                isTournamentSelected && isLengthSelected && isImperialSelected -> {
+                isTournamentSelected && isInchesSelected -> {
                     catchEntryType = TYPE_TOURN_INCH
                     CatchEntryTournamentInches::class.java
                 }
@@ -615,4 +643,5 @@ class SetUpActivity : AppCompatActivity() {
         }
 
     }
+
 //================END==========================
