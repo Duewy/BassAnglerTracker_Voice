@@ -651,7 +651,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         val spnClipColor = dialogView.findViewById<Spinner>(R.id.spnClipColorKgs)
         val edtKgs       = dialogView.findViewById<EditText>(R.id.edtTourWeightKgs)
         val edtGrams     = dialogView.findViewById<EditText>(R.id.edtTourWeightGrams)
-        val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourKgss)
+        val btnSave      = dialogView.findViewById<Button>(R.id.btnSaveEdtTourKgs)
         val btnCancel    = dialogView.findViewById<Button>(R.id.btnCancelEdtTourKgs)
         val btnDelete    = dialogView.findViewById<Button>(R.id.btnDeleteEdtTourKgs)
 
@@ -662,7 +662,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
         // 4) color box
         // Find available clip colors
-        val allClipColors = CatchEntryTournament.ClipColor.entries.map { it.name }.toMutableList()
+        val allClipColors = CatchEntryTournamentKgs.ClipColor.entries.map { it.name }.toMutableList()
         val currentColor = c.clipColor ?: "RED"
         val availableColors = allClipColors.toMutableList().apply {
             remove(currentColor)                // temporarily remove current

@@ -48,12 +48,13 @@ fun CatchItem.getMeasurementMode(): MeasurementMode? {
 fun CatchItem.getComparisonValueByMode(mode: MeasurementMode): Int {
     return when (mode) {
         MeasurementMode.LBS_OZ -> totalWeightOz ?: 0
-        MeasurementMode.POUNDS -> totalWeightHundredthPounds ?:0
+        MeasurementMode.POUNDS -> totalWeightHundredthPounds ?: 0
         MeasurementMode.KG     -> totalWeightHundredthKg ?: 0
         MeasurementMode.INCHES -> totalLengthQuarters ?: 0
         MeasurementMode.CM     -> totalLengthTenths ?: 0
     }
 }
+
 
 //======= FORMAT THE MEASUREMENT UNITS  ===============================
 

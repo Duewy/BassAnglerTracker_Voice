@@ -674,7 +674,7 @@ override val dialog: Any
         edtQuartersOfInch.setText((totalQuarters % 4).toString())
 
         // 4) show clip-color box
-        val allClipColors = CatchEntryTournament.ClipColor.entries.map { it.name }.toMutableList()
+        val allClipColors = CatchEntryTournamentInches.ClipColor.entries.map { it.name }.toMutableList()
         val currentColor = c.clipColor ?: "RED"
         val availableColors = allClipColors.toMutableList().apply {
             remove(currentColor)

@@ -10,7 +10,6 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.Locale
 
 object SharedPreferencesManager {
 
@@ -104,28 +103,32 @@ object SharedPreferencesManager {
             .getInt(KEY_CATCH_TYPE, -1)
     }
 
-    fun getTournamentUnit(context: Context): MeasurementMode {
-        val unit = context.getSharedPreferences("catch_and_call_prefs", Context.MODE_PRIVATE)
-            .getString("unitType", "lbs") ?: "lbs"
-        return when (unit.lowercase(Locale.ROOT)) {
-            "lbs", "pounds", "weight" -> MeasurementMode.LBS_OZ
-            "kg", "kgs" -> MeasurementMode.KG
-            "inches" -> MeasurementMode.INCHES
-            "cm", "centimeters" -> MeasurementMode.CM
-            else -> MeasurementMode.LBS_OZ
-        }
-    }
-
+  //=============== MEASUREMENT MODE #'s ===========================
     fun getFunDayUnit(context: Context): MeasurementMode {
         val type = getCatchEntryType(context)
         return when (type) {
             1 -> MeasurementMode.LBS_OZ
-            2 -> MeasurementMode.KG
-            3 -> MeasurementMode.INCHES
-            4 -> MeasurementMode.CM
+            2 -> MeasurementMode.POUNDS
+            3 -> MeasurementMode.KG
+            4 -> MeasurementMode.INCHES
+            5 -> MeasurementMode.CM
+
             else -> MeasurementMode.LBS_OZ
         }
     }
+
+    fun getTournamentUnit(context: Context): MeasurementMode {
+        val type = getCatchEntryType(context)
+        return when (type) {
+            6   -> MeasurementMode.LBS_OZ
+            7   -> MeasurementMode.POUNDS
+            8   -> MeasurementMode.KG
+            9   -> MeasurementMode.INCHES
+            10  -> MeasurementMode.CM
+            else -> MeasurementMode.LBS_OZ
+        }
+    }
+
 
 
     // === Tournament Settings ===

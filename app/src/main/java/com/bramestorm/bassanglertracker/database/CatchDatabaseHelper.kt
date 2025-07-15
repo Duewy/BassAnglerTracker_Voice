@@ -17,8 +17,8 @@ import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-                                                          // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!!
-class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 8) {
+                                       // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!! +++++++ Added POUNDS to list +++++++
+class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 9) {
 
     private val prefs by lazy { context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE) }
 
@@ -29,11 +29,11 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_LATITUDE = "latitude"
         private const val COLUMN_LONGITUDE = "longitude"
         private const val COLUMN_SPECIES = "species"
-        private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"            // Stored in pounds ounces: 34 = 2 lbs and 2 oz
-        private const val COLUMN_TOTAL_WEIGHT_POUNDS = "total_weight_pounds"    // Stored in hundredths of pounds: 225 = 2.25 lbs
-        private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters" // Stored in 4ths of inch:  18 = 2 inches and 2/4 inch
-        private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"  // Stored in hundredths of Kgs : 255 = 2.55 Kgs
-        private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"    // Stored in millimeters: 135 = 13.5 Cm
+        private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"                                // Stored in pounds ounces: 34 = 2 lbs and 2 oz
+        private const val COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS = "total_weight_hundredth_pounds"    // Stored in hundredths of pounds: 225 = 2.25 lbs
+        private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters"                    // Stored in 4ths of inch:  18 = 2 inches and 2/4 inch
+        private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"                      // Stored in hundredths of Kgs : 255 = 2.55 Kgs
+        private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"                        // Stored in millimeters: 135 = 13.5 Cm
         private const val COLUMN_CATCH_TYPE = "catch_type"
         private const val COLUMN_MARKER_TYPE = "marker_type"
         private const val COLUMN_CLIP_COLOR = "clip_color"
@@ -48,7 +48,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             $COLUMN_LONGITUDE REAL,
             $COLUMN_SPECIES TEXT NOT NULL,
             $COLUMN_TOTAL_WEIGHT_OZ INTEGER DEFAULT 0,
-            $COLUMN_TOTAL_WEIGHT_POUNDS INTEGER DEFAULT 0,
+            $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_QUARTERS INTEGER DEFAULT 0,
             $COLUMN_TOTAL_WEIGHT_KG INTEGER DEFAULT 0,
             $COLUMN_TOTAL_LENGTH_TENTHS INTEGER DEFAULT 0,
@@ -83,7 +83,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 $COLUMN_LONGITUDE,
                 $COLUMN_SPECIES,
                 $COLUMN_TOTAL_WEIGHT_OZ,
-                $COLUMN_TOTAL_WEIGHT_POUNDS,
+                $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS,
                 $COLUMN_TOTAL_WEIGHT_KG,
                 $COLUMN_TOTAL_LENGTH_QUARTERS,
                 $COLUMN_TOTAL_LENGTH_TENTHS,
@@ -98,7 +98,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 $COLUMN_LONGITUDE,
                 $COLUMN_SPECIES,
                 $COLUMN_TOTAL_WEIGHT_OZ,
-                $COLUMN_TOTAL_WEIGHT_POUNDS,
+                $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS,
                 $COLUMN_TOTAL_WEIGHT_KG,
                 $COLUMN_TOTAL_LENGTH_QUARTERS,
                 $COLUMN_TOTAL_LENGTH_TENTHS,
@@ -118,10 +118,22 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
           }
 
           if (oldVersion < 8) {
-              // Add future column upgrades here
+              if (!columnExists(db, TABLE_NAME, "total_weight_hundredth_pounds")) {
+                  db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN total_weight_hundredth_pounds INTEGER DEFAULT 0;")
+              }
           }
+
+          if (oldVersion < 9) {
+              Log.d("DB_UPGRADE", "🔧 Upgraded to version 9 — no schema changes.") // Just to track changes
+          }
+
+          if (oldVersion > 9 ){
+              Log.d("DB_UPGRADE", "🔧 Upgraded to version 10 — no schema changes.")
+              // When Updated Add Information to this line...
+          }
+
       }
-//=== END on Up Grade ================================
+    //=== END on Up Grade ================================
 
 
     fun insertCatch(catch: CatchItem): Boolean {
@@ -133,7 +145,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_DATE_TIME, catch.dateTime)
                 put(COLUMN_SPECIES, catch.species)
                 put(COLUMN_TOTAL_WEIGHT_OZ, catch.totalWeightOz)
-                put(COLUMN_TOTAL_WEIGHT_POUNDS, catch.totalWeightHundredthPounds)
+                put(COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS, catch.totalWeightHundredthPounds)
                 put(COLUMN_TOTAL_LENGTH_QUARTERS, catch.totalLengthQuarters)
                 put(COLUMN_TOTAL_LENGTH_TENTHS, catch.totalLengthTenths)
                 put(COLUMN_TOTAL_WEIGHT_KG, catch.totalWeightHundredthKg)
@@ -243,7 +255,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val values = ContentValues()
         values.put(COLUMN_SPECIES, species)
         if (newWeightOz != null) values.put(COLUMN_TOTAL_WEIGHT_OZ, newWeightOz)
-        if (newWeightPounds!= null) values.put(COLUMN_TOTAL_WEIGHT_POUNDS, newWeightPounds)
+        if (newWeightPounds!= null) values.put(COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS, newWeightPounds)
         if (newWeightKg != null) values.put(COLUMN_TOTAL_WEIGHT_KG, newWeightKg)
         if (newLengthQuarters != null) values.put(COLUMN_TOTAL_LENGTH_QUARTERS, newLengthQuarters)
         if (newLengthCm != null) values.put(COLUMN_TOTAL_LENGTH_TENTHS, newLengthCm)
@@ -265,7 +277,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
             species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
             totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
-            totalWeightHundredthPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_POUNDS)),
+            totalWeightHundredthPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS)),
             totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS)),
             totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
             totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
@@ -382,7 +394,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                     args.add((maxValue * 16).toInt().toString())
                 }
                 "weightpounds", "pounds", "pound" -> {
-                    whereClauses.add("$COLUMN_TOTAL_WEIGHT_POUNDS BETWEEN ? AND ?")
+                    whereClauses.add("$COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS BETWEEN ? AND ?")
                     args.add((minValue * 100).toInt().toString())
                     args.add((maxValue * 100).toInt().toString())
                 }
@@ -563,9 +575,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
               """
         SELECT * FROM catches
         WHERE LOWER(species) = ?
-        AND $COLUMN_TOTAL_WEIGHT_POUNDS BETWEEN ? AND ?
+        AND $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS BETWEEN ? AND ?
         AND strftime('%Y-%m', $COLUMN_DATE_TIME) = ?
-          ORDER BY $COLUMN_TOTAL_WEIGHT_POUNDS DESC
+          ORDER BY $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS DESC
           LIMIT ?
         """.trimIndent(),
               arrayOf(

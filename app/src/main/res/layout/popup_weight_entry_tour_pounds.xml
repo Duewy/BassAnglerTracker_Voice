@@ -123,7 +123,7 @@
                 android:background="@color/very_lite_grey"
                 android:inputType="number"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="25sp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -138,18 +138,18 @@
                 android:textColor="@color/black"/>
 
             <EditText
-                android:id="@+id/edtWeightTourLbsDecimal"
+                android:id="@+id/edtWeightTourPoundsDecimal"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@color/very_lite_grey"
+                android:gravity="center"
                 android:hint="@string/_0_99"
                 android:inputType="number"
                 android:textColor="@color/black"
                 android:textColorHint="@color/grey"
-                android:background="@color/very_lite_grey"
-                android:textSize="20sp"
+                android:textSize="25sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -197,7 +197,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                android:id="@+id/btnCancel"
+                android:id="@+id/btnCancelPounds"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -209,7 +209,7 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnSaveWeight"
+                android:id="@+id/btnSaveWeightPounds"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

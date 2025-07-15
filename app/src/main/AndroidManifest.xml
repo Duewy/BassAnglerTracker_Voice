@@ -120,6 +120,10 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".CatchEntryPounds"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryKgs"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
@@ -135,6 +139,10 @@
         <!-- Tournament Fishing Activity -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity android:name=".CatchEntryTournament"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".CatchEntryTournamentPounds"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
@@ -156,12 +164,17 @@
 
         <!-- Tournament Popups for User Input -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupWeightEntryTourKgs"
+        <activity android:name=".PopupWeightEntryTourLbs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupWeightEntryTourLbs"
+        <activity android:name=".PopupWeightEntryTourPounds"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".PopupWeightEntryTourKgs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
@@ -177,13 +190,19 @@
             tools:ignore="LockedOrientationActivity"/>
 
         <!-- Fun Day Popups for User Input -->
+
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupWeightEntryKgs"
+        <activity android:name=".PopupWeightEntryLbs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupWeightEntryLbs"
+        <activity android:name=".PopupWeightEntryPounds"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"/>
+        <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
+        <activity android:name=".PopupWeightEntryKgs"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>

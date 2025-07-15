@@ -23,7 +23,10 @@ object CatchSaver {
         // Convert imperial weight to total ounces
         val totalOz = ((parsed.weightLbs ?: 0) * 16) + (parsed.weightOz ?: 0)
 
-        // Convert kg + grams to hundredth-kg integer
+        // Convert Pounds + decimal to hundredth-Pounds integer
+        val totalHundredthPounds = ((parsed.weightPounds ?: 0) * 100) + ((parsed.weightDec ?: 0) / 10)
+
+        // Convert kg + grams to hundredth-kg integer //todo why are we dividing all by 10????
         val totalHundredthKg = ((parsed.weightKgWhole ?: 0) * 100) + ((parsed.weightGrams ?: 0) / 10)
 
         // Convert inches + quarters to total quarters
@@ -38,6 +41,7 @@ object CatchSaver {
             dateTime = getCurrentDateTime(),
             species = parsed.species ?: "Unknown",
             totalWeightOz = totalOz,
+            totalWeightHundredthPounds = totalHundredthPounds,
             totalLengthQuarters = totalQuarters,
             totalLengthTenths = totalTenths,
             totalWeightHundredthKg = totalHundredthKg,

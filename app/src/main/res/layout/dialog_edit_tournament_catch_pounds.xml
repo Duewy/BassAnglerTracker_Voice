@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/popup_background_kgs"
+    android:background="@drawable/popup_background_pounds_decimal"
     android:orientation="vertical"
     android:padding="20dp" >
 
@@ -12,14 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
+        android:layout_marginBottom="15dp"
+        android:background="@color/clip_green"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_marginBottom="15dp"
-        android:text="@string/edit_tourn_kgs"
+        android:text="@string/edit_tournament_pounds"
         android:textColor="@color/clip_white"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:background="@color/clip_blue"/>
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,7 +29,7 @@
         android:gravity="center">
 
         <Spinner
-            android:id="@+id/spnClipColorKgs"
+            android:id="@+id/spnClipColorPounds"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="0.5"
@@ -44,11 +44,11 @@
             android:textStyle="bold"/>
 
         <EditText
-            android:id="@+id/edtTourWeightKgs"
+            android:id="@+id/edtTourWeightPounds"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="0.5"
-            android:hint="@string/kgs"
+            android:hint="@string/lbs"
             android:inputType="number"
             android:textColor="@color/black"
             android:background="@color/lite_grey"
@@ -58,7 +58,7 @@
             android:textStyle="bold"/>
 
         <EditText
-            android:id="@+id/edtTourWeightGrams"
+            android:id="@+id/edtTourWeightPoundsDecimal"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="0.5"
@@ -96,7 +96,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtEditTourKgs"
+            android:id="@+id/txtEditTourPounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -104,13 +104,13 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:layout_weight="0.4"
-            android:text="@string/kgs"
+            android:text="@string/lbs"
             android:textSize="15sp"
             android:textColor="@color/black"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtEditTourGrams"
+            android:id="@+id/txtEditTourPoundsDecimal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -131,7 +131,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnDeleteEdtTourKgs"
+            android:id="@+id/btnDeleteEdtTourPounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -143,7 +143,7 @@
             android:textSize="20sp" />
 
         <Button
-            android:id="@+id/btnCancelEdtTourKgs"
+            android:id="@+id/btnCancelEdtTourPounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -155,7 +155,7 @@
             android:textSize="20sp"/>
 
         <Button
-            android:id="@+id/btnSaveEdtTourKgs"
+            android:id="@+id/btnSaveEdtTourPounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"

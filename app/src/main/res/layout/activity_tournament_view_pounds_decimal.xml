@@ -41,14 +41,14 @@
             android:textColor="@color/black"
             android:textSize="34sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/btnAlarmLBS"
+            app:layout_constraintBottom_toTopOf="@+id/btnAlarmPounds"
             app:layout_constraintEnd_toStartOf="@+id/imageView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/timer_place_holder" />
 
         <Button
-            android:id="@+id/btnStartFishingLBS"
+            android:id="@+id/btnStartFishingPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="5dp"
@@ -64,11 +64,11 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_percent="0.09"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@id/btnAlarmLBS"
+            app:layout_constraintStart_toEndOf="@id/btnAlarmPounds"
             app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
         <Button
-            android:id="@+id/btnAlarmLBS"
+            android:id="@+id/btnAlarmPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="4dp"
@@ -99,7 +99,7 @@
             android:textSize="40sp"
             app:layout_constraintHeight_percent="0.085"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnStartFishingLBS"
+            app:layout_constraintTop_toBottomOf="@id/btnStartFishingPounds"
             app:layout_constraintWidth_percent="0.09" />
 
         <TextView
@@ -178,7 +178,7 @@
             app:layout_constraintWidth_percent="0.09"/>
 
         <TextView
-            android:id="@+id/firstRealWeightLBS"
+            android:id="@+id/firstRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="5dp"
@@ -192,11 +192,11 @@
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
             app:layout_constraintStart_toEndOf="@id/txtColorLetter1"
-            app:layout_constraintTop_toBottomOf="@id/btnStartFishingLBS"
+            app:layout_constraintTop_toBottomOf="@id/btnStartFishingPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/secondRealWeightLBS"
+            android:id="@+id/secondRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintWidth_percent="0.35"
@@ -209,11 +209,11 @@
             android:textColor="@color/black"
             android:textSize="45sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/firstRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/firstRealWeightLBS" />
+            app:layout_constraintStart_toStartOf="@+id/firstRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/firstRealWeightPounds" />
 
         <TextView
-            android:id="@+id/thirdRealWeightLBS"
+            android:id="@+id/thirdRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -225,12 +225,12 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@+id/secondRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/secondRealWeightLBS"
+            app:layout_constraintStart_toStartOf="@+id/secondRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/secondRealWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/fourthRealWeightLBS"
+            android:id="@+id/fourthRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -242,12 +242,12 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@+id/thirdRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/thirdRealWeightLBS"
+            app:layout_constraintStart_toStartOf="@+id/thirdRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/thirdRealWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/fifthRealWeightLBS"
+            android:id="@+id/fifthRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -259,12 +259,12 @@
             android:textColor="@color/black"
             android:textSize="45sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/fourthRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/fourthRealWeightLBS"
+            app:layout_constraintStart_toStartOf="@+id/fourthRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/fourthRealWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/sixthRealWeightLBS"
+            android:id="@+id/sixthRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -276,13 +276,13 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@id/fifthRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/fifthRealWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/fifthRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/fifthRealWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
 
         <TextView
-            android:id="@+id/firstDecWeightLBS"
+            android:id="@+id/firstDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="5dp"
@@ -294,12 +294,12 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toEndOf="@id/firstRealWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/btnStartFishingLBS"
+            app:layout_constraintStart_toEndOf="@id/firstRealWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/btnStartFishingPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/secondDecWeightLBS"
+            android:id="@+id/secondDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintHeight_percent="0.085"
@@ -311,11 +311,11 @@
             android:textColor="@color/black"
             android:textSize="45sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/firstDecWeightLBS"  />
+            app:layout_constraintStart_toStartOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/firstDecWeightPounds"  />
 
         <TextView
-            android:id="@+id/thirdDecWeightLBS"
+            android:id="@+id/thirdDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -326,12 +326,12 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@id/secondDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/secondDecWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/secondDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/secondDecWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/fourthDecWeightLBS"
+            android:id="@+id/fourthDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -342,12 +342,12 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@id/thirdDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/thirdDecWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/thirdDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/thirdDecWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/fifthDecWeightLBS"
+            android:id="@+id/fifthDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintHeight_percent="0.085"
@@ -358,12 +358,12 @@
             android:textColor="@color/black"
             android:textSize="45sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/fourthDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/fourthDecWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/fourthDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/fourthDecWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
-            android:id="@+id/sixthDecWeightLBS"
+            android:id="@+id/sixthDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="5dp"
@@ -374,8 +374,8 @@
             android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toStartOf="@id/fifthDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@+id/fifthDecWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/fifthDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@+id/fifthDecWeightPounds"
             app:layout_constraintWidth_percent="0.35" />
 
         <TextView
@@ -390,8 +390,8 @@
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
             app:layout_constraintWidth_percent="0.1"
-            app:layout_constraintStart_toEndOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/btnStartFishingLBS"/>
+            app:layout_constraintStart_toEndOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/btnStartFishingPounds"/>
 
         <TextView
             android:id="@+id/txtTypeLetter2"
@@ -404,8 +404,8 @@
             android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toEndOf="@id/secondDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/firstDecWeightLBS"
+            app:layout_constraintStart_toEndOf="@id/secondDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/firstDecWeightPounds"
             app:layout_constraintWidth_percent="0.1" />
 
         <TextView
@@ -419,8 +419,8 @@
             android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toEndOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/secondDecWeightLBS"
+            app:layout_constraintStart_toEndOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/secondDecWeightPounds"
             app:layout_constraintWidth_percent="0.1" />
 
         <TextView
@@ -435,8 +435,8 @@
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
             app:layout_constraintWidth_percent="0.1"
-            app:layout_constraintStart_toEndOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/thirdDecWeightLBS" />
+            app:layout_constraintStart_toEndOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/thirdDecWeightPounds" />
 
         <TextView
             android:id="@+id/txtTypeLetter5"
@@ -449,8 +449,8 @@
             android:textColor="@color/black"
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
-            app:layout_constraintStart_toEndOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/fourthDecWeightLBS"
+            app:layout_constraintStart_toEndOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/fourthDecWeightPounds"
             app:layout_constraintWidth_percent="0.1" />
 
         <TextView
@@ -465,8 +465,8 @@
             android:textSize="20sp"
             app:layout_constraintHeight_percent="0.085"
             app:layout_constraintWidth_percent="0.1"
-            app:layout_constraintStart_toEndOf="@id/firstDecWeightLBS"
-            app:layout_constraintTop_toBottomOf="@id/fifthDecWeightLBS" />
+            app:layout_constraintStart_toEndOf="@id/firstDecWeightPounds"
+            app:layout_constraintTop_toBottomOf="@id/fifthDecWeightPounds" />
 
 
         <TextView
@@ -482,30 +482,30 @@
             android:textSize="22sp"
             android:fontFamily="sans-serif-medium"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/totalRealWeightLBS"
+            app:layout_constraintBottom_toTopOf="@+id/totalRealWeightPounds"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sixthRealWeightLBS" />
+            app:layout_constraintTop_toBottomOf="@id/sixthRealWeightPounds" />
 
         <TextView
             android:id="@+id/txtGPSNotice"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="15dp"
-            android:text="@string/gps_on"
+            android:layout_marginStart="8dp"
             android:gravity="center"
+            android:text="@string/gps_on"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="@id/totalRealWeightLBS"
-            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightLBS"
-            app:layout_constraintStart_toStartOf="@id/txtColorLetter1"/>
+            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightPounds"
+            app:layout_constraintStart_toStartOf="@id/txtColorLetter1"
+            app:layout_constraintTop_toTopOf="@id/totalRealWeightPounds"
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
-            android:id="@+id/totalRealWeightLBS"
+            android:id="@+id/totalRealWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintWidth_percent="0.2"
@@ -517,7 +517,7 @@
             android:textStyle="bold"
             app:layout_constraintHeight_percent="0.1"
             app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="@id/firstRealWeightLBS"
+            app:layout_constraintStart_toStartOf="@id/firstRealWeightPounds"
             android:layout_marginStart="25dp"
             app:layout_constraintTop_toBottomOf="@id/total_weightView"    />
 
@@ -532,27 +532,27 @@
             android:textColor="@color/black"
             android:textSize="80sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightLBS"
-            app:layout_constraintStart_toEndOf="@id/totalRealWeightLBS" />
+            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightPounds"
+            app:layout_constraintStart_toEndOf="@id/totalRealWeightPounds" />
 
 
         <TextView
-            android:id="@+id/totalDecWeightLBS"
+            android:id="@+id/totalDecWeightPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.2"
             android:background="@color/clip_white"
             android:gravity="center"
             android:textAlignment="gravity"
             android:textColor="@color/black"
             android:textSize="48sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightLBS"
+            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightPounds"
             app:layout_constraintEnd_toStartOf="@+id/txtHolderOzs"
             app:layout_constraintHeight_percent="0.1"
             app:layout_constraintStart_toEndOf="@id/txtLbHolder"
-            app:layout_constraintTop_toBottomOf="@+id/total_weightView" />
-
+            app:layout_constraintTop_toBottomOf="@+id/total_weightView"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintWidth_percent="0.2" />
 
         <TextView
             android:id="@+id/txtHolderOzs"
@@ -566,11 +566,11 @@
             android:textScaleX="0.4"
             android:textSize="60sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/totalDecWeightLBS"
-            app:layout_constraintStart_toEndOf="@id/totalDecWeightLBS" />
+            app:layout_constraintBottom_toBottomOf="@id/totalDecWeightPounds"
+            app:layout_constraintStart_toEndOf="@id/totalDecWeightPounds" />
 
         <TextView
-            android:id="@+id/txtVCCTourLbs"
+            android:id="@+id/txtVCCTourPounds"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="10dp"
@@ -581,9 +581,9 @@
             android:textColor="@color/clip_blue"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightLBS"
+            app:layout_constraintBottom_toBottomOf="@id/totalRealWeightPounds"
             app:layout_constraintStart_toEndOf="@id/txtHolderOzs"
-            app:layout_constraintTop_toTopOf="@id/totalRealWeightLBS"
+            app:layout_constraintTop_toTopOf="@id/totalRealWeightPounds"
             app:layout_constraintVertical_bias="0.0" />
 
         <LinearLayout
@@ -593,10 +593,10 @@
             android:gravity="center"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            app:layout_constraintTop_toBottomOf="@id/totalRealWeightLBS" >
+            app:layout_constraintTop_toBottomOf="@id/totalRealWeightPounds" >
 
             <Button
-                android:id="@+id/btnMainPg"
+                android:id="@+id/btnMainPounds"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_marginTop="6dp"
@@ -609,7 +609,7 @@
                 android:textSize="22sp" />
 
             <Button
-                android:id="@+id/btnMenu"
+                android:id="@+id/btnSetUpPounds"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_marginStart="4dp"

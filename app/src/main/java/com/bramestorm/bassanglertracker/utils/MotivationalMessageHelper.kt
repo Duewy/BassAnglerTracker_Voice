@@ -61,6 +61,7 @@ fun getMotivationalMessage(
     // 🔄 Convert raw string to MeasurementMode (safe fallback = LBS_OZ)
     val mode = when (comparisonModeRaw.lowercase()) {
         "lbsozs", "weight", "lbs" -> MeasurementMode.LBS_OZ
+        "pounds"                  -> MeasurementMode.POUNDS
         "kgs", "weightkg"         -> MeasurementMode.KG
         "inches", "length"        -> MeasurementMode.INCHES
         "cm", "lengthcm"          -> MeasurementMode.CM

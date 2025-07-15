@@ -102,11 +102,15 @@ class TournamentVoiceHandler(
             (measurementMode == MeasurementMode.CM     && tenths > 9)) {
 
             Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
-            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT") // goes back to startVoiceSession with new TTS "Please say...
-            Handler(Looper.getMainLooper()).postDelayed({
-                startVoiceSession()
-            }, 1500)
-            return
+            uiHelper.speak("That value was out of range. Say it again or say cancel that. Over.", "TTS_INVALID_UNIT")
+            (context as? VoiceControlService)?.startVoiceSession(getStartPrompt(), uiHelper) { response ->
+                if (response.contains("cancel", true)) {
+                    uiHelper.speak("Cancelled. Over and Out.", "TTS_CANCEL")
+                    endSession("cancel from confirm prompt")
+                } else {
+                    parseAndConfirm(response)
+                }
+            }
         }
 
 
@@ -123,8 +127,8 @@ class TournamentVoiceHandler(
 
         if (missingInfo) {  parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
-                uiHelper.speak("Okay, let’s try again later. Over.", "TTS_FAIL")
-                parseRetryCount = 0
+                uiHelper.speak("Okay, let’s try again later. Over and Out.", "TTS_FAIL")
+                endSession("too many parse retries")
                 return
             }
             uiHelper.speak("Sorry, I missed some info—let’s try again. Over.", "TTS_RETRY")
@@ -163,7 +167,7 @@ class TournamentVoiceHandler(
                         response.contains("no ",  true)    -> startVoiceSession()
                         response.contains("cancel", true) -> {
                             uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
-                            (context as? VoiceControlService)?.markSessionComplete()  // ✅ RESET SESSION HERE
+                            endSession("cancel from confirm prompt") // ✅ RESET SESSION HERE
                         }
                         else -> {
                             uiHelper.speak("Sorry, please say yes over no over or cancel that. Over.","TTS_RETRY")
@@ -173,6 +177,7 @@ class TournamentVoiceHandler(
                 }
             } ?: run {
                 // fallback to Intent
+                endSession("If fallback voice session fails")
                 val intent = Intent(context, VoiceControlService::class.java)
                     .setAction(VoiceControlService.ACTION_START_VOICE)
                 ContextCompat.startForegroundService(context, intent)
@@ -243,8 +248,7 @@ class TournamentVoiceHandler(
         }
 
         uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
-
-        (context as? VoiceControlService)?.markSessionComplete()
+        endSession("catch successfully saved")
     }
 
     override fun shutdown() {
@@ -281,8 +285,7 @@ class TournamentVoiceHandler(
         //  Check for “cancel” command ❌ to get out of the VCC Question section
         if (question.contains("cancel", ignoreCase = true)) {
             uiHelper.speak("Okay, exiting question mode. Over and out.", "TTS_CANCEL")
-            inQuestionMode     = false
-            questionRetryCount = 0
+            endSession("cancel from confirm prompt")
             return
         }
 
@@ -292,10 +295,7 @@ class TournamentVoiceHandler(
         val cullList = sortedDesc.take(tournamentCatchLimit)     // “cull list” = your tournamentCatchLimit biggest fish
         val catch = lastCatchItem ?: run {
             Log.w(TAG, "No last catch—cannot answer questions yet Over and out.")
-            uiHelper.speak(
-                "I don't have a catch to ask about, Over and Out.",
-                "TTS_ERROR"
-            )
+            uiHelper.speak("I don't have a catch to ask about, Over and Out.","TTS_ERROR" )
             return
         }
 
@@ -389,8 +389,7 @@ class TournamentVoiceHandler(
                 questionRetryCount++
                 if (questionRetryCount > maxQuestionRetries) {
                     uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_FAIL")
-                    inQuestionMode = false
-                    questionRetryCount = 0
+                    endSession("too many question retries")
                 } else {
                     uiHelper.speak(
                         "Sorry, I did not catch that. Say smallest, largest, total weight, position or time left.$overOut",
@@ -454,6 +453,14 @@ class TournamentVoiceHandler(
                 )
             }
         }
+    }
+
+    private fun endSession(reason: String = "User cancel") {
+        Log.d(TAG, "Session ended: $reason")
+        (context as? VoiceControlService)?.markSessionComplete()
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
     }
 
     private fun currentTimestamp(): String =
