@@ -36,10 +36,13 @@ class VoiceInteractionHelper(
     private val sessionId = System.currentTimeMillis()
 
 
-    data class CatchData(val pounds: Int, val ounces: Int, val species: String, val clipColor: String)//todo why only pounds ounces?????
+    data class CatchData(val pounds: Int, val ounces: Int, val species: String, val clipColor: String)
+    // Only used in VoiceTraining and diagnostics — not part of tournament or fun day logging
+    // Supports pounds & ounces for simplicity
+
 
     enum class MeasurementUnit {
-        LBS_OZ, KG_G, INCHES, CM        //todo why is CM not Used???
+        LBS_OZ,POUNDS, KG_G, INCHES, CM        //todo why is CM not Used???
     }
 
     init {

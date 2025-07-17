@@ -180,7 +180,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             // 3️⃣ And only then wire up your helper
             voiceHelper = VoiceInteractionHelper(
                 activity        = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.KG_G,
+                measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
                 isTournament    = true,
                 onCommandAction = { transcript -> onSpeechResult(transcript) }
             )
@@ -342,11 +342,11 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             dateTime = getCurrentDateTime(),
             species = species,
             totalWeightOz = null,
-            totalWeightHundredthPounds = null,
+            totalWeightHundredthPounds = weightTotalPounds,
             totalLengthQuarters = null,
-            totalWeightHundredthKg = weightTotalPounds,
+            totalWeightHundredthKg =null,
             totalLengthTenths = null,
-            catchType = "kgs",
+            catchType = "pounds",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -367,10 +367,10 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
     private fun updateTotalWeight(tournamentCatches: List<CatchItem>) {
         // Always sort and limit to top N
         val catchesToUse = tournamentCatches
-            .sortedByDescending { it.totalWeightHundredthKg ?: 0 }
+            .sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
             .take(tournamentCatchLimit)  // ✅ Apply limit always
 
-        val totalWeightPounds = catchesToUse.sumOf { it.totalWeightHundredthKg ?: 0 }
+        val totalWeightPounds = catchesToUse.sumOf { it.totalWeightHundredthPounds ?: 0 }
         val totalPounds = totalWeightPounds / 100
         val totalDec = totalWeightPounds % 100
 
@@ -379,14 +379,14 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
         // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
         val currentCount = dbHelper
-            .getCatchesForToday("kgs", getCurrentDate())
-            .sortedByDescending { it.totalWeightHundredthKg ?: 0 }
+            .getCatchesForToday("pounds", getCurrentDate())
+            .sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
             .take(tournamentCatchLimit)
             .size
 
         if (currentCount >= 2) {
             lastTournamentCatch?.let {
-                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "kgs")
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "pounds")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
@@ -434,8 +434,8 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "kgs", formattedDate)
-        val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
+        val allCatches = dbHelper.getCatchesForToday(catchType = "pounds", formattedDate)
+        val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
             sortedCatches.take(tournamentCatchLimit)
@@ -445,12 +445,12 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "kgs",
+            catchType = "pounds",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
         )
-        Log.d("CLIP_COLOR", "🎨 Available Colors KGS: $availableClipColors")
+        Log.d("CLIP_COLOR", "🎨 Available Colors POUNDS: $availableClipColors")
         clearTournamentTextViews()
 
         runOnUiThread {
@@ -459,7 +459,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
                 if (i >= realWeightPounds.size) continue
 
                 val catch = sortedCatches[i]
-                val totalWeightPounds = catch.totalWeightHundredthKg ?: 0
+                val totalWeightPounds = catch.totalWeightHundredthPounds ?: 0
                 val weightPounds = totalWeightPounds / 100
                 val weightDec = totalWeightPounds % 100
 
@@ -578,7 +578,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
         isCullingEnabled: Boolean
     ): List<ClipColor> {
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
-        val sorted = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
+        val sorted = allCatches.sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
         val topCatches = sorted.take(tournamentCatchLimit) // ✅ Always limit to top N
         val usedColors = topCatches.mapNotNull { it.clipColor }
             .mapNotNull {

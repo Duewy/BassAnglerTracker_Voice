@@ -49,13 +49,14 @@ object VoiceParser {
 
     // ======== 🏆 TOURNAMENT MODE PARSERS ==========
 
+    //-------------------------------------------------------------------------------------------
     fun parseLbsOzsCatchWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)//todo why is there the input WithOutClip????? should never happen??????
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -81,60 +82,90 @@ object VoiceParser {
         )
     }
 
+    //-------------------------------------------------------------------------------------------
     fun parsePoundsCatchWithClips(      //todo check this over there are likely errors...
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
-        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(text)
+        val cleanText = correctMisheardWords(transcript.lowercase())
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            inputWithoutClip
+                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(pounds?|lbs?|lb)"""), "")
+                .replace(Regex("""\b(over|and|clip|color)\b"""), "")
+                .trim(),
+            speciesList
+        )
+
+        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(cleanText)
         val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
-        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
 
+        Log.d("VCC_PARSE", "ParsedCatch Pounds → Species=$species, Lbs= $lbs.$dec, ClipColor=$detectedClipColor")
+        Log.d("VCC_STT_RAW", "Raw transcript Pounds: $transcript")
 
         return ParsedCatch(
             species = species,
             weightPounds = lbs,
             weightDec = dec,
-            clipColor = color
+            clipColor = detectedClipColor
         )
+
     }
 
+    //-------------------------------------------------------------------------------------------
     fun parseKgsCatchWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
-        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:kilograms|kgs|kg)""").find(text)
+        val cleanText = correctMisheardWords(transcript.lowercase())
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            inputWithoutClip
+                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
+                .replace(Regex("""\b(over|and|clip|color)\b"""), "")
+                .trim(),
+            speciesList
+        )
+
+        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(kilograms?|kgs?|kg)""").find(cleanText)
         val kg = kgMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val grams = kgMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
-        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
-
 
         return ParsedCatch(
             species = species,
             weightKgWhole = kg,
             weightGrams = grams,
-            clipColor = color
+            clipColor = detectedClipColor
         )
+
     }
 
+    //-------------------------------------------------------------------------------------------
     fun parseImperialLengthWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
+        val cleanText = correctMisheardWords(transcript.lowercase())
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
-        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            inputWithoutClip
+                .replace(Regex("""\d+\s*(inches?|in|")"""), "")
+                .replace(Regex("""\b(over|and|clip|color|quarter|fourth)\b"""), "")
+                .trim(),
+            speciesList
+        )
 
-        // Pattern: "four and three quarters inches"
-        val complexMatch = Regex("""(\d+)\s*(?:and)?\s*(one|two|three)\s*(?:quarters?|fourths?)""").find(text)
+        val complexMatch = Regex("""(\d+)\s*(?:and)?\s*(one|two|three)\s*(quarters?|fourths?)""").find(cleanText)
         val whole = complexMatch?.groupValues?.get(1)?.toIntOrNull()
         val fractionWord = complexMatch?.groupValues?.get(2)
         val fraction = when (fractionWord) {
@@ -144,8 +175,7 @@ object VoiceParser {
             else -> 0
         }
 
-        // Fallback if not matched
-        val inchesOnly = Regex("""(\d+)\s*(?:inches|in|")""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val inchesOnly = Regex("""(\d+)\s*(inches?|in|")""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
         val lengthInches = whole ?: inchesOnly
         val lengthQuarters = if (complexMatch != null) fraction else 0
@@ -154,38 +184,56 @@ object VoiceParser {
             species = species,
             lengthInches = lengthInches,
             lengthQuarters = lengthQuarters,
-            clipColor = color
+            clipColor = detectedClipColor
         )
     }
 
-
+//-------------------------------------------------------------------------------------------
     fun parseMetricLengthWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>
     ): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, speciesList)
-        val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(?:cm|centimeters?)""").find(text)
+        val cleanText = correctMisheardWords(transcript.lowercase())
+        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            inputWithoutClip
+                .replace(Regex("""\d+(?:\.\d)?\s*(cm|centimeters?)"""), "")
+                .replace(Regex("""\b(over|and|clip|color)\b"""), "")
+                .trim(),
+            speciesList
+        )
+
+        val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(cm|centimeters?)""").find(cleanText)
         val cm = cmMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val tenths = cmMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
-        val color = VoiceInputMapper.getClipColorFromVoice(text, clipColors)
 
         return ParsedCatch(
             species = species,
             lengthCm = cm,
             lengthTenths = tenths,
-            clipColor = color
+            clipColor = detectedClipColor
         )
     }
+
 
     // ======== 🎣 FUN DAY MODE PARSERS ==========
 
     fun parseImperialCatchSimple(transcript: String): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
-        val lbs = Regex("""(\d{1,2})\s*(?:pounds|lbs?)""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?: 0
-        val oz = Regex("""(\d{1,2})\s*(?:ounces|ozs?)""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val cleanText = correctMisheardWords(transcript.lowercase())
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            cleanText
+                .replace(Regex("""\d+\s*(pounds?|lbs?|ounces?|ozs?)"""), "")
+                .replace(Regex("""\b(over|and)\b"""), "")
+                .trim(),
+            emptyList()
+        )
+
+        val lbs = Regex("""(\d{1,2})\s*(pounds?|lbs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val oz = Regex("""(\d{1,2})\s*(ounces?|ozs?)""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
         return ParsedCatch(
             species = species,
@@ -194,24 +242,43 @@ object VoiceParser {
         )
     }
 
-    fun parsePoundsCatchSimple(transcript: String): ParsedCatch {   //todo check for erros
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
-        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(text)
+//------------------------------------------------------------------------------------------
+
+    fun parsePoundsCatchSimple(transcript: String): ParsedCatch {
+        val cleanText = correctMisheardWords(transcript.lowercase())
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            cleanText
+                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(pounds?|lbs?|lb)"""), "")
+                .replace(Regex("""\b(over|and)\b"""), "")
+                .trim(),
+            emptyList()
+        )
+
+        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(pounds?|lbs?|lb)""").find(cleanText)
         val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
         return ParsedCatch(
             species = species,
             weightPounds = lbs,
-            weightDec = dec,
+            weightDec = dec
         )
     }
 
+    //--------------------------------------------------------------------------------------
     fun parseMetricCatchSimple(transcript: String): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
-        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:kilograms|kgs|kg)""").find(text)
+        val cleanText = correctMisheardWords(transcript.lowercase())
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            cleanText
+                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
+                .replace(Regex("""\b(over|and)\b"""), "")
+                .trim(),
+            emptyList()
+        )
+
+        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(kilograms?|kgs?|kg)""").find(cleanText)
         val kg = kgMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val grams = kgMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
@@ -222,22 +289,31 @@ object VoiceParser {
         )
     }
 
-    fun parseImperialLengthSimple(transcript: String): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
+    //-----------------------------------------------------------------------------------------
 
-        // Pattern: "four and three quarters inches" or "five and one fourth inches"
-        val complexMatch = Regex("""(\d+)\s*(?:and)?\s*(one|two|three)\s*(?:quarters?|fourths?)""").find(text)
+    fun parseImperialLengthSimple(transcript: String): ParsedCatch {
+        val cleanText = correctMisheardWords(transcript.lowercase())
+
+        val species = VoiceInputMapper.getSpeciesFromVoice(
+            cleanText
+                .replace(Regex("""\d+\s*(inches?|in|")"""), "")
+                .replace(Regex("""\b(over|and|quarter|fourth)\b"""), "")
+                .trim(),
+            emptyList()
+        )
+
+        val complexMatch = Regex("""(\d+)\s*(?:and)?\s*(one|two|three)\s*(quarters?|fourths?)""").find(cleanText)
         val whole = complexMatch?.groupValues?.get(1)?.toIntOrNull()
         val fractionWord = complexMatch?.groupValues?.get(2)
-            val fraction = when (fractionWord) {
-                "one" -> 1
-                "two" -> 2
-                "three" -> 3
-                else -> 0
-            }
-        // Fallback: whole number only like "six inches"
-        val inchesOnly = Regex("""(\d+)\s*(?:inches|in|")""").find(text)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        val fraction = when (fractionWord) {
+            "one" -> 1
+            "two" -> 2
+            "three" -> 3
+            else -> 0
+        }
+
+        val inchesOnly = Regex("""(\d+)\s*(inches?|in|")""").find(cleanText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
         val lengthInches = whole ?: inchesOnly
         val lengthQuarters = if (complexMatch != null) fraction else 0
 
@@ -249,21 +325,31 @@ object VoiceParser {
     }
 
 
-    fun parseMetricLengthSimple(transcript: String): ParsedCatch {
-        val text = correctMisheardWords(transcript.lowercase())
-        val species = VoiceInputMapper.getSpeciesFromVoice(text, emptyList())
-        val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(?:cm|centimeters?)""").find(text)
-        val cm = cmMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
-        val tenths = cmMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
+//-------------------------------------------------------------------------------------------------------------
+fun parseMetricLengthSimple(transcript: String): ParsedCatch {
+    val cleanText = correctMisheardWords(transcript.lowercase())
+
+    val species = VoiceInputMapper.getSpeciesFromVoice(
+        cleanText
+            .replace(Regex("""\d+(?:\.\d)?\s*(cm|centimeters?)"""), "")
+            .replace(Regex("""\b(over|and)\b"""), "")
+            .trim(),
+        emptyList()
+    )
+
+    val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(cm|centimeters?)""").find(cleanText)
+    val cm = cmMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    val tenths = cmMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
+
+    return ParsedCatch(
+        species = species,
+        lengthCm = cm,
+        lengthTenths = tenths
+    )
+}
 
 
-        return ParsedCatch(
-            species = species,
-            lengthCm = cm,
-            lengthTenths = tenths
-        )
-    }
-
+//-------------------------------------------------------------------------------------------
     private fun removeClipColor(input: String, color: String?): String {
         if (color.isNullOrBlank()) return input
 

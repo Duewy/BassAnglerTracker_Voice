@@ -65,15 +65,19 @@ class VoiceInteractionManager(
         })
     }
 
+            // Set Up Times for VCC Interactions... To ensure the User has ample time to say the Catch Information
     private fun startListening() {
         recognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        val intent = RecognizerIntent.getVoiceDetailsIntent(context)?.apply {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-        } ?: Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 6000)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 4000)
         }
+
+        Log.d("VCC_STT", "🎤 STT timeout settings applied (Complete=6000ms, Possible=4000ms, Min=4000ms)")
 
 
         recognizer?.setRecognitionListener(object : RecognitionListener {

@@ -1,6 +1,7 @@
 package com.bramestorm.bassanglertracker.training
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -150,6 +151,8 @@ object VoiceInputMapper {
                 // 🔁 Clean and normalize before returning
                 return unifySpeciesName(species.trim())
             }
+            Log.d("VCC_getSpeciesFromVoice", "🐟 ParsedCatch from Voice: $simplified")
+
         }
 
         // 🧠 Try to resolve via baseSpeciesVoiceMap

@@ -77,7 +77,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
 
             voiceHelper = VoiceInteractionHelper(
                 activity = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+                measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
                 isTournament = false,
                 onCommandAction = { transcript -> onSpeechResult(transcript) }
             )
@@ -104,24 +104,24 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             showEditDeleteDialog(catchList[position])
             true
         }
-    }
+    }//=============== END on Create ==============================
 
     override fun onDestroy() {
         stopService(Intent(this, VoiceControlService::class.java))
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         super.onDestroy()
     }
-
+    //=================================================================================
     override fun onSpeechResult(transcript: String) {
         Log.d("VCC_TRANSCRIPT", "Received: $transcript")
         // TODO: implement actual parser or use broadcast response
     }
-
+    //============================================================================
     private fun openWeightPopupPounds() {
         val popupIntent = Intent(this, PopupWeightEntryPounds::class.java)
         weightEntryLauncher.launch(popupIntent)
     }
-
+    //============================================================================
     private fun saveCatch() {
         val newCatch = CatchItem(
             id = 0,
@@ -134,7 +134,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
-            catchType = "lbsOzs",
+            catchType = "pounds",
             markerType = selectedSpecies,
             clipColor = null
         )
@@ -150,6 +150,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         updateListViewPounds()
     }
 
+    //============================================================================
     private fun updateListViewPounds() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val todaysCatches = dbHelper.getCatchesForToday("pounds", todaysDate).sortedByDescending { it.dateTime } //todo check the correct catchType
@@ -169,6 +170,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         simplePoundsListView.adapter = CatchItemAdapter(this, catchList)
     }
 
+    //============================================================================
     private fun showEditDeleteDialog(catchItem: CatchItem) {
         AlertDialog.Builder(this)
             .setTitle("Edit or Delete")
@@ -183,6 +185,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             .show()
     }
 
+    //============================================================================
     private fun showEditDialog(catchItem: CatchItem) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_pounds, null)
         val edtWeightLbs = dialogView.findViewById<EditText>(R.id.edtWeightLbs)
@@ -197,9 +200,9 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesLbs.adapter = adapter
 
-        val totalWeightOz = catchItem.totalWeightOz ?: 0
-        edtWeightLbs.setText((totalWeightOz / 100).toString())
-        edtWeightDec.setText((totalWeightOz % 100).toString())
+        val totalWeightHundredthPounds = catchItem.totalWeightHundredthPounds ?: 0
+        edtWeightLbs.setText((totalWeightHundredthPounds / 100).toString())
+        edtWeightDec.setText((totalWeightHundredthPounds % 100).toString())
 
         val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
         spinnerSpeciesLbs.setSelection(if (speciesIndex != -1) speciesIndex else 0)
@@ -210,13 +213,13 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val newLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
                 val newOzs = edtWeightDec.text.toString().toIntOrNull() ?: 0
-                val totalWeightPounds = (newLbs * 100) + newOzs
+                val newTotalWeightHundredthPounds = (newLbs * 100) + newOzs
                 val species = spinnerSpeciesLbs.selectedItem.toString()
 
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
                     newWeightOz = null,
-                    newWeightPounds = totalWeightPounds,
+                    newWeightPounds = newTotalWeightHundredthPounds,
                     newWeightKg = null,
                     newLengthQuarters = null,
                     newLengthCm = null,
@@ -230,11 +233,14 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             .show()
     }
 
+    //============================================================================
     private fun getCurrentDateTime(): String {
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
     }
 
+    //============================================================================
     override fun onManualWake() {
         openWeightPopupPounds()
     }
-}
+
+}//================= END ================================

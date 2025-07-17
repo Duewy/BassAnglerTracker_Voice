@@ -48,8 +48,8 @@ class TournamentVoiceHandler(
     // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
         MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species, and clip color of your catch. Over."
-        MeasurementMode.POUNDS -> "Please say the Pounds, species, and clip color of your catch. Over."
-        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."
+        MeasurementMode.POUNDS -> "Please say the point pounds, species, and clip color of your catch. Over."
+        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over." //todo should we have "point kilograms" to tell the user to say 4.15 kilograms ???
         MeasurementMode.INCHES -> "Please say the inches, quarters, species, and clip color of your catch. Over."
         MeasurementMode.CM     -> "Please say the centimeters, species, and clip color of your catch. Over."
     }
@@ -57,6 +57,8 @@ class TournamentVoiceHandler(
     /** Entry point for service wake or media-button tap. */
     override fun onWake() {
         Log.d(TAG, "onWake() called")
+        // Clear any stuck session flags that block restart
+        endSession("Forced reset via Bluetooth button")
         startVoiceSession()
     }
 
@@ -144,14 +146,15 @@ class TournamentVoiceHandler(
         // Build confirmation prompt
 
         val confirmPrompt = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct? Over."
-            MeasurementMode.POUNDS     -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} pounds on the ${parsed.clipColor} clip. Is that correct? Over."
-            MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct? Over."
-            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters on the ${parsed.clipColor} clip. Is that correct? Over."
-            MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct? Over."
+            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct?"
+            MeasurementMode.POUNDS -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} pounds on the ${parsed.clipColor} clip. Is that correct?"
+            MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct?"
+            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters on the ${parsed.clipColor} clip. Is that correct?"
+            MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct?"
         }
 
         Log.d(TAG, "Confirm prompt: \$confirmPrompt")
+        Log.d(TAG, "Confirm Species🐟: \${parsed.species}")
         uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
 
 
@@ -217,6 +220,7 @@ class TournamentVoiceHandler(
             markerType = markerType,
             clipColor = parsed.clipColor
         )
+        Log.d(TAG, "Checking the actual Species is: \$species")
 
         dbHelper.insertCatch(dbItem)
         lastCatchItem = dbItem// remember this one for question mode
@@ -256,6 +260,7 @@ class TournamentVoiceHandler(
         Log.d("TournamentVoiceHandler", "🔻 shutdown called")
     }
 
+ //??????????????????? 🤔 QUESTION MODE ❓🤔?????????????????????????????????
 
     /** Switch into question mode for stats queries. */
     private fun handleQuestionMode() {
