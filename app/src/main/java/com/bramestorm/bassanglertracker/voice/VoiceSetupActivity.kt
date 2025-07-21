@@ -38,6 +38,9 @@ class VoiceSetupActivity : AppCompatActivity() {
                 context, Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED
 
+            Log.e("VCC_PERMISSION", "🚫 RECORD_AUDIO permission not granted!")
+            // request permission or show explanation
+
             val sttIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             val sttResolved = sttIntent.resolveActivity(context.packageManager) != null
 

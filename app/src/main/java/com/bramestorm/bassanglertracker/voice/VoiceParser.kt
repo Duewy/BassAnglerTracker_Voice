@@ -94,13 +94,13 @@ object VoiceParser {
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
             inputWithoutClip
-                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(pounds?|lbs?|lb)"""), "")
+                .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(?:pounds|lbs|lb)"""), "")
                 .replace(Regex("""\b(over|and|clip|color)\b"""), "")
                 .trim(),
             speciesList
         )
 
-        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(?:pounds|lbs|lb)""").find(cleanText)
+        val poundsMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(?:pounds|lbs|lb)""").find(cleanText)
         val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
@@ -128,13 +128,13 @@ object VoiceParser {
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
             inputWithoutClip
-                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
+                .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
                 .replace(Regex("""\b(over|and|clip|color)\b"""), "")
                 .trim(),
             speciesList
         )
 
-        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(kilograms?|kgs?|kg)""").find(cleanText)
+        val kgMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(kilograms?|kgs?|kg)""").find(cleanText)
         val kg = kgMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val grams = kgMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
@@ -200,13 +200,13 @@ object VoiceParser {
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
             inputWithoutClip
-                .replace(Regex("""\d+(?:\.\d)?\s*(cm|centimeters?)"""), "")
+                .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(cm|centimeters?)"""), "")
                 .replace(Regex("""\b(over|and|clip|color)\b"""), "")
                 .trim(),
             speciesList
         )
 
-        val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(cm|centimeters?)""").find(cleanText)
+        val cmMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(cm|centimeters?)""").find(cleanText)
         val cm = cmMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val tenths = cmMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
 
@@ -249,13 +249,13 @@ object VoiceParser {
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
             cleanText
-                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(pounds?|lbs?|lb)"""), "")
+                .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(pounds?|lbs?|lb)"""), "")
                 .replace(Regex("""\b(over|and)\b"""), "")
                 .trim(),
             emptyList()
         )
 
-        val poundsMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(pounds?|lbs?|lb)""").find(cleanText)
+        val poundsMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(pounds?|lbs?|lb)""").find(cleanText)
         val lbs = poundsMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val dec = poundsMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
@@ -272,13 +272,13 @@ object VoiceParser {
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
             cleanText
-                .replace(Regex("""\d+(?:\.\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
+                .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(kilograms?|kgs?|kg)"""), "")
                 .replace(Regex("""\b(over|and)\b"""), "")
                 .trim(),
             emptyList()
         )
 
-        val kgMatch = Regex("""(\d+)(?:\.(\d{1,2}))?\s*(kilograms?|kgs?|kg)""").find(cleanText)
+        val kgMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(kilograms?|kgs?|kg)""").find(cleanText)
         val kg = kgMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val grams = kgMatch?.groupValues?.getOrNull(2)?.padEnd(2, '0')?.take(2)?.toIntOrNull() ?: 0
 
@@ -331,13 +331,13 @@ fun parseMetricLengthSimple(transcript: String): ParsedCatch {
 
     val species = VoiceInputMapper.getSpeciesFromVoice(
         cleanText
-            .replace(Regex("""\d+(?:\.\d)?\s*(cm|centimeters?)"""), "")
+            .replace(Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(cm|centimeters?)"""), "")
             .replace(Regex("""\b(over|and)\b"""), "")
             .trim(),
         emptyList()
     )
 
-    val cmMatch = Regex("""(\d+)(?:\.(\d))?\s*(cm|centimeters?)""").find(cleanText)
+    val cmMatch = Regex("""(\d+)(?:[.]| point )(\d{1,2})?\s*(cm|centimeters?)""").find(cleanText)
     val cm = cmMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
     val tenths = cmMatch?.groupValues?.getOrNull(2)?.toIntOrNull() ?: 0
 

@@ -172,27 +172,27 @@ class VoiceControlService : Service() {
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */
     private fun onWake() {
-        if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) return
+        if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) {
+            Log.d(TAG, "⛔ onWake() blocked — sessionActive=$sessionActive")
+            return
+        }
+
         sessionActive = true
-        wakeLock.acquire(5_000L)
         Log.d(TAG, "🔁 onWake() called — sessionActive=$sessionActive")
+        wakeLock.acquire(5_000L)
 
         val uiHelper = object : VoiceUiHelper {
             private val vrm = VoiceResponseManager(applicationContext)
             private val mainH = Handler(Looper.getMainLooper())
 
-            // single-arg speak
             override fun speak(text: String) {
                 vrm.speak(text)
             }
 
-            // two-arg speak (utteranceId)
             override fun speak(text: String, utteranceId: String) {
-                // pass the utteranceId back in the onDone callback
                 vrm.speak(text) { utteranceId }
             }
 
-            // now returns Unit
             override fun showToast(message: String) {
                 mainH.post {
                     Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
@@ -202,17 +202,18 @@ class VoiceControlService : Service() {
 
         when (SharedPreferencesManager.getCatchEntryType(this)) {
             in 5..8 -> TournamentVoiceHandler(
-                context    = this,
-                uiHelper   = uiHelper,
-                alarmHour  = getPrefsInt("ALARM_HOUR"),
-                alarmMinute= getPrefsInt("ALARM_MINUTE")
+                context     = this,
+                uiHelper    = uiHelper,
+                alarmHour   = getPrefsInt("ALARM_HOUR"),
+                alarmMinute = getPrefsInt("ALARM_MINUTE")
             ).onWake()
 
-            else    -> FunDayVoiceHandler(this, uiHelper).onWake()
+            else -> FunDayVoiceHandler(this, uiHelper).onWake()
         }
 
         wakeLock.release()
-    }//==== END = on Wake =====================
+    }
+        //==== END = on Wake =====================
 
 
     fun markSessionComplete() {

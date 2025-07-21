@@ -48,8 +48,8 @@ class TournamentVoiceHandler(
     // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
         MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species, and clip color of your catch. Over."
-        MeasurementMode.POUNDS -> "Please say the point pounds, species, and clip color of your catch. Over."
-        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over." //todo should we have "point kilograms" to tell the user to say 4.15 kilograms ???
+        MeasurementMode.POUNDS -> "Please say the point pounds, species, and clip color of your catch. Over."       //todo should we have "point pounds" to tell the user to say 3 point 26 pounds ???
+        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."   //todo should we have "point kilograms" to tell the user to say 4 point 15 kilograms ???
         MeasurementMode.INCHES -> "Please say the inches, quarters, species, and clip color of your catch. Over."
         MeasurementMode.CM     -> "Please say the centimeters, species, and clip color of your catch. Over."
     }
@@ -133,7 +133,7 @@ class TournamentVoiceHandler(
                 endSession("too many parse retries")
                 return
             }
-            uiHelper.speak("Sorry, I missed some info—let’s try again. Over.", "TTS_RETRY")
+            uiHelper.speak("Sorry, I missed some info—let’s try again.", "TTS_RETRY")
             Handler(Looper.getMainLooper()).postDelayed({
                 startVoiceSession()
             }, 1500)
