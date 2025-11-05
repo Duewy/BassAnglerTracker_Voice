@@ -1,9 +1,7 @@
 package com.bramestorm.bassanglertracker
 
 import android.app.Activity
-import android.app.AlarmManager
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,12 +10,9 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
-import android.media.MediaPlayer
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
@@ -31,7 +26,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
@@ -40,7 +34,6 @@ import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -51,18 +44,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     // Buttons
     private lateinit var btnTournamentCatch:Button
     private lateinit var btnMainInches: Button
-    private lateinit var btnAlarmInches: Button
     private lateinit var btnSetUpInches: Button
-
-    // Alarm Variables
-    private var alarmHour: Int = -1
-    private var alarmMinute: Int = -1
-    private var alarmTriggered: Boolean = false
-    private val requestAlarmSET = 1012
-
-    private val handler = Handler(Looper.getMainLooper())
-    private var mediaPlayer: MediaPlayer? = null
-
 
     // Weight Display TextViews
     private lateinit var firstRealLengthInches: TextView
@@ -194,7 +176,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         btnTournamentCatch = findViewById(R.id.btnStartFishingInches)
         btnMainInches = findViewById(R.id.btnMainInches)
         btnSetUpInches = findViewById(R.id.btnSetUpInches)
-        btnAlarmInches = findViewById(R.id.btnAlarmInches)
         txtGPSNotice = findViewById(R.id.txtGPSNotice)
         txtVCCTourInches = findViewById(R.id.txtVCCTourInches)
 
@@ -249,14 +230,12 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         btnTournamentCatch.setOnClickListener {showLengthInchesPopup()}
         btnSetUpInches.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
         btnMainInches.setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
-        btnAlarmInches.setOnClickListener { startActivityForResult(Intent(this, PopUpAlarm::class.java), requestAlarmSET) }
 
         updateVccLabel()         // just shows user if VCC is Enabled or not...
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
-        handler.postDelayed(checkAlarmRunnable, 60000) // check every minute (60 sec)
-    }
+         }
 // ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 override val dialog: Any
@@ -276,17 +255,16 @@ override val dialog: Any
         showLengthInchesPopup()
     }
 
-    //------------- ON DESTROY ----- Disarm the ALARM -----------------
+    //------------- ON DESTROY ------------------
     override fun onDestroy() {
         super.onDestroy()
         tts.stop()
         tts.shutdown()
-        voiceHelper.shutdown()
+        if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
-        handler.removeCallbacksAndMessages(null)
-        flashHandler.removeCallbacksAndMessages(null)
-        mediaPlayer?.release()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
     }
+
 
     private val voiceCatchReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -737,112 +715,6 @@ override val dialog: Any
             updateTournamentList()
         }
     }//========== END of User Editing Logged Length ==============================
-
-    // +++++++++++++++++ CHECK ALARM ++++++++++++++++++++++++
-
-    private val checkAlarmRunnable = object : Runnable {
-        override fun run() {
-            val calendar = Calendar.getInstance()
-            val nowHour = calendar.get(Calendar.HOUR_OF_DAY)
-            val nowMinute = calendar.get(Calendar.MINUTE)
-
-            Log.d("ALARM_DEBUG", "🕒 Checking alarm... Now: $nowHour:$nowMinute, Set: $alarmHour:$alarmMinute")
-
-            if (!alarmTriggered && nowHour == alarmHour && nowMinute == alarmMinute) {
-                alarmTriggered = true
-                Log.d("ALARM_DEBUG", "🔔 Alarm triggered!")
-                startAlarm()
-            }
-
-            if (!alarmTriggered) {
-                handler.postDelayed(this, 60000)
-            }
-        }
-    }
-
-    // --------- Start Alarm ------------------------
-    private fun startAlarm() {
-        // ✅ Ensure raw file exists
-        mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound)
-        mediaPlayer?.start()
-
-        val flashHandler = Handler()
-        var isRed = true
-        val flashRunnable = object : Runnable {
-            override fun run() {
-                btnAlarmInches.setBackgroundColor(if (isRed) Color.RED else Color.WHITE)
-                isRed = !isRed
-                flashHandler.postDelayed(this, 500)
-            }
-        }
-
-        flashHandler.post(flashRunnable)
-
-        handler.postDelayed({
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-            btnAlarmInches.setBackgroundColor(Color.TRANSPARENT)
-            flashHandler.removeCallbacks(flashRunnable)
-        }, 4000)
-    }
-
-    //@@@@@@@@@@@@ Alarm Triggering @@@@@@@@@@@@@@@
-
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API" +
-            "which brings increased type safety via an {@link ActivityResultContract} and the prebuilt " +
-            "contracts for common intents available in {@link androidx.activity.result.contract.ActivityResultContracts}, " +
-            "provides hooks for testing, and allow receiving results in separate, testable classes independent from the " +
-            "activity. Use {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}with the appropriate " +
-            "{@link ActivityResultContract} and handling the result in the {@link ActivityResultCallback#onActivityResult(Object) callback}.")
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        Log.d("ALARM_DEBUG", "📥 onActivityResult triggered with requestCode=$requestCode")
-
-        if (requestCode == requestAlarmSET && resultCode == Activity.RESULT_OK) {
-            alarmHour = data?.getIntExtra("ALARM_HOUR", -1) ?: -1
-            alarmMinute = data?.getIntExtra("ALARM_MINUTE", -1) ?: -1
-            alarmTriggered = false // ✅ reset so the alarm can trigger again
-
-            Log.d("ALARM_DEBUG", "✅ Alarm Set - hour=$alarmHour, minute=$alarmMinute")
-
-            if (alarmHour != -1 && alarmMinute != -1) {
-                // Format time string for display
-                val amPm = if (alarmHour >= 12) "PM" else "AM"
-                val displayHour = if (alarmHour % 12 == 0) 12 else alarmHour % 12
-                val formattedMinute = String.format(Locale.getDefault(), "%02d", alarmMinute)
-                val timeString = "$displayHour:$formattedMinute $amPm"
-
-                // Update button and show toast
-                btnAlarmInches.text = getString(R.string.alarm_set_to, timeString)
-                positionedToast(getString(R.string.alarm_toast_message, timeString))
-                // Schedule alarm
-                val calendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, alarmHour)
-                    set(Calendar.MINUTE, alarmMinute)
-                    set(Calendar.SECOND, 0)
-                }
-                val alarmIntent = Intent(this, AlarmReceiver::class.java)
-                val pendingIntent = PendingIntent.getBroadcast(
-                    this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE
-                )
-                val mgr = getSystemService(ALARM_SERVICE) as AlarmManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    !mgr.canScheduleExactAlarms()
-                ) {
-                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
-                } else {
-                    mgr.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                }
-                Log.d("ALARM_DEBUG", "⏰ Alarm scheduled for ${calendar.time}")
-            }
-        }
-    }
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {

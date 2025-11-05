@@ -41,7 +41,6 @@
             android:textColor="@color/black"
             android:textSize="34sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/btnAlarmPounds"
             app:layout_constraintEnd_toStartOf="@+id/imageView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -51,9 +50,8 @@
             android:id="@+id/btnStartFishingPounds"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginVertical="5dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="5dp"
             android:background="@drawable/btn_add_catch"
             android:gravity="center"
             android:shadowColor="#8FC16D"
@@ -61,29 +59,12 @@
             android:textColor="@color/clip_white"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_percent="0.09"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@id/btnAlarmPounds"
+            app:layout_constraintStart_toStartOf="@id/firstRealWeightPounds"
+            app:layout_constraintEnd_toEndOf="@id/firstDecWeightPounds"
             app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
-        <Button
-            android:id="@+id/btnAlarmPounds"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="4dp"
-            app:layout_constraintWidth_percent="0.40"
-            app:layout_constraintHeight_percent="0.09"
-            android:background="#80C5D2E8"
-            android:gravity="center"
-            android:hint="@string/days_End_time"
-            android:text="@string/alarm"
-            android:textAllCaps="true"
-            android:textColor="@color/clip_red"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/timeNOW"
-            app:layout_constraintTop_toBottomOf="@id/imageView"/>
 
 
         <TextView
