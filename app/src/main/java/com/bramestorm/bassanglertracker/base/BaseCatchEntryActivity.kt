@@ -31,6 +31,8 @@ import com.bramestorm.bassanglertracker.voice.VoiceControlService
  *  - SpeechRecognizer initialization & lifecycle
  *  - Delivery of recognized speech via onSpeechResult()
  */
+// TODO not sure if this is required...
+
 
 abstract class BaseCatchEntryActivity : AppCompatActivity() {
 

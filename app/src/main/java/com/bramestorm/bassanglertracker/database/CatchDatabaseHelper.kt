@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
                                        // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!! +++++++ Added POUNDS to list +++++++
 class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 9) {
 
@@ -34,9 +35,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_TOTAL_LENGTH_QUARTERS = "total_length_quarters"                    // Stored in 4ths of inch:  18 = 2 inches and 2/4 inch
         private const val COLUMN_TOTAL_WEIGHT_KG = "total_weight_hundredth_kg"                      // Stored in hundredths of Kgs : 255 = 2.55 Kgs
         private const val COLUMN_TOTAL_LENGTH_TENTHS = "total_length_tenths"                        // Stored in millimeters: 135 = 13.5 Cm
-        private const val COLUMN_CATCH_TYPE = "catch_type"
+        private const val COLUMN_CATCH_TYPE = "catch_type"                                          // FunDay or Tournament
         private const val COLUMN_MARKER_TYPE = "marker_type"
-        private const val COLUMN_CLIP_COLOR = "clip_color"
+        private const val COLUMN_CLIP_COLOR = "clip_color"                                          // Culling Clip Colors the catches were saved with.
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -164,32 +165,37 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
             updateLastCatchTime()
 
-            // Enable GPS automatically
-            prefs.edit().putBoolean("GPS_ENABLED", true).apply()
-            Log.d("GPS_DEBUG", "✅ GPS forced ON internally in insertCatch()")
+// ✅ Respect the user's GPS setting instead of forcing it ON
+            val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
+            Log.d("GPS_DEBUG", "GPS_ENABLED at insertCatch time = $gpsEnabled")
 
-            // Try to get GPS after delay
-            Handler(Looper.getMainLooper()).postDelayed({
-                getLastKnownLocation { location ->
-                    if (location != null) {
-                        updateCatchGPS(rowId.toInt(), location.latitude, location.longitude)
-                        Toast.makeText(
-                            context,
-                            "📍 GPS Saved: ${"%.5f".format(location.latitude)}, ${"%.5f".format(location.longitude)}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "⚠️ No GPS Location for that Catch.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        Log.w("GPS_DEBUG", "⚠️ No location found to save for catch ID=$rowId")
+            if (gpsEnabled) {
+                // Try to get GPS after short delay (let sensors/wifi settle)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    getLastKnownLocation { location ->
+                        if (location != null) {
+                            updateCatchGPS(rowId.toInt(), location.latitude, location.longitude)
+                            Toast.makeText(
+                                context,
+                                "📍 GPS Saved: ${"%.5f".format(location.latitude)}, ${"%.5f".format(location.longitude)}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "⚠️ No GPS Location for that Catch.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            Log.w("GPS_DEBUG", "⚠️ No location found to save for catch ID=$rowId")
+                        }
                     }
-                }
-            }, 3000)
+                }, 3000L)
+            } else {
+                Log.d("GPS_DEBUG", "GPS disabled by user; not requesting location for catch ID=$rowId")
+            }
 
             return true
+
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
             return false
@@ -199,7 +205,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         }
     }
 
-    private fun updateLastCatchTime() {
+
+     private fun updateLastCatchTime() {
         val prefs = context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
         prefs.edit().putLong("LAST_CATCH_TIME", System.currentTimeMillis()).apply()
     }
@@ -210,20 +217,26 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     }
 
 
-        // todo why is this only Weight_Oz ?????
     fun getCatchesForToday(catchType: String, todaysDate: String): List<CatchItem> {
         val db = readableDatabase
         val catchList = mutableListOf<CatchItem>()
+
         val cursor: Cursor = db.rawQuery(
-            "SELECT * FROM $TABLE_NAME WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ? AND $COLUMN_CATCH_TYPE = ? ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC",
-            arrayOf(todaysDate, catchType)
+           """
+            SELECT * FROM $TABLE_NAME
+            WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ?
+            AND $COLUMN_CATCH_TYPE = ?
+            ORDER BY $COLUMN_DATE_TIME DESC
+            """.trimIndent(),
+           arrayOf(todaysDate, catchType)
         )
 
         if (cursor.moveToFirst()) {
-            do {
-                catchList.add(parseCatch(cursor))
-            } while (cursor.moveToNext())
+           do {
+               catchList.add(parseCatch(cursor))
+           } while (cursor.moveToNext())
         }
+
         cursor.close()
         db.close()
         return catchList
@@ -289,50 +302,74 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         )
     }
 
-    private fun getLastKnownLocation(callback: (android.location.Location?) -> Unit) {
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+   // ---- GPS helpers: insist on fresh + accurate locations (global, not Ontario-only) ----
 
-        if (
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.e("GPS_DEBUG", "❌ Location permission not granted")
-            callback(null)
-            return
-        }
+   private fun isLocationFreshAndAccurate(loc: android.location.Location): Boolean {
+       val maxAgeMs = 40_000L    // 40 seconds old
+       val maxAccM  = 3f        // ~3 m accuracy (tune this if you like)
 
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    Log.d("GPS_DEBUG", "✅ Got fused location: ${location.latitude}, ${location.longitude}")
-                    callback(location)
-                } else {
-                    val locationRequest = com.google.android.gms.location.LocationRequest.create().apply {
-                        priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-                        interval = 1000
-                        fastestInterval = 500
-                        numUpdates = 1
-                    }
+       val ageMs = System.currentTimeMillis() - loc.time
+       val accurate = loc.hasAccuracy() && loc.accuracy <= maxAccM
 
-                    fusedLocationClient.requestLocationUpdates(
-                        locationRequest,
-                        object : com.google.android.gms.location.LocationCallback() {
-                            override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
-                                val freshLocation = result.lastLocation
-                                Log.d("GPS_DEBUG", "📡 Fresh location received: ${freshLocation?.latitude}, ${freshLocation?.longitude}")
-                                callback(freshLocation)
-                                fusedLocationClient.removeLocationUpdates(this)
-                            }
-                        },
-                        Looper.getMainLooper()
-                    )
-                }
-            }
-            .addOnFailureListener {
-                Log.e("GPS_DEBUG", "❌ Failed to get fused location: ${it.message}")
-                callback(null)
-            }
-    }
+       return ageMs in 0..maxAgeMs && accurate
+   }
+
+   /**
+    * Get a single good fix, or null if we can’t get one quickly/accurately.
+    * Call this from insertCatch when GPS is enabled.
+    */
+   private fun getLastKnownLocation(callback: (android.location.Location?) -> Unit) {
+       val fused = LocationServices.getFusedLocationProviderClient(context)
+
+       if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+           != PackageManager.PERMISSION_GRANTED &&
+           ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+           != PackageManager.PERMISSION_GRANTED
+       ) {
+           Log.w("GPS_DEBUG", "❌ No location permission, cannot get GPS.")
+           callback(null)
+           return
+       }
+
+       fused.lastLocation
+           .addOnSuccessListener { last ->
+               if (last != null && isLocationFreshAndAccurate(last)) {
+                   Log.d("GPS_DEBUG", "✅ Using lastLocation: ${last.latitude}, ${last.longitude}, acc=${last.accuracy}")
+                   callback(last)
+               } else {
+                   Log.d("GPS_DEBUG", "ℹ️ lastLocation is null or not good enough, requesting fresh update...")
+
+                   val req = com.google.android.gms.location.LocationRequest.create().apply {
+                       priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+                       interval = 1_000L
+                       fastestInterval = 500L
+                       numUpdates = 1
+                   }
+
+                   fused.requestLocationUpdates(
+                       req,
+                       object : com.google.android.gms.location.LocationCallback() {
+                           override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
+                               val fresh = result.lastLocation
+                               if (fresh != null && isLocationFreshAndAccurate(fresh)) {
+                                   Log.d("GPS_DEBUG", "📡 Fresh GPS: ${fresh.latitude}, ${fresh.longitude}, acc=${fresh.accuracy}")
+                                   callback(fresh)
+                               } else {
+                                   Log.w("GPS_DEBUG", "⚠️ Fresh GPS not accurate enough or null.")
+                                   callback(null)
+                               }
+                               fused.removeLocationUpdates(this)
+                           }
+                       },
+                       Looper.getMainLooper()
+                   )
+               }
+           }
+           .addOnFailureListener { e ->
+               Log.e("GPS_DEBUG", "❌ Failed to get location: ${e.message}")
+               callback(null)
+           }
+   }
 
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -458,44 +495,214 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
 
     // for Map Searches TOP 5 of Length or Weight in set Species...
-    fun getTopCatchesForSpeciesThisMonth(
-        species: String,
-        minOz: Int,
-        maxOz: Int,
-        limit: Int
-    ): List<CatchItem> {
-        val db = readableDatabase
-        val list = mutableListOf<CatchItem>()
-        val monthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
-        val cursor = db.rawQuery(       //todo ?? why only total Weight Oz ????
-            """
+       // Top 5 by lbs/oz within a date range
+       fun getTopCatchesByLbsWithinDateRange(
+           species: String,
+           minOz: Int,
+           maxOz: Int,
+           fromDate: String,
+           toDate: String,
+           limit: Int
+       ): List<CatchItem> {
+           val db = readableDatabase
+           val list = mutableListOf<CatchItem>()
+
+           val cursor = db.rawQuery(
+               """
             SELECT * FROM $TABLE_NAME
-            WHERE LOWER(species) = ?
-              AND total_weight_oz BETWEEN ? AND ?
-              AND strftime('%Y-%m', $COLUMN_DATE_TIME) = ?
-            ORDER BY total_weight_oz DESC
+            WHERE LOWER($COLUMN_SPECIES) = ?
+              AND $COLUMN_TOTAL_WEIGHT_OZ BETWEEN ? AND ?
+              AND strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?
+            ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC
             LIMIT ?
             """.trimIndent(),
-            arrayOf(
-                species.lowercase(),
-                minOz.toString(),
-                maxOz.toString(),
-                monthPrefix,
-                limit.toString()
-            )
-        )
+               arrayOf(
+                   species.lowercase(),
+                   minOz.toString(),
+                   maxOz.toString(),
+                   fromDate,
+                   toDate,
+                   limit.toString()
+               )
+           )
 
-        while (cursor.moveToNext()) {
-            list.add(parseCatch(cursor))
-        }
+           while (cursor.moveToNext()) {
+               list.add(parseCatch(cursor))
+           }
 
-        cursor.close()
-        db.close()
-        return list
+           cursor.close()
+           db.close()
+           return list
+       }
+
+
+                                           // for Map Searches TOP 5 of Length or Weight in set Species...
+   fun getTopCatchesByPoundsWithinDateRange(
+       species: String,
+       minHundredthsPounds: Int,
+       maxHundredthsPounds: Int,
+       fromDate: String,
+       toDate: String,
+       limit: Int
+   ): List<CatchItem> {
+       val db = readableDatabase
+       val list = mutableListOf<CatchItem>()
+
+       val cursor = db.rawQuery(
+           """
+            SELECT * FROM $TABLE_NAME
+            WHERE LOWER($COLUMN_SPECIES) = ?
+              AND $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS BETWEEN ? AND ?
+              AND strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?
+            ORDER BY $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS DESC
+            LIMIT ?
+            """.trimIndent(),
+           arrayOf(
+               species.lowercase(),
+               minHundredthsPounds.toString(),
+               maxHundredthsPounds.toString(),
+               fromDate,
+               toDate,
+               limit.toString()
+           )
+       )
+
+       while (cursor.moveToNext()) {
+           list.add(parseCatch(cursor))
+       }
+
+       cursor.close()
+       db.close()
+       return list
+   }
+
+ // for Map Searches TOP 5 of Length or Weight in set Species...
+
+   fun getTopCatchesByKgWithinDateRange(
+       species: String,
+       minHundredthsKg: Int,
+       maxHundredthsKg: Int,
+       fromDate: String,
+       toDate: String,
+       limit: Int
+   ): List<CatchItem> {
+       val db = readableDatabase
+       val list = mutableListOf<CatchItem>()
+
+       val cursor = db.rawQuery(
+           """
+            SELECT * FROM $TABLE_NAME
+            WHERE LOWER($COLUMN_SPECIES) = ?
+              AND $COLUMN_TOTAL_WEIGHT_KG BETWEEN ? AND ?
+              AND strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?
+            ORDER BY $COLUMN_TOTAL_WEIGHT_KG DESC
+            LIMIT ?
+            """.trimIndent(),
+               arrayOf(
+                   species.lowercase(),
+                   minHundredthsKg.toString(),
+                   maxHundredthsKg.toString(),
+                   fromDate,
+                   toDate,
+                   limit.toString()
+               )
+           )
+
+           while (cursor.moveToNext()) {
+               list.add(parseCatch(cursor))
+           }
+
+           cursor.close()
+           db.close()
+           return list
+       }
+
+  // for Map Searches TOP 5 of Length or Weight in set Species...
+       fun getTopCatchesByInchesWithinDateRange(
+           species: String,
+           minQuarters: Int,
+           maxQuarters: Int,
+           fromDate: String,
+           toDate: String,
+           limit: Int
+       ): List<CatchItem> {
+           val db = readableDatabase
+           val list = mutableListOf<CatchItem>()
+
+           val cursor = db.rawQuery(
+               """
+            SELECT * FROM $TABLE_NAME
+            WHERE LOWER($COLUMN_SPECIES) = ?
+              AND $COLUMN_TOTAL_LENGTH_QUARTERS BETWEEN ? AND ?
+              AND strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?
+            ORDER BY $COLUMN_TOTAL_LENGTH_QUARTERS DESC
+            LIMIT ?
+            """.trimIndent(),
+               arrayOf(
+                   species.lowercase(),
+                   minQuarters.toString(),
+                   maxQuarters.toString(),
+                   fromDate,
+                   toDate,
+                   limit.toString()
+               )
+           )
+
+           while (cursor.moveToNext()) {
+               list.add(parseCatch(cursor))
+           }
+
+           cursor.close()
+           db.close()
+           return list
+       }
+
+// for Map Searches TOP 5 of Length or Weight in set Species...
+       fun getTopCatchesByCmWithinDateRange(
+           species: String,
+           minTenths: Int,
+           maxTenths: Int,
+           fromDate: String,
+           toDate: String,
+           limit: Int
+       ): List<CatchItem> {
+           val db = readableDatabase
+           val list = mutableListOf<CatchItem>()
+
+           val cursor = db.rawQuery(
+               """
+            SELECT * FROM $TABLE_NAME
+            WHERE LOWER($COLUMN_SPECIES) = ?
+              AND $COLUMN_TOTAL_LENGTH_TENTHS BETWEEN ? AND ?
+              AND strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?
+            ORDER BY $COLUMN_TOTAL_LENGTH_TENTHS DESC
+            LIMIT ?
+            """.trimIndent(),
+           arrayOf(
+               species.lowercase(),
+               minTenths.toString(),
+               maxTenths.toString(),
+               fromDate,
+               toDate,
+               limit.toString()
+           )
+       )
+
+       while (cursor.moveToNext()) {
+           list.add(parseCatch(cursor))
+       }
+
+       cursor.close()
+       db.close()
+       return list
     }
 
-    //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
+
+
+
+
+                                           //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
     fun getCatchById(catchId: Int): CatchItem? {
         val db = readableDatabase
         val cursor = db.query(

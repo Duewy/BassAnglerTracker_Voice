@@ -211,15 +211,15 @@ object SharedPreferencesManager {
 
         val all = getAllSavedSpecies(context).toMutableList()
         val idxAll = all.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
-        if (idxAll >= 0) all[idxAll] = newName
+        if (idxAll >= 0) all[idxAll] = normalizedNew
         saveAllSpecies(context, all)
 
         val sel = getSelectedSpeciesList(context).toMutableList()
         val idxSel = sel.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
-        if (idxSel >= 0) sel[idxSel] = newName
+        if (idxSel >= 0) sel[idxSel] = normalizedNew
         saveSelectedSpeciesList(context, sel)
 
-        Log.d(TAG, "Updated species from '$oldName' to '$newName'.")
+        Log.d(TAG, "Updated species from '$oldName' to '$normalizedNew'.")
     }
 
     fun getMasterSpeciesList(context: Context): List<String> = getAllSavedSpecies(context)
@@ -238,10 +238,17 @@ object SharedPreferencesManager {
     }
 
     fun saveAllSpecies(context: Context, speciesList: List<String>) {
-        getSpeciesPrefs(context).edit().putString(KEY_ALL_SPECIES_LIST, Gson().toJson(speciesList))
+        val normalizedList = speciesList
+            .map { normalizeSpeciesName(it) }
+            .filter { it.isNotBlank() }
+            .distinct()
+                // NORMALIZE all Species Names before adding to list
+        getSpeciesPrefs(context).edit()
+            .putString(KEY_ALL_SPECIES_LIST, Gson().toJson(normalizedList))
             .apply()
-        Log.d(TAG, "Saved all species: $speciesList")
+        Log.d(TAG, "Saved all species: $normalizedList")
     }
+
 
     fun getUserAddedSpeciesList(context: Context): List<String> {
         val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }

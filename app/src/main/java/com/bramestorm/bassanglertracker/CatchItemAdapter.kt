@@ -25,7 +25,7 @@ class CatchItemAdapter(
         val catchItem = getItem(position)
         val txtCatchInfo = view.findViewById<TextView>(R.id.txtSpeciesNameListItem)
         val imgSpecies = view.findViewById<ImageView>(R.id.imgSpeciesListItem)
-        val imgGpsPin = view.findViewById<ImageView>(R.id.imgGpsPin) // <-- NEW LINE
+        val imgGpsPin = view.findViewById<ImageView>(R.id.imgGpsPin)
 
         // Format time from dateTime string
         val timeFormatted = try {
@@ -42,26 +42,32 @@ class CatchItemAdapter(
             val infoText = when (it.catchType) {
                 "lbsOzs" -> {
                     val totalOz = it.totalWeightOz ?: 0
-                    "$speciesName: ${totalOz / 16}Lbs ${totalOz % 16}oz, @ $timeFormatted"
+                    "$speciesName: ${formatWeightOzToLbsOz(totalOz)}, @ $timeFormatted"
                 }
-                "kgs" -> "$speciesName: ${it.totalWeightHundredthKg?.div(100.0) ?: 0.0} Kg, @ $timeFormatted"
+
+                "pounds" -> {
+                    val hundredthLbs = it.totalWeightHundredthPounds ?: 0
+                    "$speciesName: ${formatWeightPounds(context, hundredthLbs)}, @ $timeFormatted"
+                }
+
+                "kgs" -> {
+                    val hundredthKg = it.totalWeightHundredthKg ?: 0
+                    "$speciesName: ${formatWeightKg(context, hundredthKg)}, @ $timeFormatted"
+                }
+
                 "inches" -> {
-                    val totalQuarters = it.totalLengthQuarters ?: 0
-                    val inchesPart    = totalQuarters / 4
-                    val quarterPart   = totalQuarters % 4
-
-                    val lengthFormatted = when (quarterPart) {
-                        0    -> "$inchesPart in"
-                        2    -> "$inchesPart 1/2 in"
-                        else -> "$inchesPart ${quarterPart}/4 in"
-                    }
-
-                    "$speciesName: $lengthFormatted, @ $timeFormatted"
+                    val quarters = it.totalLengthQuarters ?: 0
+                    "$speciesName: ${formatLengthQuartersToInches(quarters)}, @ $timeFormatted"
                 }
 
-                "metric" -> "$speciesName: ${it.totalLengthTenths?.div(10.0) ?: 0.0} cm, @ $timeFormatted"
+                "metric" -> {
+                    val tenthCm = it.totalLengthTenths ?: 0
+                    "$speciesName: ${formatLengthCm(context, tenthCm)}, @ $timeFormatted"
+                }
+
                 else -> it.toString()
             }
+
 
             txtCatchInfo.text = infoText
             imgSpecies.setImageResource(SpeciesImageHelper.getSpeciesImageResId(speciesName))

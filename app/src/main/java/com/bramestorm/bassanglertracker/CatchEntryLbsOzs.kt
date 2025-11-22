@@ -16,7 +16,7 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat

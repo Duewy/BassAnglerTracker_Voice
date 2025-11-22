@@ -7,10 +7,13 @@ import com.bramestorm.bassanglertracker.R
 
 object GpsUtils {
     fun updateGpsStatusLabel(textView: TextView, context: Context) {
-        val isEnabled = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val isEnabled = context
+            .getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
             .getBoolean("GPS_ENABLED", false)
 
-        textView.text = context.getString(if (isEnabled) R.string.gps_on else R.string.gps_off)
+        textView.text = context.getString(
+            if (isEnabled) R.string.gps_on else R.string.gps_off
+        )
         textView.setTextColor(
             ContextCompat.getColor(
                 context,
@@ -19,3 +22,4 @@ object GpsUtils {
         )
     }
 }
+

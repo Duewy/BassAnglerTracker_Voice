@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingVertical="12dp"
-        android:text="@string/top_5_catches_this_month"
+        android:text="@string/top_5_catches"
         android:textSize="25sp"
         android:textStyle="bold"
         android:textColor="@color/clip_blue"/>
@@ -28,17 +28,52 @@
         android:layout_marginVertical="5dp"
         android:text="@string/select_species"
         android:textColor="@color/black"
+        android:textStyle="bold"
         android:textSize="18sp"
         android:layout_gravity="center"
         android:gravity="center"/>
 
-    <!-- Min/Max Weight Input -->
+    <!-- Species -->
+
+    <!-- Date range for Top 5 -->
+
     <Spinner
         android:id="@+id/spinnerSpeciesSummary"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:background="@color/Log_yellow_secondary"
+        android:background="@color/highlight_yellow"
         android:textAlignment="center" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnFromDateTop5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/from_date"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:background="@drawable/btn_outline_green" />
+
+        <Button
+            android:id="@+id/btnToDateTop5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/to_date"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:background="@drawable/btn_outline_blue" />
+    </LinearLayout>
+
+    <!-- Min/Max Weight Input -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -126,8 +161,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:checked="true"
-                android:text="@string/lbs"
-                android:layout_marginEnd="5dp"
+                android:text="@string/lbs_ozs"
+                android:layout_marginEnd="2dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/clip_blue"/>
+
+            <RadioButton
+                android:id="@+id/radioPounds"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="@string/pounds_caps"
+                android:layout_marginEnd="2dp"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/clip_blue"/>
@@ -137,18 +182,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:text="@string/kgs"
-                android:layout_marginEnd="5dp"
-                android:textSize="20sp"
+                android:layout_marginEnd="2dp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/clip_blue"/>
+
+         </RadioGroup>
+
+
+    </LinearLayout>
+
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <RadioGroup
+            android:id="@+id/radioGroupUnitsLength"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:orientation="horizontal" >
 
             <RadioButton
                 android:id="@+id/radioInches"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:text="@string/inches"
-                android:layout_marginEnd="5dp"
-                android:textSize="20sp"
+                android:layout_marginEnd="2dp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/clip_blue" />
 
@@ -157,14 +225,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:text="@string/cms"
-                android:textSize="20sp"
+                android:layout_marginEnd="2dp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/clip_blue"/>
         </RadioGroup>
 
 
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -179,8 +247,9 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
             android:layout_weight="1"
-            android:background="@drawable/btn_outline_green"
+            android:background="@drawable/btn_outline_softlock_blue"
             android:text="@string/search"
+            android:textColor="@color/clip_white"
             android:textSize="20sp"
             android:textStyle="bold" />
 

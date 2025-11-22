@@ -1,4 +1,4 @@
-package com.bramestorm.bassanglertracker
+package com.bramestorm.bassanglertracker.utils
 
 object Constants {
     const val EXTRA_VOICE_CONTROL_ENABLED = "VOICE_CONTROL_ENABLED"

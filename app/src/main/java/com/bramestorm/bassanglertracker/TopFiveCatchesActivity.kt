@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.io.File
 import java.io.FileOutputStream
@@ -25,16 +26,25 @@ class TopFiveCatchesActivity : AppCompatActivity() {
     private lateinit var btnGetTop5: Button
     private lateinit var btnShareResults: Button
     private lateinit var listView: ListView
+
     private lateinit var radioGroupUnits: RadioGroup
     private lateinit var radioLbs: RadioButton
+    private lateinit var radioPounds: RadioButton
     private lateinit var radioKgs: RadioButton
+
+    private lateinit var radioGroupUnitsLength: RadioGroup
     private lateinit var radioInches: RadioButton
     private lateinit var radioCm: RadioButton
+
+    private lateinit var btnFromDateTop5: Button
+    private lateinit var btnToDateTop5: Button
+
+    private var fromDate: String = ""
+    private var toDate: String = ""
+
     private lateinit var txtMinUnits: TextView
     private lateinit var txtMaxUnits: TextView
     private lateinit var btnCancelSummary: Button
-
-
 
 
     private var results: List<CatchItem> = emptyList()
@@ -49,14 +59,38 @@ class TopFiveCatchesActivity : AppCompatActivity() {
         btnGetTop5 = findViewById(R.id.btnGetTop5)
         btnShareResults = findViewById(R.id.btnShareResults)
         listView = findViewById(R.id.listTopCatches)
+
+        btnFromDateTop5 = findViewById(R.id.btnFromDateTop5)
+        btnToDateTop5 = findViewById(R.id.btnToDateTop5)
+
         radioGroupUnits = findViewById(R.id.radioGroupUnits)
         radioLbs = findViewById(R.id.radioLbs)
+        radioPounds = findViewById(R.id.radioPounds)
         radioKgs = findViewById(R.id.radioKgs)
+
+        radioGroupUnitsLength = findViewById(R.id.radioGroupUnitsLength)
         radioInches = findViewById(R.id.radioInches)
         radioCm = findViewById(R.id.radioCm)
+
         txtMinUnits = findViewById(R.id.txtMinUnits)
         txtMaxUnits = findViewById(R.id.txtMaxUnits)
+
         btnCancelSummary = findViewById(R.id.btnCancelSummary)
+
+        //--  Select the To and From Dates ----
+        btnFromDateTop5.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                btnFromDateTop5.text = "From: $date"
+            }
+        }
+
+        btnToDateTop5.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                btnToDateTop5.text = "To: $date"
+            }
+        }
 
 // When user presses "Done" on edtMinWeight, move to edtMaxWeight
         edtMinWeight.setOnEditorActionListener { _, actionId, _ ->
@@ -89,12 +123,13 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             shareResultsAsCsv()
         }
 
-
-
         radioGroupUnits.setOnCheckedChangeListener { _, _ ->
             updateWeightHints() // update when unit selection changes
         }
 
+        radioGroupUnitsLength.setOnCheckedChangeListener { _, _ ->
+            updateWeightHints()
+        }
         // ...findViewById calls for all views...
 
         val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
@@ -102,14 +137,6 @@ class TopFiveCatchesActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // optional: customize later if needed
         spinnerSpecies.adapter = adapter
 
-
-        btnGetTop5.setOnClickListener {
-            loadTopCatches()
-        }
-
-        btnShareResults.setOnClickListener {
-            shareResultsAsCsv()
-        }
 
         btnCancelSummary.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -121,16 +148,22 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
     //------------ Hide # Key Pad ---------------
     private fun hideKeyboard() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        val imm =
+            getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         val view = currentFocus ?: return
         imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    // ------- Set up Date Selection ---------
+    private fun formatDate(year: Int, month: Int, day: Int): String {
+        return String.format("%04d-%02d-%02d", year, month + 1, day)
     }
 
 
     //------------ LOAD TOP CATCHES -------------------
     private fun loadTopCatches() {
         val db = CatchDatabaseHelper(this)
-        val selectedSpecies = spinnerSpecies.selectedItem.toString()
+        val selectedSpecies = normalizeSpeciesName(spinnerSpecies.selectedItem.toString())
         val unitType = getSelectedMeasurementType()
 
         val minValue = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
@@ -146,58 +179,74 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             "lbs" -> {
                 val minOz = (minValue * 16).toInt()
                 val maxOz = (maxValue * 16).toInt()
-                db.getTopCatchesForSpeciesThisMonth(
+                db.getTopCatchesByLbsWithinDateRange(
                     species = selectedSpecies,
                     minOz = minOz,
                     maxOz = maxOz,
+                    fromDate = fromDateOrDefault,
+                    toDate = toDateOrDefault,
                     limit = 5
                 )
             }
+
             "pounds" -> {
                 val minPounds = (minValue * 100).toInt()
                 val maxPounds = (maxValue * 100).toInt()
 
-                db.getTopCatchesByPoundsForSpeciesThisMonth(
+                db.getTopCatchesByPoundsWithinDateRange(
                     species = selectedSpecies,
                     minHundredthsPounds = minPounds,
                     maxHundredthsPounds = maxPounds,
+                    fromDate = fromDateOrDefault,
+                    toDate = toDateOrDefault,
                     limit = 5
                 )
 
             }
+
             "kgs" -> {
                 val minHg = (minValue * 100).toInt()
                 val maxHg = (maxValue * 100).toInt()
 
-                db.getTopCatchesByKgForSpeciesThisMonth(
+                db.getTopCatchesByKgWithinDateRange(
                     species = selectedSpecies,
                     minHundredthsKg = minHg, // renamed var
                     maxHundredthsKg = maxHg,
+                    fromDate = fromDateOrDefault,
+                    toDate = toDateOrDefault,
                     limit = 5
                 )
 
             }
+
             "inches" -> {
-                val minQuarters  = (minValue * 4).toInt()
-                val maxQuarters  = (maxValue * 4).toInt()
+                val minQuarters = (minValue * 4).toInt()
+                val maxQuarters = (maxValue * 4).toInt()
 
-                db.getTopCatchesByInchesForSpeciesThisMonth(
+                db.getTopCatchesByInchesWithinDateRange(
                     species = selectedSpecies,
-                    minQuarters = minQuarters ,
-                    maxQuarters = maxQuarters ,
+                    minQuarters = minQuarters,
+                    maxQuarters = maxQuarters,
+                    fromDate = fromDateOrDefault,
+                    toDate = toDateOrDefault,
                     limit = 5
                 )
             }
+
             "cm" -> {
                 val minTenths = (minValue * 10).toInt()
                 val maxTenths = (maxValue * 10).toInt()
-                db.getTopCatchesByCmForSpeciesThisMonth(
+
+                db.getTopCatchesByCmWithinDateRange(
                     species = selectedSpecies,
                     minTenths = minTenths,
                     maxTenths = maxTenths,
+                    fromDate = fromDateOrDefault,
+                    toDate = toDateOrDefault,
                     limit = 5
                 )
             }
+
             else -> emptyList()
         }
 
@@ -209,12 +258,63 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             return
         }
 
-        val displayList = results.map {
-            val weight = formatWeightOzToLbsOz(it.totalWeightOz ?: 0)
-            "${it.dateTime} - $weight"
-        }
+        val displayList = results.map { catch ->
+            val formattedValue = when (unitType) {
+                "lbs" -> {
+                    // stored as totalWeightOz
+                    formatWeightOzToLbsOz(catch.totalWeightOz ?: 0)
+                }
 
-        listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, displayList)
+                "pounds" -> {
+                    catch.totalWeightHundredthPounds?.let { pounds ->
+                        if (pounds > 0) {
+                            formatWeightPounds(this@TopFiveCatchesActivity, pounds)
+                        } else {
+                            ""
+                        }
+                    } ?: ""
+                }
+
+                "kgs" -> {
+                    catch.totalWeightHundredthKg?.let { kg ->
+                        if (kg > 0) {
+                            formatWeightKg(this@TopFiveCatchesActivity, kg)
+                        } else {
+                            ""
+                        }
+                    } ?: ""
+                }
+
+                "inches" -> {
+                    catch.totalLengthQuarters?.let { quarters ->
+                        if (quarters > 0) {
+                            formatLengthQuartersToInches(quarters)
+                        } else {
+                            ""
+                        }
+                    } ?: ""
+                }
+
+                "cm" -> {
+                    catch.totalLengthTenths?.let { cm ->
+                        if (cm > 0) {
+                            formatLengthCm(this@TopFiveCatchesActivity, cm)
+                        } else {
+                            ""
+                        }
+                    } ?: ""
+                }
+
+                else -> ""
+            }
+
+            "${catch.dateTime} – $formattedValue"
+        }
+        listView.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            displayList
+        )
     }
 
 
@@ -227,10 +327,14 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
 
         val csvBuilder = StringBuilder()
-        csvBuilder.append("Date,Species,Weight (lbs/oz),Weight (kg),Length (in),Length (cm),Catch Type,Marker Type,Latitude,Longitude\n")
+        csvBuilder.append("Date,Species,Weight (lbs/oz), Weight (pounds) ,Weight (kg),Length (in),Length (cm),Catch Type,Marker Type,Latitude,Longitude\n")
 
         results.forEach {
             val weightLbs = formatWeightOzToLbsOz(it.totalWeightOz ?: 0)
+
+            val weightPounds =  it.totalWeightHundredthPounds?.let{ pounds ->
+                if (pounds > 0) formatWeightPounds( this@TopFiveCatchesActivity, pounds) else ""
+            }?:""
 
             val weightKg = it.totalWeightHundredthKg?.let { kg ->
                 if (kg > 0) formatWeightKg(this@TopFiveCatchesActivity, kg) else ""
@@ -244,11 +348,11 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                 if (cm > 0) formatLengthCm(this@TopFiveCatchesActivity, cm) else ""
             } ?: ""
 
-            csvBuilder.append(
                 csvBuilder.append(
                     "${it.dateTime}," +
                         "${it.species}," +
                         "$weightLbs," +
+                        "$weightPounds," +
                         "$weightKg," +
                         "$lengthIn," +
                         "$lengthCm," +
@@ -256,7 +360,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                         "${it.markerType ?: ""}," +
                         "${it.latitude ?: ""}," +
                         "${it.longitude ?: ""}\n"
-            ))
+            )
         }
 
         val fileName = "Top5Catches_${System.currentTimeMillis()}.csv"
@@ -283,10 +387,11 @@ class TopFiveCatchesActivity : AppCompatActivity() {
     private fun getSelectedMeasurementType(): String {
         return when {
             radioLbs.isChecked -> "lbs"
+            radioPounds.isChecked -> "pounds"
             radioKgs.isChecked -> "kgs"
             radioInches.isChecked -> "inches"
             radioCm.isChecked -> "cm"
-            else -> "lbs"
+            else -> "lbs" // default go to units
         }
     }
 
@@ -298,6 +403,12 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                 edtMaxWeight.hint = "Max Weight"
                 txtMinUnits.text = "Lbs"
                 txtMaxUnits.text = "Lbs"
+            }
+            "pounds" -> {
+                edtMinWeight.hint = "Min Weight"
+                edtMaxWeight.hint = "Max Weight"
+                txtMinUnits.text = "pounds"
+                txtMaxUnits.text = "pounds"
             }
             "kgs" -> {
                 edtMinWeight.hint = "Min Weight"
@@ -318,6 +429,51 @@ class TopFiveCatchesActivity : AppCompatActivity() {
                 txtMaxUnits.text = "cm"
             }
         }
+    }
+
+    //---------- Date picker for From / To (same as PopupQueryDate) ----------
+    private fun showDatePicker(onDateSelected: (String) -> Unit) {
+        val cal = java.util.Calendar.getInstance()
+        android.app.DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                // uses your date_iso string resource: "%04d-%02d-%02d"
+                val selectedDate = getString(R.string.date_iso, year, month + 1, day)
+                onDateSelected(selectedDate)
+            },
+            cal.get(java.util.Calendar.YEAR),
+            cal.get(java.util.Calendar.MONTH),
+            cal.get(java.util.Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    // Default = from Jan 1 of this year to today, if user didn't pick dates
+    private val fromDateOrDefault: String
+        get() = if (fromDate.isNotBlank()) fromDate else getDefaultFromDate()
+
+    private val toDateOrDefault: String
+        get() = if (toDate.isNotBlank()) toDate else getDefaultToDate()
+
+    private fun getDefaultFromDate(): String {
+        val cal = java.util.Calendar.getInstance()
+        cal.set(java.util.Calendar.MONTH, java.util.Calendar.JANUARY)
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1)
+        return String.format(
+            "%04d-%02d-%02d",
+            cal.get(java.util.Calendar.YEAR),
+            cal.get(java.util.Calendar.MONTH) + 1,
+            cal.get(java.util.Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    private fun getDefaultToDate(): String {
+        val cal = java.util.Calendar.getInstance()
+        return String.format(
+            "%04d-%02d-%02d",
+            cal.get(java.util.Calendar.YEAR),
+            cal.get(java.util.Calendar.MONTH) + 1,
+            cal.get(java.util.Calendar.DAY_OF_MONTH)
+        )
     }
 
 

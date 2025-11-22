@@ -89,7 +89,7 @@ class PopupLengthEntryTourCms : Activity() {
         spinnerClipColor.adapter = adapter
 
 
-        edtLengthCms.filters = arrayOf(MinMaxInputFilter(0, 99)) // Cms: 0-99
+        edtLengthCms.filters = arrayOf(MinMaxInputFilter(0, 999)) // Cms: 0-999
         edtLengthDec.filters = arrayOf(MinMaxInputFilter(0, 9)) // mm 0 - 9
 
         // `````````` btn SAVE  ````````````````

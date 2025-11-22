@@ -5,10 +5,13 @@ import android.content.Intent.createChooser
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.io.File
+import java.util.Locale
 
 class ShareFishingLogsActivity : AppCompatActivity() {
 
@@ -52,7 +55,8 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         //------------- Create Data into CSV ️🖋️-------------------
         //  generate CSV
         btnGenerateCSV.setOnClickListener {
-            generatedCsvFile = generateDummyCatchLogCsv()
+            generatedCsvFile = generateCatchLogCsv()
+
             if (generatedCsvFile != null) {
                 positionedToast("CSV generated to cache!")
                 // now enable the other two buttons
@@ -60,6 +64,8 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                 btnShareCSV.isEnabled = true
             } else {
                 positionedToast("⚠️ Warning: Failed to generate CSV 📄")
+                btnViewFile.isEnabled = false
+                btnShareCSV.isEnabled = false
             }
         }
 
@@ -120,36 +126,135 @@ class ShareFishingLogsActivity : AppCompatActivity() {
 
     }//-------------- END onResume --------------------
 
-            //todo Remove for APP Release 🚨
-    private fun generateDummyCatchLogCsv(): File? {
+    // Real CSV export using data from the SQLite database
+// -----  Generate Catch Log to CSV ------
+    private fun generateCatchLogCsv(): File? {
         return try {
+            // 1) Get all real catches except "practice"
+            val dbHelper = CatchDatabaseHelper(this)
+            val catches = dbHelper.getAllCatchesExcludingPractice()
+
+            if (catches.isEmpty()) {
+                Toast.makeText(this, "No catches found to export.", Toast.LENGTH_SHORT).show()
+                return null
+            }
+
+            // 2) Create CSV file in cache
             val file = File(cacheDir, "catch_log.csv")
             file.printWriter().use { writer ->
+                // ----- Header row based on checkboxes -----
                 val headers = mutableListOf<String>()
-                if (chkIncludeDate.isChecked) headers.add("Date")
-                if (chkIncludeSpecies.isChecked) headers.add("Species")
-                if (chkIncludeWeight.isChecked) headers.add("Weight")
-                if (chkIncludeLength.isChecked) headers.add("Length")
-                if (chkIncludeGPS.isChecked) headers.add("GPS")
-                if (chkIncludeCatchType.isChecked) headers.add("Catch Type")
+                if (chkIncludeDate.isChecked)      headers.add("DateTime")
+                if (chkIncludeSpecies.isChecked)   headers.add("Species")
+                if (chkIncludeWeight.isChecked)    headers.add("Weight")
+                if (chkIncludeLength.isChecked)    headers.add("Length")
+                if (chkIncludeGPS.isChecked)       headers.add("GPS")
+                if (chkIncludeCatchType.isChecked) headers.add("CatchType")
+
                 writer.println(headers.joinToString(","))
 
-                // Dummy data row
-                for (i in 1..5) {
+                // ----- Data rows -----
+                for (catch in catches) {
                     val row = mutableListOf<String>()
-                    if (chkIncludeDate.isChecked) row.add("2025-04-0$i 07:00")
-                    if (chkIncludeSpecies.isChecked) row.add("Bass")
-                    if (chkIncludeWeight.isChecked) row.add("${4 + i} lbs $i oz")
-                    if (chkIncludeLength.isChecked) row.add("${15 + i}\"")
-                    if (chkIncludeGPS.isChecked) row.add("Lat: 43.12$i, Lng: -79.32$i")
-                    if (chkIncludeCatchType.isChecked) row.add(if (i % 2 == 0) "Fun Day" else "Tournament")
+
+                    // Date / Time (already a string like "yyyy-MM-dd HH:mm:ss")
+                    if (chkIncludeDate.isChecked) {
+                        row.add(catch.dateTime ?: "")
+                    }
+
+                    // Species
+                    if (chkIncludeSpecies.isChecked) {
+                        row.add(catch.species ?: "")
+                    }
+
+                    // Weight: choose best available representation
+                    if (chkIncludeWeight.isChecked) {
+                        val totalOz              = catch.totalWeightOz ?: 0
+                        val hundredthPounds      = catch.totalWeightHundredthPounds ?: 0
+                        val hundredthKg          = catch.totalWeightHundredthKg ?: 0
+
+                        val weightStr = when {
+                            // 1) Stored as total ounces (lbs/oz mode)
+                            totalOz > 0 -> {
+                                val lbs = totalOz / 16
+                                val oz  = totalOz % 16
+                                "${lbs}lb ${oz}oz"
+                            }
+
+                            // 2) Stored as hundredths of pounds (decimal lbs mode)
+                            hundredthPounds > 0 -> {
+                                val decLbs = hundredthPounds / 100.0
+                                String.format(Locale.getDefault(), "%.2flb", decLbs)
+                            }
+
+                            // 3) Stored as hundredths of kg (kg mode)
+                            hundredthKg > 0 -> {
+                                val kg = hundredthKg / 100.0
+                                String.format(Locale.getDefault(), "%.2fkg", kg)
+                            }
+
+                            else -> ""
+                        }
+
+                        row.add(weightStr)
+                    }
+
+                    // Length: choose best available representation
+                    if (chkIncludeLength.isChecked) {
+                        val quartersTotal = catch.totalLengthQuarters ?: 0
+                        val tenthsTotal   = catch.totalLengthTenths ?: 0
+
+                        val lengthStr = when {
+                            // 1) Stored as quarters of an inch
+                            quartersTotal > 0 -> {
+                                val inches   = quartersTotal / 4
+                                val quarters = quartersTotal % 4
+                                if (quarters == 0) {
+                                    "${inches}\""
+                                } else {
+                                    "${inches} , ${quarters}/4\""
+                                }
+                            }
+
+                            // 2) Stored as tenths of cm
+                            tenthsTotal > 0 -> {
+                                val cm = tenthsTotal / 10.0
+                                String.format(Locale.getDefault(), "%.1fcm", cm)
+                            }
+
+                            else -> ""
+                        }
+
+                        row.add(lengthStr)
+                    }
+
+                    // GPS (from latitude / longitude)
+                    if (chkIncludeGPS.isChecked) {
+                        val gpsStr =
+                            if ((catch.latitude != 0.0) || (catch.longitude != 0.0)) {
+                                "${catch.latitude};${catch.longitude}"
+                            } else {
+                                ""
+                            }
+                        row.add(gpsStr)
+                    }
+
+                    // Catch type (Fun Day / Tournament / etc.)
+                    if (chkIncludeCatchType.isChecked) {
+                        row.add(catch.catchType ?: "")
+                    }
+
                     writer.println(row.joinToString(","))
                 }
             }
+
             file
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
-    }
-}
+    } //--- END --- Generate Catch Log to CSV -------
+
+
+
+}//=== END =======

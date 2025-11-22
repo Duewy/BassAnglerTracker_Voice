@@ -306,7 +306,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
+        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files... USE APPLES METHOD
             "Largemouth"   -> "L"
             "Smallmouth"   -> "S"
             "Spotted"      -> "P"
@@ -355,14 +355,14 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
         // todo Set up Better Scenarios
         val currentCount = dbHelper
-            .getCatchesForToday("LbsOzs", getCurrentDate())
-            .sortedByDescending { it.totalWeightOz ?: 0 }
+            .getCatchesForToday("metric", getCurrentDate())
+            .sortedByDescending { it.totalLengthTenths ?: 0 }
             .take(tournamentCatchLimit)
             .size
 
         if (currentCount >= 2) {
             lastTournamentCatch?.let {
-                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "lbs")
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "metric")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
@@ -603,6 +603,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     }
 
     //!!!!!!!!!!!!!!!! Get SPECIES Letters for Side Text !!!!!!!!!!!!!!!!!
+    //todo Follow the APPLE Xcode method !!!!!
     private fun getSpeciesCode(species: String): String {
         val u = species.uppercase(Locale.US)
         return when {

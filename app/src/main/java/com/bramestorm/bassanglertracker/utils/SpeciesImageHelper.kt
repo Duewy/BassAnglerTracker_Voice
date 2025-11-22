@@ -2,16 +2,12 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.util.Log
 import com.bramestorm.bassanglertracker.R
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 
-        //++++++++++++++++++++++ Pictures of the Fish Species +++++++++++++++++++++++++
+
+//++++++++++++++++++++++ Pictures of the Fish Species +++++++++++++++++++++++++
 
 object SpeciesImageHelper {
-
-    // -- 🔒 Private helper to normalize species name from various forms "Large Mouth, Largemouth, largemouth, large mouth" are now all the same
-
-    fun normalizeSpeciesName(name: String?): String {
-        return name?.trim()?.lowercase()?.replace("\\s+".toRegex(), " ") ?: ""
-    }
 
 
     fun getSpeciesImageResId(species: String): Int {

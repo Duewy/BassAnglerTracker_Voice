@@ -312,6 +312,8 @@
     <string name="enter_catch_pounds">enter catch pounds</string>
     <string name="_00_to_99">00 to 99</string>
     <string name="edit_tournament_pounds">Edit Tournament Pounds</string>
+    <string name="pounds_caps">Pounds</string>
+    <string name="top_5_catches">Top 5 Catches</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">

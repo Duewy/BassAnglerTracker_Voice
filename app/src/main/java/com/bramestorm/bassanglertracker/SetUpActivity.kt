@@ -23,8 +23,8 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.util.Date
@@ -84,7 +84,8 @@ class SetUpActivity : AppCompatActivity() {
         private const val KEY_USE_BLUETOOTH_MODE            = "VOICE_USE_BLUETOOTH"
     }
 
-    private val sharedPreferences by lazy { getSharedPreferences("AppPrefs", MODE_PRIVATE) }
+    private val sharedPreferences by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
+
     private val prefs by lazy { getSharedPreferences(PREFS_NAME, MODE_PRIVATE) }
 
 

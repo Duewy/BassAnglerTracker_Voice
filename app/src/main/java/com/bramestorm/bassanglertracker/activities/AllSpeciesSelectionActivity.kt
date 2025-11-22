@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.adapters.AllSpeciesAdapter
 import com.bramestorm.bassanglertracker.models.SpeciesItem
-import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getSpeciesImageResId
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -101,6 +101,7 @@ class AllSpeciesSelectionActivity : AppCompatActivity() {
                         positionedToast("⚠️ Species already exists!")
                         return@setPositiveButton
                     }
+
 
                     // ✅ Add to list and save
                     allSpecies.add(input)
