@@ -15,7 +15,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.bramestorm.bassanglertrackervoiceControl" // make sure this is the app you want on Play
+        applicationId = "com.bramestorm.bassanglertracker" // make sure this is the app you want on Play
         minSdk = 23
         targetSdk = 35
         versionCode = 2             // ↑ must be higher than the last upload for THIS applicationId submission September 04 2025
@@ -28,7 +28,7 @@ android {
         manifestPlaceholders.putAll(
             mapOf(
                 // if not set, fall back to empty for Maps (so it won’t crash the build)
-                "MAPS_API_KEY" to (project.findProperty("MAPS_API_KEY") as String? ?: ""),
+                "MAPS_API_KEY" to (project.findProperty("MAPS_API_KEY") as String? ?: "AIzaSyDk_AhWI1MnCwFWAVfowN_KlwdV592LtPc"),
                 // default to Google’s TEST AdMob App ID if none provided
                 "ADMOB_APP_ID" to (project.findProperty("ADMOB_APP_ID") as String?
                     ?: "ca-app-pub-3940256099942544~3347511713")

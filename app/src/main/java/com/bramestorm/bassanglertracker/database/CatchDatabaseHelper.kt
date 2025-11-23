@@ -59,6 +59,9 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         )
     """.trimIndent()
         db.execSQL(createCatchesTable)
+
+        // 🌟 Insert the “Three Brothers / Kingston” legend catch 🦈
+        insertSampleLegendCatch(db)
     }
 
       private fun columnExists(db: SQLiteDatabase, table: String, column: String): Boolean {
@@ -72,7 +75,65 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
       }
 
 
-      override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    // Insert a single “legend” catch near Three Brothers Islands (Kingston)
+    // Smallmouth, 59.5 cm, Fun Day, July 1st 2007, pre-cormorant era.
+    private fun insertSampleLegendCatch(db: SQLiteDatabase) {
+       try {
+           // Avoid duplicates if this ever gets called again for some reason
+           val checkCursor = db.rawQuery(
+               """
+    SELECT COUNT(*) FROM $TABLE_NAME
+    WHERE $COLUMN_DATE_TIME = ?
+    AND $COLUMN_SPECIES = ?
+    AND $COLUMN_LATITUDE = ?
+    AND $COLUMN_LONGITUDE = ?
+    """.trimIndent(),
+               arrayOf(
+                   "2007-07-01 12:00:00",
+                   "Small Mouth",
+                   "44.206096",
+                   "-76.625115"
+               )
+           )
+
+           var alreadyExists = false
+           if (checkCursor.moveToFirst()) {
+               alreadyExists = checkCursor.getInt(0) > 0
+           }
+           checkCursor.close()
+
+           if (alreadyExists) {
+               Log.d("DB_INIT", "Legend sample catch already exists, skipping insert.")
+               return
+           }
+
+           val values = ContentValues().apply {
+               put(COLUMN_DATE_TIME, "2007-07-01 12:00:00")
+               put(COLUMN_LATITUDE, 44.206096)
+               put(COLUMN_LONGITUDE, -76.625115)
+               put(COLUMN_SPECIES, "Small Mouth")
+
+               // 59.5 cm → stored as tenths of cm = 595
+               put(COLUMN_TOTAL_LENGTH_TENTHS, 595)
+
+               put(COLUMN_CATCH_TYPE, "Fun Day")
+               put(COLUMN_MARKER_TYPE, "Legend")
+               // No clip color needed, but you *could* set "BLUE" or similar
+           }
+
+           val rowId = db.insert(TABLE_NAME, null, values)
+           if (rowId == -1L) {
+               Log.e("DB_INIT", "❌ Failed to insert legend sample catch.")
+           } else {
+               Log.d("DB_INIT", "✅ Legend sample catch inserted with ID=$rowId")
+           }
+       } catch (e: Exception) {
+           Log.e("DB_INIT", "❌ Error inserting legend sample catch: ${e.message}")
+       }
+    }
+
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
           if (oldVersion < 2) {
               db.execSQL("ALTER TABLE $TABLE_NAME RENAME TO ${TABLE_NAME}_old;")
               onCreate(db)
@@ -165,7 +226,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
             updateLastCatchTime()
 
-// ✅ Respect the user's GPS setting instead of forcing it ON
+                // ✅ Respect the user's GPS setting instead of forcing it ON
             val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
             Log.d("GPS_DEBUG", "GPS_ENABLED at insertCatch time = $gpsEnabled")
 

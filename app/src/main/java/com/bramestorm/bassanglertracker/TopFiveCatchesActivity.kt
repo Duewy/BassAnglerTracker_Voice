@@ -12,8 +12,10 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
+import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
+import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import java.io.File
 import java.io.FileOutputStream
@@ -31,8 +33,6 @@ class TopFiveCatchesActivity : AppCompatActivity() {
     private lateinit var radioLbs: RadioButton
     private lateinit var radioPounds: RadioButton
     private lateinit var radioKgs: RadioButton
-
-    private lateinit var radioGroupUnitsLength: RadioGroup
     private lateinit var radioInches: RadioButton
     private lateinit var radioCm: RadioButton
 
@@ -49,13 +49,30 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
     private var results: List<CatchItem> = emptyList()
 
+    private fun setupUnitRadioButtons() {
+        val allRadios = listOf(radioLbs, radioPounds, radioKgs, radioInches, radioCm)
+
+        fun selectRadio(selected: RadioButton) {
+            allRadios.forEach { it.isChecked = (it == selected) }
+            updateWeightHints()
+        }
+
+        radioLbs.setOnClickListener   { selectRadio(radioLbs) }
+        radioPounds.setOnClickListener{ selectRadio(radioPounds) }
+        radioKgs.setOnClickListener   { selectRadio(radioKgs) }
+        radioInches.setOnClickListener{ selectRadio(radioInches) }
+        radioCm.setOnClickListener    { selectRadio(radioCm) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_top_five_catches)
 
         spinnerSpecies = findViewById(R.id.spinnerSpeciesSummary)
+
         edtMinWeight = findViewById(R.id.edtMinWeight)
         edtMaxWeight = findViewById(R.id.edtMaxWeight)
+
         btnGetTop5 = findViewById(R.id.btnGetTop5)
         btnShareResults = findViewById(R.id.btnShareResults)
         listView = findViewById(R.id.listTopCatches)
@@ -67,8 +84,6 @@ class TopFiveCatchesActivity : AppCompatActivity() {
         radioLbs = findViewById(R.id.radioLbs)
         radioPounds = findViewById(R.id.radioPounds)
         radioKgs = findViewById(R.id.radioKgs)
-
-        radioGroupUnitsLength = findViewById(R.id.radioGroupUnitsLength)
         radioInches = findViewById(R.id.radioInches)
         radioCm = findViewById(R.id.radioCm)
 
@@ -92,7 +107,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             }
         }
 
-// When user presses "Done" on edtMinWeight, move to edtMaxWeight
+        // When user presses "Done" on edtMinWeight, move to edtMaxWeight
         edtMinWeight.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
                 edtMaxWeight.requestFocus()
@@ -101,7 +116,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             false
         }
 
-// When user presses "Done" on edtMaxWeight, hide keyboard
+        // When user presses "Done" on edtMaxWeight, hide keyboard
         edtMaxWeight.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
                 hideKeyboard()
@@ -111,31 +126,44 @@ class TopFiveCatchesActivity : AppCompatActivity() {
             false
         }
 
-// Hide keyboard when search button clicked
+        // Hide keyboard when search button clicked
         btnGetTop5.setOnClickListener {
             hideKeyboard()
             loadTopCatches()
         }
 
-// Also hide for Share Results
+        // Also hide for Share Results
         btnShareResults.setOnClickListener {
             hideKeyboard()
             shareResultsAsCsv()
         }
 
-        radioGroupUnits.setOnCheckedChangeListener { _, _ ->
-            updateWeightHints() // update when unit selection changes
+        // Set initial selection
+        radioLbs.isChecked = true
+
+        // Wire up manual group logic
+        setupUnitRadioButtons()
+
+        // Make sure labels match the initial selection
+        updateWeightHints()
+
+
+
+        // Get the saved species names
+        val speciesNames = SharedPreferencesManager.getSelectedSpeciesList(this)
+
+        // Map them into SpeciesItem so we get name + image
+        val speciesItems = speciesNames.map { name ->
+            SpeciesItem(
+                name = name,
+                imageResId = getSpeciesImageResId(name)  // your existing helper
+            )
         }
 
-        radioGroupUnitsLength.setOnCheckedChangeListener { _, _ ->
-            updateWeightHints()
-        }
-        // ...findViewById calls for all views...
-
-        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
-        val adapter = ArrayAdapter(this, R.layout.spinner_item_summary, speciesList)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // optional: customize later if needed
+// Use your existing image+text adapter from SetUp
+        val adapter = SpeciesSpinnerAdapter(this, speciesItems)
         spinnerSpecies.adapter = adapter
+
 
 
         btnCancelSummary.setOnClickListener {
