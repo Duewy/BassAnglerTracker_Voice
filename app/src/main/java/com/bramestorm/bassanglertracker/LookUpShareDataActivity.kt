@@ -3,9 +3,7 @@ package com.bramestorm.bassanglertracker
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 
 class LookUpShareDataActivity : AppCompatActivity() {
 
@@ -39,13 +37,6 @@ class LookUpShareDataActivity : AppCompatActivity() {
             val intent = Intent(this, SetUpActivity::class.java)
             startActivity(intent)
         }
-
-
-
-        // TODO: Remove the Toast and the 20 catches from the DataBase
-        val toast = Toast.makeText(this, "20 test catches added", Toast.LENGTH_SHORT)
-        toast.setGravity(android.view.Gravity.CENTER, 0, 0)
-        toast.show()
 
 
     }//----------------- END OnCreate ------------------
