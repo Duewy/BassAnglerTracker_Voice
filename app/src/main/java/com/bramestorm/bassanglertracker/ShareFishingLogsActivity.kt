@@ -5,7 +5,6 @@ import android.content.Intent.createChooser
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -22,13 +21,16 @@ class ShareFishingLogsActivity : AppCompatActivity() {
     private lateinit var chkIncludeGPS: CheckBox
     private lateinit var chkIncludeCatchType: CheckBox
     private lateinit var btnGenerateCSV: Button
+    private lateinit var btnGenerateKLM: Button
     private lateinit var btnViewFile : Button
     private lateinit var btnShareCSV: Button
+    private lateinit var btnShareKLM: Button
     private lateinit var btnSetUpSFLogs :Button
     private lateinit var btnMainSFL :Button
 
-
     private var generatedCsvFile: File? = null
+    private var generatedKmlFile: File? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,30 +44,65 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         chkIncludeCatchType = findViewById(R.id.chkIncludeCatchType)
 
         btnGenerateCSV = findViewById(R.id.btnGenerateCSV)
+        btnGenerateKLM = findViewById(R.id.btnGenerateKLM)
+
         btnViewFile = findViewById(R.id.btnViewFile)
+
         btnShareCSV = findViewById(R.id.btnShareCSV)
+        btnShareKLM = findViewById(R.id.btnShareKLM)
+
         btnSetUpSFLogs= findViewById(R.id.btnSetUpSFLogs)
         btnMainSFL  = findViewById(R.id.btnMainSFL)
 
         //  start with View/Share disabled
         btnViewFile.isEnabled = false
         btnShareCSV.isEnabled = false
+        btnShareKLM.isEnabled = false
 
 
-        //------------- Create Data into CSV ️🖋️-------------------
-        //  generate CSV
+        //------------- Create Data into CSV ️ & KLM (for Google Earth or other map software) 🖋️-------------------
+
+        //  generate CSV Files
         btnGenerateCSV.setOnClickListener {
-            generatedCsvFile = generateCatchLogCsv()
 
-            if (generatedCsvFile != null) {
-                positionedToast("CSV generated to cache!")
-                // now enable the other two buttons
+            // 🔒 Require at least one checkbox
+            if (!hasAnyFieldSelected()) {
+                positionedToast("Please select at least one field to include.")
+                return@setOnClickListener
+            }
+
+            val csvFile = generateCatchLogCsv()
+            generatedCsvFile = csvFile
+
+            if (csvFile != null) {
+                positionedToast("CSV generated!")
                 btnViewFile.isEnabled = true
                 btnShareCSV.isEnabled = true
             } else {
-                positionedToast("⚠️ Warning: Failed to generate CSV 📄")
+                positionedToast("⚠️ Failed to generate CSV")
                 btnViewFile.isEnabled = false
                 btnShareCSV.isEnabled = false
+            }
+        }
+
+        //  generate KLM Files
+        btnGenerateKLM.setOnClickListener {
+
+            // 🔒 Require at least one checkbox
+            if (!hasAnyFieldSelected()) {
+                positionedToast("Please select at least one field to include.")
+                return@setOnClickListener
+            }
+
+            val kmlFile = generateCatchLogKml()
+            generatedKmlFile = kmlFile
+
+            if (kmlFile != null) {
+                positionedToast("KML generated for Google Earth!")
+                btnShareKLM.isEnabled = true
+            } else {
+                positionedToast("⚠️ Failed to generate KML")
+                btnShareKLM.isEnabled = false
             }
         }
 
@@ -87,6 +124,23 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                 }
             }
         }
+
+        btnShareKLM.setOnClickListener {
+            generatedKmlFile?.let { file ->
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    file
+                )
+                Intent(Intent.ACTION_SEND).run {
+                    type = "application/vnd.google-earth.kml+xml"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    startActivity(createChooser(this, "Share KML via:"))
+                }
+            } ?: positionedToast("⚠️ Please generate the KML first")
+        }
+
 
         // ----------🥽 See the Files Yourself 😍----------------------------
         //  view the CSV in your ListCatchLogView
@@ -124,25 +178,86 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         chkIncludeGPS.isChecked = false
         chkIncludeCatchType.isChecked = false
 
+        btnShareCSV.isEnabled = false
+        btnShareKLM.isEnabled = false
+        btnViewFile.isEnabled = false
+        generatedCsvFile = null
+        generatedKmlFile = null
+
     }//-------------- END onResume --------------------
 
+    // ---------------------------------------
+        // HELPER: Did the user select any fields?
+    // ---------------------------------------
+    private fun hasAnyFieldSelected(): Boolean {
+        return chkIncludeDate.isChecked ||
+                chkIncludeSpecies.isChecked ||
+                chkIncludeWeight.isChecked ||
+                chkIncludeLength.isChecked ||
+                chkIncludeGPS.isChecked ||
+                chkIncludeCatchType.isChecked
+    }
+
+
+
     // Real CSV export using data from the SQLite database
-// -----  Generate Catch Log to CSV ------
+        // -----  Generate Catch Log to CSV ------
+    // ---------------------------------------
+        // CSV FIELD ESCAPER  (prevents broken rows)
+    // ---------------------------------------
+    private fun toCsvField(raw: String?): String {
+        val s = raw ?: ""
+        return if (s.contains(',') || s.contains('"') || s.contains('\n')) {
+            "\"" + s.replace("\"", "\"\"") + "\""
+        } else {
+            s
+        }
+    }
+
+    // ---------------------------------------
+        // FIXED INCHES FORMATTER  (NO COMMAS!)
+    // ---------------------------------------
+    private fun formatInchesLength(quartersTotal: Int): String {
+        if (quartersTotal <= 0) return ""
+        val inches = quartersTotal / 4
+        val q = quartersTotal % 4
+
+        return if (q == 0) {
+            "${inches}\""
+        } else {
+            "$inches ${q}/4\""
+        }
+    }
+
+    // ---------------------------------------
+        // ADD DATE TO FILE NAME
+    // ---------------------------------------
+    private fun buildCsvFileName(): String {
+        val sdf = java.text.SimpleDateFormat("dd_MMM_yyyy", Locale.getDefault())
+        val today = sdf.format(java.util.Date())
+        return "catch_log_${today}.csv"
+    }
+
+    // ---------------------------------------
+        // MAIN CSV GENERATOR (FULLY FIXED)
+    // ---------------------------------------
     private fun generateCatchLogCsv(): File? {
         return try {
-            // 1) Get all real catches except "practice"
             val dbHelper = CatchDatabaseHelper(this)
             val catches = dbHelper.getAllCatchesExcludingPractice()
 
             if (catches.isEmpty()) {
-                Toast.makeText(this, "No catches found to export.", Toast.LENGTH_SHORT).show()
-                return null
+                positionedToast(" No catches found to export.")
+               return null
             }
 
-            // 2) Create CSV file in cache
-            val file = File(cacheDir, "catch_log.csv")
+            // ------- USE DATED FILE NAME -------
+            val fileName = buildCsvFileName()
+            val file = File(cacheDir, fileName)
+
             file.printWriter().use { writer ->
-                // ----- Header row based on checkboxes -----
+
+                // ----- HEADER -----
                 val headers = mutableListOf<String>()
                 if (chkIncludeDate.isChecked)      headers.add("DateTime")
                 if (chkIncludeSpecies.isChecked)   headers.add("Species")
@@ -153,98 +268,73 @@ class ShareFishingLogsActivity : AppCompatActivity() {
 
                 writer.println(headers.joinToString(","))
 
-                // ----- Data rows -----
+                // ----- DATA ROWS -----
                 for (catch in catches) {
                     val row = mutableListOf<String>()
 
-                    // Date / Time (already a string like "yyyy-MM-dd HH:mm:ss")
-                    if (chkIncludeDate.isChecked) {
+                    // Date/time
+                    if (chkIncludeDate.isChecked)
                         row.add(catch.dateTime ?: "")
-                    }
 
                     // Species
-                    if (chkIncludeSpecies.isChecked) {
+                    if (chkIncludeSpecies.isChecked)
                         row.add(catch.species ?: "")
-                    }
 
-                    // Weight: choose best available representation
+                    // Weight
                     if (chkIncludeWeight.isChecked) {
-                        val totalOz              = catch.totalWeightOz ?: 0
-                        val hundredthPounds      = catch.totalWeightHundredthPounds ?: 0
-                        val hundredthKg          = catch.totalWeightHundredthKg ?: 0
+                        val totalOz = catch.totalWeightOz ?: 0
+                        val hundredthPounds = catch.totalWeightHundredthPounds ?: 0
+                        val hundredthKg = catch.totalWeightHundredthKg ?: 0
 
                         val weightStr = when {
-                            // 1) Stored as total ounces (lbs/oz mode)
                             totalOz > 0 -> {
                                 val lbs = totalOz / 16
-                                val oz  = totalOz % 16
+                                val oz = totalOz % 16
                                 "${lbs}lb ${oz}oz"
                             }
-
-                            // 2) Stored as hundredths of pounds (decimal lbs mode)
                             hundredthPounds > 0 -> {
-                                val decLbs = hundredthPounds / 100.0
-                                String.format(Locale.getDefault(), "%.2flb", decLbs)
+                                String.format(Locale.getDefault(),
+                                    "%.2flb", hundredthPounds / 100.0)
                             }
-
-                            // 3) Stored as hundredths of kg (kg mode)
                             hundredthKg > 0 -> {
-                                val kg = hundredthKg / 100.0
-                                String.format(Locale.getDefault(), "%.2fkg", kg)
+                                String.format(Locale.getDefault(),
+                                    "%.2fkg", hundredthKg / 100.0)
                             }
-
                             else -> ""
                         }
 
                         row.add(weightStr)
                     }
 
-                    // Length: choose best available representation
+                    // Length
                     if (chkIncludeLength.isChecked) {
-                        val quartersTotal = catch.totalLengthQuarters ?: 0
-                        val tenthsTotal   = catch.totalLengthTenths ?: 0
+                        val quarters = catch.totalLengthQuarters ?: 0
+                        val tenths  = catch.totalLengthTenths ?: 0
 
                         val lengthStr = when {
-                            // 1) Stored as quarters of an inch
-                            quartersTotal > 0 -> {
-                                val inches   = quartersTotal / 4
-                                val quarters = quartersTotal % 4
-                                if (quarters == 0) {
-                                    "${inches}\""
-                                } else {
-                                    "${inches} , ${quarters}/4\""
-                                }
-                            }
-
-                            // 2) Stored as tenths of cm
-                            tenthsTotal > 0 -> {
-                                val cm = tenthsTotal / 10.0
-                                String.format(Locale.getDefault(), "%.1fcm", cm)
-                            }
-
+                            quarters > 0 -> formatInchesLength(quarters)
+                            tenths > 0 -> String.format(Locale.getDefault(),
+                                "%.1fcm", tenths / 10.0)
                             else -> ""
                         }
 
                         row.add(lengthStr)
                     }
 
-                    // GPS (from latitude / longitude)
+                    // GPS
                     if (chkIncludeGPS.isChecked) {
-                        val gpsStr =
-                            if ((catch.latitude != 0.0) || (catch.longitude != 0.0)) {
-                                "${catch.latitude};${catch.longitude}"
-                            } else {
-                                ""
-                            }
-                        row.add(gpsStr)
+                        val gps = if ((catch.latitude != 0.0) || (catch.longitude != 0.0))
+                            "${catch.latitude},${catch.longitude}"
+                        else ""
+                        row.add(gps)
                     }
 
-                    // Catch type (Fun Day / Tournament / etc.)
-                    if (chkIncludeCatchType.isChecked) {
+                    // Catch type
+                    if (chkIncludeCatchType.isChecked)
                         row.add(catch.catchType ?: "")
-                    }
 
-                    writer.println(row.joinToString(","))
+                    // WRITE CSV SAFELY
+                    writer.println(row.joinToString(",") { toCsvField(it) })
                 }
             }
 
@@ -253,7 +343,137 @@ class ShareFishingLogsActivity : AppCompatActivity() {
             e.printStackTrace()
             null
         }
-    } //--- END --- Generate Catch Log to CSV -------
+    }
+    //--- END --- Generate Catch Log to CSV -------
+
+    // ------------------------------------------------------------
+        // GOOGLE EARTH: Pick correct icon for FunDay vs Tournament
+    // ------------------------------------------------------------
+    private fun getKmlIconForCatch(catchType: String?, clipColor: String?): String {
+
+        // ---- Fun Day → fishing icon ----
+        if (catchType.equals("Fun Day", ignoreCase = true) ||
+            catchType.equals("fun", ignoreCase = true)) {
+            return "http://maps.google.com/mapfiles/kml/shapes/fishing.png"
+        }
+
+        // ---- Tournament → use clip colors ----
+        return when (clipColor?.lowercase(Locale.getDefault())) {
+            "yellow" -> "http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png"
+            "blue"   -> "http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png"
+            "green"  -> "http://maps.google.com/mapfiles/kml/pushpin/grn-pushpin.png"
+            "red"    -> "http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png"
+            "white"  -> "http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png"
+
+            // No orange → substitute with pink
+            "orange" -> "http://maps.google.com/mapfiles/kml/pushpin/pink-pushpin.png"
+
+            else     -> "http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png"
+        }
+    }
+
+    // ------------------------------------------------------------
+        // GOOGLE EARTH: Generate a full KML file of all catches
+        // ------------------------------------------------------------
+    private fun generateCatchLogKml(): File? {
+        return try {
+            val dbHelper = CatchDatabaseHelper(this)
+            val catches = dbHelper.getAllCatchesExcludingPractice()
+
+            if (catches.isEmpty()) {
+                positionedToast("No catches found for KML export.")
+                return null
+            }
+
+            // ----- Create KML filename -----
+            val sdf = java.text.SimpleDateFormat("dd_MMM_yyyy", Locale.getDefault())
+            val today = sdf.format(java.util.Date())
+            val fileName = "catch_log_$today.kml"
+
+            val file = File(cacheDir, fileName)
+
+
+            file.printWriter().use { writer ->
+                // ---- KML HEADER ----
+                writer.println("""<?xml version="1.0" encoding="UTF-8"?>""")
+                writer.println("""<kml xmlns="http://www.opengis.net/kml/2.2">""")
+                writer.println("<Document>")
+                writer.println("<name>$fileName</name>")
+
+                // ---- LOOP THROUGH CATCHES ----
+                for (catch in catches) {
+
+                    // ignore empty GPS
+                    if (catch.latitude == 0.0 || catch.longitude == 0.0) continue
+
+                    val iconUrl = getKmlIconForCatch(catch.catchType, catch.clipColor)
+
+                    // Build readable description text
+                    val weightStr = when {
+                        (catch.totalWeightOz ?: 0) > 0 -> {
+                            val oz = catch.totalWeightOz!!
+                            val lbs = oz / 16
+                            val remOz = oz % 16
+                            "${lbs}lb ${remOz}oz"
+                        }
+                        (catch.totalWeightHundredthPounds ?: 0) > 0 -> {
+                            String.format("%.2flb", (catch.totalWeightHundredthPounds!! / 100.0))
+                        }
+                        (catch.totalWeightHundredthKg ?: 0) > 0 -> {
+                            String.format("%.2fkg", (catch.totalWeightHundredthKg!! / 100.0))
+                        }
+                        else -> ""
+                    }
+
+                    val lengthStr = when {
+                        (catch.totalLengthQuarters ?: 0) > 0 -> {
+                            val q = catch.totalLengthQuarters!!
+                            val i = q / 4
+                            val rem = q % 4
+                            if (rem == 0) "${i}\"" else "$i ${rem}/4\""
+                        }
+                        (catch.totalLengthTenths ?: 0) > 0 -> {
+                            String.format("%.1fcm", catch.totalLengthTenths!! / 10.0)
+                        }
+                        else -> ""
+                    }
+
+                    // ---- GOOGLE EARTH PLACEMARK ----
+                    writer.println("<Placemark>")
+                    writer.println("<name>${catch.species}</name>")
+
+                    // CDATA allows HTML in popup
+                    writer.println("<description><![CDATA[")
+                    writer.println("<b>Date:</b> ${catch.dateTime}<br/>")
+                    if (weightStr.isNotEmpty()) writer.println("<b>Weight:</b> $weightStr<br/>")
+                    if (lengthStr.isNotEmpty()) writer.println("<b>Length:</b> $lengthStr<br/>")
+                    writer.println("<b>Type:</b> ${catch.catchType}<br/>")
+                    if (!catch.clipColor.isNullOrEmpty())
+                        writer.println("<b>Clip Color:</b> ${catch.clipColor}<br/>")
+                    writer.println("]]></description>")
+
+                    writer.println("<Style><IconStyle><Icon><href>$iconUrl</href></Icon></IconStyle></Style>")
+
+                    // KML uses lon,lat,altitude (altitude = 0)
+                    writer.println("<Point>")
+                    writer.println("<coordinates>${catch.longitude},${catch.latitude},0</coordinates>")
+                    writer.println("</Point>")
+
+                    writer.println("</Placemark>")
+                }
+
+                // ---- KML FOOTER ----
+                writer.println("</Document>")
+                writer.println("</kml>")
+            }
+
+            file
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }// === END == Generate KLM File ========
 
 
 

@@ -191,11 +191,49 @@ class TopFiveCatchesActivity : AppCompatActivity() {
     //------------ LOAD TOP CATCHES -------------------
     private fun loadTopCatches() {
         val db = CatchDatabaseHelper(this)
-        val selectedSpecies = normalizeSpeciesName(spinnerSpecies.selectedItem.toString())
+
+            // Get the actual SpeciesItem from the spinner
+        val selectedSpeciesItem = spinnerSpecies.selectedItem as SpeciesItem
+        val selectedSpecies = normalizeSpeciesName(selectedSpeciesItem.name)
+
         val unitType = getSelectedMeasurementType()
 
-        val minValue = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
-        val maxValue = edtMaxWeight.text.toString().toFloatOrNull() ?: 99999f
+        // Smart defaults based on selected unit
+        val (minValue, maxValue) = when (getSelectedMeasurementType()) {
+
+            "lbs" -> {
+                val min = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
+                val max = edtMaxWeight.text.toString().toFloatOrNull() ?: 999f        // Max is 999 Lbs
+                min to max
+            }
+
+            "pounds" -> {
+                val min = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
+                val max = edtMaxWeight.text.toString().toFloatOrNull() ?: 999f     // Max is 999 pounds
+                min to max
+            }
+
+            "kgs" -> {
+                val min = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
+                val max = edtMaxWeight.text.toString().toFloatOrNull() ?: 999f     // Max is 999 Kgs
+                min to max
+            }
+
+            "inches" -> {
+                val min = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
+                val max = edtMaxWeight.text.toString().toFloatOrNull() ?: 200f      // Max is 16.7' 200"
+                min to max
+            }
+
+            "cm" -> {
+                val min = edtMinWeight.text.toString().toFloatOrNull() ?: 0f
+                val max = edtMaxWeight.text.toString().toFloatOrNull() ?: 500f      // max is 5 meters
+                min to max
+            }
+
+            else -> 0f to 999f                                                      // default Min is 0 Max is 999
+        }
+
 
         if (minValue > maxValue) {
             positionedToast("⚠️ Minimum value cannot be greater than maximum.")

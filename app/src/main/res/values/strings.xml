@@ -129,7 +129,7 @@
     <string name="include_length">Include Length</string>
     <string name="include_gps_coordinates">Include GPS Coordinates</string>
     <string name="include_day">Include Day Type\n(Fun Day/Tournament)</string>
-    <string name="generate_csv_file">Generate CSV File</string>
+    <string name="generate_csv_file">Generate\n CSV File</string>
     <string name="share_csv">Share CSV</string>
     <string name="top_5">Top 5</string>
     <string name="find_your_top_5">Find Your Top 5</string>
@@ -314,6 +314,8 @@
     <string name="edit_tournament_pounds">Edit Tournament Pounds</string>
     <string name="pounds_caps">Pounds</string>
     <string name="top_5_catches">Top 5 Catches</string>
+    <string name="generate_klm_file">Generate\n KLM File</string>
+    <string name="share_klm">share KLM</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">
