@@ -49,6 +49,7 @@ class PopupLengthEntryTourInches : Activity() {
         isTournament = intent.getBooleanExtra("isTournament", false)
         catchType = intent.getStringExtra("catchType") ?: ""
         selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
+
         val colorNames = intent.getStringArrayExtra("availableClipColors")
             ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
@@ -88,6 +89,8 @@ class PopupLengthEntryTourInches : Activity() {
         val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?: emptyArray()
         val adapter = ClipColorSpinnerAdapter(this, availableColorNames.toList())
         spinnerClipColor.adapter = adapter
+
+        // `````````````` Apply InputFilters to limit values  ````````````````````
 
         edtLengthInches.filters = arrayOf(MinMaxInputFilter(0, 99)) // Inches: 0-99
         edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3)) //  0 - 3 / 4ths

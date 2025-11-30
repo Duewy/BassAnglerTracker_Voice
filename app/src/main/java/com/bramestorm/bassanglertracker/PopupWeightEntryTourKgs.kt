@@ -53,8 +53,6 @@ class PopupWeightEntryTourKgs : Activity() {
         val colorNames = intent.getStringArrayExtra("availableClipColors")
             ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
-        Log.d("PopupWeightEntry", "isTournament: $isTournament | catchType: $catchType | selectedSpecies: $selectedSpecies")
-        Log.d("PopupWeightEntry", "Available clip colors: ${colorNames.joinToString()}")
 
         // UI Components
         spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)

@@ -301,9 +301,9 @@ override val dialog: Any
                 intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
             }
 
-            // 🔥 Send available clip colors as String array
-            val colorNames = availableClipColors.map { it.name }.toTypedArray()
-            intent.putExtra(EXTRA_AVAILABLE_CLIP_COLORS, colorNames)
+            // Send as an ArrayList so you can retrieve with getStringArrayListExtra
+            val colorArray = availableClipColors.map { it.name }.toTypedArray()
+            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
         }
 
         entryLauncher.launch(intent)
