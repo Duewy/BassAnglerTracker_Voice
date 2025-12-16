@@ -19,7 +19,6 @@ object SharedPreferencesManager {
     private const val APP_PREFS = "BassAnglerTrackerPrefs"
 
     // Species keys
-    private const val KEY_SELECTED_SPECIES_LIST = "SELECTED_SPECIES_LIST"
     private const val KEY_ALL_SPECIES_LIST = "ALL_SPECIES_LIST"
 
     // Catch entry type
@@ -72,26 +71,6 @@ object SharedPreferencesManager {
             .getBoolean(KEY_VCC_DOZE_AGREEMENT, false)
     }
 
-    // ALARM Values from any Tournament Activity
-
-    fun setAlarmTime(context: Context, hour: Int, minute: Int) {
-        context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .edit()
-            .putInt(KEY_ALARM_HOUR, hour)
-            .putInt(KEY_ALARM_MINUTE, minute)
-            .apply()
-    }
-
-    fun getAlarmHour(context: Context): Int {
-        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_ALARM_HOUR, -1)
-    }
-
-    fun getAlarmMinute(context: Context): Int {
-        return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_ALARM_MINUTE, -1)
-    }
-
     // === CatchEntry Type ===
     fun saveCatchEntryType(context: Context, type: Int) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
@@ -130,8 +109,7 @@ object SharedPreferencesManager {
     }
 
 
-
-    // === Tournament Settings ===
+    // === Tournament Settings 🏆 ===
     fun setNumberOfCatches(context: Context, number: Int) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .edit().putInt(KEY_NUMBER_OF_CATCHES, number).apply()
@@ -163,39 +141,51 @@ object SharedPreferencesManager {
     }
 
 
-    // === Species Handling ===
+    // === Species Handling SYSTEM ===
+    // -------- There is a set list on the FishSpecies that has Icons from SpeciesImageHelper -------
+
     fun initializeDefaultSpeciesIfNeeded(context: Context) {
         val prefs = getSpeciesPrefs(context)
         val gson = Gson()
         if (!prefs.contains(KEY_ALL_SPECIES_LIST)) {
             val defaultSpecies = FishSpecies.allSpeciesList
             prefs.edit().putString(KEY_ALL_SPECIES_LIST, gson.toJson(defaultSpecies)).apply()
-            prefs.edit().putString(KEY_SELECTED_SPECIES_LIST, gson.toJson(defaultSpecies.take(8)))
-                .apply()
-            Log.d("SharedPrefsInit", "Initialized species lists.")
         }
     }
 
-    fun resetToDefaultSpecies(context: Context) {
-        val defaultSpecies = FishSpecies.allSpeciesList
-        val gson = Gson()
-        val prefsEditor = getSpeciesPrefs(context).edit()
-        prefsEditor.putString(KEY_ALL_SPECIES_LIST, gson.toJson(defaultSpecies))
-        prefsEditor.putString(KEY_SELECTED_SPECIES_LIST, gson.toJson(defaultSpecies.take(8)))
-        prefsEditor.apply()
-        Log.d(TAG, "Reset species to default.")
+    fun getSpeciesCatalogue(context: Context): List<String> {
+        val saved = getAllSavedSpecies(context)
+        return if (saved.isNotEmpty()) {
+            saved
+        } else {
+            FishSpecies.allSpeciesList
+        }
     }
+
+    fun saveSpeciesCatalogue(context: Context, speciesList: List<String>) {
+        val cleaned = speciesList
+            .map { normalizeSpeciesName(it) }
+            .filter { it.isNotBlank() }
+            .distinct()
+
+        getSpeciesPrefs(context)
+            .edit()
+            .putString(KEY_ALL_SPECIES_LIST, Gson().toJson(cleaned))
+            .apply()
+
+        Log.d(TAG, "Saved species catalogue: $cleaned")
+    }
+
 
     fun removeUserSpecies(context: Context, speciesName: String) {
         val normalized = normalizeSpeciesName(speciesName)
         val all = getAllSavedSpecies(context).toMutableList()
         all.removeAll { normalizeSpeciesName(it) == normalized }
-        saveAllSpecies(context, all)
+        saveSpeciesCatalogue(context, all)
 
-        val selected = getSelectedSpeciesList(context).toMutableList()
-        selected.removeAll { normalizeSpeciesName(it) == normalized }
-        saveSelectedSpeciesList(context, selected)
-        Log.d(TAG, "Removed species: $speciesName")
+        val updated = getSpeciesCatalogue(context).toMutableList()
+        updated.removeAll { normalizeSpeciesName(it) == normalized }
+        saveSpeciesCatalogue(context, updated)
     }
 
     private fun getAllSavedSpecies(context: Context): List<String> {
@@ -212,57 +202,21 @@ object SharedPreferencesManager {
         val all = getAllSavedSpecies(context).toMutableList()
         val idxAll = all.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
         if (idxAll >= 0) all[idxAll] = normalizedNew
-        saveAllSpecies(context, all)
+        saveSpeciesCatalogue(context, all)
 
-        val sel = getSelectedSpeciesList(context).toMutableList()
+        val sel = getSpeciesCatalogue(context).toMutableList()
         val idxSel = sel.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
         if (idxSel >= 0) sel[idxSel] = normalizedNew
-        saveSelectedSpeciesList(context, sel)
+        saveSpeciesCatalogue(context, sel)
 
         Log.d(TAG, "Updated species from '$oldName' to '$normalizedNew'.")
     }
 
-    fun getMasterSpeciesList(context: Context): List<String> = getAllSavedSpecies(context)
-
-    fun getSelectedSpeciesList(context: Context): List<String> {
-        val json = getSpeciesPrefs(context).getString(KEY_SELECTED_SPECIES_LIST, null)
-        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
-        else emptyList()
-    }
-
-    fun saveSelectedSpeciesList(context: Context, speciesList: List<String>) {
-        val limited = speciesList.take(8).map { normalizeSpeciesName(it) }
-        getSpeciesPrefs(context).edit().putString(KEY_SELECTED_SPECIES_LIST, Gson().toJson(limited))
-            .apply()
-        Log.d(TAG, "Saved selected species: $limited")
-    }
-
-    fun saveAllSpecies(context: Context, speciesList: List<String>) {
-        val normalizedList = speciesList
-            .map { normalizeSpeciesName(it) }
-            .filter { it.isNotBlank() }
-            .distinct()
-                // NORMALIZE all Species Names before adding to list
-        getSpeciesPrefs(context).edit()
-            .putString(KEY_ALL_SPECIES_LIST, Gson().toJson(normalizedList))
-            .apply()
-        Log.d(TAG, "Saved all species: $normalizedList")
-    }
-
-
-    fun getUserAddedSpeciesList(context: Context): List<String> {
-        val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
-        val default = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
-        return saved.filterNot { it in default }
-    }
-
-    fun loadAllSpecies(context: Context): List<String> =
-        getAllSpecies(context)
-
-    fun getAllSpecies(context: Context): List<String> {
-        val default = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
-        return (default + getUserAddedSpeciesList(context)).distinct()
-    }
+   // fun getUserAddedSpeciesList(context: Context): List<String> {
+   //     val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
+   //     val default = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
+   //     return saved.filterNot { it in default }
+  //  }
 
     private fun getSpeciesPrefs(context: Context) =
         context.getSharedPreferences(SPECIES_PREFS, Context.MODE_PRIVATE)
@@ -277,6 +231,9 @@ object SharedPreferencesManager {
 
     fun normalizeSpeciesName(name: String): String =
         name.trim().lowercase().replace(Regex("\\s+"), " ")
+
+
+    //==== ADVERTISEMENT SECTION saveSpeciesCatalogue 📰 ======================
 
     fun logAdCloseTime(context: Context, adSource: String, durationMs: Long) {
         val prefs = context.getSharedPreferences("AdStatsPrefs", Context.MODE_PRIVATE)
@@ -299,4 +256,4 @@ object SharedPreferencesManager {
     }
 
 
-}
+}//===== END =======

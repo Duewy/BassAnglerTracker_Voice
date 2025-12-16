@@ -13,8 +13,8 @@ object SpeciesImageHelper {
     fun getSpeciesImageResId(species: String): Int {
         val normalized = normalizeSpeciesName(species)
         return when (normalized) {
-            "large mouth", "largemouth" -> R.drawable.fish_large_mouth
-            "small mouth", "smallmouth"-> R.drawable.fish_small_mouth
+            "large mouth" -> R.drawable.fish_large_mouth
+            "small mouth"-> R.drawable.fish_small_mouth
             "crappie" -> R.drawable.fish_crappie
             "walleye" -> R.drawable.fish_walleye
             "perch" -> R.drawable.fish_perch

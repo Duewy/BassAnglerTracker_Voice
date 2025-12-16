@@ -1,5 +1,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -7,15 +8,17 @@
     android:background="@color/very_lite_grey">
 
 
-    <CheckBox
-        android:id="@+id/chkSelectSpeciesNameSelect"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <ImageButton
+        android:id="@+id/btnSelectSpeciesNameSelect"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:clickable="true"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+        android:focusable="true"
+        android:contentDescription="@string/species_image"
+        android:focusableInTouchMode="false"
+        app:srcCompat="@drawable/ic_edit" />
 
     <ImageView
         android:id="@+id/imgSpeciesSelect"

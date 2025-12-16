@@ -291,7 +291,7 @@ class TrainingWords : AppCompatActivity() {
         val normalizedInput = rawInput.lowercase().replace(" ", "").trim()
         val currentPhraseTextRaw = txtSayThis.text.toString().replace("Say This: ", "").trim()
         val currentPhraseText = currentPhraseTextRaw.lowercase().replace(" ", "")
-        val speciesList = SharedPreferencesManager.loadAllSpecies(this)
+        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
         val matchedSpecies = VoiceInputMapper.getSpeciesFromVoice(rawInput, speciesList)
         val matchedNormalized = matchedSpecies.lowercase().replace(" ", "")
 

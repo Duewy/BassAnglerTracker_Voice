@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
@@ -29,8 +28,6 @@ class PopupWeightEntryKgs : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_weight_entry_kgs)
-        Log.d("Popup", "Popup KGS Opened")
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         val edtWeightKgs: EditText = findViewById(R.id.edtWeightKgs)
         val edtWeightGrams: EditText = findViewById(R.id.edtWeightGrams)
@@ -69,22 +66,19 @@ class PopupWeightEntryKgs : Activity() {
 
     override fun onResume() {
         super.onResume()
-        loadSpeciesSpinner()
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerKgsSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
-
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
-
-        Log.d("POPUP_SPINNER", "Species list reloaded: $speciesList")
+        val speciesList = SharedPreferencesManager
+            .getSpeciesCatalogue(this)
+            .map { speciesName ->
+                SpeciesItem(
+                    speciesName,
+                    SpeciesImageHelper.getSpeciesImageResId(speciesName)
+                )
+            }
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
@@ -93,18 +87,21 @@ class PopupWeightEntryKgs : Activity() {
             selectedSpecies = speciesList[0].name
         }
 
-        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
-                selectedSpecies = speciesList[position].name
-                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
-            }
+        spinnerSpecies.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedSpecies = speciesList[position].name
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = ""
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    selectedSpecies = ""
+                }
             }
-        }
     }
 
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {

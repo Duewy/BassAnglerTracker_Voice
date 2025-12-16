@@ -35,16 +35,7 @@ class MainActivity : AppCompatActivity() {
 
 
         //--------------------- Set the Initial List for Species ---------------------
-        if (!SharedPreferencesManager.isSpeciesInitialized(this)) {
-            val default8 = listOf("Large Mouth", "Small Mouth", "Crappie", "Walleye", "Catfish", "Perch", "Pike", "Bluegill")
-            SharedPreferencesManager.saveSelectedSpeciesList(this, default8)
-            SharedPreferencesManager.saveAllSpecies(this, SharedPreferencesManager.getAllSpecies(this))
-            SharedPreferencesManager.setSpeciesInitialized(this, true)
-            Log.d("MainActivity", "Species initialized with default 8: $default8")
-        } else {
-            val selected = SharedPreferencesManager.getSelectedSpeciesList(this)
-            Log.d("MainActivity", "Species already initialized. Loaded selected: $selected")
-        }
+        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         // ---------------- Open Set-Up page --------------------------------
         val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)

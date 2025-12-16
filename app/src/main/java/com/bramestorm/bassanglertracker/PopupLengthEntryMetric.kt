@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
@@ -29,7 +28,6 @@ class PopupLengthEntryMetric : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.popup_length_entry_metric)
 
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         val edtLengthCm: EditText = findViewById(R.id.edtLengthCms)
         val edtLengthDecimal: EditText = findViewById(R.id.edtLengthDecimal)
@@ -56,8 +54,6 @@ class PopupLengthEntryMetric : Activity() {
             resultIntent.putExtra(EXTRA_LENGTH_CMS, totalLengthCms)
             resultIntent.putExtra(EXTRA_SPECIES, selectedSpecies)
 
-            Log.d("DB_DEBUG", "🚀 Returning length from Pop Up: $totalLengthCms mm, Species: $selectedSpecies")
-
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
@@ -70,22 +66,19 @@ class PopupLengthEntryMetric : Activity() {
 
     override fun onResume() {
         super.onResume()
-        loadSpeciesSpinner()
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerCmsSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
-
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
-
-        Log.d("POPUP_SPINNER", "Species list reloaded: $speciesList")
+        val speciesList = SharedPreferencesManager
+            .getSpeciesCatalogue(this)
+            .map { speciesName ->
+                SpeciesItem(
+                    speciesName,
+                    SpeciesImageHelper.getSpeciesImageResId(speciesName)
+                )
+            }
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
@@ -94,19 +87,23 @@ class PopupLengthEntryMetric : Activity() {
             selectedSpecies = speciesList[0].name
         }
 
-        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
-                selectedSpecies = speciesList[position].name
-                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
-            }
+        spinnerSpecies.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedSpecies = speciesList[position].name
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = ""
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    selectedSpecies = ""
+                }
             }
-        }
     }
+
 
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(

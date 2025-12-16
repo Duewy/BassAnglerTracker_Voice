@@ -20,10 +20,9 @@ import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.bramestorm.bassanglertracker.activities.SpeciesSelectionActivity
+import com.bramestorm.bassanglertracker.activities.SpeciesOrganizeActivity
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
-import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -370,7 +369,7 @@ class SetUpActivity : AppCompatActivity() {
         }
 
         btnCustomizeSpecies.setOnClickListener {
-            val intent = Intent(this,SpeciesSelectionActivity::class.java)
+            val intent = Intent(this,SpeciesOrganizeActivity::class.java)
             startActivity(intent)
         }
 
@@ -509,34 +508,44 @@ class SetUpActivity : AppCompatActivity() {
     private fun loadTournamentSpeciesSpinner() {
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerTournamentSpecies)
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
-
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
+        // ✅ Single source of truth
+        val speciesList = SharedPreferencesManager
+            .getSpeciesCatalogue(this)
+            .map { speciesName ->
+                SpeciesItem(
+                    speciesName,
+                    SpeciesImageHelper.getSpeciesImageResId(speciesName)
+                )
+            }
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
 
-        // Select first by default (normalized)
+        // Default selection
         if (speciesList.isNotEmpty()) {
-            selectedSpecies = normalizeSpeciesName(speciesList[0].name)
+            selectedSpecies = speciesList[0].name
         }
 
-        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedSpecies = normalizeSpeciesName(speciesList[position].name)
-                Log.d("DB_DEBUG", "Species selected: $selectedSpecies")
-            }
+        spinnerSpecies.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedSpecies = speciesList[position].name
+                    Log.d("DB_DEBUG", "Tournament species selected: $selectedSpecies")
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = normalizeSpeciesName(speciesList[0].name)
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    if (speciesList.isNotEmpty()) {
+                        selectedSpecies = speciesList[0].name
+                    }
+                }
             }
-        }
     }
+
 
     //------------------------------ GPS Permissions --------------------------------------------------
     private fun checkAndRequestLocationPermission() {

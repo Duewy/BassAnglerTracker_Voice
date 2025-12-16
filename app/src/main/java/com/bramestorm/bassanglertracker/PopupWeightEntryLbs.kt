@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
@@ -31,7 +30,6 @@ class PopupWeightEntryLbs : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         setContentView(R.layout.popup_weight_entry_lbs)
 
@@ -100,22 +98,19 @@ class PopupWeightEntryLbs : Activity() {
 
     override fun onResume() {
         super.onResume()
-        loadSpeciesSpinner()
     }
 
-    private  fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerSpeciesPopUp)
+    private fun loadSpeciesSpinner() {
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
-        val savedSpecies = SharedPreferencesManager.getSelectedSpeciesList(this).ifEmpty {
-            SharedPreferencesManager.getMasterSpeciesList(this)
-        }
-
-        val speciesList = savedSpecies.map { speciesName ->
-            val imageRes = SpeciesImageHelper.getSpeciesImageResId(speciesName)
-            SpeciesItem(speciesName, imageRes)
-        }
-
-        Log.d("POPUP_SPINNER", "Species list reloaded: $speciesList")
+        val speciesList = SharedPreferencesManager
+            .getSpeciesCatalogue(this)
+            .map { speciesName ->
+                SpeciesItem(
+                    speciesName,
+                    SpeciesImageHelper.getSpeciesImageResId(speciesName)
+                )
+            }
 
         val adapter = SpeciesSpinnerAdapter(this, speciesList)
         spinnerSpecies.adapter = adapter
@@ -124,20 +119,21 @@ class PopupWeightEntryLbs : Activity() {
             selectedSpecies = speciesList[0].name
         }
 
-        spinnerSpecies.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                selectedSpecies = speciesList[position].name
-            }
+        spinnerSpecies.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedSpecies = speciesList[position].name
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                selectedSpecies = ""
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    selectedSpecies = ""
+                }
             }
-        }
     }
 
 }

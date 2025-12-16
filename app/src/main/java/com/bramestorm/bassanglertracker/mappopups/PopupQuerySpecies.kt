@@ -22,7 +22,9 @@ class PopupQuerySpecies(
 
         val dialog = AlertDialog.Builder(context).setView(view).create()
 
-        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(context)
+        val speciesList = listOf("All") +
+                SharedPreferencesManager.getSpeciesCatalogue(context)
+
         if (speciesList.isEmpty()) {
             Toast.makeText(context, "No species found. Please select species first.", Toast.LENGTH_SHORT).show()
             dialog.dismiss()

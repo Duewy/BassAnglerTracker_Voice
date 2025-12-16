@@ -54,6 +54,8 @@
             android:textStyle="bold" />
 
         <!-- RecyclerView for drag-and-drop -->
+
+        <!-- Save Button -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerSpecies"
             android:layout_width="match_parent"
@@ -63,7 +65,6 @@
             android:scrollbars="vertical"
             tools:listitem="@layout/item_species_select" />
 
-        <!-- Save Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -75,26 +76,26 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnAdjustSpeciesList"
+                android:id="@+id/btnAddSpeciesList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/btn_outline_orange"
                 android:padding="7dp"
-                android:text="@string/alter_species_list"
+                android:text="@string/add_a_species"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnSaveSpecies"
+                android:id="@+id/btnSaveListOrder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_outline_blue"
                 android:padding="7dp"
-                android:text="@string/save_selection"
+                android:text="@string/save_order"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -111,20 +112,6 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnResetSpecies"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="15dp"
-                android:background="@drawable/btn_outline_gold"
-                android:padding="7dp"
-                android:text="@string/reset_species_list"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnCancelSpecies"

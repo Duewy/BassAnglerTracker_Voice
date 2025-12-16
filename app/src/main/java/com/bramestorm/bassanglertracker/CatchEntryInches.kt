@@ -221,7 +221,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         val edtLengthEntryQuarters = dialogView.findViewById<EditText>(R.id.edtLengthQuarters)
         val spinnerSpeciesEditInches = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditInches)
 
-        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 

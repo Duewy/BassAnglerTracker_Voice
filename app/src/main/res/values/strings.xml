@@ -316,6 +316,10 @@
     <string name="top_5_catches">Top 5 Catches</string>
     <string name="generate_klm_file">Generate\n KLM File</string>
     <string name="share_klm">share KLM</string>
+    <string name="species_catalog">Species Catalog</string>
+    <string name="species_image">Species Image</string>
+    <string name="add_a_species">Add a Species</string>
+    <string name="save_order">Save Order</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">

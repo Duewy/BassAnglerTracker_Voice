@@ -187,7 +187,7 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
         val edtWeightGrams = dialogView.findViewById<EditText>(R.id.edtDialogWeightGrams)
         val spinnerSpecies = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditKgs)
 
-        val speciesList = SharedPreferencesManager.getSelectedSpeciesList(this)
+        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 

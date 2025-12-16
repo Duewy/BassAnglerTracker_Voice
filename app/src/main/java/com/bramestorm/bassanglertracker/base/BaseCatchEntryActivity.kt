@@ -92,10 +92,14 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
             VoiceInputMapper.registerUserSpecies(it)
         }
 
-        val userSpecies = SharedPreferencesManager.getUserAddedSpeciesList(this)
-        userSpecies.forEach {
+        val userAddedSpecies =
+            SharedPreferencesManager.getSpeciesCatalogue(this)
+                .filter { it !in FishSpecies.allSpeciesList }
+
+        userAddedSpecies.forEach {
             VoiceInputMapper.registerUserSpecies(it)
         }
+
 
         // Start/stop service and register receiver based on user preference
         if (getSharedPreferences("catch_and_call_prefs", MODE_PRIVATE)

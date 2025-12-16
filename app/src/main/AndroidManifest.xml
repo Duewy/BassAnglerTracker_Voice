@@ -100,14 +100,15 @@
 
         <!-- User can select species for list and can add species to list -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".activities.AllSpeciesSelectionActivity"
+        <activity android:name=".activities.SpeciesCatalogueActivity"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Users can arrange the positioning of the 8 on the species list -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".activities.SpeciesSelectionActivity"
+        <activity
+            android:name=".activities.SpeciesOrganizeActivity"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"/>
+            tools:ignore="LockedOrientationActivity" />
 
         <!-- Fun Day Catch Entry Pages -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
