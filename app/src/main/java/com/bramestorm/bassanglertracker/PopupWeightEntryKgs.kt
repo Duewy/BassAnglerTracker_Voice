@@ -36,8 +36,8 @@ class PopupWeightEntryKgs : Activity() {
 
         loadSpeciesSpinner()
 
-        edtWeightKgs.filters = arrayOf(MinMaxInputFilter(0, 99))
-        edtWeightGrams.filters = arrayOf(MinMaxInputFilter(0, 99))
+        edtWeightKgs.filters = arrayOf(MinMaxInputFilter(0, 299))   // Limit to 299 Kgs
+        edtWeightGrams.filters = arrayOf(MinMaxInputFilter(0, 99))  // Limit to 0.99 Kgs
 
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
@@ -69,10 +69,10 @@ class PopupWeightEntryKgs : Activity() {
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerKgsSpeciesPopUp)
 
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,
@@ -103,6 +103,7 @@ class PopupWeightEntryKgs : Activity() {
                 }
             }
     }
+
 
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(

@@ -323,7 +323,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalWeightHundredthKg =null,
             totalLengthTenths = null,
-            catchType = "pounds",
+            catchType = "tournament_pounds",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -411,7 +411,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "pounds", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "tournament_pounds", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightHundredthPounds ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
@@ -422,7 +422,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "pounds",
+            catchType = "tournament_pounds",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled

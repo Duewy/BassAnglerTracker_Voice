@@ -191,11 +191,11 @@ class TournamentVoiceHandler(
     /** Persists the parsed catch and provides feedback. */
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
         val typeEntry = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "lbsOzs"
-            MeasurementMode.POUNDS -> "pounds"
-            MeasurementMode.KG -> "kgs"
-            MeasurementMode.INCHES -> "inches"
-            MeasurementMode.CM -> "metric"
+            MeasurementMode.LBS_OZ -> "tournament_lbs_ozs"
+            MeasurementMode.POUNDS -> "tournament_pounds"
+            MeasurementMode.KG -> "tournament_kgs"
+            MeasurementMode.INCHES -> "tournament_inches"
+            MeasurementMode.CM -> "tournament_cms"
         }
 
         val markerType = when (parsed.species.lowercase()) {

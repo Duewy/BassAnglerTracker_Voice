@@ -97,8 +97,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_outline_green"
-                android:enabled="false"
-                android:fadeScrollbars="true"
                 android:padding="10dp"
                 android:text="@string/add_species"
                 android:textColor="@color/black"

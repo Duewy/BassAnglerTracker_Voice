@@ -8,8 +8,8 @@ import android.util.Log
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import org.json.JSONArray
+import org.json.JSONObject
 
 object SharedPreferencesManager {
 
@@ -17,9 +17,13 @@ object SharedPreferencesManager {
     private const val KEY_VCC_DOZE_AGREEMENT = "USER_AGREED_TO_VCC_DOZE"
     private const val SPECIES_PREFS = "SpeciesPrefs"
     private const val APP_PREFS = "BassAnglerTrackerPrefs"
+    private const val PREFS_NAME = "bass_angler_prefs"
 
     // Species keys
-    private const val KEY_ALL_SPECIES_LIST = "ALL_SPECIES_LIST"
+    private const val KEY_SPECIES_LIST = "species_list_v2"
+
+    private const val KEY_SPECIES_IMAGE_URIS = "species_image_uris"
+
 
     // Catch entry type
     private const val KEY_CATCH_TYPE = "catchEntryType"
@@ -144,79 +148,65 @@ object SharedPreferencesManager {
     // === Species Handling SYSTEM ===
     // -------- There is a set list on the FishSpecies that has Icons from SpeciesImageHelper -------
 
-    fun initializeDefaultSpeciesIfNeeded(context: Context) {
-        val prefs = getSpeciesPrefs(context)
-        val gson = Gson()
-        if (!prefs.contains(KEY_ALL_SPECIES_LIST)) {
-            val defaultSpecies = FishSpecies.allSpeciesList
-            prefs.edit().putString(KEY_ALL_SPECIES_LIST, gson.toJson(defaultSpecies)).apply()
+// =============================================================
+// SPECIES – SINGLE SOURCE OF TRUTH
+// =============================================================
+
+    fun loadSpeciesList(context: Context): MutableList<String> {
+        val prefs = prefs(context)
+
+        val json = prefs.getString(KEY_SPECIES_LIST, null)
+
+        if (!json.isNullOrBlank()) {
+            return try {
+                val array = JSONArray(json)
+                MutableList(array.length()) { i ->
+                    normalizeSpeciesName(array.getString(i))
+                }
+            } catch (e: Exception) {
+                mutableListOf()
+            }
         }
+
+        // ---- FIRST RUN / MIGRATION ----
+        val defaults = FishSpecies.allSpeciesList
+            .map { normalizeSpeciesName(it) }
+            .toMutableList()
+
+        saveSpeciesList(context, defaults)
+        return defaults
     }
 
-    fun getSpeciesCatalogue(context: Context): List<String> {
-        val saved = getAllSavedSpecies(context)
-        return if (saved.isNotEmpty()) {
-            saved
-        } else {
-            FishSpecies.allSpeciesList
-        }
-    }
-
-    fun saveSpeciesCatalogue(context: Context, speciesList: List<String>) {
-        val cleaned = speciesList
+    fun saveSpeciesList(context: Context, list: List<String>) {
+        val cleaned = list
             .map { normalizeSpeciesName(it) }
             .filter { it.isNotBlank() }
             .distinct()
 
-        getSpeciesPrefs(context)
-            .edit()
-            .putString(KEY_ALL_SPECIES_LIST, Gson().toJson(cleaned))
+        val json = JSONArray(cleaned).toString()
+
+        prefs(context).edit()
+            .putString(KEY_SPECIES_LIST, json)
             .apply()
+    }
 
-        Log.d(TAG, "Saved species catalogue: $cleaned")
+    fun addSpecies(context: Context, species: String) {
+        val list = loadSpeciesList(context)
+        val normalized = normalizeSpeciesName(species)
+
+        if (!list.contains(normalized)) {
+            list.add(normalized)
+            saveSpeciesList(context, list)
+        }
+    }
+
+    fun removeSpecies(context: Context, species: String) {
+        val list = loadSpeciesList(context)
+        list.remove(normalizeSpeciesName(species))
+        saveSpeciesList(context, list)
     }
 
 
-    fun removeUserSpecies(context: Context, speciesName: String) {
-        val normalized = normalizeSpeciesName(speciesName)
-        val all = getAllSavedSpecies(context).toMutableList()
-        all.removeAll { normalizeSpeciesName(it) == normalized }
-        saveSpeciesCatalogue(context, all)
-
-        val updated = getSpeciesCatalogue(context).toMutableList()
-        updated.removeAll { normalizeSpeciesName(it) == normalized }
-        saveSpeciesCatalogue(context, updated)
-    }
-
-    private fun getAllSavedSpecies(context: Context): List<String> {
-        val json = getSpeciesPrefs(context).getString(KEY_ALL_SPECIES_LIST, null)
-        return if (json != null) Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
-        else emptyList()
-    }
-
-    fun updateUserSpeciesName(context: Context, oldName: String, newName: String) {
-        val normalizedOld = normalizeSpeciesName(oldName)
-        val normalizedNew = normalizeSpeciesName(newName)
-        if (normalizedNew.isBlank()) return
-
-        val all = getAllSavedSpecies(context).toMutableList()
-        val idxAll = all.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
-        if (idxAll >= 0) all[idxAll] = normalizedNew
-        saveSpeciesCatalogue(context, all)
-
-        val sel = getSpeciesCatalogue(context).toMutableList()
-        val idxSel = sel.indexOfFirst { normalizeSpeciesName(it) == normalizedOld }
-        if (idxSel >= 0) sel[idxSel] = normalizedNew
-        saveSpeciesCatalogue(context, sel)
-
-        Log.d(TAG, "Updated species from '$oldName' to '$normalizedNew'.")
-    }
-
-   // fun getUserAddedSpeciesList(context: Context): List<String> {
-   //     val saved = getAllSavedSpecies(context).map { normalizeSpeciesName(it) }
-   //     val default = FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
-   //     return saved.filterNot { it in default }
-  //  }
 
     private fun getSpeciesPrefs(context: Context) =
         context.getSharedPreferences(SPECIES_PREFS, Context.MODE_PRIVATE)
@@ -228,9 +218,46 @@ object SharedPreferencesManager {
     fun setSpeciesInitialized(context: Context, initialized: Boolean) {
         getSpeciesPrefs(context).edit().putBoolean("SPECIES_INITIALIZED", initialized).apply()
     }
+    // =============================================================
+    // HELPERS
+    // =============================================================
+    private fun prefs(context: Context) =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun normalizeSpeciesName(name: String): String =
-        name.trim().lowercase().replace(Regex("\\s+"), " ")
+        name.trim().lowercase()
+
+    // =============================================================
+    // ALL SPECIES (CATALOGUE)
+    // =============================================================
+
+
+
+    fun saveSpeciesImageUri(context: Context, speciesName: String, uri: String?) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = prefs.getString(KEY_SPECIES_IMAGE_URIS, "{}")
+        val obj = JSONObject(json ?: "{}")
+
+        if (uri == null) {
+            obj.remove(speciesName)
+        } else {
+            obj.put(speciesName, uri)
+        }
+
+        prefs.edit()
+            .putString(KEY_SPECIES_IMAGE_URIS, obj.toString())
+            .apply()
+    }
+
+    fun getSpeciesImageUri(context: Context, speciesName: String): String? {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = prefs.getString(KEY_SPECIES_IMAGE_URIS, null) ?: return null
+
+        val value = JSONObject(json).optString(speciesName, "")
+        return value.ifBlank { null }
+    }
+
+
 
 
     //==== ADVERTISEMENT SECTION saveSpeciesCatalogue 📰 ======================

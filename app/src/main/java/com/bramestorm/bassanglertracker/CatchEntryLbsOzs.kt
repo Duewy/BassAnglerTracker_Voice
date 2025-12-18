@@ -133,7 +133,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
-            catchType = "lbsOzs",
+            catchType = "fun_lbs_oz",
             markerType = selectedSpecies,
             clipColor = null
         )
@@ -151,7 +151,7 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
 
     private fun updateListViewLb() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("lbsOzs", todaysDate).sortedByDescending { it.dateTime }
+        val todaysCatches = dbHelper.getCatchesForToday("fun_lbs_oz", todaysDate).sortedByDescending { it.dateTime }
 
         catchList.clear()
         catchList.addAll(todaysCatches)
@@ -188,13 +188,15 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
         val edtWeightOzs = dialogView.findViewById<EditText>(R.id.edtWeightOzs)
         val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditLbs)
 
-        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
+SharedPreferencesManager.loadSpeciesList(this)
+        val speciesList = SharedPreferencesManager.loadSpeciesList(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesLbs.adapter = adapter
+
 
         val totalWeightOz = catchItem.totalWeightOz ?: 0
         edtWeightLbs.setText((totalWeightOz / 16).toString())

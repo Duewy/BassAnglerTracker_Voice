@@ -1,8 +1,12 @@
 package com.bramestorm.bassanglertracker.activities
 
-import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,9 +19,16 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: SpeciesReorderAdapter
-    private lateinit var btnGotoAddSpeciesList: Button
+    private lateinit var btnAddSpecies: Button
     private lateinit var btnSave: Button
     private lateinit var btnCancel: Button
+
+    private var pendingImageUri: Uri? = null
+    private val imagePicker =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            pendingImageUri = uri
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,13 +36,19 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerSpecies)
         btnSave = findViewById(R.id.btnSaveListOrder)
-        btnGotoAddSpeciesList = findViewById(R.id.btnAddSpeciesList)
+        btnAddSpecies = findViewById(R.id.btnAddSpeciesList)
         btnCancel = findViewById(R.id.btnCancelSpecies)
 
-        val speciesCatalogue =
-            SharedPreferencesManager.getSpeciesCatalogue(this).toMutableList()
+        val speciesList =
+            SharedPreferencesManager.loadSpeciesList(this)
 
-        adapter = SpeciesReorderAdapter(speciesCatalogue)
+        adapter = SpeciesReorderAdapter(
+            speciesList,
+            onDeleteRequested = { speciesName ->
+                confirmDeleteSpecies(speciesName)
+            }
+        )
+
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -40,13 +57,12 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
         val touchHelper = ItemTouchHelper(adapter.itemTouchHelperCallback)
         touchHelper.attachToRecyclerView(recyclerView)
 
-        btnGotoAddSpeciesList.setOnClickListener {
-            val intent = Intent(this,SpeciesCatalogueActivity::class.java)
-            startActivity(intent)
+        btnAddSpecies.setOnClickListener {
+            showAddSpeciesDialog()
         }
 
         btnSave.setOnClickListener {
-            SharedPreferencesManager.saveSpeciesCatalogue(
+            SharedPreferencesManager.saveSpeciesList(
                 this,
                 adapter.getCurrentList()
             )
@@ -54,8 +70,77 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
         }
 
 
+
         btnCancel.setOnClickListener {
             finish()
         }
     }
+
+    private fun showAddSpeciesDialog() {
+        val input = EditText(this).apply {
+            hint = "Enter species name"
+        }
+
+        val btnSelectImage = Button(this).apply {
+            text = context.getString(R.string.select_image_optional)
+            setOnClickListener {
+                imagePicker.launch("image/*")
+            }
+        }
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 32, 32, 32)
+            addView(input)
+            addView(btnSelectImage)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Add Species")
+            .setView(layout)
+            .setPositiveButton("Add") { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isBlank()) return@setPositiveButton
+
+                // 1️⃣ Save species name
+                SharedPreferencesManager.addSpecies(this, name)
+
+                // 2️⃣ Save image URI if selected
+                pendingImageUri?.let {
+                    SharedPreferencesManager.saveSpeciesImageUri(
+                        this,
+                        SharedPreferencesManager.normalizeSpeciesName(name),
+                        it.toString()
+                    )
+                }
+
+                pendingImageUri = null
+
+                // 3️⃣ Refresh list
+                adapter.updateList(
+                    SharedPreferencesManager.loadSpeciesList(this)
+                )
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                pendingImageUri = null
+            }
+            .show()
+    }
+
+
+    private fun confirmDeleteSpecies(speciesName: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Species")
+            .setMessage("Delete \"$speciesName\"?\nThis will not remove past catches.")
+            .setPositiveButton("Delete") { _, _ ->
+                SharedPreferencesManager.removeSpecies(this, speciesName)
+
+                adapter.updateList(
+                    SharedPreferencesManager.loadSpeciesList(this)
+                )
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
 }

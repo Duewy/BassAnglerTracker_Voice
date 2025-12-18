@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
-import com.bramestorm.bassanglertracker.utils.FishSpecies
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 
@@ -87,16 +86,10 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 
-        // ✅ Register species for voice recognition
-        FishSpecies.allSpeciesList.forEach {
-            VoiceInputMapper.registerUserSpecies(it)
-        }
+        // ✅ Register species for voice recognition (single source of truth)
+        val speciesList = SharedPreferencesManager.loadSpeciesList(this)
 
-        val userAddedSpecies =
-            SharedPreferencesManager.getSpeciesCatalogue(this)
-                .filter { it !in FishSpecies.allSpeciesList }
-
-        userAddedSpecies.forEach {
+        speciesList.forEach {
             VoiceInputMapper.registerUserSpecies(it)
         }
 

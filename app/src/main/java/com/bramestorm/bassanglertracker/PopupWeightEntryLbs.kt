@@ -40,8 +40,8 @@ class PopupWeightEntryLbs : Activity() {
 
         loadSpeciesSpinner() // Populates spinner and sets up listener
 
-        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99))
-        edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15))
+        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 499))   // limit of 499 Lbs
+        edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15))    // ounces 0 to 15
 
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
@@ -74,37 +74,17 @@ class PopupWeightEntryLbs : Activity() {
     }
 //------------- END On Create ---------------------------------
 
- // -------------- Min & Max Input Filter to enforce value limits --------------------------
-    class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
-        override fun filter(
-            source: CharSequence?,
-            start: Int,
-            end: Int,
-            dest: Spanned?,
-            dstart: Int,
-            dend: Int
-        ): CharSequence? {
-            try {
-                val input = (dest.toString() + source.toString()).toInt()
-                if (input in min..max) {
-                    return null // Accept input
-                }
-            } catch (e: NumberFormatException) {
-                // Ignore invalid input
-            }
-            return "" // Reject input if out of range
-        }
-    }
+
 
     override fun onResume() {
         super.onResume()
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerLbsSpeciesPopUp)
 
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,
@@ -134,6 +114,28 @@ class PopupWeightEntryLbs : Activity() {
                     selectedSpecies = ""
                 }
             }
+    }
+
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
+    class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
+        override fun filter(
+            source: CharSequence?,
+            start: Int,
+            end: Int,
+            dest: Spanned?,
+            dstart: Int,
+            dend: Int
+        ): CharSequence? {
+            try {
+                val input = (dest.toString() + source.toString()).toInt()
+                if (input in min..max) {
+                    return null // Accept input
+                }
+            } catch (e: NumberFormatException) {
+                // Ignore invalid input
+            }
+            return "" // Reject input if out of range
+        }
     }
 
 }

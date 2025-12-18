@@ -57,7 +57,7 @@ class PopupWeightEntryTourPounds : Activity() {
         Log.d("PopupWeightEntry", "Available clip colors: ${colorNames.joinToString()}")
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)
+        spinnerSpecies = findViewById(R.id.spinnerTournyPoundsSpeciesPopUp)
         spinnerClipColor = findViewById(R.id.clipColorSpinner)
         edtWeightTourPounds = findViewById(R.id.edtWeightTourPounds)
         edtWeightTourPoundsDecimal = findViewById(R.id.edtWeightTourPoundsDecimal)

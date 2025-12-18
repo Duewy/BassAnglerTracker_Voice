@@ -54,7 +54,7 @@ class PopupLengthEntryTourInches : Activity() {
             ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)
+        spinnerSpecies = findViewById(R.id.spinnerInchesTournySpeciesPopUp)
         spinnerClipColor = findViewById(R.id.clipColorSpinner)
         edtLengthInches = findViewById(R.id.edtLengthTourInches)
         edtLengthQuarters = findViewById(R.id.edtLengthQuarters)

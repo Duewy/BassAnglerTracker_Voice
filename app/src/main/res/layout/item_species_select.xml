@@ -14,8 +14,7 @@
         android:layout_height="1dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:clickable="true"
-        android:focusable="true"
+        android:visibility="gone"
         android:contentDescription="@string/species_image"
         android:focusableInTouchMode="false"
         app:srcCompat="@drawable/ic_edit" />

@@ -49,7 +49,7 @@ class SpeciesSelectAdapter(
 
         // Save reordered list here
         val newOrder = getOrderedSpeciesNames()
-        SharedPreferencesManager.saveSpeciesCatalogue(
+        SharedPreferencesManager.saveSpeciesList(
             viewHolder.itemView.context,
             newOrder
         )

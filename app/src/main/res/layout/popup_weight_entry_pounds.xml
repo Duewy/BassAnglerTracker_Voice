@@ -58,7 +58,7 @@
                 android:textStyle="bold" />
 
             <Spinner
-                android:id="@+id/spinnerSpeciesPopUp"
+                android:id="@+id/spinnerPoundsSpeciesPopUp"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="center"

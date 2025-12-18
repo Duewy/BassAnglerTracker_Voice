@@ -36,11 +36,11 @@
             android:gravity="center"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:paddingBottom="8dp"
-            android:text="@string/this_is_where_you_arrange_the_species_on_the_list_for_all_of_the_species_listings_throughout_the_catch_and_call_app"
+            android:paddingBottom="2dp"
+            android:text="@string/add_a_species_to_list"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="italic" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtSelectedCount"
@@ -55,13 +55,12 @@
 
         <!-- RecyclerView for drag-and-drop -->
 
-        <!-- Save Button -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerSpecies"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingBottom="10dp"
+            android:layout_marginHorizontal="10dp"
             android:scrollbars="vertical"
             tools:listitem="@layout/item_species_select" />
 
@@ -75,14 +74,17 @@
             android:gravity="center"
             android:orientation="horizontal">
 
+
+            <!-- Add Save Cancel Buttons -->
+
             <Button
                 android:id="@+id/btnAddSpeciesList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginEnd="15dp"
-                android:background="@drawable/btn_outline_orange"
-                android:padding="7dp"
+                android:background="@drawable/btn_outline_green"
+                android:padding="15dp"
                 android:text="@string/add_a_species"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -94,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/btn_outline_blue"
-                android:padding="7dp"
+                android:padding="15dp"
                 android:text="@string/save_order"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -119,12 +121,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="15dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/btn_outline_lt_brown"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/btn_outline_grey"
                 android:padding="15dp"
                 android:text="@string/cancel"
                 android:textColor="@color/clip_blue"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
         </LinearLayout>

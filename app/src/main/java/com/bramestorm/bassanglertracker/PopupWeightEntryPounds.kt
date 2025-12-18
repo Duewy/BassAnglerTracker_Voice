@@ -30,7 +30,6 @@ class PopupWeightEntryPounds : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         setContentView(R.layout.popup_weight_entry_pounds)
 
@@ -41,8 +40,8 @@ class PopupWeightEntryPounds : Activity() {
 
         loadSpeciesSpinner() // Populates spinner and sets up listener
 
-        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99))
-        edtWeightDec.filters = arrayOf(MinMaxInputFilter(0, 99))
+        edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 499))   // limit to 499 Pounds
+        edtWeightDec.filters = arrayOf(MinMaxInputFilter(0, 99))    // limit to 0.99 Pounds
 
         btnSaveWeight.setOnClickListener {
             val resultIntent = Intent()
@@ -75,38 +74,16 @@ class PopupWeightEntryPounds : Activity() {
     }
 //------------- END On Create ---------------------------------
 
-    // -------------- Min & Max Input Filter to enforce value limits --------------------------
-    class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
-        override fun filter(
-            source: CharSequence?,
-            start: Int,
-            end: Int,
-            dest: Spanned?,
-            dstart: Int,
-            dend: Int
-        ): CharSequence? {
-            try {
-                val input = (dest.toString() + source.toString()).toInt()
-                if (input in min..max) {
-                    return null // Accept input
-                }
-            } catch (e: NumberFormatException) {
-                // Ignore invalid input
-            }
-            return "" // Reject input if out of range
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         loadSpeciesSpinner()
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerPoundsSpeciesPopUp)
 
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,
@@ -136,6 +113,28 @@ class PopupWeightEntryPounds : Activity() {
                     selectedSpecies = ""
                 }
             }
+    }
+
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
+    class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
+        override fun filter(
+            source: CharSequence?,
+            start: Int,
+            end: Int,
+            dest: Spanned?,
+            dstart: Int,
+            dend: Int
+        ): CharSequence? {
+            try {
+                val input = (dest.toString() + source.toString()).toInt()
+                if (input in min..max) {
+                    return null // Accept input
+                }
+            } catch (e: NumberFormatException) {
+                // Ignore invalid input
+            }
+            return "" // Reject input if out of range
+        }
     }
 
 }

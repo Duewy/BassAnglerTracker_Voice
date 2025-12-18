@@ -118,7 +118,6 @@ class SetUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         requestPhoneStatePermissionIfNeeded()
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         //------------------- Ensures that the GPS must be Re-Enabled Every Day --------------------
 
@@ -397,7 +396,7 @@ class SetUpActivity : AppCompatActivity() {
                 }
                 isFunDaySelected && isCentimetersSelected -> {
                     catchEntryType = TYPE_FUN_CM
-                    CatchEntryMetric::class.java
+                    CatchEntryCentimeters::class.java
                 }
                 isFunDaySelected && isInchesSelected -> {
                     catchEntryType = TYPE_FUN_INCH
@@ -510,7 +509,7 @@ class SetUpActivity : AppCompatActivity() {
 
         // ✅ Single source of truth
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,

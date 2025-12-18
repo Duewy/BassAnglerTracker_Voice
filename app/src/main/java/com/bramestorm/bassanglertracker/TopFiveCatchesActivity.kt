@@ -150,7 +150,7 @@ class TopFiveCatchesActivity : AppCompatActivity() {
 
 
         // Get the saved species names
-        val speciesNames = SharedPreferencesManager.getSpeciesCatalogue(this)
+        val speciesNames = SharedPreferencesManager.loadSpeciesList(this)
 
         // Map them into SpeciesItem so we get name + image
         val speciesItems = speciesNames.map { name ->

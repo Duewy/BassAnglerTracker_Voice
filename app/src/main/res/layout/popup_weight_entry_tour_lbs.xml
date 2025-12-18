@@ -74,7 +74,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Spinner
-                android:id="@+id/spinnerSpeciesPopUp"
+                android:id="@+id/spinnerTournyLbsSpeciesPopUp"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="30dp"

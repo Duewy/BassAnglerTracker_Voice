@@ -134,7 +134,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
-            catchType = "pounds",
+            catchType = "fun_pounds",
             markerType = selectedSpecies,
             clipColor = null
         )
@@ -153,7 +153,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
     //============================================================================
     private fun updateListViewPounds() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("pounds", todaysDate).sortedByDescending { it.dateTime } //todo check the correct catchType
+        val todaysCatches = dbHelper.getCatchesForToday("fun_pounds", todaysDate).sortedByDescending { it.dateTime } //todo check the correct catchType
 
         catchList.clear()
         catchList.addAll(todaysCatches)
@@ -190,15 +190,17 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_catch_pounds, null)
         val edtWeightLbs = dialogView.findViewById<EditText>(R.id.edtWeightLbs)
         val edtWeightDec = dialogView.findViewById<EditText>(R.id.edtWeightDec)
-        val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditLbs)
+        val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditPounds)
 
-        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
+        SharedPreferencesManager.loadSpeciesList(this)
+        val speciesList = SharedPreferencesManager.loadSpeciesList(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesLbs.adapter = adapter
+
 
         val totalWeightHundredthPounds = catchItem.totalWeightHundredthPounds ?: 0
         edtWeightLbs.setText((totalWeightHundredthPounds / 100).toString())

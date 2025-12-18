@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class CatchEntryMetric : BaseCatchEntryActivity() {
+class CatchEntryCentimeters : BaseCatchEntryActivity() {
 
     private lateinit var btnSetUp3Cm: Button
     private lateinit var btnOpenLengthCmPopup: Button
@@ -64,7 +64,7 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_catch_entry_metric)
+        setContentView(R.layout.activity_catch_entry_centimeters)
 
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
         Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
@@ -117,7 +117,7 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
     }
 
     private fun openLengthCmPopup() {
-        val intent = Intent(this, PopupLengthEntryMetric::class.java)
+        val intent = Intent(this, PopupLengthEntryCentimeters::class.java)
         lengthEntryLauncher.launch(intent)
     }
 
@@ -133,7 +133,7 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalLengthTenths = totalLengthTenths,
             totalWeightHundredthKg = null,
-            catchType = "metric",
+            catchType = "fun_cm",
             markerType = selectedSpecies,
             clipColor = null
         )
@@ -160,7 +160,7 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
 
     private fun updateListViewCm() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("metric", todaysDate).sortedByDescending { it.dateTime }
+        val todaysCatches = dbHelper.getCatchesForToday("fun_cm", todaysDate).sortedByDescending { it.dateTime }
 
         catchList.clear()
         catchList.addAll(todaysCatches)
@@ -188,13 +188,15 @@ class CatchEntryMetric : BaseCatchEntryActivity() {
         val edtLengthDecimal = dialogView.findViewById<EditText>(R.id.edtLengthDecimal)
         val spinnerSpeciesLbs = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditCms)
 
-        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
+SharedPreferencesManager.loadSpeciesList(this)
+        val speciesList = SharedPreferencesManager.loadSpeciesList(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesLbs.adapter = adapter
+
 
         val totalLengthTenths = catchItem.totalLengthTenths ?: 0
         edtLengthCms.setText((totalLengthTenths / 10).toString())

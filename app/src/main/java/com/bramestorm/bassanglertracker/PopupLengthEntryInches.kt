@@ -36,8 +36,8 @@ class PopupLengthEntryInches : Activity() {
 
         loadSpeciesSpinner()
 
-        edtLengthInches.filters = arrayOf(MinMaxInputFilter(1, 99))
-        edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3))
+        edtLengthInches.filters = arrayOf(MinMaxInputFilter(1, 299))    //Limit to 299 Inches
+        edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3))    //Limit 0 to 3 quarters
 
         btnSaveCatch.setOnClickListener {
             val resultIntent = Intent()
@@ -74,7 +74,7 @@ class PopupLengthEntryInches : Activity() {
         val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
 
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,
@@ -106,7 +106,7 @@ class PopupLengthEntryInches : Activity() {
             }
     }
 
-
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(
             source: CharSequence?,

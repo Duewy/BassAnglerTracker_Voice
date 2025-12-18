@@ -14,7 +14,6 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.training.UserTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
-import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
@@ -32,10 +31,6 @@ class MainActivity : AppCompatActivity() {
         // Check if this is the First time the Catch and Call app has opened
         checkFirstLaunch()
 
-
-
-        //--------------------- Set the Initial List for Species ---------------------
-        SharedPreferencesManager.initializeDefaultSpeciesIfNeeded(this)
 
         // ---------------- Open Set-Up page --------------------------------
         val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)

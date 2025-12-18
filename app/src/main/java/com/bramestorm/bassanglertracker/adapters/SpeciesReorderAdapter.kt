@@ -8,19 +8,19 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
+import com.bramestorm.bassanglertracker.utils.FishSpecies
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
 
 class SpeciesReorderAdapter(
-    private val speciesList: MutableList<String>
-) : RecyclerView.Adapter<SpeciesReorderAdapter.ViewHolder>() {
-
+    private val speciesList: MutableList<String>,
+    private val onDeleteRequested: (String) -> Unit) : RecyclerView.Adapter<SpeciesReorderAdapter.ViewHolder>(){
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgDragHandle: ImageView = itemView.findViewById(R.id.imgDragHandle)
         val imgSpecies: ImageView = itemView.findViewById(R.id.imgSpeciesReorder)
         val txtSpeciesName: TextView = itemView.findViewById(R.id.txtSpeciesNameReorder)
+        val imgDelete: ImageView = itemView.findViewById(R.id.imgDeleteSpecies)
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -30,9 +30,27 @@ class SpeciesReorderAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val name = speciesList[position]
+
+        holder.itemView.setBackgroundResource(R.color.selection_list)
+
         holder.txtSpeciesName.text = name
         holder.imgSpecies.setImageResource(getSpeciesImageResId(name))
+
+        // 🔒 Determine if this is a user-added species
+        val isUserAdded = name !in FishSpecies.allSpeciesList
+
+        if (isUserAdded) {
+            holder.imgDelete.visibility = View.VISIBLE
+            holder.imgDelete.setOnClickListener {
+                onDeleteRequested(name)
+            }
+        } else {
+            holder.imgDelete.visibility = View.GONE
+            holder.imgDelete.setOnClickListener(null)
+        }
     }
+
+
 
     override fun getItemCount(): Int = speciesList.size
 
@@ -46,6 +64,31 @@ class SpeciesReorderAdapter(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             0
         ) {
+            override fun onSelectedChanged(
+                viewHolder: RecyclerView.ViewHolder?,
+                actionState: Int
+            ) {
+                super.onSelectedChanged(viewHolder, actionState)
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                    viewHolder?.itemView?.setBackgroundResource(
+                        R.color.softlock_green
+                    )
+                }
+            }
+
+            override fun clearView(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ) {
+                super.clearView(recyclerView, viewHolder)
+
+                viewHolder.itemView.setBackgroundResource(
+                    R.color.selection_list
+                )
+            }
+
+
 
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -69,6 +112,12 @@ class SpeciesReorderAdapter(
                 // No swipe behavior
             }
         }
+
+    fun updateList(newList: List<String>) {
+        speciesList.clear()
+        speciesList.addAll(newList)
+        notifyDataSetChanged()
+    }
 
 }
 

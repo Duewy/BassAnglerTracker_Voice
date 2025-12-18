@@ -40,27 +40,27 @@ class CatchItemAdapter(
         catchItem?.let {
             val speciesName = it.species ?: "Unknown"
             val infoText = when (it.catchType) {
-                "lbsOzs" -> {
+                "fun_lbs_oz" -> {
                     val totalOz = it.totalWeightOz ?: 0
                     "$speciesName: ${formatWeightOzToLbsOz(totalOz)}, @ $timeFormatted"
                 }
 
-                "pounds" -> {
+                "fun_pounds" -> {
                     val hundredthLbs = it.totalWeightHundredthPounds ?: 0
                     "$speciesName: ${formatWeightPounds(context, hundredthLbs)}, @ $timeFormatted"
                 }
 
-                "kgs" -> {
+                "fun_kgs" -> {
                     val hundredthKg = it.totalWeightHundredthKg ?: 0
                     "$speciesName: ${formatWeightKg(context, hundredthKg)}, @ $timeFormatted"
                 }
 
-                "inches" -> {
+                "fun_inches" -> {
                     val quarters = it.totalLengthQuarters ?: 0
                     "$speciesName: ${formatLengthQuartersToInches(quarters)}, @ $timeFormatted"
                 }
 
-                "metric" -> {
+                "fun_cm" -> {
                     val tenthCm = it.totalLengthTenths ?: 0
                     "$speciesName: ${formatLengthCm(context, tenthCm)}, @ $timeFormatted"
                 }

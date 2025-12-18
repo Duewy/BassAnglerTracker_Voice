@@ -323,7 +323,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
             totalLengthQuarters = null,
             totalWeightHundredthKg = null,
             totalLengthTenths = totalLengthTenths,
-            catchType = "metric",
+            catchType = "tournament_cms",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -355,14 +355,14 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
         // todo Set up Better Scenarios
         val currentCount = dbHelper
-            .getCatchesForToday("metric", getCurrentDate())
+            .getCatchesForToday("tournament_cms", getCurrentDate())
             .sortedByDescending { it.totalLengthTenths ?: 0 }
             .take(tournamentCatchLimit)
             .size
 
         if (currentCount >= 2) {
             lastTournamentCatch?.let {
-                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "metric")
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "tournament_cms")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
@@ -410,7 +410,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "metric", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "tournament_cms", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalLengthTenths ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
@@ -421,7 +421,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "metric",
+            catchType = "tournament_cms",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled

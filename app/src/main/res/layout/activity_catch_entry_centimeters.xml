@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/softlock_sand"
-    tools:context=".CatchEntryMetric">
+    tools:context=".CatchEntryCentimeters">
 
 
     <ImageView
@@ -103,8 +103,8 @@
         android:id="@+id/simpleCmListView"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
+        android:divider="@color/Log_brown"
+        android:dividerHeight="2dp"
         android:padding="8dp"
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"

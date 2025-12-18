@@ -31,4 +31,14 @@
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/imgDeleteSpecies"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/icon_x_red_med"
+        android:contentDescription="Delete Species"
+        android:visibility="gone"
+        android:padding="4dp" />
+
 </LinearLayout>

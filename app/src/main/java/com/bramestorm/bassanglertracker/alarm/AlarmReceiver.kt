@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.bramestorm.bassanglertracker.R
 
 class AlarmReceiver : BroadcastReceiver() {
-
+//todo since there is no ALARM on the Tournament pages this can be deleted
     override fun onReceive(context: Context, intent: Intent?) {
         Log.d("ALARM_DEBUG", "🚨 AlarmReceiver triggered!")
 

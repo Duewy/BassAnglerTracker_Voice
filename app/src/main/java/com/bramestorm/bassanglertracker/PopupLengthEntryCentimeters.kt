@@ -15,7 +15,7 @@ import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper
 
-class PopupLengthEntryMetric : Activity() {
+class PopupLengthEntryCentimeters : Activity() {
 
     private var selectedSpecies: String = ""
 
@@ -26,7 +26,7 @@ class PopupLengthEntryMetric : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.popup_length_entry_metric)
+        setContentView(R.layout.popup_length_entry_centimeters)
 
 
         val edtLengthCm: EditText = findViewById(R.id.edtLengthCms)
@@ -36,7 +36,7 @@ class PopupLengthEntryMetric : Activity() {
 
         loadSpeciesSpinner()
 
-        edtLengthCm.filters = arrayOf(MinMaxInputFilter(0, 99))      // Cms: 1-99
+        edtLengthCm.filters = arrayOf(MinMaxInputFilter(0, 999))      // Cms: 1-999
         edtLengthDecimal.filters = arrayOf(MinMaxInputFilter(0, 9))  // millimeters: 0-9
 
         btnSaveCatch.setOnClickListener {
@@ -69,10 +69,10 @@ class PopupLengthEntryMetric : Activity() {
     }
 
     private fun loadSpeciesSpinner() {
-        val spinnerSpecies: Spinner = findViewById(R.id.spinnerInchesSpeciesPopUp)
+        val spinnerSpecies: Spinner = findViewById(R.id.spinnerCmsSpeciesPopUp)
 
         val speciesList = SharedPreferencesManager
-            .getSpeciesCatalogue(this)
+            .loadSpeciesList(this)
             .map { speciesName ->
                 SpeciesItem(
                     speciesName,
@@ -104,7 +104,7 @@ class PopupLengthEntryMetric : Activity() {
             }
     }
 
-
+    // -------------- Min & Max Input Filter to enforce value limits --------------------------
     class MinMaxInputFilter(private val min: Int, private val max: Int) : InputFilter {
         override fun filter(
             source: CharSequence?,

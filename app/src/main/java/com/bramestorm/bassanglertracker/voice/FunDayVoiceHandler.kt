@@ -27,7 +27,14 @@ class FunDayVoiceHandler(
     }
 
     private val measurementMode = SharedPreferencesManager.getFunDayUnit(context)
-    private val typeEntry = measurementMode.name.lowercase(Locale.getDefault())
+    private val typeEntry = when (measurementMode) {
+        MeasurementMode.LBS_OZ -> "fun_lbs_oz"
+        MeasurementMode.POUNDS -> "fun_pounds"
+        MeasurementMode.KG -> "fun_kgs"
+        MeasurementMode.INCHES -> "fun_inches"
+        MeasurementMode.CM -> "fun_cm"
+    }
+
 
     private val voiceManager = VoiceInteractionManager(
         context = context,

@@ -72,8 +72,10 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <!-- Species Spinner -->
+
+            <!-- Clip Color Spinner -->
             <Spinner
-                android:id="@+id/spinnerSpeciesPopUp"
+                android:id="@+id/spinnerInchesTournySpeciesPopUp"
                 android:layout_width="150dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="30dp"
@@ -83,7 +85,6 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- Clip Color Spinner -->
             <Spinner
                 android:id="@+id/clipColorSpinner"
                 android:layout_width="150dp"

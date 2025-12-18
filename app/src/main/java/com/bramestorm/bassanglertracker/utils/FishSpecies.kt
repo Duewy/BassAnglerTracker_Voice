@@ -25,11 +25,11 @@ package com.bramestorm.bassanglertracker.utils
             "ling",
             "sucker",
             "drum",
-            "stripped bass",
+            "striped bass",
             "saugeye",
             "sunfish",
             "gar",
-            " bull head",
+            "bull head",
             "tarpon",
             "grouper",
             "red snapper"

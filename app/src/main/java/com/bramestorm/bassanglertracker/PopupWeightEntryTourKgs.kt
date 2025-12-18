@@ -55,7 +55,7 @@ class PopupWeightEntryTourKgs : Activity() {
 
 
         // UI Components
-        spinnerSpecies = findViewById(R.id.spinnerSpeciesPopUp)
+        spinnerSpecies = findViewById(R.id.spinnerTournyKgsSpeciesPopUp)
         spinnerClipColor = findViewById(R.id.clipColorSpinner)
         edtWeightTourKgs = findViewById(R.id.edtWeightTourKgs)
         edtWeightTourGrams = findViewById(R.id.edtWeightTourGrams)

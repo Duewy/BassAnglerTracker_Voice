@@ -333,7 +333,7 @@ override val dialog: Any
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
             totalLengthQuarters = totalLengthQuarters,
-            catchType = "inches",
+            catchType = "tournament_inches",
             markerType = speciesInitial,
             clipColor = cleanClipColor
         )
@@ -420,7 +420,7 @@ override val dialog: Any
             txtTypeLetterInches4, txtTypeLetterInches5, txtTypeLetterInches6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "inches", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "tournament_inches", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalLengthQuarters ?: 0 }
 
         val tournamentCatches = if (isCullingEnabled) {
@@ -431,7 +431,7 @@ override val dialog: Any
 
         availableClipColors = calculateAvailableClipColors(
             dbHelper,
-            catchType = "inches",
+            catchType = "tournament_inches",
             date = formattedDate,
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled

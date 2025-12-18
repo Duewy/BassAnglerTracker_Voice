@@ -162,7 +162,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             totalLengthQuarters = totalLengthQuarters,
             totalLengthTenths = null,
             totalWeightHundredthKg = null,
-            catchType = "inches",
+            catchType = "fun_inches",
             markerType = selectedSpecies,
             clipColor = null
         )
@@ -189,7 +189,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
     private fun updateListViewInch() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("inches", todaysDate)
+        val todaysCatches = dbHelper.getCatchesForToday("fun_inches", todaysDate)
             .sortedByDescending { it.dateTime }
 
         catchList.clear()
@@ -221,13 +221,15 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         val edtLengthEntryQuarters = dialogView.findViewById<EditText>(R.id.edtLengthQuarters)
         val spinnerSpeciesEditInches = dialogView.findViewById<Spinner>(R.id.spinnerSpeciesEditInches)
 
-        val speciesList = SharedPreferencesManager.getSpeciesCatalogue(this)
+SharedPreferencesManager.loadSpeciesList(this)
+        val speciesList = SharedPreferencesManager.loadSpeciesList(this)
         val normalizedSpeciesList = speciesList.map { normalizeSpeciesName(it) }
         val currentSpeciesNormalized = normalizeSpeciesName(catchItem.species)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerSpeciesEditInches.adapter = adapter
+
 
         val newLengthQuarters = catchItem.totalLengthQuarters ?: 0
         edtLengthInches.setText((newLengthQuarters / 4).toString())

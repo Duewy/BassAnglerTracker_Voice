@@ -128,7 +128,7 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".CatchEntryMetric"
+        <activity android:name=".CatchEntryCentimeters"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 
@@ -208,7 +208,7 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".PopupLengthEntryMetric"
+        <activity android:name=".PopupLengthEntryCentimeters"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
