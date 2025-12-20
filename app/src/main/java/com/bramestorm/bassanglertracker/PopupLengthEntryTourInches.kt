@@ -27,8 +27,8 @@ class PopupLengthEntryTourInches : Activity() {
     private lateinit var btnCancelInches: Button
 
     companion object {
-        const val EXTRA_LENGTH_INCHES = "totalLengthQuarters"
-        const val EXTRA_SPECIES = "selectedSpecies"
+        const val EXTRA_LENGTH_INCHES          = "totalLengthQuarters"
+        const val EXTRA_SPECIES                = "selectedSpecies"
         const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
         const val EXTRA_CATCH_TYPE             = "catchType"
         const val EXTRA_IS_TOURNAMENT          = "isTournament"

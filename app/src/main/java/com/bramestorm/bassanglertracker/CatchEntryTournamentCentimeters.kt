@@ -105,15 +105,16 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     private var lastTournamentCatch: CatchItem? = null
 
     companion object {
-        // ← outputs from this popup
-        const val EXTRA_LENGTH_CMS             = "totalLengthTenths"        // Send & receive this
+
+                                // ← outputs this to the popup
+        const val EXTRA_LENGTH_CMS             = "totalLengthTenths"    // Send & receive this
         const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
         const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
-        const val EXTRA_MEASURING_TYPE         = "measuringType"
+        const val EXTRA_MEASURING_TYPE         = "unitType"
         const val EXTRA_IS_TOURNAMENT          = "isTournament"
         const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
 
-        // → inputs into this popup
+                               // → inputs this from the popup
         const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
         const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
@@ -219,7 +220,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         txtColorLetter6 = findViewById(R.id.txtCmsColorLetter6)
 
 
-
+        //--- Retrieve the values from the Set Up page -------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
         tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
@@ -286,13 +287,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         val intent = Intent(this, PopupLengthEntryTourCms::class.java)
         intent.putExtra(EXTRA_IS_TOURNAMENT, true)
 
-        if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
-            intent.putExtra("tournamentSpecies", "Large Mouth Bass")
-        } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
-            intent.putExtra("tournamentSpecies", "Small Mouth Bass")
-        } else{
-            intent.putExtra("tournamentSpecies", tournamentSpecies)
-        }
+        intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
 
         // 🔥 Send available clip colors as String array
         val colorNames = availableClipColors.map { it.name }.toTypedArray()

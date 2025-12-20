@@ -108,7 +108,7 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         const val EXTRA_LENGTH_INCHES          = "totalLengthQuarters"    // Send & receive this from this popup
         const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
         const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
-        const val EXTRA_MEASURING_TYPE         = "measuringType"
+        const val EXTRA_MEASURING_TYPE         = "unitType"
         const val EXTRA_IS_TOURNAMENT          = "isTournament"
         const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
 
@@ -116,7 +116,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
         const val EXTRA_TOURNAMENT_SPECIES     = "tournamentSpecies"    // Receive this
     }
-
 
 
     // ````````````` Retrieves data from the Manual Mode POPUP ````````````````````````
@@ -218,10 +217,10 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         txtInchesColorLetter5 = findViewById(R.id.txtInchesColorLetter5)
         txtInchesColorLetter6 = findViewById(R.id.txtInchesColorLetter6)
 
-        // GET VAlUES from SetUp page -----------
+        //--- Retrieve the values from the Set Up page -------
         tournamentCatchLimit = intent.getIntExtra("NUMBER_OF_CATCHES", 4)
         typeOfMarkers = intent.getStringExtra("Color_Numbers") ?: "Color"
-        tournamentSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES) ?: "Unknown"
+        tournamentSpecies = intent.getStringExtra("TOURNAMENT_SPECIES") ?: "Unknown"
         measurementSystem = intent.getStringExtra("unitType") ?: "weight"
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
         voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)     // Is the app in VCC mode?
@@ -287,19 +286,12 @@ override val dialog: Any
         awaitingResult = true
 
         // build the Intent with your fresh list
-        val intent = Intent(
-            this,
-            PopupLengthEntryTourInches::class.java
-        ).apply {
-            intent.putExtra(EXTRA_IS_TOURNAMENT, true)
+        val intent = Intent(this,PopupLengthEntryTourInches::class.java).apply {
 
-            if (tournamentSpecies.equals("Large Mouth", true) || tournamentSpecies.equals("Largemouth", true))  {
-                intent.putExtra(EXTRA_TOURNAMENT_SPECIES, "Large Mouth Bass")
-            } else         if (tournamentSpecies.equals("Small Mouth", true) || tournamentSpecies.equals("Smallmouth", true))  {
-                intent.putExtra(EXTRA_TOURNAMENT_SPECIES, "Small Mouth Bass")
-            } else{
-                intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
-            }
+            intent.putExtra(EXTRA_IS_TOURNAMENT, true)  // Tell the Popup this is a Tournament
+
+                // Send the Species from the Set Up page on to the Popup
+            intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
 
             // Send as an ArrayList so you can retrieve with getStringArrayListExtra
             val colorArray = availableClipColors.map { it.name }.toTypedArray()

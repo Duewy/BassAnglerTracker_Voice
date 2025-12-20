@@ -61,7 +61,7 @@ class PopupLengthEntryTourCms : Activity() {
         btnCancelCms = findViewById(R.id.btnCancelCms)
 
         // ************  Setup Species Spinner *********************        // if Small Mouth is selected then Small Mouth is at top of Spinner
-        val tournamentSpecies = intent.getStringExtra("tournamentSpecies")?.trim() ?: "Unknown"
+        val tournamentSpecies = intent.getStringExtra(EXTRA_TOURNAMENT_SPECIES)?.trim() ?: "Unknown"
         val speciesList: Array<String> = when {
             isTournament && tournamentSpecies.equals("Large Mouth Bass", ignoreCase = true) -> {
                 arrayOf("Large Mouth", "Small Mouth")

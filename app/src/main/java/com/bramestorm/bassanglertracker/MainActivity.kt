@@ -21,8 +21,11 @@ import com.google.android.gms.ads.MobileAds
 import java.util.Date
 import java.util.Locale
 
+private const val ADS_ENABLED = false
 
 class MainActivity : AppCompatActivity() {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +65,10 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        MobileAds.initialize(this) {}
+        if (ADS_ENABLED) {
+            MobileAds.initialize(this) {}
+        }
+
 
 
     }// `````````` END On Create  ``````````````````````
@@ -70,10 +76,11 @@ class MainActivity : AppCompatActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        if (hasFocus && shouldShowAdToday()) {
+        if (ADS_ENABLED && hasFocus && shouldShowAdToday()) {
             showAdPopup("main")
         }
     }
+
 
     // Check if this is the User's first Time Opening the Catch and Call App
     // if so then they will have to set up the proper STT and TTS as well as
