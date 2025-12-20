@@ -246,7 +246,7 @@
 
         <!-- Get the Voice Training Section -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
-        <activity android:name=".training.UserTrainingIndex"
+        <activity android:name=".training.UserManualModeTrainingIndex"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"/>
 

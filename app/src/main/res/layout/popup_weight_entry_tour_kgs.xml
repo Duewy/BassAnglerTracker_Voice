@@ -20,12 +20,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@color/clip_orange"
+            android:background="@color/clip_blue"
             android:gravity="center"
             android:paddingHorizontal="10dp"
             android:paddingVertical="5dp"
             android:text="@string/tournament_catch_kgs"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
 

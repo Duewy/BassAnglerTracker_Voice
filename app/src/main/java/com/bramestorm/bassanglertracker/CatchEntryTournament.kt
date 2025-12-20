@@ -413,7 +413,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
         )
 
-        val allCatches = dbHelper.getCatchesForToday(catchType = "tournament_lbs_oz", formattedDate)
+        val allCatches = dbHelper.getCatchesForToday(catchType = "tournament_lbs_ozs", formattedDate)
         val sortedCatches = allCatches.sortedByDescending { it.totalWeightOz ?: 0 }
 
         // These are the ones used for scoring and totals

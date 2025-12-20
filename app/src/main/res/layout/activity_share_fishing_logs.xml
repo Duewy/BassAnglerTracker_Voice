@@ -120,15 +120,15 @@
                 android:padding="10dp"/>
 
             <Button
-                android:id="@+id/btnGenerateKLM"
+                android:id="@+id/btnGenerateKML"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/btn_outline_softlock_blue"
-                android:text="@string/generate_klm_file"
+                android:padding="10dp"
+                android:text="@string/generate_kml_file"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:padding="10dp"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 

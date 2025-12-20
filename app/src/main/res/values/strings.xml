@@ -322,6 +322,7 @@
     <string name="save_order">Save Order</string>
     <string name="add_a_species_to_list">Add a Species to the List \n User Added Species may be Deleted</string>
     <string name="select_image_optional">Select Image (Optional)</string>
+    <string name="generate_kml_file">Generate \nKML File</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">

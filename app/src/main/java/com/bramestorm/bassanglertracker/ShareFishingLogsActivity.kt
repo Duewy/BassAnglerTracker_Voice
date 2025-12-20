@@ -21,7 +21,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
     private lateinit var chkIncludeGPS: CheckBox
     private lateinit var chkIncludeCatchType: CheckBox
     private lateinit var btnGenerateCSV: Button
-    private lateinit var btnGenerateKLM: Button
+    private lateinit var btnGenerateKML: Button
     private lateinit var btnViewFile : Button
     private lateinit var btnShareCSV: Button
     private lateinit var btnShareKLM: Button
@@ -44,7 +44,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         chkIncludeCatchType = findViewById(R.id.chkIncludeCatchType)
 
         btnGenerateCSV = findViewById(R.id.btnGenerateCSV)
-        btnGenerateKLM = findViewById(R.id.btnGenerateKLM)
+        btnGenerateKML = findViewById(R.id.btnGenerateKML)
 
         btnViewFile = findViewById(R.id.btnViewFile)
 
@@ -86,7 +86,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
         }
 
         //  generate KLM Files
-        btnGenerateKLM.setOnClickListener {
+        btnGenerateKML.setOnClickListener {
 
             // 🔒 Require at least one checkbox
             if (!hasAnyFieldSelected()) {

@@ -36,6 +36,7 @@ class PopupLengthEntryCentimeters : Activity() {
 
         loadSpeciesSpinner()
 
+
         edtLengthCm.filters = arrayOf(MinMaxInputFilter(0, 999))      // Cms: 1-999
         edtLengthDecimal.filters = arrayOf(MinMaxInputFilter(0, 9))  // millimeters: 0-9
 

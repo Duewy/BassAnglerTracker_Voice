@@ -9,7 +9,7 @@ import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.SetUpActivity
 
-class UserTrainingIndex : AppCompatActivity() {
+class UserManualModeTrainingIndex : AppCompatActivity() {
 
     private lateinit var btnSetUpUser:Button
     private lateinit var btnMenuUser:Button
@@ -23,7 +23,7 @@ class UserTrainingIndex : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.user_training_index)
+        setContentView(R.layout.user_manual_mode_training_index)
 
         btnSetUpUser = findViewById(R.id.btnSetUpUser)
         btnMenuUser = findViewById(R.id.btnMenuUser)
@@ -49,35 +49,35 @@ class UserTrainingIndex : AppCompatActivity() {
         // GitHub Repository has all saved files on...
 
         btnFunDayFishing.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/funday_how_to.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Fun_Day.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnTournamentFishing.setOnClickListener{
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Tournament_HowTo.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Tournament.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnShareTop5.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Find%20Top%205%20Catches.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_Find_Top_5_Catches.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnWhatIsGPS.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Setup%20GPS.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Setup_GPS.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnMappingGPS.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Share%20Catches%20As%20CSV%20File-1.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_Save_CSV_or_KML_Files.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)

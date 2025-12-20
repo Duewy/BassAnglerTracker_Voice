@@ -12,7 +12,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
-import com.bramestorm.bassanglertracker.training.UserTrainingIndex
+import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 import com.google.android.gms.ads.AdRequest
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     //-------------------------- Open the Manual TRAINING INDEX ------------------------
         val btnManualControls = findViewById<Button>(R.id.btnManualControls)
         btnManualControls.setOnClickListener{
-            val intent1 = Intent(this, UserTrainingIndex::class.java)
+            val intent1 = Intent(this, UserManualModeTrainingIndex::class.java)
             startActivity(intent1)
         }
 
