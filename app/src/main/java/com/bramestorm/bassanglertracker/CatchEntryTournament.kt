@@ -31,6 +31,7 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -92,7 +93,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
-    private var awaitingResult = false
 
 
     // Tournament Configuration
@@ -122,8 +122,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        awaitingResult = false
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val oz = result.data!!.getIntExtra(EXTRA_WEIGHT_OZ, 0)
             val sp = result.data!!.getStringExtra(EXTRA_SPECIES).orEmpty()
             val clip = result.data!!.getStringExtra(EXTRA_CLIP_COLOR).orEmpty()
@@ -218,7 +217,6 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         isCullingEnabled = intent.getBooleanExtra("CULLING_ENABLED", false)
         voiceControlEnabled  = intent.getBooleanExtra("VCC_ENABLED", false)
 
-
         //----ADD a CATCH button is clicked -----------
         btnTournamentCatch.setOnClickListener { showWeightPopup() }
         btnMenu.setOnClickListener { startActivity(Intent(this, SetUpActivity::class.java)) }
@@ -277,21 +275,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
     private fun showWeightPopup() {
-        awaitingResult = true
 
-        val popupClass =
-            PopupWeightEntryTourLbs::class.java
+        val intent = Intent(this, PopupWeightEntryTourLbs::class.java).apply {
 
-        val intent = Intent(this, popupClass).apply {
             putExtra(EXTRA_IS_TOURNAMENT, true)
 
-            // Normalize the tournamentSpecies string
-            val normalizedSpecies = when (tournamentSpecies.trim().lowercase(Locale.US)) {
-                "large mouth", "largemouth" -> "Large Mouth Bass"
-                "small mouth", "smallmouth" -> "Small Mouth Bass"
-                else -> tournamentSpecies
-            }
-            putExtra(EXTRA_TOURNAMENT_SPECIES, normalizedSpecies)
+            putExtra(EXTRA_TOURNAMENT_SPECIES,tournamentSpecies)
 
             // Send as an ArrayList so you can retrieve with getStringArrayListExtra
             val colorArray = availableClipColors.map { it.name }.toTypedArray()
@@ -306,12 +295,12 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
-            "Largemouth"   -> "L"
-            "Smallmouth"   -> "S"
-            "Spotted"      -> "P"
-            else           -> ""
-        }
+        val normalizedSpecies =
+            SharedPreferencesManager.normalizeSpeciesName(species)
+
+        val speciesInitial =
+            SharedPreferencesManager.getSpeciesInitial(normalizedSpecies)
+
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
@@ -477,7 +466,10 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                     "WHITE"  -> "W"
                     else     -> "?"
                 }
-                typeLetters[i].text  = getSpeciesCode(item.species ?: "")
+
+                typeLetters[i].text =
+                    SharedPreferencesManager.getSpeciesInitial(item.species)
+
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realWeights[i].setOnLongClickListener {

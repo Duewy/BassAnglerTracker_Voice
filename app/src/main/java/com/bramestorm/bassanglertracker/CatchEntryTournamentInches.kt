@@ -30,6 +30,7 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -93,7 +94,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
-    private var awaitingResult = false
 
 
     // Tournament Configuration
@@ -122,8 +122,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
     private val entryLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-
-        awaitingResult = false
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val totalLengthQuarters = result.data!!.getIntExtra(EXTRA_LENGTH_INCHES, 0)
             val sp = result.data!!.getStringExtra(EXTRA_SPECIES).orEmpty()
@@ -283,21 +281,18 @@ override val dialog: Any
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
     private fun showLengthInchesPopup() {
-        awaitingResult = true
 
-        // build the Intent with your fresh list
         val intent = Intent(this,PopupLengthEntryTourInches::class.java).apply {
 
-            intent.putExtra(EXTRA_IS_TOURNAMENT, true)  // Tell the Popup this is a Tournament
+            putExtra(EXTRA_IS_TOURNAMENT, true)  // Tell the Popup this is a Tournament
 
-                // Send the Species from the Set Up page on to the Popup
-            intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
+            // Send the Species from the Set Up page on to the Popup
+            putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
 
             // Send as an ArrayList so you can retrieve with getStringArrayListExtra
             val colorArray = availableClipColors.map { it.name }.toTypedArray()
-            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
+            putExtra(CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS,colorArray)
         }
-
         entryLauncher.launch(intent)
     }
 
@@ -307,14 +302,11 @@ override val dialog: Any
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
-            "Largemouth"   -> "L"
-            "Smallmouth"   -> "S"
-            "Spotted"      -> "P"
-            else           -> ""
-        }
+        val normalized =
+            SharedPreferencesManager.normalizeSpeciesName(species)
 
-        Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
+        val speciesInitial =
+            SharedPreferencesManager.getSpeciesInitial(normalized)
 
         val catch = CatchItem(
             id = 0,
@@ -478,7 +470,9 @@ override val dialog: Any
                     "WHITE" -> "W"
                     else -> "?"
                 }
-                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+
+                typeLetters[i].text =
+                    SharedPreferencesManager.getSpeciesInitial(catch.species)
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realLengthInches[i].setOnLongClickListener {

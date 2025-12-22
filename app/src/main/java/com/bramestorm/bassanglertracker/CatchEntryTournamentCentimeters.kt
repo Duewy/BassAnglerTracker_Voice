@@ -29,6 +29,7 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import java.text.SimpleDateFormat
@@ -93,7 +94,6 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
-    private var awaitingResult = false
 
 
     // Tournament Configuration
@@ -284,15 +284,17 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
     private fun showLengthPopup() {
-        val intent = Intent(this, PopupLengthEntryTourCms::class.java)
-        intent.putExtra(EXTRA_IS_TOURNAMENT, true)
 
-        intent.putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
+        val intent = Intent(this, PopupLengthEntryTourCms::class.java).apply {
 
-        // 🔥 Send available clip colors as String array
-        val colorNames = availableClipColors.map { it.name }.toTypedArray()
-        intent.putExtra("availableClipColors", colorNames)
+            putExtra(EXTRA_IS_TOURNAMENT, true)
 
+            putExtra(EXTRA_TOURNAMENT_SPECIES, tournamentSpecies)
+
+            // Send as an ArrayList so you can retrieve with getStringArrayListExtra
+            val colorArray = availableClipColors.map { it.name }.toTypedArray()
+            putExtra(CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS,colorArray)
+        }
         lengthEntryLauncher.launch(intent)
     }
 
@@ -301,13 +303,11 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files... USE APPLES METHOD
-            "Largemouth"   -> "L"
-            "Smallmouth"   -> "S"
-            "Spotted"      -> "P"
-            else           -> ""
-        }
-        Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
+        val normalized =
+            SharedPreferencesManager.normalizeSpeciesName(species)
+
+        val speciesInitial =
+            SharedPreferencesManager.getSpeciesInitial(normalized)
 
         val catch = CatchItem(
             id = 0,
@@ -471,8 +471,8 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
                     else -> "?"
                 }
 
-                // Species label
-                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+                typeLetters[i].text =
+                    SharedPreferencesManager.getSpeciesInitial(catch.species)
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realLengthCms[i].setOnLongClickListener {

@@ -52,8 +52,7 @@ class MainActivity : AppCompatActivity() {
         //-------------------------- Open the Voice Control TRAINING INDEX ------------------------
         val btnVCC = findViewById<Button>(R.id.btnVCC)
         btnVCC.setOnClickListener {
-           //val intent = Intent(this, UserTrainingVoiceCommands::class.java)
-            intent = Intent(this, UserTrainingVoiceCommands::class.java)
+            val intent = Intent(this, UserTrainingVoiceCommands::class.java)
             startActivity(intent)
         }
 

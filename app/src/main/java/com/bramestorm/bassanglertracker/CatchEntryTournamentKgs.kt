@@ -29,6 +29,7 @@ import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
 import com.bramestorm.bassanglertracker.utils.GpsUtils
+import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -95,7 +96,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
     lateinit var userVoiceMap: MutableMap<String, String>       //todo Correct with Mispronunciations ReWrite the Word/Phrase DataBase
-    private var awaitingResult = false
 
 
     // Tournament Configuration
@@ -125,7 +125,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private val weightEntryLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        awaitingResult = false
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
             val weightTotalKgs = data?.getIntExtra(EXTRA_WEIGHT_KGS, 0) ?: 0
@@ -278,25 +277,16 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     /** ~~~~~~~~~~~~~ Opens the weight entry popup ~~~~~~~~~~~~~~~ */
 
     private fun showWeightPopup() {
-        awaitingResult = true
 
-        val popupClass =
-            PopupWeightEntryTourKgs::class.java
+        val intent = Intent(this, PopupWeightEntryTourKgs::class.java).apply {
 
-        val intent = Intent(this, popupClass).apply {
             putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_IS_TOURNAMENT, true)
 
-            // Normalize the tournamentSpecies string
-            val normalizedSpecies = when (tournamentSpecies.trim().lowercase(Locale.US)) {
-                "large mouth", "largemouth" -> "Large Mouth Bass"
-                "small mouth", "smallmouth" -> "Small Mouth Bass"
-                else -> tournamentSpecies
-            }
-            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_TOURNAMENT_SPECIES, normalizedSpecies)
+            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_TOURNAMENT_SPECIES,tournamentSpecies)
 
             // Send as an ArrayList so you can retrieve with getStringArrayListExtra
             val colorArray = availableClipColors.map { it.name }.toTypedArray()
-            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
+            putExtra(CatchEntryTournament.EXTRA_AVAILABLE_CLIP_COLORS, colorArray)
         }
         weightEntryLauncher.launch(intent)
     }
@@ -306,12 +296,11 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val speciesInitial = when (species) {     //todo reproduce this in the other CatchEntryTournament files...
-            "Largemouth"   -> "L"
-            "Smallmouth"   -> "S"
-            "Spotted"      -> "P"
-            else           -> ""
-        }
+        val normalized =
+            SharedPreferencesManager.normalizeSpeciesName(species)
+
+        val speciesInitial =
+            SharedPreferencesManager.getSpeciesInitial(normalized)
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
@@ -477,7 +466,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                     "WHITE"     -> "W"
                     else        -> "?"
                 }
-                typeLetters[i].text = getSpeciesCode(catch.species ?: "")
+
+                typeLetters[i].text =
+                    SharedPreferencesManager.getSpeciesInitial(catch.species)
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realWeightKgs[i].setOnLongClickListener {

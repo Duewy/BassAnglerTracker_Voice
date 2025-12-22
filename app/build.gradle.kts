@@ -4,7 +4,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    alias(libs.plugins.kotlin.plugin.compose)
 }
 
 // ---------------------------------------------
@@ -15,10 +15,10 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.bramestorm.bassanglertracker" // make sure this is the app you want on Play
+        applicationId = "com.bramestorm.bassanglertracker"
         minSdk = 23
         targetSdk = 35
-        versionCode = 2             // ↑ must be higher than the last upload for THIS applicationId submission September 04 2025
+        versionCode = 2
         versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -27,30 +27,17 @@ android {
         }
         manifestPlaceholders.putAll(
             mapOf(
-                // if not set, fall back to empty for Maps (so it won’t crash the build)
                 "MAPS_API_KEY" to (project.findProperty("MAPS_API_KEY") as String? ?: "AIzaSyDk_AhWI1MnCwFWAVfowN_KlwdV592LtPc"),
-                // default to Google’s TEST AdMob App ID if none provided
-                "ADMOB_APP_ID" to (project.findProperty("ADMOB_APP_ID") as String?
-                    ?: "ca-app-pub-3940256099942544~3347511713")
+                "ADMOB_APP_ID" to (project.findProperty("ADMOB_APP_ID") as String? ?: "ca-app-pub-3940256099942544~3347511713")
             )
         )
     }
 
-    // Optional: use test AdMob App ID on debug no matter what
-    buildTypes {
-        getByName("debug") {
-            manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
-            // Add other debug-only flags here if needed
-        }
-        // release will use whatever is in local.properties
-    }
-
     buildTypes {
         debug {
-            // 🟡 Removed buildConfigField for PICOVOICE_API_KEY tried but dropped
+            manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
-            // Tip: set to false for your first tester build to avoid R8/ProGuard surprises
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -75,10 +62,6 @@ android {
         compose = true
         buildConfig = true
     }
-
-    // Using the Kotlin Compose plugin (2.1.0). You can remove this block;
-    // the plugin manages the compiler version. If you keep it, ensure it matches.
-    // composeOptions { kotlinCompilerExtensionVersion = "1.5.1" }
 
     packaging {
         resources {
@@ -115,8 +98,8 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.play.services.maps)
 
-    // 🔧 Support + Material
-    implementation(libs.support.annotations)
+    // 🔧 Annotations + Material
+    implementation(libs.androidx.annotation)
     implementation(libs.material)
 
     // 🔄 JSON Parsing

@@ -10,6 +10,7 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 object SharedPreferencesManager {
 
@@ -257,6 +258,40 @@ object SharedPreferencesManager {
         return value.ifBlank { null }
     }
 
+
+// ----- Species Initials -------
+fun getSpeciesInitial(normalizedSpecies: String): String {
+    val s = normalizedSpecies.trim().lowercase(Locale.US)
+
+    // ✅ Explicit tournament overrides for Spotted Bass
+    if (s == "spotted bass" || s == "spotted") {
+        return "SP"
+    }
+
+    val words = s.split(" ").filter { it.isNotBlank() }
+
+    return when {
+        // Two-word (or more) species → first letters
+        words.size >= 2 -> {
+            "${words[0][0]}${words[1][0]}".uppercase(Locale.US)
+        }
+
+        // Single-word species → first two consonants
+        words.size == 1 -> {
+            val consonants = words[0]
+                .uppercase(Locale.US)
+                .filter { it !in "AEIOU" }
+
+            when {
+                consonants.length >= 2 -> consonants.substring(0, 2)
+                consonants.length == 1 -> "${consonants[0]}${words[0][0].uppercaseChar()}"
+                else -> words[0].take(2).uppercase(Locale.US)
+            }
+        }
+
+        else -> "--"
+    }
+}
 
 
 

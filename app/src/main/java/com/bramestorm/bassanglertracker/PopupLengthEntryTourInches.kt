@@ -48,7 +48,7 @@ class PopupLengthEntryTourInches : Activity() {
         //------  Retrieve intent extras from CATCH ENTRY TOURNAMENT  --------------------------
         isTournament = intent.getBooleanExtra("isTournament", false)
         catchType = intent.getStringExtra("catchType") ?: ""
-        selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
+      //  selectedSpecies = intent.getStringExtra("selectedSpecies") ?: ""
 
         val colorNames = intent.getStringArrayExtra("availableClipColors")
             ?: arrayOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE","RED")
@@ -61,29 +61,10 @@ class PopupLengthEntryTourInches : Activity() {
         btnSaveLengthInches = findViewById(R.id.btnSaveLengthInches)
         btnCancelInches = findViewById(R.id.btnCancelInches)
 
-        // ************  Setup Species Spinner *********************        // if Small Mouth is selected then Small Mouth is at top of Spinner
-        val tournamentSpecies = intent.getStringExtra("tournamentSpecies")?.trim() ?: "Unknown"
-        val speciesList: Array<String> = when {
-            isTournament && tournamentSpecies.equals("Large Mouth Bass", ignoreCase = true) -> {
-                arrayOf("Large Mouth", "Small Mouth")
-            }
-            isTournament && tournamentSpecies.equals("Small Mouth Bass", ignoreCase = true) -> {
-                arrayOf("Small Mouth", "Large Mouth")
-            }
-
-            isTournament && tournamentSpecies.equals("Spotted Bass", ignoreCase = true) -> {
-                arrayOf("Spotted Bass","Small Mouth", "Large Mouth")    // Southern States Have All Three Bass Species
-            }
-            isTournament -> {
-                arrayOf(tournamentSpecies)
-            }
-            else -> {
-                arrayOf("Large Mouth", "Small Mouth", "Crappie", "Pike", "Perch", "Walleye", "Catfish", "Panfish")
-            }
+// Defer spinner setup until window is attached (prevents ANR)
+        spinnerSpecies.post {
+            setupTournamentSpeciesSpinner()
         }
-        val speciesAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, speciesList)
-        speciesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerSpecies.adapter = speciesAdapter
 
         // ****************  Setup Clip Color Spinner ****************
         val availableColorNames = intent.getStringArrayExtra("availableClipColors") ?: emptyArray()
@@ -131,5 +112,50 @@ class PopupLengthEntryTourInches : Activity() {
             finish()
         }
     }//```````````` END ON CREATE ```````````````````````````
+    private fun setupTournamentSpeciesSpinner() {
+
+        val tournamentSpecies = intent
+            .getStringExtra(EXTRA_TOURNAMENT_SPECIES)
+            ?.trim()
+
+        if (tournamentSpecies.isNullOrEmpty()) {
+            Log.e("POPUP", "Tournament species missing — closing popup safely")
+            finish()
+            return
+        }
+
+        val speciesList = when (tournamentSpecies.lowercase()) {
+
+            "large mouth" -> listOf(
+                "Large Mouth",
+                "Small Mouth"
+            )
+
+            "small mouth" -> listOf(
+                "Small Mouth",
+                "Large Mouth"
+            )
+
+            "spotted bass" -> listOf(
+                "Spotted Bass",
+                "Small Mouth",
+                "Large Mouth"
+            )
+
+            else -> listOf(
+                tournamentSpecies
+            )
+        }
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            speciesList
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        spinnerSpecies.adapter = adapter
+    }
 
 }//================== END  ==========================

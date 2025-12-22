@@ -168,7 +168,7 @@ class SetUpActivity : AppCompatActivity() {
             isInchesSelected = false
             isCentimetersSelected = false
             resetUnitSelectionHighlights()
-            btnLbsOzs.setBackgroundResource(R.color.highlight_yellow)
+            btnLbsOzs.setBackgroundResource(R.color.main_compliment)
         }
 
         btnPounds.setOnClickListener {
@@ -178,7 +178,7 @@ class SetUpActivity : AppCompatActivity() {
             isInchesSelected = false
             isCentimetersSelected = false
             resetUnitSelectionHighlights()
-            btnPounds.setBackgroundResource(R.color.highlight_yellow)
+            btnPounds.setBackgroundResource(R.color.main_compliment)
         }
 
 
@@ -189,7 +189,7 @@ class SetUpActivity : AppCompatActivity() {
             isInchesSelected = false
             isCentimetersSelected = false
             resetUnitSelectionHighlights()
-            btnKilograms.setBackgroundResource(R.color.highlight_yellow)
+            btnKilograms.setBackgroundResource(R.color.main_compliment)
             btnKilograms.setTextColor(ContextCompat.getColor(this, R.color.black))
 
         }
@@ -202,7 +202,7 @@ class SetUpActivity : AppCompatActivity() {
             isInchesSelected = true
             isCentimetersSelected = false
             resetUnitSelectionHighlights()
-            btnInches.setBackgroundResource(R.color.highlight_yellow)
+            btnInches.setBackgroundResource(R.color.main_compliment)
         }
 
         btnCentimeters.setOnClickListener {
@@ -212,7 +212,7 @@ class SetUpActivity : AppCompatActivity() {
             isInchesSelected = false
             isCentimetersSelected = true
             resetUnitSelectionHighlights()
-            btnCentimeters.setBackgroundResource(R.color.highlight_yellow)
+            btnCentimeters.setBackgroundResource(R.color.main_compliment)
         }
 
         // Toggle Fun Day/Tournament Selection
@@ -223,11 +223,11 @@ class SetUpActivity : AppCompatActivity() {
             btnFunDay.setBackgroundResource(R.color.clip_bright_green)
             btnTournament.setBackgroundResource(R.color.lite_grey)
             txtLimitMarker.alpha = 0.3f
-            txtLimitMarker.setBackgroundResource(R.color.nothing)
+           // txtLimitMarker.setBackgroundResource(R.color.nothing)
             txtSpeciesSelector.alpha = 0.3f
-            txtSpeciesSelector.setBackgroundResource(R.color.nothing)
+          //  txtSpeciesSelector.setBackgroundResource(R.color.nothing)
             tglCullingValue.alpha = 0.3f
-            tglCullingValue.setBackgroundResource(R.color.lite_grey)
+           // tglCullingValue.setBackgroundResource(R.color.lite_grey)
             tglCullingValue.isEnabled=false
             spinnerTournamentSpecies.alpha = 0.3f
             spinnerTournamentSpecies.isEnabled = false
@@ -240,11 +240,11 @@ class SetUpActivity : AppCompatActivity() {
             btnTournament.setBackgroundResource(R.color.clip_bright_green)
             btnFunDay.setBackgroundResource(R.color.lite_grey)
             tglCullingValue.alpha = 1.0f
-            tglCullingValue.setBackgroundResource(R.color.clip_white)
+           // tglCullingValue.setBackgroundResource(R.drawable.btn_outline_off_white)
             txtLimitMarker.alpha = 1.0f
-            txtLimitMarker.setBackgroundResource(R.color.clip_white)
+            //txtLimitMarker.setBackgroundResource(R.drawable.btn_outline_off_white)
             txtSpeciesSelector.alpha = 1.0f
-            txtSpeciesSelector.setBackgroundResource(R.color.clip_white)
+            //txtSpeciesSelector.setBackgroundResource(R.drawable.btn_outline_off_white)
             tglCullingValue.isEnabled = true
             spinnerTournamentSpecies.alpha = 1.0f
             spinnerTournamentSpecies.isEnabled = true

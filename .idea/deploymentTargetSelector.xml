@@ -4,14 +4,17 @@
     <selectionStates>
       <SelectionState runConfigName="catch and call simulator">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-11-20T20:13:10.630380900Z">
+        <DropdownSelection timestamp="2025-12-21T02:15:02.590725300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CR31WHBMF" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\dwayn\.android\avd\Pixel_7.avd" />
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="app">
+        <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
   </component>

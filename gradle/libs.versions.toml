@@ -1,30 +1,31 @@
-
 [versions]
+# Downgraded for Koala compatibility
 agp = "8.5.2"
-gsonVersion = "2.12.1"
 kotlin = "2.1.0"
-compose-ui        = "1.8.0"
+ksp = "2.1.0-1.0.29"
+
+# Library Versions (Kept the fixed ones)
+gsonVersion = "2.12.1"
+compose-ui = "1.7.0"
 core-ktx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-espressoCore = "3.5.0"
-kotlinSymbolProcessingApi = "1.4.0-rc-dev-experimental-20200828"
+espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.04.00"
+composeBom = "2025.02.00"
 localbroadcastmanager = "1.1.0"
 media = "1.7.0"
-playServicesAds = "24.4.0"
+playServicesAds = "24.0.0"
 playServicesAuth = "21.3.0"
 appcompat = "1.7.0"
-constraintlayout = "2.2.1"
+constraintlayout = "2.2.0"
 playServicesLocation = "21.3.0"
-supportAnnotations = "28.0.0"
+annotation = "1.9.1"
 material = "1.12.0"
-playServicesMaps = "19.1.0"
-uiTestAndroid = "1.8.0"
+playServicesMaps = "19.0.0"
+uiTestAndroid = "1.7.0"
 protoliteWellKnownTypes = "18.0.1"
-
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
@@ -46,21 +47,18 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-kotlin-symbol-processing-api = { module = "org.jetbrains.kotlin:kotlin-symbol-processing-api", version.ref = "kotlinSymbolProcessingApi" }
+kotlin-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-support-annotations = { group = "com.android.support", name = "support-annotations", version.ref = "supportAnnotations" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose-ui" }
 protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 
-
-
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
-
+kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
