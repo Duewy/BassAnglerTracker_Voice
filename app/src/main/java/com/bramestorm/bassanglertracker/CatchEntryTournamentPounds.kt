@@ -416,7 +416,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             tournamentCatchLimit = tournamentCatchLimit,
             isCullingEnabled = isCullingEnabled
         )
-        Log.d("CLIP_COLOR", "🎨 Available Colors POUNDS: $availableClipColors")
+
         clearTournamentTextViews()
 
         runOnUiThread {
@@ -508,23 +508,48 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
-        firstRealWeightPounds.text = ""
-        secondRealWeightPounds.text = ""
-        thirdRealWeightPounds.text = ""
-        fourthRealWeightPounds.text = ""
-        fifthRealWeightPounds.text = ""
-        sixthRealWeightPounds.text = ""
 
-        firstDecWeightPounds.text = ""
-        secondDecWeightPounds.text = ""
-        thirdDecWeightPounds.text = ""
-        fourthDecWeightPounds.text = ""
-        fifthDecWeightPounds.text = ""
-        sixthDecWeightPounds.text = ""
+        val realWeights = listOf(
+            firstRealWeightPounds, secondRealWeightPounds, thirdRealWeightPounds,
+            fourthRealWeightPounds, fifthRealWeightPounds, sixthRealWeightPounds
+        )
+
+        val decWeights = listOf(
+            firstDecWeightPounds, secondDecWeightPounds, thirdDecWeightPounds,
+            fourthDecWeightPounds, fifthDecWeightPounds, sixthDecWeightPounds
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
+        val colorLetters = listOf(
+            txtPoundsColorLetter1, txtPoundsColorLetter2, txtPoundsColorLetter3,
+            txtPoundsColorLetter4, txtPoundsColorLetter5, txtPoundsColorLetter6
+        )
+
+        realWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        decWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        typeLetters.forEach { it.text = "" }
+        colorLetters.forEach { it.text = "" }
 
         totalRealWeightPounds.text = "0"
         totalDecWeightPounds.text = "0"
     }
+
 
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -690,8 +715,9 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
         // 8) Delete button
         btnDelete.setOnClickListener {
             dbHelper.deleteCatch(c.id)
-            updateTournamentList()
             dialogInstance.dismiss()
+            updateTournamentList()
+            Toast.makeText(this, "Catch Deleted", Toast.LENGTH_SHORT).show()
         }
     }//========== END of User Editing Logged Weights ==============================
 

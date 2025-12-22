@@ -509,23 +509,48 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
-        firstRealWeightKgs.text = ""
-        secondRealWeightKgs.text = ""
-        thirdRealWeightKgs.text = ""
-        fourthRealWeightKgs.text = ""
-        fifthRealWeightKgs.text = ""
-        sixthRealWeightKgs.text = ""
 
-        firstDecWeightKgs.text = ""
-        secondDecWeightKgs.text = ""
-        thirdDecWeightKgs.text = ""
-        fourthDecWeightKgs.text = ""
-        fifthDecWeightKgs.text = ""
-        sixthDecWeightKgs.text = ""
+        val realWeights = listOf(
+            firstRealWeightKgs, secondRealWeightKgs, thirdRealWeightKgs,
+            fourthRealWeightKgs, fifthRealWeightKgs, sixthRealWeightKgs
+        )
+
+        val decWeights = listOf(
+            firstDecWeightKgs, secondDecWeightKgs, thirdDecWeightKgs,
+            fourthDecWeightKgs, fifthDecWeightKgs, sixthDecWeightKgs
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
+        val colorLetters = listOf(
+            txtKgsColorLetter1, txtKgsColorLetter2, txtKgsColorLetter3,
+            txtKgsColorLetter4, txtKgsColorLetter5, txtKgsColorLetter6
+        )
+
+        realWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        decWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        typeLetters.forEach { it.text = "" }
+        colorLetters.forEach { it.text = "" }
 
         totalRealWeightKgs.text = "0"
         totalDecWeightKgs.text = "0"
     }
+
 
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 

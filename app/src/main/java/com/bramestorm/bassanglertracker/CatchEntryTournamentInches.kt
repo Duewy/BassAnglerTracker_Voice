@@ -512,23 +512,48 @@ override val dialog: Any
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
-        firstRealLengthInches.text = ""
-        secondRealLengthInches.text = ""
-        thirdRealLengthInches.text = ""
-        fourthRealLengthInches.text = ""
-        fifthRealLengthInches.text = ""
-        sixthRealLengthInches.text = ""
 
-        firstDecLengthInches.text = ""
-        secondDecLengthInches.text = ""
-        thirdDecLengthInches.text = ""
-        fourthDecLengthInches.text = ""
-        fifthDecLengthInches.text = ""
-        sixthDecLengthInches.text = ""
+        val realLengths = listOf(
+            firstRealLengthInches, secondRealLengthInches, thirdRealLengthInches,
+            fourthRealLengthInches, fifthRealLengthInches, sixthRealLengthInches
+        )
+
+        val decLengths = listOf(
+            firstDecLengthInches, secondDecLengthInches, thirdDecLengthInches,
+            fourthDecLengthInches, fifthDecLengthInches, sixthDecLengthInches
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetterInches1, txtTypeLetterInches2, txtTypeLetterInches3,
+            txtTypeLetterInches4, txtTypeLetterInches5, txtTypeLetterInches6
+        )
+
+        val colorLetters = listOf(
+            txtInchesColorLetter1, txtInchesColorLetter2, txtInchesColorLetter3,
+            txtInchesColorLetter4, txtInchesColorLetter5, txtInchesColorLetter6
+        )
+
+        realLengths.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        decLengths.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        typeLetters.forEach { it.text = "" }
+        colorLetters.forEach { it.text = "" }
 
         totalRealLengthInches.text = "0"
         totalDecLengthInches.text = "0"
     }
+
 
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 

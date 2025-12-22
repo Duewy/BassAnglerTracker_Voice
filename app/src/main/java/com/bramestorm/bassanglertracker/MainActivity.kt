@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -63,6 +64,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        //-------------------------- Open the Privacy Policy pdf 📝 --------------------
+        val btnPrivacyPolicy = findViewById<Button>(R.id.btnPrivacyPolicy)
+        btnPrivacyPolicy.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Privacy_Policy.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
 
         if (ADS_ENABLED) {
             MobileAds.initialize(this) {}

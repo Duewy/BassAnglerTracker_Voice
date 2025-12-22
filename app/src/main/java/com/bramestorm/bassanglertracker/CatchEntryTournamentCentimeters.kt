@@ -514,23 +514,48 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
-        firstRealLengthCms.text = ""
-        secondRealLengthCms.text = ""
-        thirdRealLengthCms.text = ""
-        fourthRealLengthCms.text = ""
-        fifthRealLengthCms.text = ""
-        sixthRealLengthCms.text = ""
 
-        firstDecLengthCms.text = ""
-        secondDecLengthCms.text = ""
-        thirdDecLengthCms.text = ""
-        fourthDecLengthCms.text = ""
-        fifthDecLengthCms.text = ""
-        sixthDecLengthCms.text = ""
+        val realLengths = listOf(
+            firstRealLengthCms, secondRealLengthCms, thirdRealLengthCms,
+            fourthRealLengthCms, fifthRealLengthCms, sixthRealLengthCms
+        )
+
+        val decLengths = listOf(
+            firstDecLengthCms, secondDecLengthCms, thirdDecLengthCms,
+            fourthDecLengthCms, fifthDecLengthCms, sixthDecLengthCms
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
+        val colorLetters = listOf(
+            txtColorLetter1, txtColorLetter2, txtColorLetter3,
+            txtColorLetter4, txtColorLetter5, txtColorLetter6
+        )
+
+        realLengths.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        decLengths.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        typeLetters.forEach { it.text = "" }
+        colorLetters.forEach { it.text = "" }
 
         totalRealLengthCms.text = "0"
         totalDecLengthCms.text = "0"
     }
+
 
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 

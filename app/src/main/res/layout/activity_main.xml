@@ -184,14 +184,58 @@
         app:layout_constraintTop_toBottomOf="@id/textView15"
         android:layout_marginBottom="15dp"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+
+    <View
+        android:id="@+id/dividerPolicy"
+        android:layout_width="0dp"
+        android:layout_height="5dp"
+        android:layout_marginVertical="5dp"
+        android:background="@color/black"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnVCC"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/btnVCC" />
 
+    <TextView
+        android:id="@+id/txtPrivacyPolicy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/privacy_policy"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerPolicy" />
+
+    <Button
+        android:id="@+id/btnPrivacyPolicy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:background="@drawable/btn_outline_orange"
+        android:gravity="center"
+        android:paddingHorizontal="15dp"
+        android:text="@string/privacy_policy_pdf"
+        android:textColor="@color/clip_blue"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtPrivacyPolicy" />
+
+    <TextView
+        android:id="@+id/txtCatchAndCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/catch_and_call"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPrivacyPolicy"
+        android:layout_marginVertical="55dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

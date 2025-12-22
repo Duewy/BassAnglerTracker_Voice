@@ -510,23 +510,48 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     //########### Clear Tournament Text Views  ########################
 
     private fun clearTournamentTextViews() {
-        firstRealWeight.text = ""
-        secondRealWeight.text = ""
-        thirdRealWeight.text = ""
-        fourthRealWeight.text = ""
-        fifthRealWeight.text = ""
-        sixthRealWeight.text = ""
 
-        firstDecWeight.text = ""
-        secondDecWeight.text = ""
-        thirdDecWeight.text = ""
-        fourthDecWeight.text = ""
-        fifthDecWeight.text = ""
-        sixthDecWeight.text = ""
+        val realWeights = listOf(
+            firstRealWeight, secondRealWeight, thirdRealWeight,
+            fourthRealWeight, fifthRealWeight, sixthRealWeight
+        )
+
+        val decWeights = listOf(
+            firstDecWeight, secondDecWeight, thirdDecWeight,
+            fourthDecWeight, fifthDecWeight, sixthDecWeight
+        )
+
+        val typeLetters = listOf(
+            txtTypeLetter1, txtTypeLetter2, txtTypeLetter3,
+            txtTypeLetter4, txtTypeLetter5, txtTypeLetter6
+        )
+
+        val colorLetters = listOf(
+            txtColorLetter1, txtColorLetter2, txtColorLetter3,
+            txtColorLetter4, txtColorLetter5, txtColorLetter6
+        )
+
+        realWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        decWeights.forEach {
+            it.text = ""
+            it.setBackgroundColor(ContextCompat.getColor(this, R.color.grey))
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+            it.setOnLongClickListener(null)
+        }
+
+        typeLetters.forEach { it.text = "" }
+        colorLetters.forEach { it.text = "" }
 
         totalRealWeight.text = "0"
         totalDecWeight.text = "0"
     }
+
 
     // %%%%%%%%%%%% Clip Color assignment  %%%%%%%%%%%%%%%%%%%%%%%
 

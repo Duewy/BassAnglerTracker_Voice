@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="1dp"
             android:gravity="center"
-            android:text="Weight Measurements"
+            android:text="@string/weight_measurements"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -104,7 +104,8 @@
                 android:text="@string/lbs_ozs"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btnPounds"
@@ -115,7 +116,8 @@
                 android:text="@string/pounds"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btnKilograms"
@@ -126,7 +128,8 @@
                 android:text="@string/kgs"
                 android:textColor="@color/clip_white"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
         </LinearLayout>
 
@@ -169,7 +172,8 @@
                 android:textColor="@color/black"
                 android:textColorHighlight="@color/clip_white"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btnCentimeters"
@@ -180,7 +184,8 @@
                 android:text="@string/centimeters"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
         </LinearLayout>
         <LinearLayout
@@ -218,7 +223,8 @@
                 android:text="@string/fun_day"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/btnTournament"
@@ -229,7 +235,8 @@
                 android:text="@string/tournament"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle,VisualLintButtonSize" />
 
         </LinearLayout>
 
@@ -258,7 +265,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="1dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="5dp"
                 android:background="@drawable/btn_outline_off_white"
                 android:gravity="center"
                 android:padding="9dp"
@@ -306,7 +313,8 @@
                 android:layout_width="55dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
-                android:layout_marginEnd="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/btn_outline_off_white"
                 android:gravity="center"
                 android:shadowColor="@color/Log_red"
@@ -319,20 +327,33 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnStartFishing"
                 app:layout_constraintTop_toBottomOf="@+id/txtTourneyValue"
-                app:layout_constraintWidth="wrap_content" />
+                app:layout_constraintWidth="wrap_content"
+                tools:ignore="TextSizeCheck" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="15dp"
+                android:scaleX="1.25"
+                android:text="@string/spacers"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                android:textStyle="bold" />
 
             <!-- Targeted Species for Tournament  -->
             <Spinner
                 android:id="@+id/spinnerTournamentSpecies"
-                android:layout_width="200dp"
+                android:layout_width="220dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="25dp"
+                android:layout_marginStart="10dp"
                 android:background="@drawable/btn_outline_off_white"
                 android:entries="@array/species_list"
                 android:padding="9dp"
                 android:textColor="@color/black"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"  />
+
         </LinearLayout>
 
         <View
@@ -485,7 +506,8 @@
                 android:text="@string/main_page"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle" />
 
             <!-- Customize Species Pages  -->
 
@@ -504,7 +526,8 @@
                 android:text="@string/customize_species_list"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="ButtonStyle" />
 
         </LinearLayout>
 
