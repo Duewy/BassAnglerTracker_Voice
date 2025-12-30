@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -206,6 +207,9 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         edtWeightLbs.setText((totalWeightHundredthPounds / 100).toString())
         edtWeightDec.setText((totalWeightHundredthPounds % 100).toString())
 
+        clearOnceOnFocus(edtWeightLbs)
+        clearOnceOnFocus(edtWeightDec)
+
         val speciesIndex = normalizedSpeciesList.indexOf(currentSpeciesNormalized)
         spinnerSpeciesLbs.setSelection(if (speciesIndex != -1) speciesIndex else 0)
 
@@ -233,6 +237,18 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun clearOnceOnFocus(editText: EditText) {
+        editText.onFocusChangeListener = object : View.OnFocusChangeListener {
+            private var cleared = false
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if (hasFocus && !cleared) {
+                    editText.text.clear()
+                    cleared = true
+                }
+            }
+        }
     }
 
     //============================================================================

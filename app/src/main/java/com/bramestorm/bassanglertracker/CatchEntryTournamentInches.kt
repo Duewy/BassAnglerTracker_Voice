@@ -663,6 +663,9 @@ override val dialog: Any
         edtInches.setText((totalQuarters / 4).toString())
         edtQuartersOfInch.setText((totalQuarters % 4).toString())
 
+        clearOnceOnFocus(edtInches)
+        clearOnceOnFocus(edtQuartersOfInch)
+
         // 4) show clip-color box
         val availableColors = calculateAvailableClipColorsForEdit(
             dbHelper = dbHelper,
@@ -767,6 +770,17 @@ override val dialog: Any
 
     //----- END Calculate Available Clips for EDIT Mode  --------------------------------
 
+    private fun clearOnceOnFocus(editText: EditText) {
+        editText.onFocusChangeListener = object : View.OnFocusChangeListener {
+            private var cleared = false
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if (hasFocus && !cleared) {
+                    editText.text.clear()
+                    cleared = true
+                }
+            }
+        }
+    }
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {

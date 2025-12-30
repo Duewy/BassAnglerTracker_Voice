@@ -653,6 +653,9 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
         edtPounds.setText((totalHundredth / 100).toString())
         edtLbsDecimal.setText((totalHundredth % 100).toString())
 
+        clearOnceOnFocus(edtPounds)
+        clearOnceOnFocus(edtLbsDecimal)
+
         // 4) color box
         // Find available clip colors
         val availableColors = calculateAvailableClipColorsForEdit(
@@ -761,6 +764,17 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
     //----- END Calculate Available Clips for EDIT Mode  --------------------------------
 
+    private fun clearOnceOnFocus(editText: EditText) {
+        editText.onFocusChangeListener = object : View.OnFocusChangeListener {
+            private var cleared = false
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if (hasFocus && !cleared) {
+                    editText.text.clear()
+                    cleared = true
+                }
+            }
+        }
+    }
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {

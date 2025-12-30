@@ -663,6 +663,9 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         edtCms.setText(( totalTenths / 10).toString())
         edtDec.setText(( totalTenths % 10).toString())
 
+        clearOnceOnFocus(edtCms)
+        clearOnceOnFocus(edtDec)
+
         // 4) show clip-color box
         val availableColors = calculateAvailableClipColorsForEdit(
             dbHelper = dbHelper,
@@ -754,6 +757,18 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     }
 
     //----- END Calculate Available Clips for EDIT Mode  --------------------------------
+
+    private fun clearOnceOnFocus(editText: EditText) {
+        editText.onFocusChangeListener = object : View.OnFocusChangeListener {
+            private var cleared = false
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if (hasFocus && !cleared) {
+                    editText.text.clear()
+                    cleared = true
+                }
+            }
+        }
+    }
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {
