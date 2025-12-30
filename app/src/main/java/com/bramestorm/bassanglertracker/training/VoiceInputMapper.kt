@@ -1,5 +1,12 @@
 package com.bramestorm.bassanglertracker.training
 
+//TODO
+    /*Light refactor later (not urgent)
+    Split into:
+    VoiceSpeciesResolver
+    VoiceColorResolver
+    VoiceGrammarCleaner  */
+
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson

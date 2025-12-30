@@ -82,7 +82,8 @@ class VoiceInteractionHelper(
                         restartListening()
                     } else {
                         speak("Voice input failed multiple times—please try manual entry. Over and out")
-                        activity.finish()
+                        activity.positionedToast("Voice disabled ⚠️ \n— manual mode 📝 active")
+                        shutdown()
                     }
                     isListening = false
                 }

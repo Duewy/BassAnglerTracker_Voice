@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bramestorm.bassanglertracker.CatchEntryTournamentPounds.ClipColor
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
@@ -663,11 +664,16 @@ override val dialog: Any
         edtQuartersOfInch.setText((totalQuarters % 4).toString())
 
         // 4) show clip-color box
-        val allClipColors = CatchEntryTournamentInches.ClipColor.entries.map { it.name }.toMutableList()
-        val currentColor = c.clipColor ?: "RED"
-        val availableColors = allClipColors.toMutableList().apply {
-            remove(currentColor)
-            add(0, currentColor)
+        val availableColors = calculateAvailableClipColorsForEdit(
+            dbHelper = dbHelper,
+            catchType = "tournament_inches",
+            date = getCurrentDate(),
+            tournamentCatchLimit = tournamentCatchLimit,
+            editingCatchId = c.id
+        ).toMutableList().apply {
+            if (!contains(c.clipColor)) {
+                add(0, c.clipColor!!)
+            }
         }
 
         val colorAdapter = ClipColorSpinnerAdapter(this, availableColors)
@@ -726,6 +732,41 @@ override val dialog: Any
             updateTournamentList()
         }
     }//========== END of User Editing Logged Length ==============================
+
+    //----- Calculate Available Clips for EDIT Mode  --------------------------------
+
+
+    private fun calculateAvailableClipColorsForEdit(
+        dbHelper: CatchDatabaseHelper,
+        catchType: String,
+        date: String,
+        tournamentCatchLimit: Int,
+        editingCatchId: Int
+    ): List<String> {
+
+        val allCatches = dbHelper.getCatchesForToday(catchType, date)
+            .sortedByDescending {
+                it.totalWeightOz
+                    ?: it.totalWeightHundredthKg
+                    ?: it.totalLengthQuarters
+                    ?: it.totalLengthTenths
+                    ?: 0
+            }
+            .take(tournamentCatchLimit)
+
+        val usedColors = allCatches
+            .filter { it.id != editingCatchId }   // 👈 exclude the one being edited
+            .mapNotNull { it.clipColor }
+            .map { it.uppercase() }
+            .toSet()
+
+        return com.bramestorm.bassanglertracker.CatchEntryTournamentPounds.ClipColor.entries
+            .map { it.name }
+            .filter { it !in usedColors }
+    }
+
+    //----- END Calculate Available Clips for EDIT Mode  --------------------------------
+
 
     //++++++++++++++++ Date and Time  +++++++++++++++++++++++++++++
     private fun getCurrentDateTime(): String {

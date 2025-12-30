@@ -14,6 +14,6 @@ class IntroPage : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
             finish() // closes the splash screen so it can't be returned to
-        }, 2000) // wait for 2 seconds then off to Main Page
+        }, 3000) // wait for 2 seconds then off to Main Page
     }
 }
