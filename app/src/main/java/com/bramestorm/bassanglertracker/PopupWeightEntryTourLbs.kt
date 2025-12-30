@@ -60,7 +60,11 @@ class PopupWeightEntryTourLbs : Activity() {
         btnSaveWeight = findViewById(R.id.btnSaveWeight)
         btnCancel = findViewById(R.id.btnCancel)
 
-// Defer spinner setup until window is attached (prevents ANR)
+        // ----- Clear out the values in the Edit Text Boxes ----
+        clearOnFocus(edtWeightLbs)
+        clearOnFocus(edtWeightOz)
+
+        // Defer spinner setup until window is attached (prevents ANR)
         spinnerSpecies.post {
             setupTournamentSpeciesSpinner()
         }
@@ -74,7 +78,7 @@ class PopupWeightEntryTourLbs : Activity() {
         edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 99)) // Lbs: 0-99
         edtWeightOz.filters = arrayOf(MinMaxInputFilter(0, 15)) // Ozs 0 - 15
 
-    // `````````` SAVE btn ````````````````
+        // `````````` SAVE btn ````````````````
         btnSaveWeight.setOnClickListener {
             val selectedSpeciesValue = spinnerSpecies.selectedItem.toString()
             val selectedClipColor = spinnerClipColor.selectedItem?.toString()?.uppercase() ?: "RED"
@@ -152,6 +156,16 @@ class PopupWeightEntryTourLbs : Activity() {
 
         spinnerSpecies.adapter = adapter
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
 
 
 }//================== END  ==========================

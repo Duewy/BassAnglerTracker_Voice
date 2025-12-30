@@ -61,7 +61,7 @@ class PopupLengthEntryTourInches : Activity() {
         btnSaveLengthInches = findViewById(R.id.btnSaveLengthInches)
         btnCancelInches = findViewById(R.id.btnCancelInches)
 
-// Defer spinner setup until window is attached (prevents ANR)
+    // Defer spinner setup until window is attached (prevents ANR)
         spinnerSpecies.post {
             setupTournamentSpeciesSpinner()
         }
@@ -72,6 +72,9 @@ class PopupLengthEntryTourInches : Activity() {
         spinnerClipColor.adapter = adapter
 
         // `````````````` Apply InputFilters to limit values  ````````````````````
+
+        clearOnFocus(edtLengthInches)
+        clearOnFocus(edtLengthQuarters)
 
         edtLengthInches.filters = arrayOf(MinMaxInputFilter(0, 99)) // Inches: 0-99
         edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3)) //  0 - 3 / 4ths
@@ -157,5 +160,16 @@ class PopupLengthEntryTourInches : Activity() {
 
         spinnerSpecies.adapter = adapter
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
+
 
 }//================== END  ==========================

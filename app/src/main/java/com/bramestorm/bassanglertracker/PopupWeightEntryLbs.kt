@@ -40,6 +40,9 @@ class PopupWeightEntryLbs : Activity() {
 
         loadSpeciesSpinner() // Populates spinner and sets up listener
 
+        clearOnFocus(edtWeightLbs)
+        clearOnFocus(edtWeightOzs)
+
         edtWeightLbs.filters = arrayOf(MinMaxInputFilter(0, 499))   // limit of 499 Lbs
         edtWeightOzs.filters = arrayOf(MinMaxInputFilter(0, 15))    // ounces 0 to 15
 
@@ -137,5 +140,15 @@ class PopupWeightEntryLbs : Activity() {
             return "" // Reject input if out of range
         }
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
 
 }

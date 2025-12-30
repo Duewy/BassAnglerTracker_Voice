@@ -60,6 +60,9 @@ class PopupLengthEntryTourCms : Activity() {
         btnSaveLengthCms = findViewById(R.id.btnSaveLengthCms)
         btnCancelCms = findViewById(R.id.btnCancelCms)
 
+        clearOnFocus(edtLengthCms)
+        clearOnFocus(edtLengthDec)
+
 // Defer spinner setup until window is attached (prevents ANR)
         spinnerSpecies.post {
             setupTournamentSpeciesSpinner()
@@ -152,5 +155,15 @@ class PopupLengthEntryTourCms : Activity() {
 
         spinnerSpecies.adapter = adapter
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
 
 }//================== END  ==========================

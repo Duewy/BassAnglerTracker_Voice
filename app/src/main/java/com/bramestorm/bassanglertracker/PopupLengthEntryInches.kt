@@ -36,6 +36,9 @@ class PopupLengthEntryInches : Activity() {
 
         loadSpeciesSpinner()
 
+        clearOnFocus(edtLengthInches)
+        clearOnFocus(edtLengthQuarters)
+
         edtLengthInches.filters = arrayOf(MinMaxInputFilter(1, 299))    //Limit to 299 Inches
         edtLengthQuarters.filters = arrayOf(MinMaxInputFilter(0, 3))    //Limit 0 to 3 quarters
 
@@ -124,4 +127,15 @@ class PopupLengthEntryInches : Activity() {
             }
         }
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
+
 }

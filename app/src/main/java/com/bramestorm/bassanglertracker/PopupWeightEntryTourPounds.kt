@@ -76,6 +76,10 @@ class PopupWeightEntryTourPounds : Activity() {
         spinnerClipColor.adapter = adapter
 
         // `````````````` Apply InputFilters to limit values  ````````````````````
+
+        clearOnFocus(edtWeightTourPounds)
+        clearOnFocus(edtWeightTourPoundsDecimal)
+
         edtWeightTourPounds.filters = arrayOf(MinMaxInputFilter(0, 99)) // Pounds: 0-99
         edtWeightTourPoundsDecimal.filters = arrayOf(MinMaxInputFilter(0, 99)) // Decimal 0 - 99
 
@@ -163,5 +167,15 @@ class PopupWeightEntryTourPounds : Activity() {
 
         spinnerSpecies.adapter = adapter
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
 
 }//================== END  ==========================

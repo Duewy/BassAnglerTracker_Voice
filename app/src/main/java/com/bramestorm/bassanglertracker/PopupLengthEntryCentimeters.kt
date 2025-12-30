@@ -36,6 +36,8 @@ class PopupLengthEntryCentimeters : Activity() {
 
         loadSpeciesSpinner()
 
+        clearOnFocus(edtLengthCm)
+        clearOnFocus(edtLengthDecimal)
 
         edtLengthCm.filters = arrayOf(MinMaxInputFilter(0, 399))      // Cms: 1-399
         edtLengthDecimal.filters = arrayOf(MinMaxInputFilter(0, 9))  // millimeters: 0-9
@@ -123,4 +125,15 @@ class PopupLengthEntryCentimeters : Activity() {
             }
         }
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
+
 }

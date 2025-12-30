@@ -36,6 +36,9 @@ class PopupWeightEntryKgs : Activity() {
 
         loadSpeciesSpinner()
 
+        clearOnFocus(edtWeightKgs)
+        clearOnFocus(edtWeightGrams)
+
         edtWeightKgs.filters = arrayOf(MinMaxInputFilter(0, 299))   // Limit to 299 Kgs
         edtWeightGrams.filters = arrayOf(MinMaxInputFilter(0, 99))  // Limit to 0.99 Kgs
 
@@ -122,4 +125,15 @@ class PopupWeightEntryKgs : Activity() {
             }
         }
     }
+
+    //------ Clear the Edit Text Box onClick ----------
+    private fun clearOnFocus(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                editText.text.clear()
+                editText.setSelection(0)
+            }
+        }
+    } //---------------------------------------------
+
 }

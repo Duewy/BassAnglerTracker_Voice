@@ -89,7 +89,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     // Voice Helper
-    private lateinit var tts: TextToSpeech
+    private var tts: TextToSpeech? = null
     private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
@@ -162,12 +162,13 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                                 isTournament    = true,
                                 onCommandAction = { transcript -> onSpeechResult(transcript) }
                                     )
+
+                    tts = TextToSpeech(this) { status ->
+                        if (status == TextToSpeech.SUCCESS) {
+                            tts?.language = Locale.getDefault()
+                        }
                 }
 
-                tts = TextToSpeech(this) { status ->
-                    if (status == TextToSpeech.SUCCESS) {
-                        tts.language = Locale.getDefault()
-                    }
                 }
 
         dbHelper = CatchDatabaseHelper(this)
@@ -250,8 +251,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     //------------- ON DESTROY ----------------------
     override fun onDestroy() {
         super.onDestroy()
-        tts.stop()
-        tts.shutdown()
+        tts?.stop()
+        tts?.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
