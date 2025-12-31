@@ -303,11 +303,8 @@ override val dialog: Any
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val normalized =
-            SharedPreferencesManager.normalizeSpeciesName(species)
-
         val speciesInitial =
-            SharedPreferencesManager.getSpeciesInitial(normalized)
+            SharedPreferencesManager.getSpeciesInitial(this, species)
 
         val catch = CatchItem(
             id = 0,
@@ -473,7 +470,7 @@ override val dialog: Any
                 }
 
                 typeLetters[i].text =
-                    SharedPreferencesManager.getSpeciesInitial(catch.species)
+                    SharedPreferencesManager.getSpeciesInitial(this, catch.species)
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realLengthInches[i].setOnLongClickListener {

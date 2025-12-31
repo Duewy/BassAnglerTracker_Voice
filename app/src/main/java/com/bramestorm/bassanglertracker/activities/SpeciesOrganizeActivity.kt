@@ -102,8 +102,34 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
                 val name = input.text.toString().trim()
                 if (name.isBlank()) return@setPositiveButton
 
-                // 1️⃣ Save species name
+// 1️⃣ Save species name
                 SharedPreferencesManager.addSpecies(this, name)
+
+// 1️⃣🅱️ Ensure default initials are seeded (runs once)
+                SharedPreferencesManager.ensureDefaultSpeciesInitials(this)
+
+// 1️⃣🅲 Assign a UNIQUE initial for this species
+                val normalizedName =
+                    SharedPreferencesManager.normalizeSpeciesName(name)
+
+                val speciesInitial =
+                    SharedPreferencesManager.assignUniqueSpeciesInitial(
+                        this,
+                        normalizedName
+                    )
+
+// 1️⃣🅳 Persist the initial
+                val initialsMap =
+                    SharedPreferencesManager.loadSpeciesInitialsMap(this)
+
+                initialsMap[normalizedName] = speciesInitial
+
+                SharedPreferencesManager.saveSpeciesInitialsMap(
+                    this,
+                    initialsMap
+                )
+
+
 
                 // 2️⃣ Save image URI if selected
                 pendingImageUri?.let {
@@ -134,6 +160,19 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
             .setMessage("Delete \"$speciesName\"?\nThis will not remove past catches.")
             .setPositiveButton("Delete") { _, _ ->
                 SharedPreferencesManager.removeSpecies(this, speciesName)
+            // 🗑️ Remove initials mapping as well
+                val normalized =
+                    SharedPreferencesManager.normalizeSpeciesName(speciesName)
+
+                val initialsMap =
+                    SharedPreferencesManager.loadSpeciesInitialsMap(this)
+
+                initialsMap.remove(normalized)
+
+                SharedPreferencesManager.saveSpeciesInitialsMap(
+                    this,
+                    initialsMap
+                )
 
                 adapter.updateList(
                     SharedPreferencesManager.loadSpeciesList(this)

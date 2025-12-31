@@ -42,7 +42,7 @@ class VoiceInteractionHelper(
 
 
     enum class MeasurementUnit {
-        LBS_OZ,POUNDS, KG_G, INCHES, CM        //todo why is CM not Used???
+        LBS_OZ,POUNDS, KG_G, INCHES, CM
     }
 
     init {

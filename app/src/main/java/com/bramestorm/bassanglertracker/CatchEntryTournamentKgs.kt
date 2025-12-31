@@ -297,11 +297,8 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val normalized =
-            SharedPreferencesManager.normalizeSpeciesName(species)
-
         val speciesInitial =
-            SharedPreferencesManager.getSpeciesInitial(normalized)
+            SharedPreferencesManager.getSpeciesInitial(this,species)
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
 
@@ -469,7 +466,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
                 }
 
                 typeLetters[i].text =
-                    SharedPreferencesManager.getSpeciesInitial(catch.species)
+                    SharedPreferencesManager.getSpeciesInitial(this, catch.species)
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**
                 realWeightKgs[i].setOnLongClickListener {

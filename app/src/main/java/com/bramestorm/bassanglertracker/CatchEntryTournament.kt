@@ -297,11 +297,8 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         val cleanClipColor = clipColor.uppercase() // This came from the popup
 
-        val normalizedSpecies =
-            SharedPreferencesManager.normalizeSpeciesName(species)
-
         val speciesInitial =
-            SharedPreferencesManager.getSpeciesInitial(normalizedSpecies)
+            SharedPreferencesManager.getSpeciesInitial(this, species)
 
 
         Log.d("DB_DEBUG", "✅ Assigned Clip Color: $cleanClipColor")
@@ -470,7 +467,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 }
 
                 typeLetters[i].text =
-                    SharedPreferencesManager.getSpeciesInitial(item.species)
+                    SharedPreferencesManager.getSpeciesInitial(this, item.species)
 
 
                 // **long-press to 📝 EDIT or DELETE 🚫 this exact item**

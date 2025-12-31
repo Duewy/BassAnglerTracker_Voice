@@ -198,12 +198,9 @@ class TournamentVoiceHandler(
             MeasurementMode.CM -> "tournament_cms"
         }
 
-        val markerType = when (parsed.species.lowercase()) {
-            "largemouth" -> "L"
-            "smallmouth" -> "S"
-            "spotted" -> "P"
-            else -> ""
-        }
+        val markerType =
+            SharedPreferencesManager.getSpeciesInitial(context, parsed.species)
+
 
         val dbItem = CatchItem(
             id = 0,

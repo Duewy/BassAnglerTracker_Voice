@@ -10,7 +10,6 @@ import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Locale
 
 object SharedPreferencesManager {
 
@@ -24,6 +23,7 @@ object SharedPreferencesManager {
     private const val KEY_SPECIES_LIST = "species_list_v2"
 
     private const val KEY_SPECIES_IMAGE_URIS = "species_image_uris"
+    private const val KEY_SPECIES_INITIALS_MAP = "species_initials_map"
 
 
     // Catch entry type
@@ -259,39 +259,104 @@ object SharedPreferencesManager {
     }
 
 
+    fun loadSpeciesInitialsMap(context: Context): MutableMap<String, String> {
+        val prefs = prefs(context)
+        val json = prefs.getString(KEY_SPECIES_INITIALS_MAP, null) ?: return mutableMapOf()
+        val obj = JSONObject(json)
+        return obj.keys().asSequence().associateWith { obj.getString(it) }.toMutableMap()
+    }
+
+    fun saveSpeciesInitialsMap(context: Context, map: Map<String, String>) {
+        val obj = JSONObject()
+        map.forEach { (k, v) -> obj.put(k, v) }
+        prefs(context).edit().putString(KEY_SPECIES_INITIALS_MAP, obj.toString()).apply()
+    }
+
+    private fun generateBaseInitial(name: String): String {
+        val parts = name.split(" ").filter { it.isNotBlank() }
+        return if (parts.size >= 2) {
+            "${parts[0][0]}${parts[1][0]}".uppercase()
+        } else {
+            name.take(2).uppercase()
+        }
+    }
+
+    fun assignUniqueSpeciesInitial(
+        context: Context,
+        speciesName: String
+    ): String {
+        val normalized = normalizeSpeciesName(speciesName)
+        val map = loadSpeciesInitialsMap(context)
+        val used = map.values.toSet()
+
+        val base = generateBaseInitial(normalized)
+        if (base !in used) return base
+
+        // Try letter variations from the name
+        val letters = normalized.replace(" ", "").uppercase()
+        for (i in 1 until letters.length) {
+            val candidate = "${letters[0]}${letters[i]}"
+            if (candidate !in used) return candidate
+        }
+
+        // Absolute fallback (rare)
+        var suffix = 'A'
+        while ("${base[0]}$suffix" in used) suffix++
+        return "${base[0]}$suffix"
+    }
+
+    fun ensureDefaultSpeciesInitials(context: Context) {
+        val map = loadSpeciesInitialsMap(context)
+        if (map.isNotEmpty()) return
+
+        map.putAll(FishSpecies.defaultSpeciesInitials)
+        saveSpeciesInitialsMap(context, map)
+    }
+
+
 // ----- Species Initials -------
-fun getSpeciesInitial(normalizedSpecies: String): String {
-    val s = normalizedSpecies.trim().lowercase(Locale.US)
 
-    // ✅ Explicit tournament overrides for Spotted Bass
-    if (s == "spotted bass" || s == "spotted") {
-        return "SP"
+    fun getSpeciesInitial(context: Context, species: String): String {
+        ensureDefaultSpeciesInitials(context)
+
+        val normalized = normalizeSpeciesName(species)
+        val map = loadSpeciesInitialsMap(context)
+
+        return map[normalized] ?: "--"
     }
 
-    val words = s.split(" ").filter { it.isNotBlank() }
+                           /* fun getSpeciesInitials(normalizedSpecies: String): String {
+                            val s = normalizedSpecies.trim().lowercase(Locale.US)
 
-    return when {
-        // Two-word (or more) species → first letters
-        words.size >= 2 -> {
-            "${words[0][0]}${words[1][0]}".uppercase(Locale.US)
-        }
+                            // ✅ Explicit tournament overrides for Spotted Bass
+                            if (s == "spotted bass" || s == "spotted") {
+                                return "SP"
+                            }
 
-        // Single-word species → first two consonants
-        words.size == 1 -> {
-            val consonants = words[0]
-                .uppercase(Locale.US)
-                .filter { it !in "AEIOU" }
+                            val words = s.split(" ").filter { it.isNotBlank() }
 
-            when {
-                consonants.length >= 2 -> consonants.substring(0, 2)
-                consonants.length == 1 -> "${consonants[0]}${words[0][0].uppercaseChar()}"
-                else -> words[0].take(2).uppercase(Locale.US)
-            }
-        }
+                            return when {
+                                // Two-word (or more) species → first letters
+                                words.size >= 2 -> {
+                                    "${words[0][0]}${words[1][0]}".uppercase(Locale.US)
+                                }
 
-        else -> "--"
-    }
-}
+                                // Single-word species → first two consonants
+                                words.size == 1 -> {
+                                    val consonants = words[0]
+                                        .uppercase(Locale.US)
+                                        .filter { it !in "AEIOU" }
+
+                                    when {
+                                        consonants.length >= 2 -> consonants.substring(0, 2)
+                                        consonants.length == 1 -> "${consonants[0]}${words[0][0].uppercaseChar()}"
+                                        else -> words[0].take(2).uppercase(Locale.US)
+                                    }
+                                }
+
+                                else -> "--"
+                            }
+                        }  */
 
 
 
