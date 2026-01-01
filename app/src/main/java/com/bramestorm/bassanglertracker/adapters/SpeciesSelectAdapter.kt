@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SpeciesImageResolver
 
 class SpeciesSelectAdapter(
     private val speciesList: MutableList<SpeciesItem>
@@ -63,7 +64,11 @@ class SpeciesSelectAdapter(
 
         fun bind(speciesItem: SpeciesItem) {
             txtSpeciesName.text = speciesItem.name
-            imgSpecies.setImageResource(speciesItem.imageResId)
+            SpeciesImageResolver.loadInto(
+                itemView.context,
+                speciesItem.name,
+                imgSpecies
+            )
         }
     }
     fun updateList(newList: List<SpeciesItem>) {

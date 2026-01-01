@@ -18,7 +18,7 @@ object SpeciesImageHelper {
             "crappie" -> R.drawable.fish_crappie
             "walleye" -> R.drawable.fish_walleye
             "perch" -> R.drawable.fish_perch
-            "pike", "northern pike" -> R.drawable.fish_northern_pike
+            "pike" -> R.drawable.fish_northern_pike
             "catfish" -> R.drawable.fish_catfish
             "panfish"-> R.drawable.fish_bluegill
             "pumpkinseed"-> R.drawable.fish_pumpkinseed
@@ -32,7 +32,7 @@ object SpeciesImageHelper {
             "salmon"-> R.drawable.fish_salmon
             "spotted bass"-> R.drawable.fish_spotted_bass
             "carp" -> R.drawable.fish_carp
-            "muskie", "muskellunge" -> R.drawable.fish_muskie
+            "muskie" -> R.drawable.fish_muskie
             "bowfin" -> R.drawable.fish_bow_fin
             "gar" -> R.drawable.fish_gar
             "drum" -> R.drawable.fish_drum

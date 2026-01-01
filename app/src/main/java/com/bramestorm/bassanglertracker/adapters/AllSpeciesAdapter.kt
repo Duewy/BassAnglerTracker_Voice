@@ -1,7 +1,6 @@
 package com.bramestorm.bassanglertracker.adapters
 
 import android.content.Context
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.models.SpeciesItem
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SpeciesImageResolver
+import com.bramestorm.bassanglertracker.utils.SpeciesImageStorage
 
 class AllSpeciesAdapter(
     private val context: Context,
@@ -36,17 +37,11 @@ class AllSpeciesAdapter(
         val item = speciesList[position]
 
         holder.txtSpecies.text = item.name
-        when {
-            item.imageUri != null -> {
-                holder.imgSpecies.setImageURI(Uri.parse(item.imageUri))
-            }
-            item.imageResId != 0 -> {
-                holder.imgSpecies.setImageResource(item.imageResId)
-            }
-            else -> {
-                holder.imgSpecies.setImageResource(R.drawable.fish_default)
-            }
-        }
+        SpeciesImageResolver.loadInto(
+            holder.itemView.context,
+            item.name,
+            holder.imgSpecies
+        )
 
         // Long-press = "Oops, delete this entry"
         holder.itemView.setOnLongClickListener {
@@ -65,7 +60,20 @@ class AllSpeciesAdapter(
                 notifyItemRemoved(position)
 
                 // Clean up stored image (if any)
-                SharedPreferencesManager.saveSpeciesImageUri(context, speciesName, null)
+                val normalized =
+                    SharedPreferencesManager.normalizeSpeciesName(speciesName)
+
+                SharedPreferencesManager.saveSpeciesImageUri(
+                    context,
+                    normalized,
+                    null
+                )
+
+                SpeciesImageStorage.deleteInternalImage(
+                    context,
+                    normalized
+                )
+
 
                 // Tell Activity to persist delete
                 onDeleteConfirmed(speciesName)

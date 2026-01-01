@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.adapters.SpeciesReorderAdapter
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import com.bramestorm.bassanglertracker.utils.SpeciesImageStorage
 
 class SpeciesOrganizeActivity : AppCompatActivity() {
 
@@ -99,50 +100,71 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
             .setTitle("Add Species")
             .setView(layout)
             .setPositiveButton("Add") { _, _ ->
-                val name = input.text.toString().trim()
-                if (name.isBlank()) return@setPositiveButton
+                val rawName = input.text.toString().trim()
+                if (rawName.isBlank()) return@setPositiveButton
 
-// 1️⃣ Save species name
-                SharedPreferencesManager.addSpecies(this, name)
+                // 🚫 Prevent near-duplicate species (human variants)
+                val existingSpecies =
+                    SharedPreferencesManager.loadSpeciesList(this)
 
-// 1️⃣🅱️ Ensure default initials are seeded (runs once)
+                val canonicalInput =
+                    SharedPreferencesManager.canonicalizeSpeciesName(rawName)
+
+                if (existingSpecies.any {
+                        SharedPreferencesManager.canonicalizeSpeciesName(it) == canonicalInput
+                    }) {
+                    pendingImageUri = null
+                    return@setPositiveButton
+                }
+
+                // 🔑 Canonical normalized key (single source of truth)
+                val normalizedLowerCasedName =
+                    SharedPreferencesManager.normalizeSpeciesName(rawName)
+
+                // 1️⃣ Save species name
+                SharedPreferencesManager.addSpecies(this, rawName)
+
+                // 2️⃣ Ensure default initials are seeded
                 SharedPreferencesManager.ensureDefaultSpeciesInitials(this)
 
-// 1️⃣🅲 Assign a UNIQUE initial for this species
-                val normalizedName =
-                    SharedPreferencesManager.normalizeSpeciesName(name)
-
+                // 3️⃣ Assign a UNIQUE initial
                 val speciesInitial =
                     SharedPreferencesManager.assignUniqueSpeciesInitial(
                         this,
-                        normalizedName
+                        normalizedLowerCasedName
                     )
 
-// 1️⃣🅳 Persist the initial
+                // 4️⃣ Persist initials
                 val initialsMap =
                     SharedPreferencesManager.loadSpeciesInitialsMap(this)
 
-                initialsMap[normalizedName] = speciesInitial
+                initialsMap[normalizedLowerCasedName] = speciesInitial
 
                 SharedPreferencesManager.saveSpeciesInitialsMap(
                     this,
                     initialsMap
                 )
 
+                // 5️⃣ Import & save species image (if selected)
+                pendingImageUri?.let { pickedUri ->
+                    val stableUri =
+                        SpeciesImageStorage.importToInternalStorage(
+                            context = this,
+                            sourceUri = pickedUri,
+                            normalizedSpecies = normalizedLowerCasedName
+                        )
 
-
-                // 2️⃣ Save image URI if selected
-                pendingImageUri?.let {
                     SharedPreferencesManager.saveSpeciesImageUri(
                         this,
-                        SharedPreferencesManager.normalizeSpeciesName(name),
-                        it.toString()
+                        normalizedLowerCasedName,
+                        stableUri
                     )
                 }
 
+                // 6️⃣ Clear picker state
                 pendingImageUri = null
 
-                // 3️⃣ Refresh list
+                // 7️⃣ Refresh list
                 adapter.updateList(
                     SharedPreferencesManager.loadSpeciesList(this)
                 )
@@ -150,6 +172,7 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
             .setNegativeButton("Cancel") { _, _ ->
                 pendingImageUri = null
             }
+
             .show()
     }
 

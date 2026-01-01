@@ -228,6 +228,22 @@ object SharedPreferencesManager {
     fun normalizeSpeciesName(name: String): String =
         name.trim().lowercase()
 
+    /**
+     * Canonical form for duplicate detection.
+     * Used ONLY for comparison, not storage.
+     *
+     * Examples:
+     *  - "large-mouth"  -> "large mouth"
+     *  - "largemouth"   -> "largemouth"
+     *  - "large   mouth"-> "large mouth"
+     */
+    fun canonicalizeSpeciesName(name: String): String =
+        name
+            .trim()
+            .lowercase()
+            .replace("-", " ")
+            .replace(Regex("\\s+"), " ")
+
     // =============================================================
     // ALL SPECIES (CATALOGUE)
     // =============================================================

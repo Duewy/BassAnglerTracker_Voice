@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.utils.FishSpecies
-import com.bramestorm.bassanglertracker.utils.SpeciesImageHelper.getSpeciesImageResId
+import com.bramestorm.bassanglertracker.utils.SpeciesImageResolver
 
 class SpeciesReorderAdapter(
     private val speciesList: MutableList<String>,
@@ -27,29 +27,28 @@ class SpeciesReorderAdapter(
             .inflate(R.layout.item_species_reorder, parent, false) // ✅ CORRECT
         return ViewHolder(view)
     }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val name = speciesList[position]
 
         holder.itemView.setBackgroundResource(R.color.selection_list)
-
         holder.txtSpeciesName.text = name
-        holder.imgSpecies.setImageResource(getSpeciesImageResId(name))
 
-        // 🔒 Determine if this is a user-added species
+        SpeciesImageResolver.loadInto(
+            holder.itemView.context,
+            name,
+            holder.imgSpecies
+        )
+
         val isUserAdded = name !in FishSpecies.allSpeciesList
 
         if (isUserAdded) {
             holder.imgDelete.visibility = View.VISIBLE
-            holder.imgDelete.setOnClickListener {
-                onDeleteRequested(name)
-            }
+            holder.imgDelete.setOnClickListener { onDeleteRequested(name) }
         } else {
             holder.imgDelete.visibility = View.GONE
             holder.imgDelete.setOnClickListener(null)
         }
     }
-
 
 
     override fun getItemCount(): Int = speciesList.size
