@@ -32,6 +32,51 @@ android {
             )
         )
     }
+    // --- ADD THIS (Phase A) ---
+    flavorDimensions += "edition"
+
+    productFlavors {
+        create("free") {
+            dimension = "edition"
+
+            // Side-by-side install support (recommended)
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+
+            // Displayed app name
+            resValue("string", "app_name", "Catch and Call Free")
+
+            // Flags for later (Phase B barriers)
+            buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "false")
+            buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "false")
+        }
+
+        create("tracker") {
+            dimension = "edition"
+
+            applicationIdSuffix = ".tracker"
+            versionNameSuffix = "-tracker"
+
+            resValue("string", "app_name", "Catch and Call Tracker")
+
+            buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "false")
+            buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "true")
+        }
+
+        create("provc") {
+            dimension = "edition"
+
+            applicationIdSuffix = ".provc"
+            versionNameSuffix = "-provc"
+
+            resValue("string", "app_name", "Catch and Call ProVC")
+
+            buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "true")
+            buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "true")
+        }
+    }
+    // --- END ADD ---
+
 
     buildTypes {
         debug {
