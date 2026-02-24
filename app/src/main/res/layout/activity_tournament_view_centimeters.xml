@@ -14,13 +14,27 @@
     tools:context=".CatchEntryTournamentCentimeters">
 
 
+    <!-- Flavor Label -->
+    <ImageView
+        android:id="@+id/imgWordmark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:maxHeight="56dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/timeNOW"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/wordmark" />
+
     <TextClock
         android:id="@+id/timeNOW"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:layout_marginTop="5dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="1dp"
         android:layout_marginBottom="19dp"
         android:gravity="center"
         android:padding="5dp"
@@ -28,24 +42,11 @@
         android:textColor="@color/black"
         android:textSize="34sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/imageView"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
+        app:layout_constraintBottom_toBottomOf="@id/imgWordmark"
+        app:layout_constraintEnd_toStartOf="@+id/imgWordmark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/timer_place_holder" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="235dp"
-        android:layout_height="61dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="5dp"
-        android:contentDescription="@string/app_image_description"
-        android:scaleX=".8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/timeNOW"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/catch_call_words_blue" />
 
 
     <Button
@@ -66,7 +67,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/firstRealLengthCms"
         app:layout_constraintEnd_toEndOf="@id/firstDecLengthCms"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/imgWordmark" />
 
     <TextView
         android:id="@+id/txtCmsColorLetter1"

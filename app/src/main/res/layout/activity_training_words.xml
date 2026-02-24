@@ -14,18 +14,20 @@
     android:background="@color/softlock_orange"
     android:paddingBottom="25dp">
 
+    <!-- Flavor Label -->
     <ImageView
-        android:id="@+id/imgVCC"
-        android:layout_width="0dp"
-        android:layout_height="55dp"
-        android:layout_marginTop="12dp"
-        android:contentDescription="@string/app_image_description"
-        android:scaleX="1.25"
+        android:id="@+id/imgWordmark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:maxHeight="56dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/catch_call_words_blue" />
+        app:srcCompat="@drawable/wordmark" />
+
 
     <ImageView
         android:layout_width="0dp"
@@ -37,7 +39,7 @@
         app:layout_constraintBottom_toTopOf="@+id/txtWhatComputerHeard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imgVCC"
+        app:layout_constraintTop_toBottomOf="@id/imgWordmark"
         app:srcCompat="@drawable/bass_jumping_boater_no_backing"
         android:contentDescription="@string/fish_image"/>
 
@@ -48,7 +50,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgVCC">
+            app:layout_constraintTop_toBottomOf="@id/imgWordmark">
 
             <TextView
                 android:layout_width="match_parent"

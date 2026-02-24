@@ -17,17 +17,20 @@
 
 
         <ImageView
-            android:id="@+id/imgShare"
-            android:layout_width="wrap_content"
-            android:layout_height="175dp"
-            android:contentDescription="@string/app_image_description"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/imageView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"
+            android:adjustViewBounds="true"
+            android:maxHeight="250dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/app_name"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.05"
-            app:srcCompat="@drawable/catch_and_call_pro_vc_logo" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/app_logo" />
 
         <TextView
             android:id="@+id/txtShareHeader"
@@ -40,7 +43,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgShare" />
+            app:layout_constraintTop_toBottomOf="@id/imageView2" />
 
         <ImageView
             android:id="@+id/imgGoogleMapIcon"

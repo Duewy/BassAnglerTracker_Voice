@@ -25,17 +25,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/bass_jumping_boater_no_backing" />
 
+        <!-- Flavor Label -->
         <ImageView
-            android:id="@+id/imgVCC"
-            android:layout_width="0dp"
-            android:layout_height="85dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:contentDescription="@string/app_image_description"
+            android:id="@+id/imgWordmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:maxHeight="56dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/catch_call_words_blue" />
+            app:srcCompat="@drawable/wordmark" />
 
         <LinearLayout
             android:id="@+id/ManualMode1linearLayout"
@@ -44,7 +46,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgVCC">
+            app:layout_constraintTop_toBottomOf="@id/imgWordmark">
 
             <TextView
                 android:id="@+id/textView4"

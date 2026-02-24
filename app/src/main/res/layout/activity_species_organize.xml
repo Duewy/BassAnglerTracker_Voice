@@ -15,13 +15,29 @@
         android:padding="16dp"
         tools:context=".SpeciesSelectionActivity">
 
+        <!-- Flavor Label -->
+        <ImageView
+            android:id="@+id/imgWordmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:maxHeight="56dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="fitCenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/wordmark" />
+
         <!-- Title -->
         <TextView
             android:id="@+id/txtSpeciesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="2dp"
             android:paddingBottom="8dp"
             android:text="@string/main_species_list"
             android:textColor="@color/clip_blue"

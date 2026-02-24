@@ -14,6 +14,22 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
+        <!-- Flavor Label -->
+        <ImageView
+            android:id="@+id/imgWordmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:maxHeight="56dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="fitCenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/wordmark" />
+
         <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
