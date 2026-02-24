@@ -15,6 +15,7 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
+import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
@@ -22,7 +23,6 @@ import com.google.android.gms.ads.MobileAds
 import java.util.Date
 import java.util.Locale
 
-private const val ADS_ENABLED = false
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,15 +53,27 @@ class MainActivity : AppCompatActivity() {
         //-------------------------- Open the Voice Control TRAINING INDEX ------------------------
         val btnVCC = findViewById<Button>(R.id.btnVCC)
         btnVCC.setOnClickListener {
-            val intent = Intent(this, UserTrainingVoiceCommands::class.java)
-            startActivity(intent)
+            if (BuildConfig.FEATURE_VOICE_COMMANDS) {
+                startActivity(Intent(this, UserTrainingVoiceCommands::class.java))
+            } else {
+                positionedToast(
+                    "Voice Controls are available in the Pro VC edition only.\n" +
+                            "Upgrade to enable hands‑free catch logging."
+                )
+            }
         }
 
-        //-------------------------- Open the Google MAPS ------------------------
+        //-------------------------- Open the See & Share / Google MAPS ------------------------
         val btnLookUpShareData = findViewById<Button>(R.id.btnLookUpShareData)
         btnLookUpShareData.setOnClickListener {
-            val intent = Intent(this, LookUpShareDataActivity::class.java)
-            startActivity(intent)
+            if (BuildConfig.FEATURE_GPS_LOGGING) {
+                startActivity(Intent(this, LookUpShareDataActivity::class.java))
+            } else {
+                positionedToast(
+                    "See & Share is available in the Tracker or Pro VC editions.\n" +
+                            "Upgrade to unlock catch mapping and sharing."
+                )
+            }
         }
 
         //-------------------------- Open the Privacy Policy pdf 📝 --------------------
@@ -73,8 +85,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        if (ADS_ENABLED) {
-            MobileAds.initialize(this) {}
+        if (BuildConfig.FEATURE_DAILY_AD && hasFocus && shouldShowAdToday()) {
+            showAdPopup("main")
         }
 
 
@@ -84,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        if (ADS_ENABLED && hasFocus && shouldShowAdToday()) {
+        if (BuildConfig.FEATURE_DAILY_AD && hasFocus && shouldShowAdToday()) {
             showAdPopup("main")
         }
     }
@@ -99,10 +111,17 @@ class MainActivity : AppCompatActivity() {
         val firstLaunch = prefs.getBoolean("FIRST_LAUNCH_COMPLETE", false)
 
         if (!firstLaunch) {
-            // Launch voice setup guide
-            startActivity(Intent(this, VoiceSetupActivity::class.java))
 
-            // Prevent this from running again
+            // ✅ Only Pro VC needs the full voice setup flow
+            if (BuildConfig.FEATURE_VOICE_COMMANDS) {
+                positionedToast(
+                    "One-time setup: enable your phone’s voice system for hands‑free logging.\n" +
+                            "Bluetooth headset setup is included."
+                )
+                startActivity(Intent(this, VoiceSetupActivity::class.java))
+            }
+
+            // Prevent this from running again (all editions)
             prefs.edit().putBoolean("FIRST_LAUNCH_COMPLETE", true).apply()
         }
     }

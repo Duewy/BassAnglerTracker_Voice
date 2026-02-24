@@ -21,6 +21,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.BuildConfig
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.utils.positionedToast
@@ -74,17 +75,26 @@ class VoiceSetupActivity : AppCompatActivity() {
         btnAssistantSettings  = findViewById(R.id.btnAssistantSettings)
         btnVoiceInputSettings = findViewById(R.id.btnVoiceInputSettings)
 
-        // Bluetooth permission / check (existing)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                REQ_BT_CONNECT
-            )
+// Only ProVC needs the full Bluetooth/hands-free setup flow
+        val isProVc = BuildConfig.FEATURE_VOICE_COMMANDS
+
+        if (isProVc) {
+            // Bluetooth permission / check (ProVC only)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    REQ_BT_CONNECT
+                )
+            } else {
+                checkBluetoothDevices()
+            }
         } else {
-            checkBluetoothDevices()
+            // Basic edition: keep setup focused on enabling voice for Practice
+            // (No BT permission prompts here)
         }
 
 

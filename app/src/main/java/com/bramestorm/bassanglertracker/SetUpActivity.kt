@@ -92,6 +92,7 @@ class SetUpActivity : AppCompatActivity() {
     private var isTournamentSelected = false
     private var selectedSpecies: String = ""
     private var isGPSInitializingToggle = true
+    private var isVoiceInitializingToggle = false
 
 
     private var isLbsOzsSelected = false
@@ -128,11 +129,10 @@ class SetUpActivity : AppCompatActivity() {
                 .putBoolean(KEY_VOICE_CONTROL, false)
                 .putString(KEY_LAST_VOICE_DATE, today)
                 .apply()
-            positionedToast("📍 GPS and Voice Control logging has been reset.\nEnable then manually if needed.")
+            SharedPreferencesManager.setVccEnabled(this, false) // daily reset also resets VCC service state
         }
 
         setContentView(R.layout.activity_set_up_event)
-
 
         // Initialize UI components
         btnLbsOzs = findViewById(R.id.btnLbsOzs)
@@ -251,47 +251,78 @@ class SetUpActivity : AppCompatActivity() {
         }
 
 
-        // |||||||||||||| Load saved GPS state ||||||||||||||||||||||||||||||||||
+// |||||||||||||| Load saved GPS state ||||||||||||||||||||||||||||||||||
 
-        //------ ✅ Check both: saved state AND permission for GPS -----------
-        val isGpsEnabledInPrefs = sharedPreferences.getBoolean("GPS_ENABLED", false)
-        val hasLocationPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-
-        tglGPS.isChecked = isGpsEnabledInPrefs && hasLocationPermission
-
-        // Immediately set background based on initial state
-        if (tglGPS.isChecked || tglGPS.text == "Enabled") {
-            tglGPS.setBackgroundResource(R.drawable.btn_outline_green)
-        } else {
+// If edition doesn't support GPS, force OFF and orange, no matter prefs
+        if (!BuildConfig.FEATURE_GPS_LOGGING) {
+            isGPSInitializingToggle = true
+            tglGPS.isChecked = false
             tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
-        }
+            isGPSInitializingToggle = false
+        } else {
+            //------ ✅ Check both: saved state AND permission for GPS -----------
+            val isGpsEnabledInPrefs = sharedPreferences.getBoolean("GPS_ENABLED", false)
+            val hasLocationPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
 
-        isGPSInitializingToggle = false
+            isGPSInitializingToggle = true
+            tglGPS.isChecked = isGpsEnabledInPrefs && hasLocationPermission
+            tglGPS.setBackgroundResource(
+                if (tglGPS.isChecked) R.drawable.btn_outline_green else R.drawable.btn_outline_orange
+            )
+            isGPSInitializingToggle = false
+        }
 
         tglGPS.setOnCheckedChangeListener { _, isChecked ->
             if (isGPSInitializingToggle) return@setOnCheckedChangeListener
 
+            if (isChecked && !BuildConfig.FEATURE_GPS_LOGGING) {
+                positionedToast("GPS logging is available in the Tracker or Pro VC editions only.")
+                isGPSInitializingToggle = true
+                tglGPS.isChecked = false
+                tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
+                isGPSInitializingToggle = false
+                return@setOnCheckedChangeListener
+            }
+
             if (isChecked) {
                 checkAndRequestLocationPermission()
-                // ✅ Change background to green
                 tglGPS.setBackgroundResource(R.drawable.btn_outline_green)
             } else {
                 disableGps()
-                // 🔄 Revert background to orange
                 tglGPS.setBackgroundResource(R.drawable.btn_outline_orange)
             }
         }
 
-        // ------ VOICE CONTROL ENABLE ----------------
+// ------ VOICE CONTROL ENABLE ----------------
         tglVoice.setOnCheckedChangeListener { _, isChecked ->
+
+            if (isVoiceInitializingToggle) return@setOnCheckedChangeListener
+
+            // 🔒 ProVC only
+            if (isChecked && !BuildConfig.FEATURE_VOICE_COMMANDS) {
+                positionedToast(
+                    "Voice Control is available in the Pro VC edition only.\n" +
+                            "Upgrade to enable hands‑free catch logging."
+                )
+                isVoiceInitializingToggle = true
+                tglVoice.isChecked = false
+                tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                isVoiceInitializingToggle = false
+                return@setOnCheckedChangeListener
+            }
+
             if (isChecked) {
+
                 // a) BT device must be connected
                 if (!isBluetoothConnectedSafe()) {
-                    positionedToast("⚠️Please connect a 🎤 Bluetooth 🎧device for voice control")
+                    positionedToast("⚠️ Please connect a Bluetooth headset/mic for voice control.")
+                    isVoiceInitializingToggle = true
                     tglVoice.isChecked = false
+                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                    isVoiceInitializingToggle = false
                     return@setOnCheckedChangeListener
                 }
 
@@ -301,7 +332,10 @@ class SetUpActivity : AppCompatActivity() {
                         Intent(this, UserAgreementForDeepDozeActivity::class.java),
                         REQUEST_DEEP_DOZE_AGREEMENT
                     )
+                    isVoiceInitializingToggle = true
                     tglVoice.isChecked = false
+                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                    isVoiceInitializingToggle = false
                     return@setOnCheckedChangeListener
                 }
 
@@ -315,7 +349,10 @@ class SetUpActivity : AppCompatActivity() {
                         arrayOf(Manifest.permission.RECORD_AUDIO),
                         REQUEST_RECORD_AUDIO
                     )
+                    isVoiceInitializingToggle = true
                     tglVoice.isChecked = false
+                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                    isVoiceInitializingToggle = false
                     return@setOnCheckedChangeListener
                 }
 
@@ -330,7 +367,10 @@ class SetUpActivity : AppCompatActivity() {
                         arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
                         REQUEST_BLUETOOTH_CONNECT
                     )
+                    isVoiceInitializingToggle = true
                     tglVoice.isChecked = false
+                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                    isVoiceInitializingToggle = false
                     return@setOnCheckedChangeListener
                 }
 
@@ -340,8 +380,13 @@ class SetUpActivity : AppCompatActivity() {
                     .putBoolean(KEY_VOICE_CONTROL, true)
                     .apply()
 
-                positionedToast("🤙 Voice Control Enabled using🎧 Bluetooth mic 🎙️")
+                // ✅ This is what startVoiceService() checks (single source of truth for service)
+                SharedPreferencesManager.setVccEnabled(this, true)
+
+                positionedToast("🤙 Voice Control Enabled (Bluetooth mic).")
                 startVoiceService()
+
+                tglVoice.setBackgroundResource(R.drawable.btn_outline_green)
 
             } else {
                 // Turning OFF
@@ -349,15 +394,13 @@ class SetUpActivity : AppCompatActivity() {
                     .putBoolean(KEY_VOICE_CONTROL, false)
                     .apply()
 
-                stopVoiceService()
-                positionedToast("⚠️ Voice control disabled 🚫️")
-            }
+                // ✅ Keep service state consistent with SharedPreferencesManager.isVccEnabled(...)
+                SharedPreferencesManager.setVccEnabled(this, false)
 
-            // Update toggle background colors
-            tglVoice.background = if (tglVoice.isChecked)
-                ContextCompat.getDrawable(this, R.drawable.btn_outline_green)
-            else
-                ContextCompat.getDrawable(this, R.drawable.btn_outline_orange)
+                stopVoiceService()
+                positionedToast("Voice control disabled.")
+                tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+            }
         }
 // ---------------- END tglVoice ----------------
 
@@ -480,6 +523,7 @@ class SetUpActivity : AppCompatActivity() {
             }
         }
     }
+
 
     // ~~~~ Voice Services for Vcc ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     private fun startVoiceService() {
