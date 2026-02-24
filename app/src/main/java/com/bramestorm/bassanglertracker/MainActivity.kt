@@ -4,29 +4,26 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import java.util.Date
 import java.util.Locale
 
 
 class MainActivity : AppCompatActivity() {
 
-
+    private var dailyInterstitial: InterstitialAd? = null
+    private var hasTriedToShowDailyAdThisResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +32,11 @@ class MainActivity : AppCompatActivity() {
         // Check if this is the First time the Catch and Call app has opened
         checkFirstLaunch()
 
+        // ✅ Initialize AdMob once (daily popup uses popup_advertisement AdView)
+        if (BuildConfig.FEATURE_DAILY_AD) {
+            MobileAds.initialize(this) {}
+            loadDailyInterstitial()
+        }
 
         // ---------------- Open Set-Up page --------------------------------
         val openSetUpActivity = findViewById<Button>(R.id.btnSetUp11)
@@ -85,19 +87,71 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        if (BuildConfig.FEATURE_DAILY_AD && hasFocus && shouldShowAdToday()) {
-            showAdPopup("main")
-        }
-
-
 
     }// `````````` END On Create  ``````````````````````
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus || !BuildConfig.FEATURE_DAILY_AD) return
+        if (hasTriedToShowDailyAdThisResume) return
+        hasTriedToShowDailyAdThisResume = true
 
-        if (BuildConfig.FEATURE_DAILY_AD && hasFocus && shouldShowAdToday()) {
-            showAdPopup("main")
+        if (shouldShowAdToday()) {
+            val shown = DailyAdManager.showIfReady(this)
+            if (!shown) {
+                // Not ready; optionally start a preload now so next open is instant
+                DailyAdManager.preload(applicationContext)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hasTriedToShowDailyAdThisResume = false
+    }
+
+    private fun loadDailyInterstitial() {
+        val adRequest = AdRequest.Builder().build()
+
+        // ✅ Google test interstitial ad unit id
+        val testInterstitialUnitId = "ca-app-pub-3940256099942544/1033173712"
+
+        InterstitialAd.load(
+            this,
+            testInterstitialUnitId,
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    dailyInterstitial = ad
+                    dailyInterstitial?.fullScreenContentCallback =
+                        object : FullScreenContentCallback() {
+                            override fun onAdDismissedFullScreenContent() {
+                                dailyInterstitial = null
+                                loadDailyInterstitial() // preload next one
+                            }
+
+                            override fun onAdFailedToShowFullScreenContent(p0: com.google.android.gms.ads.AdError) {
+                                dailyInterstitial = null
+                                loadDailyInterstitial()
+                            }
+                        }
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    dailyInterstitial = null
+                    // Optional: retry later (don’t spam requests)
+                }
+            }
+        )
+    }
+
+    private fun showDailyInterstitialIfReady() {
+        val ad = dailyInterstitial
+        if (ad != null) {
+            ad.show(this)
+        } else {
+            // Not loaded yet—either skip today OR load and show next time
+            // If you want: loadDailyInterstitial()
         }
     }
 
@@ -123,38 +177,6 @@ class MainActivity : AppCompatActivity() {
 
             // Prevent this from running again (all editions)
             prefs.edit().putBoolean("FIRST_LAUNCH_COMPLETE", true).apply()
-        }
-    }
-
-
-    private fun showAdPopup(s: String) {
-        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val parent = findViewById<View>(android.R.id.content)
-        val popupView = inflater.inflate(R.layout.popup_advertisement, parent as ViewGroup, false)
-
-        val width = LinearLayout.LayoutParams.WRAP_CONTENT
-        val height = LinearLayout.LayoutParams.WRAP_CONTENT
-        val focusable = true
-
-        val popupWindow = PopupWindow(popupView, width, height, focusable)
-        popupWindow.elevation = 10f
-
-        // Show popup at center of screen
-        if (!isFinishing && !isDestroyed) {
-            popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0)
-        } else {
-            Log.w("MapAd", "Activity not in valid state to show popup.")
-        }
-
-        // Load the Ad
-        val adViewPopup = popupView.findViewById<AdView>(R.id.adViewPopup)
-        val adRequest = AdRequest.Builder().build()
-        adViewPopup.loadAd(adRequest)
-
-        // Close button
-        val closeBtn = popupView.findViewById<Button>(R.id.btnCloseAd)
-        closeBtn.setOnClickListener {
-            popupWindow.dismiss()
         }
     }
 

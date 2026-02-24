@@ -50,7 +50,6 @@ android {
             buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "false")
             buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "false")
             buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
-            buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
             buildConfigField("Boolean", "FEATURE_CATCHENTRY_BANNER_ADS", "true")
         }
 
@@ -65,7 +64,6 @@ android {
             buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "false")
             buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "true")
             buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
-            buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
             buildConfigField("Boolean", "FEATURE_CATCHENTRY_BANNER_ADS", "false")
         }
 
@@ -79,7 +77,6 @@ android {
 
             buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "true")
             buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "true")
-            buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
             buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")
             buildConfigField("Boolean", "FEATURE_CATCHENTRY_BANNER_ADS", "false")
         }

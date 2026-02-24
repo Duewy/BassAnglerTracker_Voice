@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/clip_very_green"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/clip_very_green">
-
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:background="@color/clip_very_green"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
     tools:context=".CatchEntryLbsOzs">
 
 
@@ -90,7 +84,7 @@
 
     <!-- btn btnAddCatch -->
     <LinearLayout
-        android:id="@+id/llAddCatchLbs"
+        android:id="@+id/llAddCatchPounds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -125,22 +119,18 @@
     <!-- List of Todays Catch -->
     <ListView
         android:id="@+id/simplePoundsListView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:divider="@color/clip_green"
-        android:dividerHeight="2dp"
-        android:padding="8dp"
-        android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@id/llAddCatchLbs"
+        app:layout_constraintTop_toBottomOf="@id/llAddCatchPounds"
+        app:layout_constraintBottom_toTopOf="@id/adViewCatchEntry"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/adViewCatchEntry" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewCatchEntry"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
         app:layout_constraintTop_toBottomOf="@id/simplePoundsListView"
@@ -149,5 +139,3 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-</ScrollView>

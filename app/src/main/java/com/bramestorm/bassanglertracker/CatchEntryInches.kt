@@ -125,7 +125,15 @@ class CatchEntryInches : BaseCatchEntryActivity() {
             showEditDeleteDialog(catchList[position])
             true
         }
-    }
+
+        val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
+        if (BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS && adView != null) {
+            adView.loadAd(com.google.android.gms.ads.AdRequest.Builder().build())
+        } else {
+            adView?.visibility = android.view.View.GONE
+        }
+
+    }//=============== END on Create ==============================
 
     override fun onDestroy() {
         try {

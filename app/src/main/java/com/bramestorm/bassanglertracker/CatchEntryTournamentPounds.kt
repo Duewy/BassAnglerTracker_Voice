@@ -228,8 +228,16 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
         GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
 
         updateTournamentList()
-    }
-// ~~~~~~~~~~~~~~~~~~~~~ END ON CREATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            //------------------- AdMob for FREE Edition Only --------------------------
+        val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
+        if (BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS && adView != null) {
+            adView.loadAd(com.google.android.gms.ads.AdRequest.Builder().build())
+        } else {
+            adView?.visibility = android.view.View.GONE
+        }
+
+    }//=============== END on Create ==============================
 
     override val dialog: Any
         get() = throw UnsupportedOperationException("BaseCatchEntryActivity.dialog is unused in this subclass")

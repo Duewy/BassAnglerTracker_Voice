@@ -87,7 +87,7 @@ class CatchEntryCentimeters : BaseCatchEntryActivity() {
 
         btnSetUp3Cm = findViewById(R.id.btnSetUp3Cm)
         btnOpenLengthCmPopup = findViewById(R.id.btnOpenLengthCmPopup)
-        simpleCmListView = findViewById(R.id.simpleCmListView)
+        simpleCmListView = findViewById(R.id.simpleCmsListView)
 
         updateListViewCm()
 
@@ -104,7 +104,15 @@ class CatchEntryCentimeters : BaseCatchEntryActivity() {
             showEditDeleteDialog(catchList[position])
             true
         }
-    }
+
+        val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
+        if (BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS && adView != null) {
+            adView.loadAd(com.google.android.gms.ads.AdRequest.Builder().build())
+        } else {
+            adView?.visibility = android.view.View.GONE
+        }
+
+    }//=============== END on Create ==============================
 
     override fun onDestroy() {
         stopService(Intent(this, VoiceControlService::class.java))

@@ -11,6 +11,8 @@ class IntroPage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.intro_page)
 
+        DailyAdManager.preload(applicationContext)
+
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
             finish() // closes the splash screen so it can't be returned to
