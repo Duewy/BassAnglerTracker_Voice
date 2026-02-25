@@ -67,6 +67,13 @@
 
         <!-- All Activities Here -->
 
+        <!-- First-Time Launch Questionnaire -->
+        <activity
+            android:name=".questionnaire.FirstTimeQuestionnaireActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
         <!-- Splash Page with Catch and Call Logo -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity
