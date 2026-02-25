@@ -85,6 +85,13 @@
             </intent-filter>
         </activity>
 
+        <!-- First-Time Questionnaire (shown once on first launch) -->
+        <activity
+            android:name=".questionnaire.FirstTimeQuestionnaireActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
         <!-- Directory of All Activities  -->
         <!-- Suppress: Letterboxing warning for fixed portrait (intended design) -->
         <activity

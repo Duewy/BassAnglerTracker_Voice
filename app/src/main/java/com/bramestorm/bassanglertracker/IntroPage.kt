@@ -16,15 +16,13 @@ class IntroPage : AppCompatActivity() {
         DailyAdManager.preload(applicationContext)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            // Route to the first-time questionnaire if the user hasn't completed it yet,
-            // otherwise go straight to MainActivity. Mirrors iOS RootLaunchView logic.
-            val destination = if (!FirstTimeQuestionnaireGate.isCompleted(this)) {
-                FirstTimeQuestionnaireActivity::class.java
-            } else {
+            val nextActivity = if (FirstTimeQuestionnaireGate.isCompleted(this)) {
                 MainActivity::class.java
+            } else {
+                FirstTimeQuestionnaireActivity::class.java
             }
-            startActivity(Intent(this, destination))
+            startActivity(Intent(this, nextActivity))
             finish() // closes the splash screen so it can't be returned to
-        }, 3000)
+        }, 3000) // wait for 3 seconds then route to questionnaire or main page
     }
 }
