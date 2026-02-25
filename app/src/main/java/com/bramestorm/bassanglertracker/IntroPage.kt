@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.questionnaire.FirstTimeQuestionnaireActivity
+import com.bramestorm.bassanglertracker.questionnaire.FirstTimeQuestionnaireGate
 
 class IntroPage : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,8 +16,13 @@ class IntroPage : AppCompatActivity() {
         DailyAdManager.preload(applicationContext)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            val nextActivity = if (FirstTimeQuestionnaireGate.isCompleted(this)) {
+                MainActivity::class.java
+            } else {
+                FirstTimeQuestionnaireActivity::class.java
+            }
+            startActivity(Intent(this, nextActivity))
             finish() // closes the splash screen so it can't be returned to
-        }, 3000) // wait for 2 seconds then off to Main Page
+        }, 3000) // wait for 3 seconds then route to questionnaire or main page
     }
 }
