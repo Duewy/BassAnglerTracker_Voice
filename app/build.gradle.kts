@@ -155,6 +155,7 @@ dependencies {
 
     // 🔄 JSON Parsing
     implementation(libs.google.gson)
+    implementation(libs.afs.native)
 
     // ✅ Unit Testing
     testImplementation(libs.junit)

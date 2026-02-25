@@ -25,6 +25,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchEntryTournamentPounds.ClipColor
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
@@ -35,6 +37,9 @@ import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -139,6 +144,14 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tournament_view_inches)
 
+        // Push bottom-constrained views (like the AdView) above the system navigation bar
+        val root = findViewById<android.view.View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
+            insets
+        }
+
         // 1️⃣ Read the VCC flag first
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
         Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
@@ -236,10 +249,24 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
 
         //------------------- AdMob for FREE Edition Only --------------------------
         val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
-        if (BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS && adView != null) {
-            adView.loadAd(com.google.android.gms.ads.AdRequest.Builder().build())
+
+        if (!BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS || adView == null) {
+            adView?.visibility = View.GONE
         } else {
-            adView?.visibility = android.view.View.GONE
+            // Start collapsed so user never sees an empty banner strip
+            adView.visibility = View.GONE
+
+            adView.adListener = object : AdListener() {
+                override fun onAdLoaded() {
+                    adView.visibility = View.VISIBLE
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    adView.visibility = View.GONE
+                }
+            }
+
+            adView.loadAd(AdRequest.Builder().build())
         }
 
     }//=============== END on Create ==============================
