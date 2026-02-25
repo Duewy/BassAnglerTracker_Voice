@@ -15,12 +15,16 @@ object FirstTimeQuestionnaireGate {
 
     fun markCompleted(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putBoolean(KEY_COMPLETED, true).apply()
+            .edit()
+            .putBoolean(KEY_COMPLETED, true)
+            .apply()
     }
 
     fun reset(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().remove(KEY_COMPLETED).apply()
+            .edit()
+            .remove(KEY_COMPLETED)
+            .apply()
     }
 }
 
@@ -31,12 +35,15 @@ object FirstTimeQuestionnaireStore {
     fun save(context: Context, answers: FirstTimeQuestionnaireAnswers) {
         val dto = AnswersDto.from(answers)
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putString(KEY_ANSWERS, gson.toJson(dto)).apply()
+            .edit()
+            .putString(KEY_ANSWERS, gson.toJson(dto))
+            .apply()
     }
 
     fun load(context: Context): FirstTimeQuestionnaireAnswers? {
         val json = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_ANSWERS, null) ?: return null
+
         return try {
             gson.fromJson(json, AnswersDto::class.java).toAnswers()
         } catch (e: Exception) {
@@ -46,7 +53,9 @@ object FirstTimeQuestionnaireStore {
 
     fun clear(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().remove(KEY_ANSWERS).apply()
+            .edit()
+            .remove(KEY_ANSWERS)
+            .apply()
     }
 
     private data class AnswersDto(
@@ -91,10 +100,10 @@ object FirstTimeQuestionnaireStore {
 data class AdvertisingFocusProfile(
     var freshwater: Boolean = true,
     var saltwater: Boolean = true,
-    var platforms: Set<String> = emptySet(),
-    var techniques: Set<String> = emptySet(),
-    var speciesGroups: Set<String> = emptySet(),
-    var gearInterests: Set<String> = emptySet(),
+    var platforms: Set<FishingPlatform> = emptySet(),
+    var techniques: Set<FishingTechnique> = emptySet(),
+    var speciesGroups: Set<SpeciesGroup> = emptySet(),
+    var gearInterests: Set<GearInterest> = emptySet(),
     var tournamentFocused: Boolean = false,
     var frequentAngler: Boolean = false
 )
@@ -107,6 +116,7 @@ object AdvertisingSelectionStore {
     fun load(context: Context): AdvertisingFocusProfile {
         val json = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_PROFILE, null) ?: return AdvertisingFocusProfile()
+
         return try {
             gson.fromJson(json, AdvertisingFocusProfile::class.java)
         } catch (e: Exception) {
@@ -122,7 +132,7 @@ object AdvertisingSelectionStore {
             .apply()
     }
 
-    fun hasSeeded(context: Context): Boolean =
+    private fun hasSeeded(context: Context): Boolean =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getBoolean(KEY_SEEDED, false)
 
@@ -136,16 +146,19 @@ object AdvertisingSelectionStore {
 
     fun seedIfNeeded(context: Context, answers: FirstTimeQuestionnaireAnswers?) {
         if (hasSeeded(context) || answers == null) return
+
+        val wt = answers.waterType
         val profile = AdvertisingFocusProfile(
-            freshwater = answers.waterType != WaterType.SALTWATER,
-            saltwater = answers.waterType != WaterType.FRESHWATER,
-            platforms = answers.platforms.map { it.name }.toSet(),
-            techniques = answers.techniques.map { it.name }.toSet(),
-            speciesGroups = answers.speciesGroups.map { it.name }.toSet(),
-            gearInterests = answers.gearInterests.map { it.name }.toSet(),
+            freshwater = wt != WaterType.SALTWATER,
+            saltwater = wt != WaterType.FRESHWATER,
+            platforms = answers.platforms,
+            techniques = answers.techniques,
+            speciesGroups = answers.speciesGroups,
+            gearInterests = answers.gearInterests,
             tournamentFocused = answers.purpose == Purpose.COMPETITION || answers.purpose == Purpose.BOTH,
             frequentAngler = answers.frequency == Frequency.WEEKLY || answers.frequency == Frequency.VERY_FREQUENT
         )
+
         save(context, profile)
     }
 }
