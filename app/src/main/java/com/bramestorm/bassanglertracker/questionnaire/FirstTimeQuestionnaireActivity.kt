@@ -2,10 +2,13 @@ package com.bramestorm.bassanglertracker.questionnaire
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
@@ -36,6 +39,13 @@ class FirstTimeQuestionnaireActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first_time_questionnaire)
+
+        val bottomBar = findViewById<View>(R.id.bottomBar)
+        ViewCompat.setOnApplyWindowInsetsListener(bottomBar) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, bars.bottom)
+            insets
+        }
 
         tvStepHeader = findViewById(R.id.tvStepHeader)
         progressBar = findViewById(R.id.progressBar)
@@ -193,7 +203,10 @@ class FirstTimeQuestionnaireActivity : AppCompatActivity() {
         FirstTimeQuestionnaireStore.save(this, answers)
         FirstTimeQuestionnaireGate.markCompleted(this)
         AdvertisingSelectionStore.seedIfNeeded(this, answers)
-
+        getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+            .edit()
+            .putBoolean("SKIP_DAILY_AD_ON_NEXT_MAIN", true)
+            .apply()
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

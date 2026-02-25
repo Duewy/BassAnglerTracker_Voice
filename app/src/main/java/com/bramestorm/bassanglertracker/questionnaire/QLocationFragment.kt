@@ -42,8 +42,8 @@ class QLocationFragment : Fragment() {
         val countries = LocationData.countries
         val labels = listOf("Select country…") + countries.map { it.name }
 
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, labels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_selected_item, labels)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerCountry.adapter = adapter
 
         // Restore selection
@@ -78,8 +78,8 @@ class QLocationFragment : Fragment() {
         spinnerRegion.visibility = View.VISIBLE
 
         val labels = listOf("Select state/province…") + regions.map { it.name }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, labels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_selected_item, labels)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerRegion.adapter = adapter
 
         // Restore selection

@@ -10,12 +10,7 @@ import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import java.util.Date
 import java.util.Locale
 
@@ -34,8 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         // ✅ Initialize AdMob once (daily popup uses popup_advertisement AdView)
         if (BuildConfig.FEATURE_DAILY_AD) {
-            MobileAds.initialize(this) {}
-            loadDailyInterstitial()
+            DailyAdManager.preload(applicationContext)
         }
 
         // ---------------- Open Set-Up page --------------------------------
@@ -96,10 +90,12 @@ class MainActivity : AppCompatActivity() {
         if (hasTriedToShowDailyAdThisResume) return
         hasTriedToShowDailyAdThisResume = true
 
+        // ✅ Don’t show an interstitial immediately after questionnaire completion
+        if (consumeSkipDailyAdFlag()) return
+
         if (shouldShowAdToday()) {
             val shown = DailyAdManager.showIfReady(this)
             if (!shown) {
-                // Not ready; optionally start a preload now so next open is instant
                 DailyAdManager.preload(applicationContext)
             }
         }
@@ -110,51 +106,12 @@ class MainActivity : AppCompatActivity() {
         hasTriedToShowDailyAdThisResume = false
     }
 
-    private fun loadDailyInterstitial() {
-        val adRequest = AdRequest.Builder().build()
-
-        // ✅ Google test interstitial ad unit id
-        val testInterstitialUnitId = "ca-app-pub-3940256099942544/1033173712"
-
-        InterstitialAd.load(
-            this,
-            testInterstitialUnitId,
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    dailyInterstitial = ad
-                    dailyInterstitial?.fullScreenContentCallback =
-                        object : FullScreenContentCallback() {
-                            override fun onAdDismissedFullScreenContent() {
-                                dailyInterstitial = null
-                                loadDailyInterstitial() // preload next one
-                            }
-
-                            override fun onAdFailedToShowFullScreenContent(p0: com.google.android.gms.ads.AdError) {
-                                dailyInterstitial = null
-                                loadDailyInterstitial()
-                            }
-                        }
-                }
-
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    dailyInterstitial = null
-                    // Optional: retry later (don’t spam requests)
-                }
-            }
-        )
+    private fun consumeSkipDailyAdFlag(): Boolean {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+        val skip = prefs.getBoolean("SKIP_DAILY_AD_ON_NEXT_MAIN", false)
+        if (skip) prefs.edit().putBoolean("SKIP_DAILY_AD_ON_NEXT_MAIN", false).apply()
+        return skip
     }
-
-    private fun showDailyInterstitialIfReady() {
-        val ad = dailyInterstitial
-        if (ad != null) {
-            ad.show(this)
-        } else {
-            // Not loaded yet—either skip today OR load and show next time
-            // If you want: loadDailyInterstitial()
-        }
-    }
-
 
     // Check if this is the User's first Time Opening the Catch and Call App
     // if so then they will have to set up the proper STT and TTS as well as

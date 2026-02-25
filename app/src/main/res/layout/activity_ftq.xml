@@ -106,6 +106,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
+            android:textColor="@color/black"
             android:text="Back"
             android:visibility="gone" />
 
@@ -115,7 +116,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Next" />
+            android:text="Next"
+            android:textColor="@color/black" />
 
     </LinearLayout>
 

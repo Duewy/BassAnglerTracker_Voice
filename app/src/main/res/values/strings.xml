@@ -327,6 +327,7 @@
     <string name="privacy_policy_pdf">Privacy Policy pdf</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="weight_measurements">Weight Measurements</string>
+    <string name="set_up_your_profile">Set Up Your Profile</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">

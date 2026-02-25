@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Select all that apply"
-            android:textColor="@color/grey"
+            android:textColor="@color/black"
             android:textSize="14sp"
             android:paddingBottom="12dp" />
 
@@ -31,6 +31,7 @@
             android:id="@+id/checkboxContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:orientation="vertical" />
 
     </LinearLayout>
