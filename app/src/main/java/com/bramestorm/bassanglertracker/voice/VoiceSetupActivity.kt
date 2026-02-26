@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.BuildConfig
 import com.bramestorm.bassanglertracker.MainActivity
 import com.bramestorm.bassanglertracker.R
+import com.bramestorm.bassanglertracker.utils.BluetoothUtils
 import com.bramestorm.bassanglertracker.utils.positionedToast
 
 class VoiceSetupActivity : AppCompatActivity() {
@@ -224,9 +225,21 @@ class VoiceSetupActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun checkBluetoothDevices() {
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
-        val paired   = btAdapter?.bondedDevices
+        if (btAdapter == null) {
+            positionedToast("This device has no Bluetooth adapter; Voice Control won’t work.")
+            return
+        }
+
+        val paired = btAdapter.bondedDevices
         if (paired.isNullOrEmpty()) {
             positionedToast("No Bluetooth device paired;\nVoice Control won’t work.")
+            return
+        }
+
+        if (BluetoothUtils.isHeadsetConnected()) {
+            positionedToast("✅ Bluetooth headset connected — Voice Control should work.")
+        } else {
+            positionedToast("⚠️ Bluetooth is paired but not connected.\nConnect your headset before enabling Voice Control.")
         }
     }
 

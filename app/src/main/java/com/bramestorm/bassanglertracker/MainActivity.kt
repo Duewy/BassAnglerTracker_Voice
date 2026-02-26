@@ -10,14 +10,14 @@ import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
-import com.google.android.gms.ads.interstitial.InterstitialAd
+
 import java.util.Date
 import java.util.Locale
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var dailyInterstitial: InterstitialAd? = null
+    //private var dailyInterstitial: InterstitialAd? = null
     private var hasTriedToShowDailyAdThisResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

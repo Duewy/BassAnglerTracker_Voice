@@ -7,6 +7,7 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
+
 object DailyAdManager {
 
     private var interstitial: InterstitialAd? = null

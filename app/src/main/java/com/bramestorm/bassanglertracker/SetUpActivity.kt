@@ -683,14 +683,7 @@ class SetUpActivity : AppCompatActivity() {
 
         // ---------- Safe Bluetooth check ---------
         private fun isBluetoothConnectedSafe(): Boolean {
-            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return false
-            return try {
-                adapter.getProfileConnectionState(BluetoothProfile.HEADSET) ==
-                        BluetoothAdapter.STATE_CONNECTED
-            } catch (e: SecurityException) {
-                Log.w(TAG, "Bluetooth CONNECT permission missing", e)
-                false
-            }
+            return com.bramestorm.bassanglertracker.utils.BluetoothUtils.isHeadsetConnected()
         }
 
     //======================= onResume ==========================================

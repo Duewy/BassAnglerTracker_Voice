@@ -267,7 +267,8 @@
     <string name="info_assist_desc">info Assistant icon for accessing Popups to assist user</string>
     <string name="close">Close</string>
 
-
+    <!-- Questionnaire Intro Paragraph -->
+    <string name="questionnaire_intro">By using Catch and Call and viewing the ads shown in the app, you help us work directly with manufacturers and retail outlets to bring better sales, offers, and fishing-related deals your way.\n\nThe ads you see help support the app and are selected to be useful to the way you fish.\n\nNo information from the Catch &amp; Call app will be given out to anyone. For more information on this please visit the Privacy Policy on the Main page.\n\nWe hope you enjoy using the Catch and Call app and we want to thank you for your support. \n\n\n Select NEXT to complete the questionnaire.</string>
     <!-- STT error message with numeric error code -->
     <string name="speech_error_error">Speech error code %1$d</string>
 

@@ -44,11 +44,7 @@ object FirstTimeQuestionnaireStore {
         val json = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_ANSWERS, null) ?: return null
 
-        return try {
-            gson.fromJson(json, AnswersDto::class.java).toAnswers()
-        } catch (e: Exception) {
-            null
-        }
+        return runCatching { gson.fromJson(json, AnswersDto::class.java).toAnswers() }.getOrNull()
     }
 
     fun clear(context: Context) {
@@ -94,71 +90,5 @@ object FirstTimeQuestionnaireStore {
             speciesGroups = speciesGroups.mapNotNull { runCatching { SpeciesGroup.valueOf(it) }.getOrNull() }.toSet(),
             gearInterests = gearInterests.mapNotNull { runCatching { GearInterest.valueOf(it) }.getOrNull() }.toSet()
         )
-    }
-}
-
-data class AdvertisingFocusProfile(
-    var freshwater: Boolean = true,
-    var saltwater: Boolean = true,
-    var platforms: Set<FishingPlatform> = emptySet(),
-    var techniques: Set<FishingTechnique> = emptySet(),
-    var speciesGroups: Set<SpeciesGroup> = emptySet(),
-    var gearInterests: Set<GearInterest> = emptySet(),
-    var tournamentFocused: Boolean = false,
-    var frequentAngler: Boolean = false
-)
-
-object AdvertisingSelectionStore {
-    private const val PREFS_NAME = "AdvertisingFocusPrefs"
-    private const val KEY_PROFILE = "AdvertisingFocusProfile.v1"
-    private const val KEY_SEEDED = "AdvertisingFocusProfile.seeded.v1"
-
-    fun load(context: Context): AdvertisingFocusProfile {
-        val json = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_PROFILE, null) ?: return AdvertisingFocusProfile()
-
-        return try {
-            gson.fromJson(json, AdvertisingFocusProfile::class.java)
-        } catch (e: Exception) {
-            AdvertisingFocusProfile()
-        }
-    }
-
-    fun save(context: Context, profile: AdvertisingFocusProfile) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_PROFILE, gson.toJson(profile))
-            .putBoolean(KEY_SEEDED, true)
-            .apply()
-    }
-
-    private fun hasSeeded(context: Context): Boolean =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getBoolean(KEY_SEEDED, false)
-
-    fun reset(context: Context) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .remove(KEY_PROFILE)
-            .remove(KEY_SEEDED)
-            .apply()
-    }
-
-    fun seedIfNeeded(context: Context, answers: FirstTimeQuestionnaireAnswers?) {
-        if (hasSeeded(context) || answers == null) return
-
-        val wt = answers.waterType
-        val profile = AdvertisingFocusProfile(
-            freshwater = wt != WaterType.SALTWATER,
-            saltwater = wt != WaterType.FRESHWATER,
-            platforms = answers.platforms,
-            techniques = answers.techniques,
-            speciesGroups = answers.speciesGroups,
-            gearInterests = answers.gearInterests,
-            tournamentFocused = answers.purpose == Purpose.COMPETITION || answers.purpose == Purpose.BOTH,
-            frequentAngler = answers.frequency == Frequency.WEEKLY || answers.frequency == Frequency.VERY_FREQUENT
-        )
-
-        save(context, profile)
     }
 }

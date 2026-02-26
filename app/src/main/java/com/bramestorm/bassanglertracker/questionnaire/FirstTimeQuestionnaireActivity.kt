@@ -16,7 +16,7 @@ import com.bramestorm.bassanglertracker.R
 class FirstTimeQuestionnaireActivity : AppCompatActivity() {
 
     private var currentStep = 0
-    private val totalSteps = 8
+    private val totalSteps = 9
 
     private val answers = FirstTimeQuestionnaireAnswers()
 
@@ -26,6 +26,7 @@ class FirstTimeQuestionnaireActivity : AppCompatActivity() {
     private lateinit var btnNext: Button
 
     private val stepTitles = listOf(
+        "Welcome",
         "Where do you fish?",
         "What type of water?",
         "Why do you fish?",
@@ -80,54 +81,55 @@ class FirstTimeQuestionnaireActivity : AppCompatActivity() {
         btnNext.text = if (step == totalSteps - 1) "Finish" else "Next"
 
         val fragment: Fragment = when (step) {
-            0 -> QLocationFragment.newInstance(answers.countryCode, answers.regionCode)
-            1 -> QSingleChoiceFragment.newInstance(
+            0 -> QIntroFragment()
+            1 -> QLocationFragment.newInstance(answers.countryCode, answers.regionCode)
+            2 -> QSingleChoiceFragment.newInstance(
                 title = "What type of water do you fish?",
                 labels = WaterType.entries.map { it.label },
                 values = WaterType.entries.map { it.name },
                 selected = answers.waterType?.name ?: ""
             )
-            2 -> QSingleChoiceFragment.newInstance(
+            3 -> QSingleChoiceFragment.newInstance(
                 title = "Why do you fish?",
                 labels = Purpose.entries.map { it.label },
                 values = Purpose.entries.map { it.name },
                 selected = answers.purpose?.name ?: ""
             )
-            3 -> QSingleChoiceFragment.newInstance(
+            4 -> QSingleChoiceFragment.newInstance(
                 title = "How often do you go fishing?",
                 labels = Frequency.entries.map { it.label },
                 values = Frequency.entries.map { it.name },
                 selected = answers.frequency?.name ?: ""
             )
-            4 -> QMultiChoiceFragment.newInstance(
+            5 -> QMultiChoiceFragment.newInstance(
                 title = "What platforms do you fish from?",
                 labels = FishingPlatform.entries.map { it.label },
                 values = FishingPlatform.entries.map { it.name },
                 selected = answers.platforms.map { it.name }.toSet()
             )
-            5 -> QMultiChoiceFragment.newInstance(
+            6 -> QMultiChoiceFragment.newInstance(
                 title = "What techniques do you use?",
                 labels = FishingTechnique.entries.map { it.label },
                 values = FishingTechnique.entries.map { it.name },
                 selected = answers.techniques.map { it.name }.toSet()
             )
-            6 -> QMultiChoiceFragment.newInstance(
+            7 -> QMultiChoiceFragment.newInstance(
                 title = "What species do you target?",
                 labels = SpeciesGroup.entries.map { it.label },
                 values = SpeciesGroup.entries.map { it.name },
                 selected = answers.speciesGroups.map { it.name }.toSet()
             )
-            7 -> QMultiChoiceFragment.newInstance(
+            8 -> QMultiChoiceFragment.newInstance(
                 title = "What gear interests you?",
                 labels = GearInterest.entries.map { it.label },
                 values = GearInterest.entries.map { it.name },
                 selected = answers.gearInterests.map { it.name }.toSet()
             )
-            else -> return
+            else -> QIntroFragment()
         }
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment, FRAGMENT_TAG)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 
