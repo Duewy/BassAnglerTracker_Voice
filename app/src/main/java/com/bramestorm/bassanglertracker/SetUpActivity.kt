@@ -2,9 +2,6 @@ package com.bramestorm.bassanglertracker
 
 import android.Manifest
 import android.app.Activity
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothProfile
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -81,6 +78,8 @@ class SetUpActivity : AppCompatActivity() {
         private const val KEY_VOICE_CONTROL                 = "VOICE_CONTROL_ENABLED"
         private const val KEY_LAST_VOICE_DATE               = "VOICE_LAST_TOGGLE_DATE"
         private const val KEY_USE_BLUETOOTH_MODE            = "VOICE_USE_BLUETOOTH"
+
+        private const val TAG = "SetUpActivity"
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE) }
@@ -316,7 +315,26 @@ class SetUpActivity : AppCompatActivity() {
 
             if (isChecked) {
 
-                // a) BT device must be connected
+                // a)  BLUETOOTH_CONNECT permission (Android S+)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                        REQUEST_BLUETOOTH_CONNECT
+                    )
+                    isVoiceInitializingToggle = true
+                    tglVoice.isChecked = false
+                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                    isVoiceInitializingToggle = false
+                    return@setOnCheckedChangeListener
+                }
+
+                // b) BT device must be connected
                 if (!isBluetoothConnectedSafe()) {
                     positionedToast("⚠️ Please connect a Bluetooth headset/mic for voice control.")
                     isVoiceInitializingToggle = true
@@ -326,7 +344,7 @@ class SetUpActivity : AppCompatActivity() {
                     return@setOnCheckedChangeListener
                 }
 
-                // b) Deep‐doze agreement
+                // c) Deep‐doze agreement
                 if (!SharedPreferencesManager.hasUserAgreedToDeepDoze(this)) {
                     startActivityForResult(
                         Intent(this, UserAgreementForDeepDozeActivity::class.java),
@@ -339,7 +357,7 @@ class SetUpActivity : AppCompatActivity() {
                     return@setOnCheckedChangeListener
                 }
 
-                // c) RECORD_AUDIO permission
+                // d) RECORD_AUDIO permission
                 if (ContextCompat.checkSelfPermission(
                         this, Manifest.permission.RECORD_AUDIO
                     ) != PackageManager.PERMISSION_GRANTED
@@ -348,24 +366,6 @@ class SetUpActivity : AppCompatActivity() {
                         this,
                         arrayOf(Manifest.permission.RECORD_AUDIO),
                         REQUEST_RECORD_AUDIO
-                    )
-                    isVoiceInitializingToggle = true
-                    tglVoice.isChecked = false
-                    tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
-                    isVoiceInitializingToggle = false
-                    return@setOnCheckedChangeListener
-                }
-
-                // d) BLUETOOTH_CONNECT permission (Android S+)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    ContextCompat.checkSelfPermission(
-                        this, Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                        REQUEST_BLUETOOTH_CONNECT
                     )
                     isVoiceInitializingToggle = true
                     tglVoice.isChecked = false
@@ -649,6 +649,10 @@ class SetUpActivity : AppCompatActivity() {
                         tglVoice.isChecked = true
                     } else {
                         positionedToast("🚫 Audio permission denied.")
+                        isVoiceInitializingToggle = true
+                        tglVoice.isChecked = false
+                        tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                        isVoiceInitializingToggle = false
                     }
                 }
 
@@ -658,6 +662,10 @@ class SetUpActivity : AppCompatActivity() {
                         tglVoice.isChecked = true
                     } else {
                         positionedToast("🚫 Bluetooth permission denied.")
+                        isVoiceInitializingToggle = true
+                        tglVoice.isChecked = false
+                        tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                        isVoiceInitializingToggle = false
                     }
                 }
 
