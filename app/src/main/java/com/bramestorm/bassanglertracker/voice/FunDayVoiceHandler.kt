@@ -35,7 +35,6 @@ class FunDayVoiceHandler(
         MeasurementMode.CM -> "fun_cm"
     }
 
-
     private val voiceManager = VoiceInteractionManager(
         context = context,
         uiHelper = uiHelper,
@@ -49,8 +48,13 @@ class FunDayVoiceHandler(
     private val maxQuestionRetries = 3
     private var questionRetryCount = 0
 
+    // ─── FIX 1: endSession() at the start, like TournamentVoiceHandler ───
     override fun onWake() {
         Log.d(TAG, "onWake() called")
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
+
         startSession()
     }
 
@@ -72,14 +76,23 @@ class FunDayVoiceHandler(
             onResult = { transcript ->
                 Log.d(TAG, "Transcript: '$transcript'")
                 val clean = transcript.trim().lowercase(Locale.getDefault())
-                if (clean.contains("question")) {
-                    handleQuestionMode()
-                } else {
-                    onCatchConfirmed(transcript)
+                when {
+                    // ─── FIX 2: Intercept "cancel" at the initial prompt ───
+                    clean.contains("cancel") -> {
+                        Log.d(TAG, "Cancel detected at initial prompt")
+                        uiHelper.speak("Okay, canceling. Over and Out.", "TTS_CANCEL")
+                        endSession("User cancelled at initial prompt")
+                    }
+                    clean.contains("question") -> {
+                        handleQuestionMode()
+                    }
+                    else -> {
+                        onCatchConfirmed(transcript)
+                    }
                 }
             },
             onFailure = {
-                (context as? VoiceControlService)?.markSessionComplete()
+                endSession("Voice session failed or cancelled")
             }
         )
     }
@@ -94,7 +107,7 @@ class FunDayVoiceHandler(
             MeasurementMode.CM -> VoiceParser.parseMetricLengthSimple(transcript)
         }
 
-        val missingSpecies = parsed.species.isBlank()
+        val missingSpecies = parsed.species.isBlank() || parsed.species.equals("Unknown", ignoreCase = true)
         val missingValue = when (measurementMode) {
             MeasurementMode.LBS_OZ -> parsed.totalWeightOzs == 0
             MeasurementMode.POUNDS -> parsed.totalWeightHundredthPounds == 0
@@ -109,6 +122,7 @@ class FunDayVoiceHandler(
         val quarters = parsed.lengthQuarters
         val tenths = parsed.lengthTenths
 
+        // ── Overflow / out-of-range check ──
         if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
             (measurementMode == MeasurementMode.POUNDS && dec > 99) ||
             (measurementMode == MeasurementMode.KG && grams > 99) ||
@@ -121,46 +135,92 @@ class FunDayVoiceHandler(
             return
         }
 
+        // ─── FIX 3: Partial-missing feedback — tell user what WAS heard ───
         if (missingSpecies || missingValue) {
             parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
-                uiHelper.speak("Sorry, I still can’t understand—let’s try again later. Over.", "TTS_FAIL")
-                (context as? VoiceControlService)?.markSessionComplete()
-                parseRetryCount = 0
+                uiHelper.speak("Sorry, I still can't understand—let's try again later. Over.", "TTS_FAIL")
+                endSession("too many parse retries")
                 return
             }
-            uiHelper.speak("I missed some of that—please say pounds, ounces, and species again. Over.", "TTS_RETRY")
+
+            val retryPrompt = when {
+                // Got the measurement but NOT the species
+                missingSpecies && !missingValue -> {
+                    val heardValue = when (measurementMode) {
+                        MeasurementMode.LBS_OZ -> "${parsed.weightLbs} pounds and ${parsed.weightOz} ounces"
+                        MeasurementMode.POUNDS -> "${parsed.weightPounds} point ${parsed.weightDec} pounds"
+                        MeasurementMode.KG -> "${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms"
+                        MeasurementMode.INCHES -> "${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters"
+                        MeasurementMode.CM -> "${parsed.lengthCm} point ${parsed.lengthTenths} centimeters"
+                    }
+                    "Sorry, I got the measurement of $heardValue but I did not get the species. Please repeat the species clearly. Over."
+                }
+                // Got the species but NOT the measurement
+                !missingSpecies && missingValue -> {
+                    val neededUnit = when (measurementMode) {
+                        MeasurementMode.LBS_OZ -> "pounds and ounces"
+                        MeasurementMode.POUNDS -> "pounds"
+                        MeasurementMode.KG -> "kilograms and grams"
+                        MeasurementMode.INCHES -> "inches and quarters"
+                        MeasurementMode.CM -> "centimeters"
+                    }
+                    "Sorry, I got the species ${parsed.species} but I did not get the measurement. Please repeat the $neededUnit clearly. Over."
+                }
+                // Both missing
+                else -> {
+                    val neededParts = when (measurementMode) {
+                        MeasurementMode.LBS_OZ -> "pounds, ounces, and species"
+                        MeasurementMode.POUNDS -> "pounds and species"
+                        MeasurementMode.KG -> "kilograms, grams, and species"
+                        MeasurementMode.INCHES -> "inches, quarters, and species"
+                        MeasurementMode.CM -> "centimeters and species"
+                    }
+                    "I missed that—please say the $neededParts again. Over."
+                }
+            }
+
+            uiHelper.speak(retryPrompt, "TTS_RETRY")
             Handler(Looper.getMainLooper()).postDelayed({ startSession() }, 1500)
             return
         }
         parseRetryCount = 0
 
         val confirmPrompt = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? Over."
-            MeasurementMode.POUNDS -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} Pounds. Is that correct? Over."
-            MeasurementMode.KG -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? Over."
-            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? Over."
-            MeasurementMode.CM -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? Over."
+            MeasurementMode.LBS_OZ -> {
+                "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? "
+            }
+            MeasurementMode.POUNDS -> {
+                "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} Pounds. Is that correct? "
+            }
+            MeasurementMode.KG -> {
+                "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? "
+            }
+            MeasurementMode.INCHES -> {
+                "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? "
+            }
+            MeasurementMode.CM -> {
+                "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? "
+            }
         }
         uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
 
         Handler(Looper.getMainLooper()).postDelayed({
             voiceManager.startSession(
-                prompt = "Please say yes over, no over, or cancel that. Over.",
+                prompt = "Please say yes, no, or cancel that. Over.", //TODO remove the Please say yes over, no over or cancel that over too much
                 onResult = { response ->
                     when {
-                        response.contains("yes over", ignoreCase = true) -> saveCatch(parsed)
-                        response.contains("no over", ignoreCase = true) -> startSession()
+                        response.contains("yes", ignoreCase = true) -> saveCatch(parsed)
+                        response.contains("no", ignoreCase = true) -> startSession()
                         response.contains("cancel", ignoreCase = true) -> {
-                            parseRetryCount = 0
-                            uiHelper.speak("Okay, canceling. Over and Out.")
-                            (context as? VoiceControlService)?.markSessionComplete()
+                            uiHelper.speak("Okay, canceling. Over and Out.", "TTS_CANCEL")
+                            endSession("cancel from confirm prompt")
                         }
                         else -> startSession()
                     }
                 },
                 onFailure = {
-                    (context as? VoiceControlService)?.markSessionComplete()
+                    endSession("Voice session failed during confirmation")
                 }
             )
         }, 3500)
@@ -191,7 +251,7 @@ class FunDayVoiceHandler(
         LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_CATCH_SAVED))
 
         uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
-        (context as? VoiceControlService)?.markSessionComplete()
+        endSession("catch successfully saved")
     }
 
     private fun handleQuestionMode() {
@@ -204,7 +264,7 @@ class FunDayVoiceHandler(
                 prompt = "Which stat would you like? Over.",
                 onResult = { question -> routeQuestion(question) },
                 onFailure = {
-                    (context as? VoiceControlService)?.markSessionComplete()
+                    endSession("Voice session failed in question mode")
                 }
             )
         }, 1500)
@@ -215,9 +275,7 @@ class FunDayVoiceHandler(
 
         if (question.contains("cancel", ignoreCase = true)) {
             uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_CANCEL")
-            inQuestionMode = false
-            questionRetryCount = 0
-            (context as? VoiceControlService)?.markSessionComplete()
+            endSession("cancel from question mode")
             return
         }
 
@@ -233,6 +291,7 @@ class FunDayVoiceHandler(
 
         if (filtered.isEmpty()) {
             uiHelper.speak("No ${speciesMentioned ?: ""} catches today. $overOut", "TTS_ERROR")
+            endSession("no catches found for question")
             return
         }
 
@@ -263,8 +322,7 @@ class FunDayVoiceHandler(
                 questionRetryCount++
                 if (questionRetryCount > maxQuestionRetries) {
                     uiHelper.speak("Exiting question mode. $overOut", "TTS_FAIL")
-                    inQuestionMode = false
-                    questionRetryCount = 0
+                    endSession("too many question retries")
                 } else {
                     uiHelper.speak("Sorry, I didn't catch that. Say largest, smallest, total weight or total length. $overOut", "TTS_RETRY_QUESTION")
                     Handler(Looper.getMainLooper()).postDelayed({ handleQuestionMode() }, 1500)
@@ -306,6 +364,15 @@ class FunDayVoiceHandler(
                 uiHelper.speak("$prefix ${fish.species} at $cms point $remTenths centimeters. $overOut", "TTS_ANSWER")
             }
         }
+    }
+
+    // ─── endSession() — matches TournamentVoiceHandler ───
+    private fun endSession(reason: String = "User cancel") {
+        Log.d(TAG, "Session ended: $reason")
+        (context as? VoiceControlService)?.markSessionComplete()
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
     }
 
     private fun currentTimestamp(): String =

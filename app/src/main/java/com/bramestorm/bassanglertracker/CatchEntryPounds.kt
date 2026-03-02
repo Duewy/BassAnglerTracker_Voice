@@ -3,6 +3,7 @@ package com.bramestorm.bassanglertracker
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -13,8 +14,10 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
@@ -84,18 +87,24 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
         Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
 
-        if (voiceControlEnabled) {
-            startService(Intent(this, VoiceControlService::class.java).apply {
-                action = VoiceControlService.ACTION_START_VOICE
-            })
-
-            voiceHelper = VoiceInteractionHelper(
-                activity = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
-                isTournament = false,
-                onCommandAction = { transcript -> onSpeechResult(transcript) }
+    if (voiceControlEnabled) {
+        ContextCompat.startForegroundService(
+            this,
+            Intent(this, VoiceControlService::class.java)
+        )
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(
+                voiceCatchReceiver,
+                IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
             )
-        }
+
+        voiceHelper = VoiceInteractionHelper(
+            activity        = this,
+            measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
+            isTournament    = false,
+            onCommandAction = { transcript -> onSpeechResult(transcript) }
+        )
+    }
 
         dbHelper = CatchDatabaseHelper(this)
 
@@ -147,6 +156,14 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         super.onDestroy()
     }
+
+    private val voiceCatchReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: Intent?) {
+            Log.d("VCC_FLOW", "📥 Received VOICE_CATCH_SAVED broadcast → updating list")
+            updateListViewPounds()
+        }
+    }
+
     //=================================================================================
     override fun onSpeechResult(transcript: String) {
         Log.d("VCC_TRANSCRIPT", "Received: $transcript")

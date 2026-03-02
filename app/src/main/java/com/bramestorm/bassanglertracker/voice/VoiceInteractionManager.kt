@@ -66,15 +66,22 @@ class VoiceInteractionManager(
     }
 
     private fun startListening() {
+        recognizer?.destroy()  // ← clean up any previous recognizer
         recognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        val intent = RecognizerIntent.getVoiceDetailsIntent(context)?.apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-        } ?: Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-        }
 
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+
+            // ── Give the user more time to speak ──
+            // Wait up to 10 seconds before any speech is detected
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000L)
+            // After speech stops, wait 3 seconds of silence before finalizing
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+            // For mid-sentence pauses, wait 2 seconds before assuming done
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+        }
 
         recognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {}
@@ -101,8 +108,7 @@ class VoiceInteractionManager(
 
         recognizer?.startListening(intent)
     }
-
-
+//TODO make it call back to the handler instead of the uiHelper AND STARTING ITS OWN NESTED SESSIONS
     private fun retryOrFail() {
         retryCount++
         if (retryCount > maxRetries) {

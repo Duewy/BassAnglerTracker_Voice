@@ -115,17 +115,23 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         }
 
         // Request microphone permission and initialize SpeechRecognizer
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                AUDIO_REQUEST_CODE
-            )
-        } else {
-            initSpeechRecognizer()
+        // Only initialize the OLD SpeechRecognizer if VCC is DISABLED
+        // When VCC is enabled, VoiceInteractionManager handles all STT
+        val vccEnabled = SharedPreferencesManager.isVccEnabled(this)
+        if (!vccEnabled) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.RECORD_AUDIO),
+                    AUDIO_REQUEST_CODE
+                )
+            } else {
+                initSpeechRecognizer()
+            }
         }
+
     }//=============== END onCreate ====================================
 
     override fun onResume() {
@@ -146,11 +152,11 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
 
 
 
-    override fun onDestroy() {
-        try { unregisterReceiver(wakeReceiver) } catch(_: Exception) {}
-        recognizer.destroy()
-        super.onDestroy()
-    }
+        override fun onDestroy() {
+            try { unregisterReceiver(wakeReceiver) } catch(_: Exception) {}
+            if (::recognizer.isInitialized) recognizer.destroy()
+            super.onDestroy()
+        }
 
     private fun initSpeechRecognizer() {
         recognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
