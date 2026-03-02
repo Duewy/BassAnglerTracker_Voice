@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -44,6 +45,7 @@ class CatchEntryCentimeters : BaseCatchEntryActivity() {
     private var totalLengthTenths: Int = 0
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
+    private lateinit var tts: TextToSpeech
 
     private lateinit var dialogInstance: AlertDialog
     override val dialog: Any get() = dialogInstance
@@ -94,17 +96,14 @@ class CatchEntryCentimeters : BaseCatchEntryActivity() {
             LocalBroadcastManager.getInstance(this)
                 .registerReceiver(
                     voiceCatchReceiver,
-                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
-                )
-
-            voiceHelper = VoiceInteractionHelper(
-                activity        = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.CM,
-                isTournament    = false,
-                onCommandAction = { transcript -> onSpeechResult(transcript) }
-            )
+                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"))
         }
 
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts.language = Locale.getDefault()
+            }
+        }
         dbHelper = CatchDatabaseHelper(this)
 
         btnSetUp3Cm = findViewById(R.id.btnSetUp3Cm)
@@ -153,6 +152,9 @@ class CatchEntryCentimeters : BaseCatchEntryActivity() {
     override fun onDestroy() {
         stopService(Intent(this, VoiceControlService::class.java))
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
+        if (voiceControlEnabled) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
+        }
         super.onDestroy()
     }
 

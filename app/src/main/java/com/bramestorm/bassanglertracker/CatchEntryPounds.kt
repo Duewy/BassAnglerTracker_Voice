@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -39,6 +40,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
     private lateinit var simplePoundsListView: ListView
     private val catchList = mutableListOf<CatchItem>()
     private lateinit var dbHelper: CatchDatabaseHelper
+    private lateinit var tts: TextToSpeech
 
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
@@ -95,15 +97,13 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(
                 voiceCatchReceiver,
-                IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
-            )
+                IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"))
+    }
 
-        voiceHelper = VoiceInteractionHelper(
-            activity        = this,
-            measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
-            isTournament    = false,
-            onCommandAction = { transcript -> onSpeechResult(transcript) }
-        )
+    tts = TextToSpeech(this) { status ->
+        if (status == TextToSpeech.SUCCESS) {
+            tts.language = Locale.getDefault()
+        }
     }
 
         dbHelper = CatchDatabaseHelper(this)
@@ -154,6 +154,9 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
     override fun onDestroy() {
         stopService(Intent(this, VoiceControlService::class.java))
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
+        if (voiceControlEnabled) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
+        }
         super.onDestroy()
     }
 

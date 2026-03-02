@@ -91,19 +91,13 @@ class CatchEntryInches : BaseCatchEntryActivity() {
 
         if (voiceControlEnabled) {
             ContextCompat.startForegroundService(
-                this, Intent(this, VoiceControlService::class.java)
+                this,
+                Intent(this, VoiceControlService::class.java)
             )
-
-            LocalBroadcastManager.getInstance(this).registerReceiver(
-                voiceCatchReceiver, IntentFilter("com.bramestorm.VOICE_CATCH_SAVED")
-            )
-
-            voiceHelper = VoiceInteractionHelper(
-                activity = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.INCHES,
-                isTournament = false,
-                onCommandAction = { transcript -> onSpeechResult(transcript) }
-            )
+            LocalBroadcastManager.getInstance(this)
+                .registerReceiver(
+                    voiceCatchReceiver,
+                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"))
         }
 
         tts = TextToSpeech(this) { status ->
@@ -163,12 +157,11 @@ class CatchEntryInches : BaseCatchEntryActivity() {
     }//=============== END on Create ==============================
 
     override fun onDestroy() {
-        try {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
-        } catch (_: Exception) {}
-
         stopService(Intent(this, VoiceControlService::class.java))
-        tts.shutdown()
+        if (::voiceHelper.isInitialized) voiceHelper.shutdown()
+        if (voiceControlEnabled) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
+        }
         super.onDestroy()
     }
 
