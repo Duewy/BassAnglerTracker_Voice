@@ -44,6 +44,14 @@ class TournamentVoiceHandler(
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
 
+    // ── Build the catch_type string for DB queries ──
+    private val typeEntry = when (measurementMode) {
+        MeasurementMode.LBS_OZ -> "tournament_lbs_ozs"
+        MeasurementMode.POUNDS -> "tournament_pounds"
+        MeasurementMode.KG     -> "tournament_kgs"
+        MeasurementMode.INCHES -> "tournament_inches"
+        MeasurementMode.CM     -> "tournament_cms"
+    }
 
     // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
@@ -125,7 +133,7 @@ class TournamentVoiceHandler(
 
         }
 
-        Log.d(TAG, "Parsed result: \$parsed")
+        Log.d(TAG, "Parsed result: $parsed")
 
         if (missingInfo) {  parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
@@ -153,8 +161,8 @@ class TournamentVoiceHandler(
             MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct?"
         }
 
-        Log.d(TAG, "Confirm prompt: \$confirmPrompt")
-        Log.d(TAG, "Confirm Species🐟: \${parsed.species}")
+        Log.d(TAG, "Confirm prompt: $confirmPrompt")
+        Log.d(TAG, "Confirm Species🐟: ${parsed.species}")
         uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
 
 
@@ -173,7 +181,7 @@ class TournamentVoiceHandler(
                             endSession("cancel from confirm prompt") // ✅ RESET SESSION HERE
                         }
                         else -> {
-                            uiHelper.speak("Sorry, please say yes over no over or cancel that. Over.","TTS_RETRY")
+                            uiHelper.speak("Sorry, please say yes, no, or cancel that. Over.","TTS_RETRY")
                             Handler(Looper.getMainLooper()).postDelayed({ parseAndConfirm(transcript) }, 3500)
                         }
                     }
@@ -198,8 +206,10 @@ class TournamentVoiceHandler(
             MeasurementMode.CM -> "tournament_cms"
         }
 
+        val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species)
+
         val markerType =
-            SharedPreferencesManager.getSpeciesInitial(context, parsed.species)
+            SharedPreferencesManager.getSpeciesInitial(context, normalizedSpecies)
 
 
         val dbItem = CatchItem(
@@ -207,7 +217,7 @@ class TournamentVoiceHandler(
             dateTime = currentTimestamp(),
             longitude = null,
             latitude = null,
-            species = parsed.species,
+            species = normalizedSpecies,
             totalWeightOz = parsed.totalWeightOzs.takeIf { measurementMode == MeasurementMode.LBS_OZ },
             totalWeightHundredthPounds = parsed.totalWeightHundredthPounds.takeIf { measurementMode == MeasurementMode.POUNDS },
             totalWeightHundredthKg = parsed.totalWeightHundredthKg.takeIf { measurementMode == MeasurementMode.KG },
@@ -217,12 +227,12 @@ class TournamentVoiceHandler(
             markerType = markerType,
             clipColor = parsed.clipColor
         )
-        Log.d(TAG, "Checking the actual Species is: \$species")
+        Log.d(TAG, "Checking the actual Species is: ${parsed.species}")
 
         dbHelper.insertCatch(dbItem)
         lastCatchItem = dbItem// remember this one for question mode
 
-        Log.d(TAG, "DB insert succeeded: \$dbItem")
+        Log.d(TAG, "DB insert succeeded: $dbItem")
 
         // Notify UI
         Log.d(TAG, "Broadcasting catch saved event")
@@ -265,127 +275,268 @@ class TournamentVoiceHandler(
         inQuestionMode = true
         Log.d(TAG, "Question mode activated")
         uiHelper.speak(
-            "Question mode activated, Over.",
+            "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, time since, or time remaining. Over.",
             "TTS_QUESTION_INTRO"
         )
         (context as? VoiceControlService)?.startVoiceSession(
             "Which stat would you like? Over.",
             uiHelper
         ) { followUp ->
-            Log.d(TAG, "Question received: '\$followUp'")
+            Log.d(TAG, "Question received: '$followUp'")   // ── FIX: removed backslash so variable prints
             routeQuestion(followUp)
         }
     }
 
+
     /** Routes a user question to the appropriate response. */
     private fun routeQuestion(question: String) {
 
-        val overOut = "Over and Out."   // just a cute way to add the "Over and out." to speakFish questions
-        Log.d(TAG, "routeQuestion('\$question')")
-        // Prepare list and stats
+        val overOut = "Over and Out."
+        Log.d(TAG, "routeQuestion('$question')")
 
-        //  Check for “cancel” command ❌ to get out of the VCC Question section
+        // ── Check for "cancel" command ──
         if (question.contains("cancel", ignoreCase = true)) {
-            uiHelper.speak("Okay, exiting question mode. Over and out.", "TTS_CANCEL")
-            endSession("cancel from confirm prompt")
+            uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_CANCEL")
+            endSession("cancel from question mode")
             return
         }
 
-        // 1️⃣ rebuild your top-N list here
-        val fullList = dbHelper.getTopTournamentCatches(tournamentCatchLimit + 6)
-        val sortedDesc = fullList.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
-        val cullList = sortedDesc.take(tournamentCatchLimit)     // “cull list” = your tournamentCatchLimit biggest fish
-        val catch = lastCatchItem ?: run {
-            Log.w(TAG, "No last catch—cannot answer questions yet Over and out.")
-            uiHelper.speak("I don't have a catch to ask about, Over and Out.","TTS_ERROR" )
+        // ── FIX: Use getCatchesForToday() with the correct typeEntry ──
+        // getTopTournamentCatches() was querying catch_type='Tournament' which matches nothing
+        val todaysDate = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(java.util.Date())
+        val allCatches = dbHelper.getCatchesForToday(typeEntry, todaysDate)
+
+        // ── Species filtering (tournament-aware) ──
+        // In tournament mode, speciesList comes from the tournament config.
+        // User might say "largest smallmouth over" — we match against species in today's catches.
+        val speciesMentioned = allCatches.map { it.species.lowercase() }
+            .distinct()
+            .firstOrNull { storedSpecies ->
+                val cleanedQuestion = question.lowercase()
+                    .replace("largest", "").replace("smallest", "")
+                    .replace("total weight", "").replace("total length", "")
+                    .replace("how many", "").replace("average", "").replace("count", "")
+                    .replace("position", "").replace("time since", "").replace("time remaining", "")
+                    .replace("over", "").replace("and out", "")
+                    .trim()
+
+                // Direct match: "largest smallmouth over" → question contains "smallmouth"
+                question.lowercase().contains(storedSpecies) ||
+                        // Reverse match: "largest pike over" → "northern pike".contains("pike")
+                        (cleanedQuestion.isNotBlank() && storedSpecies.contains(cleanedQuestion))
+            }
+
+        val filtered = if (speciesMentioned != null) {
+            allCatches.filter { it.species.equals(speciesMentioned, ignoreCase = true) }
+        } else {
+            allCatches
+        }
+
+        // ── DEBUG: Log all catches so we can see what's in the DB ──
+        Log.d(TAG, "📋 Question mode — ${allCatches.size} catches found for $typeEntry on $todaysDate:")
+        allCatches.forEachIndexed { i, c ->
+            val value = c.getComparisonValueByMode(measurementMode)
+            Log.d(TAG, "  [$i] species='${c.species}', value=$value, id=${c.id}, time=${c.dateTime}")
+        }
+
+        if (filtered.isEmpty()) {
+            uiHelper.speak("No ${speciesMentioned ?: ""} catches logged yet. $overOut", "TTS_ERROR")
+            endSession("no catches found for question")
             return
         }
 
-        // re-compute stats once
-               val stats = TournamentVoiceFeedback.analyzeTournamentStats(
-                   dbHelper,
-                   tournamentCatchLimit,
-                   alarmHour,
-                   alarmMinute,
-                   catch,
-                   measurementMode
-               )
+        // ── Filter out catches with no value in the active measurement mode ──
+        val validCatches = filtered.filter { it.getComparisonValueByMode(measurementMode) > 0 }
 
+        if (validCatches.isEmpty()) {
+            uiHelper.speak("No ${speciesMentioned ?: ""} catches with valid measurements today. $overOut", "TTS_ERROR")
+            endSession("no valid catches found for question")
+            return
+        }
+
+        // ── Build the cull list (top N by measurement) for tournament-specific questions ──
+        val sortedDesc = validCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
+        val cullList = sortedDesc.take(tournamentCatchLimit)
+
+        // ── Route the question ──
         when {
 
             question.contains("smallest", true) -> {
                 Log.d(TAG, "Answering smallest fish")
-                if (cullList.isEmpty()) {
-                    uiHelper.speak("I don’t have enough catches yet to tell you the smallest. $overOut","TTS_ANSWER")
+                val fish = cullList.lastOrNull()
+                if (fish != null) {
+                    val prefix = speciesMentioned?.let { "Your smallest ${it.replaceFirstChar { c -> c.uppercase() }} on the list is" }
+                        ?: "Your smallest fish on the list is"
+                    speakFish(fish, prefix, overOut)
                 } else {
-                    val fish = cullList.last()
-                    speakFish(fish, "Your smallest fish on the list is", overOut)
+                    uiHelper.speak("I don't have enough catches yet to tell you the smallest. $overOut", "TTS_ANSWER")
                 }
+                endSession("answered smallest question")
             }
 
             question.contains("largest", true) -> {
                 Log.d(TAG, "Answering largest fish")
-                cullList.firstOrNull()?.let { fish ->
-                    speakFish(fish, "Your largest fish on the list is", overOut)
-                } ?: uiHelper.speak("You do not have any catches logged yet. $overOut","TTS_ANSWER")
+                val fish = cullList.firstOrNull()
+                if (fish != null) {
+                    val prefix = speciesMentioned?.let { "Your largest ${it.replaceFirstChar { c -> c.uppercase() }} on the list is" }
+                        ?: "Your largest fish on the list is"
+                    speakFish(fish, prefix, overOut)
+                } else {
+                    uiHelper.speak("You do not have any catches logged yet. $overOut", "TTS_ANSWER")
+                }
+                endSession("answered largest question")
             }
 
             question.contains("total weight", true) -> {
                 Log.d(TAG, "Answering total weight")
                 val msg = when (measurementMode) {
-                    MeasurementMode.LBS_OZ ->
-                        "Your total weight is ${stats.totalWeightLbs} pounds ${stats.totalWeightRemainingOz} ounces. $overOut"
-                    MeasurementMode.POUNDS ->
-                        "Your total weight is ${stats.totalWeightPounds}.${stats.totalWeightDec} Pounds. $overOut"
-                    MeasurementMode.KG ->
-                        "Your total weight is ${stats.totalWeightKgs}.${stats.totalWeightGrams} kilograms. $overOut"
+                    MeasurementMode.LBS_OZ -> {
+                        val totalOz = cullList.sumOf { it.totalWeightOz ?: 0 }
+                        val lbs = totalOz / 16
+                        val remOz = totalOz % 16
+                        "Your total weight is $lbs pounds and $remOz ounces. $overOut"
+                    }
+                    MeasurementMode.POUNDS -> {
+                        val totalHundredths = cullList.sumOf { it.totalWeightHundredthPounds ?: 0 }
+                        val pounds = totalHundredths / 100
+                        val dec = totalHundredths % 100
+                        "Your total weight is $pounds point $dec pounds. $overOut"
+                    }
+                    MeasurementMode.KG -> {
+                        val totalHundredths = cullList.sumOf { it.totalWeightHundredthKg ?: 0 }
+                        val kgs = totalHundredths / 100
+                        val grams = totalHundredths % 100
+                        "Your total weight is $kgs point $grams kilograms. $overOut"
+                    }
                     MeasurementMode.INCHES ->
-                        // if they ask “total weight” in a length-mode, you can still fall back
-                        "Weight stats aren’t available in inches mode. $overOut"
+                        "Weight stats aren't available in inches mode. $overOut"
                     MeasurementMode.CM ->
-                        "Weight stats aren’t available in centimeter mode. $overOut"
+                        "Weight stats aren't available in centimeter mode. $overOut"
                 }
                 uiHelper.speak(msg, "TTS_ANSWER")
+                endSession("answered total weight question")
             }
 
             question.contains("total length", true) -> {
                 Log.d(TAG, "Answering total length")
                 val msg = when (measurementMode) {
                     MeasurementMode.LBS_OZ ->
-                        // if they ask length in a weight-mode, fall back or say “length not available”
-                        "Length stats aren’t available in pounds/ounces mode. $overOut"
+                        "Length stats aren't available in pounds and ounces mode. $overOut"
                     MeasurementMode.POUNDS ->
-                        "Length stats aren’t available in Pounds mode. $overOut"
+                        "Length stats aren't available in Pounds mode. $overOut"
                     MeasurementMode.KG ->
-                        "Length stats aren’t available in kilograms mode. $overOut"
-                    MeasurementMode.INCHES ->
-                        "Your total length is ${stats.totalLengthInches} and ${stats.totalLengthFourths} inches. $overOut"
-                    MeasurementMode.CM ->
-                        "Your total length is ${stats.totalLengthCms}.${stats.totalLengthDec} centimeters. $overOut"
+                        "Length stats aren't available in kilograms mode. $overOut"
+                    MeasurementMode.INCHES -> {
+                        val totalQuarters = cullList.sumOf { it.totalLengthQuarters ?: 0 }
+                        val inches = totalQuarters / 4
+                        val remQ = totalQuarters % 4
+                        "Your total length is $inches inches and $remQ quarters. $overOut"
+                    }
+                    MeasurementMode.CM -> {
+                        val totalTenths = cullList.sumOf { it.totalLengthTenths ?: 0 }
+                        val cms = totalTenths / 10
+                        val remT = totalTenths % 10
+                        "Your total length is $cms point $remT centimeters. $overOut"
+                    }
                 }
                 uiHelper.speak(msg, "TTS_ANSWER")
+                endSession("answered total length question")
             }
 
-            question.contains("position", true) ->{
+            // ── NEW: "how many" / "count" question ──
+            question.contains("how many", true) || question.contains("count", true) -> {
+                Log.d(TAG, "Answering how many")
+                val count = filtered.size
+                val speciesLabel = speciesMentioned?.replaceFirstChar { it.uppercase() } ?: "fish"
+                uiHelper.speak("You have caught $count $speciesLabel today. $overOut", "TTS_ANSWER")
+                endSession("answered how many question")
+            }
+
+            // ── NEW: "average" question ──
+            question.contains("average", true) -> {
+                Log.d(TAG, "Answering average")
+                val avgMsg = when (measurementMode) {
+                    MeasurementMode.LBS_OZ -> {
+                        val avgOz = cullList.sumOf { it.totalWeightOz ?: 0 } / cullList.size
+                        val lbs = avgOz / 16; val oz = avgOz % 16
+                        "Your average catch is $lbs pounds and $oz ounces. $overOut"
+                    }
+                    MeasurementMode.POUNDS -> {
+                        val avgH = cullList.sumOf { it.totalWeightHundredthPounds ?: 0 } / cullList.size
+                        val p = avgH / 100; val d = avgH % 100
+                        "Your average catch is $p point $d pounds. $overOut"
+                    }
+                    MeasurementMode.KG -> {
+                        val avgH = cullList.sumOf { it.totalWeightHundredthKg ?: 0 } / cullList.size
+                        val k = avgH / 100; val g = avgH % 100
+                        "Your average catch is $k point $g kilograms. $overOut"
+                    }
+                    MeasurementMode.INCHES -> {
+                        val avgQ = cullList.sumOf { it.totalLengthQuarters ?: 0 } / cullList.size
+                        val i = avgQ / 4; val q = avgQ % 4
+                        "Your average catch is $i inches and $q quarters. $overOut"
+                    }
+                    MeasurementMode.CM -> {
+                        val avgT = cullList.sumOf { it.totalLengthTenths ?: 0 } / cullList.size
+                        val c = avgT / 10; val t = avgT % 10
+                        "Your average catch is $c point $t centimeters. $overOut"
+                    }
+                }
+                uiHelper.speak(avgMsg, "TTS_ANSWER")
+                endSession("answered average question")
+            }
+
+            // ── Tournament-specific: position (uses last voice-logged catch) ──
+            question.contains("position", true) -> {
                 Log.d(TAG, "Answering position of catch")
-                uiHelper.speak(
-                    "This catch is number ${stats.thisCatchPosition} on the culling list. $overOut",
-                    "TTS_ANSWER"
-                )}
+                val lastCatch = lastCatchItem
+                if (lastCatch != null) {
+                    val position = sortedDesc.indexOfFirst { it.id == lastCatch.id } + 1
+                    if (position > 0) {
+                        uiHelper.speak(
+                            "Your last catch is number $position on the culling list. $overOut",
+                            "TTS_ANSWER"
+                        )
+                    } else {
+                        uiHelper.speak(
+                            "Your last catch didn't make the culling list. $overOut",
+                            "TTS_ANSWER"
+                        )
+                    }
+                } else {
+                    uiHelper.speak(
+                        "I don't have a voice-logged catch to check position for. $overOut",
+                        "TTS_ANSWER"
+                    )
+                }
+                endSession("answered position question")
+            }
 
-            question.contains("time since", true) ->{
+            // ── Tournament-specific: time since last catch ──
+            question.contains("time since", true) -> {
                 Log.d(TAG, "Answering time since last catch")
+                val lastCatchTime = dbHelper.getLastCatchTimeMillis()
+                val sinceLastMin = ((System.currentTimeMillis() - lastCatchTime) / 60000).toInt()
                 uiHelper.speak(
-                    "It’s been ${stats.timeSinceLastCatchMin} minutes since your last catch. $overOut",
+                    "It's been $sinceLastMin minutes since your last catch. $overOut",
                     "TTS_ANSWER"
-                )}
+                )
+                endSession("answered time since question")
+            }
 
-            question.contains("time remaining", true) ->{
+            // ── Tournament-specific: time remaining ──
+            question.contains("time remaining", true) || question.contains("time left", true) -> {
                 Log.d(TAG, "Answering time remaining")
+                val alarmMin = alarmHour * 60 + alarmMinute
+                val calendar = java.util.Calendar.getInstance()
+                val nowMin = calendar.get(java.util.Calendar.HOUR_OF_DAY) * 60 + calendar.get(java.util.Calendar.MINUTE)
+                val minsLeft = if (alarmMin - nowMin > 0) alarmMin - nowMin else 0
                 uiHelper.speak(
-                    "${stats.timeUntilAlarmMin} minutes remain in the tournament. $overOut",
+                    "$minsLeft minutes remain in the tournament. $overOut",
                     "TTS_ANSWER"
-                )}
+                )
+                endSession("answered time remaining question")
+            }
 
             else -> {
                 questionRetryCount++
@@ -394,7 +545,7 @@ class TournamentVoiceHandler(
                     endSession("too many question retries")
                 } else {
                     uiHelper.speak(
-                        "Sorry, I did not catch that. Say smallest, largest, total weight, position or time left.$overOut",
+                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, time since, or time remaining. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -403,8 +554,8 @@ class TournamentVoiceHandler(
                 }
             }
         }
-
     }
+    //====== END ========= Route Question ===========================================
 
     // helper to pick the corresponding units:
     private fun speakFish(fish: CatchItem, prefix: String, overOut: String) {

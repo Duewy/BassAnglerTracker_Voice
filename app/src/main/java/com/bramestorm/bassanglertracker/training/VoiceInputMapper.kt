@@ -27,7 +27,7 @@ object VoiceInputMapper {
 
     val userVoiceMap = mutableMapOf<String, String>()
 
-    val baseColorMap = mapOf(
+    private val baseColorMap = mapOf(
         "blu" to "BLUE",
         "blue" to "BLUE",
         "yellow" to "YELLOW",
@@ -42,6 +42,9 @@ object VoiceInputMapper {
     )
 
     //  Ensure we set the ✔️🔊 correct wording for misspoken User Input or various accents
+    //  ── FIX: Output names NOW match normalizeSpeciesName() + SpeciesImageHelper ──
+    //  All output values are the EXACT lowercase form that the rest of the app expects.
+    //  normalizeSpeciesName() does .trim().lowercase(), so these must match that output.
     val baseSpeciesVoiceMap = mutableMapOf<String, String>().apply {
         put("clear list", "Clear List")
         put("clearlist", "Clear List")
@@ -50,75 +53,97 @@ object VoiceInputMapper {
         put("caught", "Caught")
         put("log entry", "Log Entry")
 
-        put("largemouth", "Largemouth")
-        put("large mouth", "Largemouth")
-        put("lard mouth", "Largemouth")
-        put("large moth", "Largemouth")
+        // ── "large mouth" — SpeciesImageHelper + initials map both use "large mouth" ──
+        put("largemouth", "large mouth")
+        put("large mouth", "large mouth")
+        put("lard mouth", "large mouth")
+        put("large moth", "large mouth")
 
-        put("smallmouth", "Small Mouth")
-        put("small mouth", "Small Mouth")
-        put("smile mouth", "Small Mouth")
+        // ── "small mouth" — already correct ──
+        put("smallmouth", "small mouth")
+        put("small mouth", "small mouth")
+        put("smile mouth", "small mouth")
 
-        put("spotted bass", "Spotted Bass")
-        put("spot", "Spotted Bass")
-        put("spottedbass", "Spotted Bass")
-        put("spot bass", "Spotted Bass")
+        // ── "spotted bass" — already correct ──
+        put("spotted bass", "spotted bass")
+        put("spot", "spotted bass")
+        put("spottedbass", "spotted bass")
+        put("spot bass", "spotted bass")
 
-        put("crappie", "Crappie")
-        put("crap pie", "Crappie")
-        put("crappy", "Crappie")
-        put("crop e", "Crappie")
-        put("crop i", "Crappie")
+        // ── "crappie" ──
+        put("crappie", "crappie")
+        put("crap pie", "crappie")
+        put("crappy", "crappie")
+        put("crop e", "crappie")
+        put("crop i", "crappie")
 
-        put("sunfish", "Sunfish")
-        put("sun fish", "Sunfish")
-        put("some fish", "Sunfish")
+        // ── "sunfish" ──
+        put("sunfish", "sunfish")
+        put("sun fish", "sunfish")
+        put("some fish", "sunfish")
 
-        put("white bass", "White Bass")
-        put("why bass", "White Bass")
-        put("wide bass", "White Bass")
+        // ── "white bass" ──
+        put("white bass", "white bass")
+        put("why bass", "white bass")
+        put("wide bass", "white bass")
 
-        put("rock bass", "Rock Bass")
-        put("rack bass", "Rock Bass")
-        put("rug bass", "Rock Bass")
+        // ── "rock bass" ──
+        put("rock bass", "rock bass")
+        put("rack bass", "rock bass")
+        put("rug bass", "rock bass")
 
-        put("bowfin", "Bowfin")
-        put("bow fin", "Bowfin")
-        put("bovine", "Bowfin")
+        // ── "bowfin" ──
+        put("bowfin", "bowfin")
+        put("bow fin", "bowfin")
+        put("bovine", "bowfin")
 
-        put("muskie", "Muskie")
-        put("musky", "Muskie")
-        put("musky fish", "Muskie")
-        put("muskellunge", "Muskie")
+        // ── "muskie" ──
+        put("muskie", "muskie")
+        put("musky", "muskie")
+        put("musky fish", "muskie")
+        put("muskellunge", "muskie")
 
-        put("walleye", "Walleye")
-        put("wall eye", "Walleye")
-        put("wallie", "Walleye")
-        put("while I", "Walleye")
+        // ── "walleye" ──
+        put("walleye", "walleye")
+        put("wall eye", "walleye")
+        put("wallie", "walleye")
+        put("while I", "walleye")
 
-        put("pike", "Pike")
-        put("northern pike", "Pike")
+        // ── "pike" ──
+        put("pike", "pike")
+        put("northern pike", "pike")
 
-        put("perch", "Perch")
-        put("purse", "Perch")
+        // ── "perch" ──
+        put("perch", "perch")
+        put("purse", "perch")
 
-        put("catfish", "Cat Fish")
-        put("cat fish", "Cat Fish")
+        // ── "catfish" — SpeciesImageHelper expects "catfish" (no space!) ──
+        put("catfish", "catfish")
+        put("cat fish", "catfish")
 
-        put("gar pike", "Gar Pike")
-        put("gor pike", "Gar Pike")
-        put("guard pike", "Gar Pike")
+        // ── "gar" — SpeciesImageHelper uses "gar", not "gar pike" ──
+        put("gar pike", "gar")
+        put("gor pike", "gar")
+        put("guard pike", "gar")
+        put("gar", "gar")
 
-        put("bullhead", "Bullhead")
-        put("bull head", "Bullhead")
-        put("bald head", "Bullhead")
+        // ── "bull head" — SpeciesImageHelper uses "bull head" ──
+        put("bullhead", "bull head")
+        put("bull head", "bull head")
+        put("bald head", "bull head")
 
-        put("red drum", "Red Drum")
-        put("redrum", "Red Drum")
-        put("red fish", "Red Drum")
+        // ── "red drum" ──
+        put("red drum", "red drum")
+        put("redrum", "red drum")
+        put("red fish", "red drum")
 
-        put("carp", "Carp")
-        put("cart", "Carp")
+        // ── "carp" ──
+        put("carp", "carp")
+        put("cart", "carp")
+
+        // ── "panfish" ──
+        put("panfish", "panfish")
+        put("pan fish", "panfish")
 
     }// ========== END of base Species Voice Map =========================
 
@@ -127,16 +152,7 @@ object VoiceInputMapper {
      * or return null if it’s empty after cleaning.
      */
     private fun normalizeSpecies(raw: String): String? {
-        val words = raw
-            .trim()
-            .split(Regex("\\s+"))
-            .map { token ->
-                token
-                    .lowercase()
-                    .replaceFirstChar { it.uppercaseChar() }
-            }
-
-        val result = words.joinToString(" ")
+        val result = raw.trim().lowercase()
         return result.ifBlank { null }
     }
 
@@ -168,7 +184,7 @@ object VoiceInputMapper {
     }
 
     private fun unifySpeciesName(raw: String): String {
-        return baseSpeciesVoiceMap[raw.lowercase()] ?: normalizeSpecies(raw) ?: "Unknown"
+        return baseSpeciesVoiceMap[raw.trim().lowercase()] ?: raw.trim().lowercase()
     }
 
     fun getClipColorFromVoice(text: String, clipColors: List<String>): String {

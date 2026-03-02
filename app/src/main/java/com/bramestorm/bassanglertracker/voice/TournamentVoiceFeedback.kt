@@ -18,7 +18,11 @@ object TournamentVoiceFeedback {
         currentCatch: CatchItem,
         mode: MeasurementMode
     ): TournamentCatchStats {
-        val fullList = dbHelper.getTopTournamentCatches(tournamentCatchLimit + 6)
+
+        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val catchType = currentCatch.catchType   // e.g. "tournament_pounds"
+        val fullList = dbHelper.getCatchesForToday(catchType, todaysDate)
+
         val sorted = fullList.sortedByDescending { it.getComparisonValueByMode(mode) }
         val topN = sorted.take(tournamentCatchLimit)
 
@@ -35,7 +39,6 @@ object TournamentVoiceFeedback {
         val calendar = java.util.Calendar.getInstance()
         val nowMin = calendar.get(java.util.Calendar.HOUR_OF_DAY) * 60 + calendar.get(java.util.Calendar.MINUTE)
         val minsLeft = alarmMin - nowMin
-
 
         return TournamentCatchStats(
             mode = mode,
@@ -68,6 +71,7 @@ object TournamentVoiceFeedback {
             fullCatchList = topN
         )
     }
+    //==== END === Analyze Tournament Stats ===================================
 
     fun getCatchSummaryResponse(stats: TournamentCatchStats): String {
         return buildString {
