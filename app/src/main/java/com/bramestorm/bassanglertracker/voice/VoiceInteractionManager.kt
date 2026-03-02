@@ -13,8 +13,6 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import java.util.Locale
 
-
-
 class VoiceInteractionManager(
     private val context: Context,
     private val uiHelper: VoiceUiHelper,
@@ -28,7 +26,43 @@ class VoiceInteractionManager(
     private val maxRetries = 3
     private val sessionId = System.currentTimeMillis()
     private var onFailureCallback: (() -> Unit)? = null
+    private var firstListenAttempt = true
 
+    // ── Reusable recognizer intent ──
+    private val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000L)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+    }
+
+    // ── Reusable recognition listener ──
+    private val recognitionListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {
+            Log.d("VCC_STT", "🎤 Ready for speech")
+        }
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onBufferReceived(buffer: ByteArray?) {}
+        override fun onEndOfSpeech() {}
+        override fun onError(error: Int) {
+            Log.d("VCC_STT", "❌ STT error code: $error")
+            retryOrFail()
+        }
+        override fun onResults(results: Bundle?) {
+            val transcript = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+            if (transcript != null) {
+                Log.d("VCC_STT", "✅ STT result: '$transcript'")
+                onTranscriptResult?.invoke(transcript)
+            } else {
+                retryOrFail()
+            }
+        }
+        override fun onPartialResults(partialResults: Bundle?) {}
+        override fun onEvent(eventType: Int, params: Bundle?) {}
+    }
 
     fun startSession(
         prompt: String,
@@ -36,6 +70,16 @@ class VoiceInteractionManager(
         onFailure: (() -> Unit)? = null )
     {
         this.onFailureCallback = onFailure
+        retryCount = 0
+        firstListenAttempt = true
+
+        // ── Create recognizer ONCE per session, on the main thread ──
+        handler.post {
+            recognizer?.destroy()
+            recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            recognizer?.setRecognitionListener(recognitionListener)
+        }
+
         tts?.stop()
         tts?.shutdown()
         tts = TextToSpeech(context) { status ->
@@ -58,7 +102,7 @@ class VoiceInteractionManager(
                 when (uttId) {
                     "TTS_PROMPT", "TTS_CONFIRM", "TTS_SAVED", "TTS_RETRY" -> {
                         Log.d("VCC_TTS", "✅ TTS finished: $uttId — starting STT...")
-                        handler.post { startListening()}
+                        handler.postDelayed({ startListening() }, 800)
                     }
                 }
             }
@@ -66,64 +110,33 @@ class VoiceInteractionManager(
     }
 
     private fun startListening() {
-        recognizer?.destroy()  // ← clean up any previous recognizer
-        recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        // ── Just start listening — recognizer already created ──
+        Log.d("VCC_STT", "🎤 startListening() called")
+        recognizer?.startListening(recognizerIntent)
+    }
 
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-
-            // ── Give the user more time to speak ──
-            // Wait up to 10 seconds before any speech is detected
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000L)
-            // After speech stops, wait 3 seconds of silence before finalizing
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
-            // For mid-sentence pauses, wait 2 seconds before assuming done
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+    private fun retryOrFail() {
+        if (firstListenAttempt) {
+            firstListenAttempt = false
+            Log.d("VCC_MANAGER", "🔄 First listen attempt failed (TTS→STT handoff) — retrying without counting")
+            handler.postDelayed({ startListening() }, 1200)
+            return
         }
 
-        recognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onError(error: Int) {
-                retryOrFail()
-            }
-
-            override fun onResults(results: Bundle?) {
-                val transcript = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
-                if (transcript != null) {
-                    onTranscriptResult?.invoke(transcript)
-                } else {
-                    retryOrFail()
-                }
-            }
-
-            override fun onPartialResults(partialResults: Bundle?) {}
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-        })
-
-        recognizer?.startListening(intent)
-    }
-//TODO make it call back to the handler instead of the uiHelper AND STARTING ITS OWN NESTED SESSIONS
-    private fun retryOrFail() {
         retryCount++
         if (retryCount > maxRetries) {
-            uiHelper.speak("Too many errors. Please try again later.", "TTS_FAIL")
+            Log.w("VCC_MANAGER", "❌ Too many STT errors — invoking failure callback")
             onFailureCallback?.invoke()
+            retryCount = 0
         } else {
-            uiHelper.speak("Sorry, please repeat your catch.", "TTS_RETRY")
-            handler.postDelayed({
-                startSession("Please say your catch details again. Over.", onTranscriptResult ?: return@postDelayed)
-            }, 3500)
+            Log.d("VCC_MANAGER", "🔄 STT retry $retryCount/$maxRetries — restarting listener")
+            handler.postDelayed({ startListening() }, 1200)
         }
     }
 
     fun shutdown() {
         recognizer?.destroy()
+        recognizer = null
         tts?.stop()
         tts?.shutdown()
         onTranscriptResult = null

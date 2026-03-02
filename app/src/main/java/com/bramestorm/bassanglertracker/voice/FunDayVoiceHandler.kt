@@ -107,7 +107,8 @@ class FunDayVoiceHandler(
             MeasurementMode.CM -> VoiceParser.parseMetricLengthSimple(transcript)
         }
 
-        val missingSpecies = parsed.species.isBlank() || parsed.species.equals("Unknown", ignoreCase = true)
+        val missingSpecies =
+            parsed.species.isBlank() || parsed.species.equals("Unknown", ignoreCase = true)
         val missingValue = when (measurementMode) {
             MeasurementMode.LBS_OZ -> parsed.totalWeightOzs == 0
             MeasurementMode.POUNDS -> parsed.totalWeightHundredthPounds == 0
@@ -127,10 +128,17 @@ class FunDayVoiceHandler(
             (measurementMode == MeasurementMode.POUNDS && dec > 99) ||
             (measurementMode == MeasurementMode.KG && grams > 99) ||
             (measurementMode == MeasurementMode.INCHES && quarters > 3) ||
-            (measurementMode == MeasurementMode.CM && tenths > 9)) {
+            (measurementMode == MeasurementMode.CM && tenths > 9)
+        ) {
 
-            Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
-            uiHelper.speak("You said an inaccurate value. Let's try that again.", "TTS_INVALID_UNIT")
+            Log.w(
+                TAG,
+                "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths"
+            )
+            uiHelper.speak(
+                "You said an inaccurate value. Let's try that again.",
+                "TTS_INVALID_UNIT"
+            )
             Handler(Looper.getMainLooper()).postDelayed({ startSession() }, 1500)
             return
         }
@@ -139,7 +147,10 @@ class FunDayVoiceHandler(
         if (missingSpecies || missingValue) {
             parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
-                uiHelper.speak("Sorry, I still can't understand—let's try again later. Over.", "TTS_FAIL")
+                uiHelper.speak(
+                    "Sorry, I still can't understand—let's try again later. Over.",
+                    "TTS_FAIL"
+                )
                 endSession("too many parse retries")
                 return
             }
@@ -187,44 +198,42 @@ class FunDayVoiceHandler(
         parseRetryCount = 0
 
         val confirmPrompt = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> {
-                "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? "
-            }
-            MeasurementMode.POUNDS -> {
-                "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} Pounds. Is that correct? "
-            }
-            MeasurementMode.KG -> {
-                "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? "
-            }
-            MeasurementMode.INCHES -> {
-                "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? "
-            }
-            MeasurementMode.CM -> {
-                "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? "
-            }
-        }
-        uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
+            MeasurementMode.LBS_OZ ->
+                "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces. Is that correct? Yes, No, or Cancel, Over."
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            voiceManager.startSession(
-                prompt = "Please say yes, no, or cancel that. Over.", //TODO remove the Please say yes over, no over or cancel that over too much
-                onResult = { response ->
-                    when {
-                        response.contains("yes", ignoreCase = true) -> saveCatch(parsed)
-                        response.contains("no", ignoreCase = true) -> startSession()
-                        response.contains("cancel", ignoreCase = true) -> {
-                            uiHelper.speak("Okay, canceling. Over and Out.", "TTS_CANCEL")
-                            endSession("cancel from confirm prompt")
-                        }
-                        else -> startSession()
+            MeasurementMode.POUNDS ->
+                "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} Pounds. Is that correct? Yes, No, or Cancel, Over."
+
+            MeasurementMode.KG ->
+                "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms. Is that correct? Yes, No, or Cancel, Over."
+
+            MeasurementMode.INCHES ->
+                "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters. Is that correct? Yes, No, or Cancel, Over."
+
+            MeasurementMode.CM ->
+                "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters. Is that correct? Yes, No, or Cancel, Over."
+        }
+        // ─── FIX: Use voiceManager ONLY — no separate uiHelper.speak() ───
+        // This ensures only ONE TTS engine speaks, then ONE STT listens.
+        voiceManager.startSession(
+            prompt = confirmPrompt,
+            onResult = { response ->
+                when {
+                    response.contains("yes", ignoreCase = true) -> saveCatch(parsed)
+                    response.contains("no", ignoreCase = true) -> startSession()
+                    response.contains("cancel", ignoreCase = true) -> {
+                        uiHelper.speak("Okay, canceling. Over and Out.", "TTS_CANCEL")
+                        endSession("cancel from confirm prompt")
                     }
-                },
-                onFailure = {
-                    endSession("Voice session failed during confirmation")
+
+                    else -> startSession()
                 }
-            )
-        }, 3500)
-    }
+            },
+            onFailure = {
+                endSession("Voice session failed during confirmation")
+            }
+        )
+      }
 
     override fun shutdown() {
         Log.d(TAG, "🔻 shutdown called")
@@ -251,13 +260,17 @@ class FunDayVoiceHandler(
         LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_CATCH_SAVED))
 
         uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+        Log.d(TAG, "🔻 Catch Saved")
         endSession("catch successfully saved")
     }
 
     private fun handleQuestionMode() {
         inQuestionMode = true
         questionRetryCount = 0
-        uiHelper.speak("Question mode activated. Ask largest, smallest, total weight or total length. Over and out.", "TTS_QUESTION_INTRO")
+        uiHelper.speak(
+            "Question mode activated. Ask largest, smallest, total weight, total length, how many, or average. Over and out.",
+            "TTS_QUESTION_INTRO"
+        )
 
         Handler(Looper.getMainLooper()).postDelayed({
             voiceManager.startSession(
@@ -281,13 +294,35 @@ class FunDayVoiceHandler(
 
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val allCatches = dbHelper.getCatchesForToday(typeEntry, todaysDate)
+
+        // ── FIX: Species matching — check BOTH directions ──
         val speciesMentioned = allCatches.map { it.species.lowercase() }
             .distinct()
-            .firstOrNull { question.lowercase().contains(it) }
+            .firstOrNull { storedSpecies ->
+                val cleanedQuestion = question.lowercase()
+                    .replace("largest", "").replace("smallest", "")
+                    .replace("total weight", "").replace("total length", "")
+                    .replace("how many", "").replace("average", "")
+                    .replace("over", "").replace("and out", "")
+                    .trim()
+
+                // Direct match: user said "largest catfish over" → question contains "catfish"
+                question.lowercase().contains(storedSpecies) ||
+                        // Reverse match: user said "largest pike over" → "northern pike".contains("pike")
+                        // BUT only if there's actually something left after stripping keywords
+                        (cleanedQuestion.isNotBlank() && storedSpecies.contains(cleanedQuestion))
+            }
 
         val filtered = if (speciesMentioned != null) {
             allCatches.filter { it.species.equals(speciesMentioned, ignoreCase = true) }
         } else allCatches
+
+        // ── DEBUG: Log all catches so we can see what's in the DB ──
+        Log.d(TAG, "📋 Question mode — ${allCatches.size} catches found for $typeEntry on $todaysDate:")
+        allCatches.forEachIndexed { i, c ->
+            val value = c.getComparisonValueByMode(measurementMode)
+            Log.d(TAG, "  [$i] species='${c.species}', value=$value, id=${c.id}, time=${c.dateTime}")
+        }
 
         if (filtered.isEmpty()) {
             uiHelper.speak("No ${speciesMentioned ?: ""} catches today. $overOut", "TTS_ERROR")
@@ -295,27 +330,126 @@ class FunDayVoiceHandler(
             return
         }
 
+        // ── Filter out catches with no value in the active measurement mode ──
+        val validCatches = filtered.filter { it.getComparisonValueByMode(measurementMode) > 0 }
+
+        if (validCatches.isEmpty()) {
+            uiHelper.speak("No ${speciesMentioned ?: ""} catches with valid measurements today. $overOut", "TTS_ERROR")
+            endSession("no valid catches found for question")
+            return
+        }
+
         when {
             question.contains("largest", true) -> {
                 val fish = filtered.maxByOrNull { it.getComparisonValueByMode(measurementMode) }!!
-                val prefix = speciesMentioned?.let { "Your largest ${it.uppercase()} today is" } ?: "Your largest catch today is"
+                val prefix = speciesMentioned?.let { "Your largest ${it.replaceFirstChar { c -> c.uppercase() }} today is" }
+                    ?: "Your largest catch today is"
                 speakFish(fish, prefix, overOut)
+                endSession("answered largest question")
             }
 
             question.contains("smallest", true) -> {
                 val fish = filtered.minByOrNull { it.getComparisonValueByMode(measurementMode) }!!
-                val prefix = speciesMentioned?.let { "Your smallest ${it.uppercase()} today is" } ?: "Your smallest catch today is"
+                val prefix = speciesMentioned?.let { "Your smallest ${it.replaceFirstChar { c -> c.uppercase() }} today is" }
+                    ?: "Your smallest catch today is"
                 speakFish(fish, prefix, overOut)
+                endSession("answered smallest question")
             }
 
             question.contains("total weight", true) -> {
-                val total = allCatches.sumOf { it.getComparisonValueByMode(measurementMode).toDouble() }
-                uiHelper.speak("Your total weight today is $total. $overOut", "TTS_ANSWER")
+                // ── FIX: Only answer in weight modes, format properly ──
+                val msg = when (measurementMode) {
+                    MeasurementMode.LBS_OZ -> {
+                        val totalOz = filtered.sumOf { it.totalWeightOz ?: 0 }
+                        val lbs = totalOz / 16
+                        val remOz = totalOz % 16
+                        "Your total weight today is $lbs pounds and $remOz ounces. $overOut"
+                    }
+                    MeasurementMode.POUNDS -> {
+                        val totalHundredths = filtered.sumOf { it.totalWeightHundredthPounds ?: 0 }
+                        val pounds = totalHundredths / 100
+                        val dec = totalHundredths % 100
+                        "Your total weight today is $pounds point $dec pounds. $overOut"
+                    }
+                    MeasurementMode.KG -> {
+                        val totalHundredths = filtered.sumOf { it.totalWeightHundredthKg ?: 0 }
+                        val kgs = totalHundredths / 100
+                        val grams = totalHundredths % 100
+                        "Your total weight today is $kgs point $grams kilograms. $overOut"
+                    }
+                    MeasurementMode.INCHES -> "Weight stats aren't available in inches mode. $overOut"
+                    MeasurementMode.CM -> "Weight stats aren't available in centimeter mode. $overOut"
+                }
+                uiHelper.speak(msg, "TTS_ANSWER")
+                endSession("answered total weight question")
             }
 
             question.contains("total length", true) -> {
-                val total = allCatches.sumOf { it.getComparisonValueByMode(measurementMode).toDouble() }
-                uiHelper.speak("Your total length today is $total. $overOut", "TTS_ANSWER")
+                // ── FIX: Only answer in length modes, format properly ──
+                val msg = when (measurementMode) {
+                    MeasurementMode.LBS_OZ -> "Length stats aren't available in pounds and ounces mode. $overOut"
+                    MeasurementMode.POUNDS -> "Length stats aren't available in pounds mode. $overOut"
+                    MeasurementMode.KG -> "Length stats aren't available in kilograms mode. $overOut"
+                    MeasurementMode.INCHES -> {
+                        val totalQuarters = filtered.sumOf { it.totalLengthQuarters ?: 0 }
+                        val inches = totalQuarters / 4
+                        val remQ = totalQuarters % 4
+                        "Your total length today is $inches inches and $remQ quarters. $overOut"
+                    }
+                    MeasurementMode.CM -> {
+                        val totalTenths = filtered.sumOf { it.totalLengthTenths ?: 0 }
+                        val cms = totalTenths / 10
+                        val remT = totalTenths % 10
+                        "Your total length today is $cms point $remT centimeters. $overOut"
+                    }
+                }
+                uiHelper.speak(msg, "TTS_ANSWER")
+                endSession("answered total length question")
+            }
+
+            // ── NEW: "how many" question ──
+            question.contains("how many", true) || question.contains("count", true) -> {
+                val count = filtered.size
+                val speciesLabel = speciesMentioned?.replaceFirstChar { it.uppercase() } ?: "fish"
+                uiHelper.speak("You have caught $count $speciesLabel today. $overOut", "TTS_ANSWER")
+                endSession("answered how many question")
+            }
+
+            // ── NEW: "average" question ──
+            question.contains("average", true) -> {
+                if (filtered.isEmpty()) {
+                    uiHelper.speak("No catches to average. $overOut", "TTS_ANSWER")
+                } else {
+                    val avgMsg = when (measurementMode) {
+                        MeasurementMode.LBS_OZ -> {
+                            val avgOz = filtered.sumOf { it.totalWeightOz ?: 0 } / filtered.size
+                            val lbs = avgOz / 16; val oz = avgOz % 16
+                            "Your average catch today is $lbs pounds and $oz ounces. $overOut"
+                        }
+                        MeasurementMode.POUNDS -> {
+                            val avgH = filtered.sumOf { it.totalWeightHundredthPounds ?: 0 } / filtered.size
+                            val p = avgH / 100; val d = avgH % 100
+                            "Your average catch today is $p point $d pounds. $overOut"
+                        }
+                        MeasurementMode.KG -> {
+                            val avgH = filtered.sumOf { it.totalWeightHundredthKg ?: 0 } / filtered.size
+                            val k = avgH / 100; val g = avgH % 100
+                            "Your average catch today is $k point $g kilograms. $overOut"
+                        }
+                        MeasurementMode.INCHES -> {
+                            val avgQ = filtered.sumOf { it.totalLengthQuarters ?: 0 } / filtered.size
+                            val i = avgQ / 4; val q = avgQ % 4
+                            "Your average catch today is $i inches and $q quarters. $overOut"
+                        }
+                        MeasurementMode.CM -> {
+                            val avgT = filtered.sumOf { it.totalLengthTenths ?: 0 } / filtered.size
+                            val c = avgT / 10; val t = avgT % 10
+                            "Your average catch today is $c point $t centimeters. $overOut"
+                        }
+                    }
+                    uiHelper.speak(avgMsg, "TTS_ANSWER")
+                }
+                endSession("answered average question")
             }
 
             else -> {
@@ -324,12 +458,16 @@ class FunDayVoiceHandler(
                     uiHelper.speak("Exiting question mode. $overOut", "TTS_FAIL")
                     endSession("too many question retries")
                 } else {
-                    uiHelper.speak("Sorry, I didn't catch that. Say largest, smallest, total weight or total length. $overOut", "TTS_RETRY_QUESTION")
+                    uiHelper.speak(
+                        "Sorry, I didn't catch that. Say largest, smallest, total weight, total length, how many, or average. $overOut",
+                        "TTS_RETRY_QUESTION"
+                    )
                     Handler(Looper.getMainLooper()).postDelayed({ handleQuestionMode() }, 1500)
                 }
             }
         }
     }
+    //============= END ========= Rout Questions ===================
 
     private fun speakFish(fish: CatchItem, prefix: String, overOut: String) {
         when (measurementMode) {

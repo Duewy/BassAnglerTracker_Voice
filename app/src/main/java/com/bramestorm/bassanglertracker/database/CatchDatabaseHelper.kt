@@ -345,23 +345,29 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         db.close()
     }
 
-    private fun parseCatch(cursor: Cursor): CatchItem {
-        return CatchItem(
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-            dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
-            species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
-            totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ)),
-            totalWeightHundredthPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS)),
-            totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS)),
-            totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS)),
-            totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG)),
-            catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),
-            markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),
-            clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR)),
-            latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUDE)),
-            longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUDE))
-        )
-    }
+                                            // Information of VC Questions
+   private fun parseCatch(cursor: Cursor): CatchItem {
+       return CatchItem(
+           id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+           dateTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE_TIME)),
+           species = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIES)),
+           totalWeightOz = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_OZ))
+               .takeIf { it > 0 },
+           totalWeightHundredthPounds = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS))
+               .takeIf { it > 0 },
+           totalLengthQuarters = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_QUARTERS))
+               .takeIf { it > 0 },
+           totalLengthTenths = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_LENGTH_TENTHS))
+               .takeIf { it > 0 },
+           totalWeightHundredthKg = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_WEIGHT_KG))
+               .takeIf { it > 0 },
+           catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),
+           markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),
+           clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR)),
+           latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUDE)),
+           longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUDE))
+       )
+   }
 
    // ---- GPS helpers: insist on fresh + accurate locations (global, not Ontario-only) ----
 
