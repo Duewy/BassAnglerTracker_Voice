@@ -204,8 +204,6 @@ class VoiceControlService : Service() {
             in 5..8 -> TournamentVoiceHandler(
                 context     = this,
                 uiHelper    = uiHelper,
-                alarmHour   = getPrefsInt("ALARM_HOUR"),
-                alarmMinute = getPrefsInt("ALARM_MINUTE")
             ).onWake()
 
             else -> FunDayVoiceHandler(this, uiHelper).onWake()

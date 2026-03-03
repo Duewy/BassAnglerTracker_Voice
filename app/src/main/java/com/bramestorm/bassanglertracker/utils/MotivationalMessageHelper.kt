@@ -49,6 +49,7 @@ fun generateMotivationalMessage(context: MotivationContext): String {
 
 }// ==== END == Generate Motivational Messages ===================
 
+// AFTER:
 fun getMotivationalMessage(
     context: Context,
     catchItemId: Int,
@@ -68,15 +69,28 @@ fun getMotivationalMessage(
         else                      -> MeasurementMode.LBS_OZ
     }
 
-    val topCatches = dbHelper.getTopTournamentCatches(tournamentCatchLimit)
+    // ── Build the catchType string to match how catches are stored ──
+    val catchType = when (mode) {
+        MeasurementMode.LBS_OZ -> "tournament_lbs_ozs"
+        MeasurementMode.POUNDS -> "tournament_pounds"
+        MeasurementMode.KG     -> "tournament_kgs"
+        MeasurementMode.INCHES -> "tournament_inches"
+        MeasurementMode.CM     -> "tournament_cms"
+    }
+
+    val topCatches = dbHelper.getTopTournamentCatches(catchType, mode, tournamentCatchLimit)
+
     val smallest = topCatches
         .minByOrNull { it.getComparisonValueByMode(mode) }
         ?.getComparisonValueByMode(mode)
         ?: catch.getComparisonValueByMode(mode)
 
     val isNewBiggestOfDay = topCatches.firstOrNull()?.id == catch.id
+
     val lastCatchTime = dbHelper.getLastCatchTimeMillis()
+
     val now = System.currentTimeMillis()
+
     val timeSinceLastCatch = now - lastCatchTime
 
     val contextObj = MotivationContext(

@@ -28,8 +28,6 @@ data class TournamentCatchStats(
     val largestCatch: CatchItem? = null,
     val thisCatchPosition: Int = 0,
     val timeSinceLastCatchMin: Int = 0,
-    val timeUntilAlarmMin: Int = 0,
     val currentTime: String = "",
-    val alarmTime: String = "",
     val fullCatchList: List<CatchItem> = emptyList()
 )

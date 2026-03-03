@@ -26,8 +26,7 @@ import java.util.Locale
 class TournamentVoiceHandler(
     private val context: Context,
     private val uiHelper: VoiceUiHelper,
-    private val alarmHour: Int = -1,
-    private val alarmMinute: Int = -1,
+
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context)
 ) : VoiceSessionHandler {
 
@@ -243,8 +242,6 @@ class TournamentVoiceHandler(
         val stats = TournamentVoiceFeedback.analyzeTournamentStats(
             dbHelper,
             tournamentCatchLimit,
-            alarmHour,
-            alarmMinute,
             dbItem,
             measurementMode
         )
@@ -522,19 +519,6 @@ class TournamentVoiceHandler(
                 endSession("answered time since question")
             }
 
-            // ── Tournament-specific: time remaining ──
-            question.contains("time remaining", true) || question.contains("time left", true) -> {
-                Log.d(TAG, "Answering time remaining")
-                val alarmMin = alarmHour * 60 + alarmMinute
-                val calendar = java.util.Calendar.getInstance()
-                val nowMin = calendar.get(java.util.Calendar.HOUR_OF_DAY) * 60 + calendar.get(java.util.Calendar.MINUTE)
-                val minsLeft = if (alarmMin - nowMin > 0) alarmMin - nowMin else 0
-                uiHelper.speak(
-                    "$minsLeft minutes remain in the tournament. $overOut",
-                    "TTS_ANSWER"
-                )
-                endSession("answered time remaining question")
-            }
 
             else -> {
                 questionRetryCount++

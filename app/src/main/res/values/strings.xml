@@ -17,7 +17,6 @@
     <string name="fun_Day">Fun Day</string>
     <string name="gps_info">GPS will be ON only to get location of your catch</string>
     <string name="voice_info">Voice Commands Enable or Disable</string>
-    <string name="set_alarm">Set Alarm</string>
     <string name="cancel">Cancel</string>
     <string name="enter_catch_details_inches">Species and Length -Inches-</string>
     <string name="inches">Inches</string>
@@ -38,7 +37,6 @@
     <string name="select_the_button_for_each_topic">Select the button for each topic</string>
     <string name="goto_setup">Goto setup</string>
     <string name="weight_lbs_ozs">Weight Lbs/ozs</string>
-    <string name="alarm">ALARM</string>
     <string name="letter_of_color_clip_for_color_blind">Letter of Color Clip for Color Blind</string>
     <string name="main_page">main Page</string>
     <string name="setup">SetUp</string>
@@ -208,8 +206,6 @@
     <string name="heard">Heard: %1$s</string>
     <string name="nothing_heard">Nothing heard</string>
     <string name="place_marker">place marker</string>
-    <string name="alarm_set_to">⏰ %1$s</string>
-    <string name="alarm_toast_message">Alarm Set for %1$s</string>
     <string name="weight_format_pounds">%.2f pounds</string>
     <string name="weight_format_kg">%.2f kg</string>
     <string name="length_format_cm">%.1f cm</string>

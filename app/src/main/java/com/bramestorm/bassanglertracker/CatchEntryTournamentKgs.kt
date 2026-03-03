@@ -51,7 +51,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private lateinit var btnStartFishingKgs: Button
     private lateinit var btnSetUpKgs: Button
     private lateinit var btnMainKgs:Button
-    private lateinit var btnAlarmKgs: Button
     private lateinit var dialogInstance: AlertDialog
 
     // Weight Display TextViews

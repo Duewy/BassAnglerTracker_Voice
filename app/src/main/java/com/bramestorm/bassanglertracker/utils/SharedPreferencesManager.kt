@@ -1,13 +1,8 @@
 package com.bramestorm.bassanglertracker.utils
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import com.bramestorm.bassanglertracker.MeasurementMode
-import com.bramestorm.bassanglertracker.alarm.AlarmReceiver
-import com.bramestorm.bassanglertracker.voice.VoiceControlService
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -35,25 +30,7 @@ object SharedPreferencesManager {
     private const val KEY_TOURNAMENT_SPECIES = "TOURNAMENT_SPECIES"
     private const val KEY_CULLING_ENABLED = "CULLING_ENABLED"
 
-
-    // ALARM values for VCC to Use
-    private const val KEY_ALARM_HOUR = "ALARM_HOUR"
-    private const val KEY_ALARM_MINUTE = "ALARM_MINUTE"
-
     private const val TAG = "SharedPreferencesManager"
-
-        // Ensures the App Voice Services all shut down when app is closed
-    fun Context.cleanupAppServices() {
-        Log.d("AppCleanup", "🧹 Cleaning up background services")
-        stopService(Intent(this, VoiceControlService::class.java))
-
-        val alarmIntent = Intent(this, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            this, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        (getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.cancel(pendingIntent)
-    }
-
 
     // === VOICE CONTROL ===
     fun setVccEnabled(context: Context, enabled: Boolean) {

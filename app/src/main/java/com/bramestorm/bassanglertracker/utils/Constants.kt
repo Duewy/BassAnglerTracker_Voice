@@ -23,10 +23,6 @@ object Constants {
     const val EXTRA_WEIGHT_KGS     = "totalWeightHundredthKg"
     const val EXTRA_SPECIES       = "selectedSpecies"
 
-    // ALARM values for VCC to Use
-    const val KEY_ALARM_HOUR = "ALARM_HOUR"
-    const val KEY_ALARM_MINUTE = "ALARM_MINUTE"
-
     const val TAG = "SharedPreferencesManager"
     // … any other keys you add later …
 }

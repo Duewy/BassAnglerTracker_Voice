@@ -13,6 +13,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.bramestorm.bassanglertracker.CatchItem
+import com.bramestorm.bassanglertracker.MeasurementMode
 import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -791,33 +792,43 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catchItem
     }
 
-    //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
-    fun getTopTournamentCatches(limit: Int): List<CatchItem> {      //todo ensure that it works for all 5 types
-        val db = readableDatabase
-        val catchList = mutableListOf<CatchItem>()
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+   //----------------------- GET Top Tournament Catches INFORMATION ---------------------------------
+   fun getTopTournamentCatches(catchType: String, measurementMode: MeasurementMode, limit: Int): List<CatchItem> {
+       val db = readableDatabase
+       val catchList = mutableListOf<CatchItem>()
+       val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        val cursor = db.rawQuery(
-            """
-        SELECT * FROM $TABLE_NAME 
-        WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ?
-          AND $COLUMN_CATCH_TYPE = ?
-        ORDER BY $COLUMN_TOTAL_WEIGHT_OZ DESC
-        LIMIT ?
-        """.trimIndent(),
-            arrayOf(today, "Tournament", limit.toString())
-        )
+       // ── Pick the correct column to sort by based on measurement mode ──
+       val orderColumn = when (measurementMode) {
+           MeasurementMode.LBS_OZ -> COLUMN_TOTAL_WEIGHT_OZ
+           MeasurementMode.POUNDS -> COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS
+           MeasurementMode.KG     -> COLUMN_TOTAL_WEIGHT_KG
+           MeasurementMode.INCHES -> COLUMN_TOTAL_LENGTH_QUARTERS
+           MeasurementMode.CM     -> COLUMN_TOTAL_LENGTH_TENTHS
+       }
 
-        while (cursor.moveToNext()) {
-            catchList.add(parseCatch(cursor))
-        }
+       val cursor = db.rawQuery(
+           """
+            SELECT * FROM $TABLE_NAME 
+            WHERE strftime('%Y-%m-%d', $COLUMN_DATE_TIME) = ?
+              AND $COLUMN_CATCH_TYPE = ?
+            ORDER BY $orderColumn DESC
+            LIMIT ?
+            """.trimIndent(),
+           arrayOf(today, catchType, limit.toString())
+       )
 
-        Log.d("DB_DEBUG", "🔎 getTopTournamentCatches: limit=$limit")
+       while (cursor.moveToNext()) {
+           catchList.add(parseCatch(cursor))
+       }
 
-        cursor.close()
-        db.close()
-        return catchList
-    }//------------- END -- MOTIVATIONAL MESSAGE INFORMATION  ---------------------------
+       Log.d("DB_DEBUG", "🔎 getTopTournamentCatches: catchType=$catchType, mode=$measurementMode, limit=$limit, found=${catchList.size}")
+
+       cursor.close()
+       db.close()
+       return catchList
+   }//------------- END -- GET Top Tournament Catches INFORMATION  ---------------------------
+
 
     //============ Functions for Various Data Retrieval  =================================
 

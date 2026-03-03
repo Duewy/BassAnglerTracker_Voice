@@ -13,8 +13,6 @@ object TournamentVoiceFeedback {
     fun analyzeTournamentStats(
         dbHelper: CatchDatabaseHelper,
         tournamentCatchLimit: Int,
-        alarmHour: Int,
-        alarmMinute: Int,
         currentCatch: CatchItem,
         mode: MeasurementMode
     ): TournamentCatchStats {
@@ -35,10 +33,6 @@ object TournamentVoiceFeedback {
         val nowTime = System.currentTimeMillis()
         val sinceLastMin = ((nowTime - lastCatchTime) / 60000).toInt()
 
-        val alarmMin = alarmHour * 60 + alarmMinute
-        val calendar = java.util.Calendar.getInstance()
-        val nowMin = calendar.get(java.util.Calendar.HOUR_OF_DAY) * 60 + calendar.get(java.util.Calendar.MINUTE)
-        val minsLeft = alarmMin - nowMin
 
         return TournamentCatchStats(
             mode = mode,
@@ -65,9 +59,7 @@ object TournamentVoiceFeedback {
             largestCatch = largest,
             thisCatchPosition = thisPosition,
             timeSinceLastCatchMin = sinceLastMin,
-            timeUntilAlarmMin = if (minsLeft > 0) minsLeft else 0,
             currentTime = SimpleDateFormat("h:mm a", Locale.ROOT).format(Date()),
-            alarmTime = String.format(Locale.ROOT, "%02d:%02d", alarmHour, alarmMinute),
             fullCatchList = topN
         )
     }
@@ -169,10 +161,6 @@ object TournamentVoiceFeedback {
                 append("It’s been ${stats.timeSinceLastCatchMin} minutes since your last catch. ")
             }
 
-            // 6️⃣ Time remaining
-            if (stats.timeUntilAlarmMin > 0) {
-                append("${stats.timeUntilAlarmMin} minutes remain in the tournament.")
-            }
         }
     }
 
