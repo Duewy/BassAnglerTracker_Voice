@@ -7,7 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -234,7 +233,7 @@ class TournamentVoiceHandler(
         // Notify UI
         Log.d(TAG, "Broadcasting catch saved event")
 
-        LocalBroadcastManager.getInstance(context).sendBroadcast(
+        context.sendBroadcast(
             Intent("com.bramestorm.VOICE_CATCH_SAVED")
         )
 

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -262,7 +261,9 @@ class FunDayVoiceHandler(
         )
         dbHelper.insertCatch(catchItem)
 
-        LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_CATCH_SAVED))
+        context.sendBroadcast(
+            Intent("com.bramestorm.VOICE_CATCH_SAVED")
+        )
 
         uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
         Log.d(TAG, "🔻 Catch Saved")

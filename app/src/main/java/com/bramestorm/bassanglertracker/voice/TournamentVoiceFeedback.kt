@@ -37,21 +37,21 @@ object TournamentVoiceFeedback {
         return TournamentCatchStats(
             mode = mode,
             species = currentCatch.species,
-            totalWeightOz = if (mode == MeasurementMode.LBS_OZ) totalValue.toInt() else 0,
-            totalWeightLbs = if (mode == MeasurementMode.LBS_OZ) (totalValue.toInt() / 16) else 0,
-            totalWeightRemainingOz = if (mode == MeasurementMode.LBS_OZ) (totalValue.toInt() % 16) else 0,
-            totalWeightHundredthPounds = if (mode == MeasurementMode.POUNDS) (totalValue * 100).toInt() else 0,
-            totalWeightPounds = if (mode == MeasurementMode.POUNDS) totalValue.toInt() else 0,
-            totalWeightDec = if (mode == MeasurementMode.POUNDS) ((totalValue * 100).toInt() % 100) else 0,
-            totalWeightHundredthKg = if (mode == MeasurementMode.KG) (totalValue * 100).toInt() else 0,
-            totalWeightKgs = if (mode == MeasurementMode.KG) totalValue.toInt() else 0,
-            totalWeightGrams = if (mode == MeasurementMode.KG) ((totalValue * 100).toInt() % 100) else 0,
-            totalLengthQuarters = if (mode == MeasurementMode.INCHES) (totalValue * 4).toInt() else 0,
-            totalLengthInches = if (mode == MeasurementMode.INCHES) totalValue.toInt() else 0,
-            totalLengthFourths = if (mode == MeasurementMode.INCHES) ((totalValue * 4).toInt() % 4) else 0,
-            totalLengthTenths = if (mode == MeasurementMode.CM) (totalValue * 10).toInt() else 0,
-            totalLengthCms = if (mode == MeasurementMode.CM) totalValue.toInt() else 0,
-            totalLengthDec = if (mode == MeasurementMode.CM) ((totalValue * 10).toInt() % 10) else 0,
+            totalWeightOz = if (mode == MeasurementMode.LBS_OZ) totalValue else 0,
+            totalWeightLbs = if (mode == MeasurementMode.LBS_OZ) (totalValue / 16) else 0,
+            totalWeightRemainingOz = if (mode == MeasurementMode.LBS_OZ) (totalValue % 16) else 0,
+            totalWeightHundredthPounds = if (mode == MeasurementMode.POUNDS) totalValue else 0,
+            totalWeightPounds = if (mode == MeasurementMode.POUNDS) (totalValue / 100) else 0,
+            totalWeightDec = if (mode == MeasurementMode.POUNDS) (totalValue % 100) else 0,
+            totalWeightHundredthKg = if (mode == MeasurementMode.KG) totalValue else 0,
+            totalWeightKgs = if (mode == MeasurementMode.KG) (totalValue / 100) else 0,
+            totalWeightGrams = if (mode == MeasurementMode.KG) (totalValue % 100) else 0,
+            totalLengthQuarters = if (mode == MeasurementMode.INCHES) totalValue else 0,
+            totalLengthInches = if (mode == MeasurementMode.INCHES) (totalValue / 4) else 0,
+            totalLengthFourths = if (mode == MeasurementMode.INCHES) (totalValue % 4) else 0,
+            totalLengthTenths = if (mode == MeasurementMode.CM) totalValue else 0,
+            totalLengthCms = if (mode == MeasurementMode.CM) (totalValue / 10) else 0,
+            totalLengthDec = if (mode == MeasurementMode.CM) (totalValue % 10) else 0,
             catchType = currentCatch.catchType,
             clipColor = currentCatch.clipColor ?: "",
             totalCatches = sorted.size,
@@ -167,16 +167,16 @@ object TournamentVoiceFeedback {
 
     // ✅ Determine value using measurement mode already provided
 
-    private fun getTotalValue(list: List<CatchItem>, mode: MeasurementMode): Int{
-        return list.sumOf { it.getComparisonValueByMode(mode)!! }
+    private fun getTotalValue(list: List<CatchItem>, mode: MeasurementMode): Int {
+        return list.sumOf { it.getComparisonValueByMode(mode) ?: 0 }
     }
 
     private fun getSmallestCatch(list: List<CatchItem>, mode: MeasurementMode): CatchItem? {
-        return list.minByOrNull { it.getComparisonValueByMode(mode)!! }
+        return list.minByOrNull { it.getComparisonValueByMode(mode) ?: 0 }
     }
 
     private fun getLargestCatch(list: List<CatchItem>, mode: MeasurementMode): CatchItem? {
-        return list.maxByOrNull { it.getComparisonValueByMode(mode)!! }
+        return list.maxByOrNull { it.getComparisonValueByMode(mode) ?: 0 }
     }
 
 

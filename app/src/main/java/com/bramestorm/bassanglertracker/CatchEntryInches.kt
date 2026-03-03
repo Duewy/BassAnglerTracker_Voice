@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
@@ -94,10 +93,11 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                 this,
                 Intent(this, VoiceControlService::class.java)
             )
-            LocalBroadcastManager.getInstance(this)
-                .registerReceiver(
-                    voiceCatchReceiver,
-                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"))
+            registerReceiver(
+                voiceCatchReceiver,
+                IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
         }
 
         tts = TextToSpeech(this) { status ->
@@ -160,7 +160,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
         stopService(Intent(this, VoiceControlService::class.java))
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         if (voiceControlEnabled) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(voiceCatchReceiver)
+            unregisterReceiver(voiceCatchReceiver)
         }
         super.onDestroy()
     }

@@ -691,7 +691,7 @@ class SetUpActivity : AppCompatActivity() {
 
         // ---------- Safe Bluetooth check ---------
         private fun isBluetoothConnectedSafe(): Boolean {
-            return com.bramestorm.bassanglertracker.utils.BluetoothUtils.isHeadsetConnected()
+            return com.bramestorm.bassanglertracker.utils.BluetoothUtils.isHeadsetConnected(this)
         }
 
     //======================= onResume ==========================================

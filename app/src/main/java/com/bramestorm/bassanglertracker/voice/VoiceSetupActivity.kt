@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -224,19 +225,20 @@ class VoiceSetupActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun checkBluetoothDevices() {
-        val btAdapter = BluetoothAdapter.getDefaultAdapter()
+        val manager = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        val btAdapter = manager?.adapter
         if (btAdapter == null) {
-            positionedToast("This device has no Bluetooth adapter; Voice Control won’t work.")
+            positionedToast("This device has no Bluetooth adapter; Voice Control won't work.")
             return
         }
 
         val paired = btAdapter.bondedDevices
         if (paired.isNullOrEmpty()) {
-            positionedToast("No Bluetooth device paired;\nVoice Control won’t work.")
+            positionedToast("No Bluetooth device paired;\nVoice Control won't work.")
             return
         }
 
-        if (BluetoothUtils.isHeadsetConnected()) {
+        if (BluetoothUtils.isHeadsetConnected(this)) {
             positionedToast("✅ Bluetooth headset connected — Voice Control should work.")
         } else {
             positionedToast("⚠️ Bluetooth is paired but not connected.\nConnect your headset before enabling Voice Control.")

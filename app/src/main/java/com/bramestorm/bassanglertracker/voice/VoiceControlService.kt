@@ -234,9 +234,6 @@ class VoiceControlService : Service() {
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
     }
 
-    private fun getPrefsInt(key: String) =
-        getSharedPreferences("catch_and_call_prefs", Context.MODE_PRIVATE).getInt(key, -1)
-
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel(CHANNEL_ID, "Voice Control", NotificationManager.IMPORTANCE_LOW)
