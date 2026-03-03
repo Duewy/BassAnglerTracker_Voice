@@ -240,19 +240,24 @@ class FunDayVoiceHandler(
     }
 
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
+
+        val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species)
+
+        val markerType =SharedPreferencesManager.getSpeciesInitial(context, normalizedSpecies)
+
         val catchItem = CatchItem(
             id = 0,
             dateTime = currentTimestamp(),
             longitude = null,
             latitude = null,
-            species = parsed.species,
+            species = normalizedSpecies,
             totalWeightOz = parsed.totalWeightOzs.takeIf { measurementMode == MeasurementMode.LBS_OZ },
             totalWeightHundredthPounds = parsed.totalWeightHundredthPounds.takeIf { measurementMode == MeasurementMode.POUNDS },
             totalWeightHundredthKg = parsed.totalWeightHundredthKg.takeIf { measurementMode == MeasurementMode.KG },
             totalLengthQuarters = parsed.totalLengthQuarters.takeIf { measurementMode == MeasurementMode.INCHES },
             totalLengthTenths = parsed.totalLengthTenths.takeIf { measurementMode == MeasurementMode.CM },
             catchType = typeEntry,
-            markerType = null,
+            markerType = markerType,
             clipColor = null
         )
         dbHelper.insertCatch(catchItem)

@@ -208,9 +208,7 @@ class TournamentVoiceHandler(
 
         val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species)
 
-        val markerType =
-            SharedPreferencesManager.getSpeciesInitial(context, normalizedSpecies)
-
+        val markerType = SharedPreferencesManager.getSpeciesInitial(context, normalizedSpecies)
 
         val dbItem = CatchItem(
             id = 0,

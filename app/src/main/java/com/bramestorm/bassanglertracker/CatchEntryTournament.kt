@@ -28,7 +28,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.bramestorm.bassanglertracker.CatchEntryTournamentPounds.ClipColor
 import com.bramestorm.bassanglertracker.PopupWeightEntryLbs.MinMaxInputFilter
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
