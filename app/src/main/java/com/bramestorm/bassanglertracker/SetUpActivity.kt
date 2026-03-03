@@ -346,6 +346,7 @@ class SetUpActivity : AppCompatActivity() {
 
                 // c) Deep‐doze agreement
                 if (!SharedPreferencesManager.hasUserAgreedToDeepDoze(this)) {
+                    @Suppress("DEPRECATION")
                     startActivityForResult(
                         Intent(this, UserAgreementForDeepDozeActivity::class.java),
                         REQUEST_DEEP_DOZE_AGREEMENT
@@ -665,6 +666,7 @@ class SetUpActivity : AppCompatActivity() {
                         isVoiceInitializingToggle = true
                         tglVoice.isChecked = false
                         tglVoice.setBackgroundResource(R.drawable.btn_outline_orange)
+                        isVoiceInitializingToggle = false
                         isVoiceInitializingToggle = false
                     }
                 }

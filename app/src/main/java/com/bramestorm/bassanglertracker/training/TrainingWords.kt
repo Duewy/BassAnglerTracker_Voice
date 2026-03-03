@@ -111,6 +111,7 @@ class TrainingWords : AppCompatActivity() {
             }
 
             try {
+                @Suppress("DEPRECATION")
                 startActivityForResult(intent, speechRequestCode)
             } catch (e: ActivityNotFoundException) {
                 Toast.makeText(this, "Your device doesn't support speech input", Toast.LENGTH_SHORT).show()

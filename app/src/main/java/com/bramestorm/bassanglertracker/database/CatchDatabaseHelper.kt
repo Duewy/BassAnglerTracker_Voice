@@ -407,12 +407,14 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                } else {
                    Log.d("GPS_DEBUG", "ℹ️ lastLocation is null or not good enough, requesting fresh update...")
 
-                   val req = com.google.android.gms.location.LocationRequest.create().apply {
-                       priority = com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-                       interval = 1_000L
-                       fastestInterval = 500L
-                       numUpdates = 1
-                   }
+                   val req = com.google.android.gms.location.LocationRequest.Builder(
+                       com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                       1_000L
+                   ).apply {
+                       setMinUpdateIntervalMillis(500L)
+                       setMaxUpdates(1)
+                   }.build()
+
 
                    fused.requestLocationUpdates(
                        req,

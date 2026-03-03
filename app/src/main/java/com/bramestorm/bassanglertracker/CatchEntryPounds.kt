@@ -78,7 +78,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
         setContentView(R.layout.activity_catch_entry_pounds)
 
     // Push bottom-constrained views (like the AdView) above the system navigation bar
-    val root = findViewById<android.view.View>(android.R.id.content)
+    val root = findViewById<View>(android.R.id.content)
     ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
         val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
         v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
@@ -93,7 +93,9 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
             this,
             Intent(this, VoiceControlService::class.java)
         )
-        registerReceiver(
+
+        ContextCompat.registerReceiver(
+            this,
             voiceCatchReceiver,
             IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"),
             ContextCompat.RECEIVER_NOT_EXPORTED

@@ -88,7 +88,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private lateinit var txtVCCTourKgs: TextView
 
     private var availableClipColors: List<ClipColor> = emptyList()
-    private val flashHandler = Handler(Looper.getMainLooper())
 
     // Database Helper
     private lateinit var dbHelper: CatchDatabaseHelper
@@ -114,9 +113,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         const val EXTRA_WEIGHT_KGS             = "totalWeightHundredthKg"        // Send & receive this
         const val EXTRA_SPECIES                = "selectedSpecies"      // Send this
         const val EXTRA_CLIP_COLOR             = "clip_color"           // Send this
-        const val EXTRA_MEASURING_TYPE         = "measuringType"
         const val EXTRA_IS_TOURNAMENT          = "isTournament"
-        const val EXTRA_CULLING_NUMBERS        = "Culling_Numbers"
 
         // → inputs into this popup
         const val EXTRA_AVAILABLE_CLIP_COLORS  = "availableClipColors"  // Receive this list
@@ -146,7 +143,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         setContentView(R.layout.activity_tournament_view_kgs)
 
      // Push bottom-constrained views (like the AdView) above the system navigation bar
-     val root = findViewById<android.view.View>(android.R.id.content)
+     val root = findViewById<View>(android.R.id.content)
      ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
          val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
          v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
@@ -163,7 +160,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
              this,
              Intent(this, VoiceControlService::class.java)
          )
-         registerReceiver(
+
+         ContextCompat.registerReceiver(
+             this,
              voiceCatchReceiver,
              IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"),
              ContextCompat.RECEIVER_NOT_EXPORTED
@@ -313,9 +312,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
 
         val intent = Intent(this, PopupWeightEntryTourKgs::class.java).apply {
 
-            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_IS_TOURNAMENT, true)
+            putExtra(CatchEntryTournament.EXTRA_IS_TOURNAMENT, true)
 
-            putExtra(com.bramestorm.bassanglertracker.CatchEntryTournament.EXTRA_TOURNAMENT_SPECIES,tournamentSpecies)
+            putExtra(CatchEntryTournament.EXTRA_TOURNAMENT_SPECIES,tournamentSpecies)
 
             // Send as an ArrayList so you can retrieve with getStringArrayListExtra
             val colorArray = availableClipColors.map { it.name }.toTypedArray()
@@ -444,8 +443,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
             dbHelper,
             catchType = "tournament_kgs",
             date = formattedDate,
-            tournamentCatchLimit = tournamentCatchLimit,
-            isCullingEnabled = isCullingEnabled
+            tournamentCatchLimit = tournamentCatchLimit
         )
         Log.d("CLIP_COLOR", "🎨 Available Colors KGS: $availableClipColors")
         clearTournamentTextViews()
@@ -598,8 +596,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         dbHelper: CatchDatabaseHelper,
         catchType: String,
         date: String,
-        tournamentCatchLimit: Int,
-        isCullingEnabled: Boolean
+        tournamentCatchLimit: Int
     ): List<ClipColor> {
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
         val sorted = allCatches.sortedByDescending { it.totalWeightHundredthKg ?: 0 }
@@ -646,24 +643,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         }
     } //---------------- END Adjust the Text View Visibility ----------------
 
-    //!!!!!!!!!!!!!!!! Get SPECIES Letter !!!!!!!!!!!!!!!!!
-    private fun getSpeciesCode(species: String): String {
-        val u = species.uppercase(Locale.US)
-        return when {
-            u.startsWith("LARGE MOUTH")  -> "LM"
-            u.startsWith("LARGEMOUTH")  -> "LM"
-            u.startsWith("SMALL MOUTH")  -> "SM"
-            u.startsWith("SPOTTEDBASS")  -> "SB"
-            u == "SPOTTED BASS"   -> "SB"
-            u == "WALLEYE"        -> "WE"
-            u == "PIKE"           -> "PK"
-            u =="PERCH"           -> "PH"
-            u == "PANFISH"        -> "PF"
-            u =="CATFISH"         -> "CF"
-            u == "CRAPPIE"       -> "CP"
-            else          -> "--"
-        }
-    } //------------ END Get Species Codes ----------------
 
     //******************* FOR 🥸 User 📝 EDIT Logged Weights ********************************
 

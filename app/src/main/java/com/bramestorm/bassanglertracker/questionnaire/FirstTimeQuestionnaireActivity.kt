@@ -241,6 +241,7 @@ class FirstTimeQuestionnaireActivity : AppCompatActivity() {
             .mapNotNull { runCatching { GearInterest.valueOf(it) }.getOrNull() }.toSet()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (currentStep > 0) {
             collectCurrentAnswers()
