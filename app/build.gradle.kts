@@ -13,6 +13,10 @@ plugins {
 android {
     namespace = "com.bramestorm.bassanglertracker"
     compileSdk = 35
+                // Suppress the setText lint warnings project-wide
+    lint {
+        disable += "SetTextI18n"
+    }
 
     defaultConfig {
         applicationId = "com.bramestorm.bassanglertracker"

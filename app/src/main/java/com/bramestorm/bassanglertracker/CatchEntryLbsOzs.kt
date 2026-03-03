@@ -272,12 +272,12 @@ SharedPreferencesManager.loadSpeciesList(this)
             .setPositiveButton("Save") { _, _ ->
                 val newLbs = edtWeightLbs.text.toString().toIntOrNull() ?: 0
                 val newOzs = edtWeightOzs.text.toString().toIntOrNull() ?: 0
-                val totalWeightOz = (newLbs * 16) + newOzs
+                val updatedWeightOz = (newLbs * 16) + newOzs
                 val species = spinnerSpeciesLbs.selectedItem.toString()
 
                 dbHelper.updateCatch(
                     catchId = catchItem.id,
-                    newWeightOz = totalWeightOz,
+                    newWeightOz = updatedWeightOz,
                     newWeightKg = null,
                     newLengthQuarters = null,
                     newLengthCm = null,

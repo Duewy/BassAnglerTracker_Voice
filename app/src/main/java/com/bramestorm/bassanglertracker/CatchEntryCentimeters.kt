@@ -269,7 +269,7 @@ SharedPreferencesManager.loadSpeciesList(this)
             .setPositiveButton("Save") { _, _ ->
                 val newCm = edtLengthCms.text.toString().toIntOrNull() ?: 0
                 val newDecimal = edtLengthDecimal.text.toString().toIntOrNull() ?: 0
-                val totalLengthTenths = ((newCm * 10) + newDecimal)
+                val updatedLengthTenths = ((newCm * 10) + newDecimal)
                 val species = spinnerSpeciesLbs.selectedItem.toString()
 
                 dbHelper.updateCatch(
@@ -277,7 +277,7 @@ SharedPreferencesManager.loadSpeciesList(this)
                     newWeightOz = null,
                     newWeightKg = null,
                     newLengthQuarters = null,
-                    newLengthCm = totalLengthTenths,
+                    newLengthCm = updatedLengthTenths,
                     species = species
                 )
 
