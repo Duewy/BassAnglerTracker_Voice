@@ -301,7 +301,7 @@
         <!-- Your foreground service -->
         <service
             android:name=".voice.VoiceControlService"
-            android:exported="true"
+            android:exported="false"
             android:foregroundServiceType="mediaPlayback|microphone|connectedDevice">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON"/>

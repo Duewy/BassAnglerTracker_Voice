@@ -269,7 +269,7 @@ class TournamentVoiceHandler(
         inQuestionMode = true
         Log.d(TAG, "Question mode activated")
         uiHelper.speak(
-            "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, time since, or time remaining. Over.",
+            "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, or time since last catch, Over.",
             "TTS_QUESTION_INTRO"
         )
         (context as? VoiceControlService)?.startVoiceSession(
@@ -310,7 +310,7 @@ class TournamentVoiceHandler(
                     .replace("largest", "").replace("smallest", "")
                     .replace("total weight", "").replace("total length", "")
                     .replace("how many", "").replace("average", "").replace("count", "")
-                    .replace("position", "").replace("time since", "").replace("time remaining", "")
+                    .replace("position", "").replace("time since", "")
                     .replace("over", "").replace("and out", "")
                     .trim()
 
@@ -526,7 +526,7 @@ class TournamentVoiceHandler(
                     endSession("too many question retries")
                 } else {
                     uiHelper.speak(
-                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, time since, or time remaining. $overOut",
+                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, or time since last catch. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({
