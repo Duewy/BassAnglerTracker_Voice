@@ -260,12 +260,11 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
             return false
-        } finally {
-            Log.d("GPS_DEBUG", "GPS_ENABLED is ${prefs.getBoolean("GPS_ENABLED", false)}")
-            db.close()
         }
+        // ✅ REMOVED db.close() from finally block — GPS callback fires 3 seconds later
+        //    and needs the DB connection alive. SQLiteOpenHelper manages the lifecycle.
     }
-
+    //==== END === Insert Catch ============================================
 
     private fun updateLastCatchTime() {
         val prefs = context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE)
@@ -369,14 +368,16 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         )
     }
 
-    // ---- GPS helpers: insist on fresh + accurate locations (global, not Ontario-only) ----
+    // ---- GPS helpers: insist on fresh + accurate locations (global) ----
 
     private fun isLocationFreshAndAccurate(loc: android.location.Location): Boolean {
         val maxAgeMs = 40_000L    // 40 seconds old
-        val maxAccM  = 3f        // ~3 m accuracy (tune this if you like)
+        val maxAccM  = 15f        // 15 meters ≈ 49 ft accuracy (The GPS Accuracy will try for 1 meter but in cloudy days may need 15 meter window)
 
         val ageMs = System.currentTimeMillis() - loc.time
         val accurate = loc.hasAccuracy() && loc.accuracy <= maxAccM
+
+        Log.d("GPS_DEBUG", "📐 Location check: age=${ageMs}ms, accuracy=${loc.accuracy}m, maxAcc=${maxAccM}m, pass=${ageMs in 0..maxAgeMs && accurate}")
 
         return ageMs in 0..maxAgeMs && accurate
     }

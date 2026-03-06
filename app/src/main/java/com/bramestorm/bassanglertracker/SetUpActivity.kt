@@ -119,7 +119,7 @@ class SetUpActivity : AppCompatActivity() {
 
         requestPhoneStatePermissionIfNeeded()
 
-        //------------------- Ensures that the GPS must be Re-Enabled Every Day --------------------
+        //------------------- Ensures GPS 📡 and Voice Control🎙️ must be Re-Enabled Every Day --------------------
 
         val today = DateFormat.format("yyyy-MM-dd", Date()).toString()
         val lastVoiceDate = prefs.getString(KEY_LAST_VOICE_DATE, "")
@@ -128,8 +128,15 @@ class SetUpActivity : AppCompatActivity() {
                 .putBoolean(KEY_VOICE_CONTROL, false)
                 .putString(KEY_LAST_VOICE_DATE, today)
                 .apply()
-            SharedPreferencesManager.setVccEnabled(this, false) // daily reset also resets VCC service state
+            SharedPreferencesManager.setVccEnabled(this, false) // daily reset VC service state
+
+            // ✅ Reset GPS daily — forcing User to consciously enable it each fishing day
+            sharedPreferences.edit()
+                .putBoolean("GPS_ENABLED", false)
+                .apply()
+            Log.d(TAG, "🔄 Daily reset: GPS_ENABLED and VOICE_CONTROL set to false for $today")
         }
+
 
         setContentView(R.layout.activity_set_up_event)
 
@@ -252,7 +259,7 @@ class SetUpActivity : AppCompatActivity() {
 
 // |||||||||||||| Load saved GPS state ||||||||||||||||||||||||||||||||||
 
-// If edition doesn't support GPS, force OFF and orange, no matter prefs
+        // If edition doesn't support GPS, force OFF and orange, no matter prefs
         if (!BuildConfig.FEATURE_GPS_LOGGING) {
             isGPSInitializingToggle = true
             tglGPS.isChecked = false
