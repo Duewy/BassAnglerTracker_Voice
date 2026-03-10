@@ -234,7 +234,9 @@ class TournamentVoiceHandler(
         Log.d(TAG, "Broadcasting catch saved event")
 
         context.sendBroadcast(
-            Intent("com.bramestorm.VOICE_CATCH_SAVED")
+            Intent("com.bramestorm.VOICE_CATCH_SAVED").apply {
+                setPackage(context.packageName)
+            }
         )
 
         // Feedback summary if on last or penultimate catch

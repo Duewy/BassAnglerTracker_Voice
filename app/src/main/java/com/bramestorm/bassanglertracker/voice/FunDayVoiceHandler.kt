@@ -262,7 +262,9 @@ class FunDayVoiceHandler(
         dbHelper.insertCatch(catchItem)
 
         context.sendBroadcast(
-            Intent("com.bramestorm.VOICE_CATCH_SAVED")
+            Intent("com.bramestorm.VOICE_CATCH_SAVED").apply {
+                setPackage(context.packageName)
+            }
         )
 
         uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
