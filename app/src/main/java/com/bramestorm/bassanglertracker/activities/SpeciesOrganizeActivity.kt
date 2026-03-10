@@ -1,9 +1,11 @@
 package com.bramestorm.bassanglertracker.activities
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -25,9 +27,29 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
     private lateinit var btnCancel: Button
 
     private var pendingImageUri: Uri? = null
+
+    // 🖼️ Hold a reference to the dialog's preview ImageView
+    private var dialogImagePreview: ImageView? = null
+
     private val imagePicker =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             pendingImageUri = uri
+
+            // 🖼️ Update the preview in the dialog when user picks an image
+            uri?.let { pickedUri ->
+                dialogImagePreview?.let { preview ->
+                    try {
+                        contentResolver.openInputStream(pickedUri)?.use { stream ->
+                            val bitmap = BitmapFactory.decodeStream(stream)
+                            if (bitmap != null) {
+                                preview.setImageBitmap(bitmap)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // If preview fails, keep the default image
+                    }
+                }
+            }
         }
 
 
@@ -78,6 +100,25 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
     }
 
     private fun showAddSpeciesDialog() {
+
+        // 🖼️ Image preview — starts with the default fish image
+        val imgPreview = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                200,   // width in pixels (adjust as needed)
+                200    // height in pixels
+            ).apply {
+                gravity = android.view.Gravity.CENTER_HORIZONTAL
+                topMargin = 16
+                bottomMargin = 16
+            }
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setImageResource(R.drawable.fish_default)
+            contentDescription = "Species image preview"
+        }
+
+        // Save reference so the imagePicker callback can update it
+        dialogImagePreview = imgPreview
+
         val input = EditText(this).apply {
             hint = "Enter species name"
         }
@@ -92,8 +133,9 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 32, 32, 32)
-            addView(input)
-            addView(btnSelectImage)
+            addView(imgPreview)        // 🖼️ Image preview at the top
+            addView(btnSelectImage)    // Select Image button below image
+            addView(input)             // Species name field at the bottom
         }
 
         AlertDialog.Builder(this)
@@ -114,6 +156,7 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
                         SharedPreferencesManager.canonicalizeSpeciesName(it) == canonicalInput
                     }) {
                     pendingImageUri = null
+                    dialogImagePreview = null
                     return@setPositiveButton
                 }
 
@@ -163,6 +206,7 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
 
                 // 6️⃣ Clear picker state
                 pendingImageUri = null
+                dialogImagePreview = null
 
                 // 7️⃣ Refresh list
                 adapter.updateList(
@@ -171,8 +215,12 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel") { _, _ ->
                 pendingImageUri = null
+                dialogImagePreview = null
             }
-
+            .setOnDismissListener {
+                // 🧹 Safety cleanup if dialog is dismissed any other way
+                dialogImagePreview = null
+            }
             .show()
     }
 
@@ -183,7 +231,7 @@ class SpeciesOrganizeActivity : AppCompatActivity() {
             .setMessage("Delete \"$speciesName\"?\nThis will not remove past catches.")
             .setPositiveButton("Delete") { _, _ ->
                 SharedPreferencesManager.removeSpecies(this, speciesName)
-            // 🗑️ Remove initials mapping as well
+                // 🗑️ Remove initials mapping as well
                 val normalized =
                     SharedPreferencesManager.normalizeSpeciesName(speciesName)
 
