@@ -276,7 +276,7 @@ class FunDayVoiceHandler(
         inQuestionMode = true
         questionRetryCount = 0
         uiHelper.speak(
-            "Question mode activated. Ask largest, smallest, total weight, total length, how many, or average. Over and out.",
+            "Question mode activated. Ask largest, smallest, total weight, total length, how many, average, or what time is it. Over and out.",
             "TTS_QUESTION_INTRO"
         )
 
@@ -297,6 +297,14 @@ class FunDayVoiceHandler(
         if (question.contains("cancel", ignoreCase = true)) {
             uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_CANCEL")
             endSession("cancel from question mode")
+            return
+        }
+
+        // ── "What time is it" — no catch data needed ──
+        if (question.contains("time", true) && (question.contains("is it", true) || question.contains("now", true))) {
+            val currentTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date())
+            uiHelper.speak("The current time is $currentTime. $overOut", "TTS_ANSWER")
+            endSession("answered what time question")
             return
         }
 
@@ -467,7 +475,7 @@ class FunDayVoiceHandler(
                     endSession("too many question retries")
                 } else {
                     uiHelper.speak(
-                        "Sorry, I didn't catch that. Say largest, smallest, total weight, total length, how many, or average. $overOut",
+                        "Sorry, I didn't catch that. Say largest, smallest, total weight, total length, how many, average, or what time is it. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({ handleQuestionMode() }, 1500)

@@ -313,7 +313,7 @@ class TournamentVoiceHandler(
         inQuestionMode = true
         Log.d(TAG, "Question mode activated")
         uiHelper.speak(
-            "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, or time since last catch, Over.",
+            "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, time since last catch, or what time is it, Over.",
             "TTS_QUESTION_INTRO"
         )
         (context as? VoiceControlService)?.startVoiceSession(
@@ -336,6 +336,14 @@ class TournamentVoiceHandler(
         if (question.contains("cancel", ignoreCase = true)) {
             uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_CANCEL")
             endSession("cancel from question mode")
+            return
+        }
+
+        // ── "What time is it" — no catch data needed ──
+        if (question.contains("time", true) && (question.contains("is it", true) || question.contains("now", true))) {
+            val currentTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date())
+            uiHelper.speak("The current time is $currentTime. $overOut", "TTS_ANSWER")
+            endSession("answered what time question")
             return
         }
 
@@ -570,7 +578,7 @@ class TournamentVoiceHandler(
                     endSession("too many question retries")
                 } else {
                     uiHelper.speak(
-                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, or time since last catch. $overOut",
+                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, time since last catch, or what time is it. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({
