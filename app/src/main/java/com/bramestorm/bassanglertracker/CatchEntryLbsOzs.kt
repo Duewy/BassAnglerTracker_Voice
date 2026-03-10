@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -21,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.bramestorm.bassanglertracker.base.BaseCatchEntryActivity
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
 import com.bramestorm.bassanglertracker.training.VoiceInteractionHelper
+import com.bramestorm.bassanglertracker.utils.GpsUtils
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager.normalizeSpeciesName
 import com.bramestorm.bassanglertracker.utils.getMotivationalMessage
@@ -129,6 +131,9 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             true
         }
 
+        updateVccLabel()
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+
         val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
 
         if (!BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS || adView == null) {
@@ -159,6 +164,26 @@ class CatchEntryLbsOzs : BaseCatchEntryActivity() {
             unregisterReceiver(voiceCatchReceiver)
         }
         super.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateVccLabel()
+        GpsUtils.updateGpsStatusLabel(findViewById(R.id.txtGPSNotice), this)
+    }
+
+    // ── Add the updateVccLabel() function: ──
+    private fun updateVccLabel() {
+        val txtVCC = findViewById<TextView>(R.id.txtVCCFunDay)
+        if (voiceControlEnabled) {
+            txtVCC.text = getString(R.string.vcc_on)
+            txtVCC.setBackgroundColor(ContextCompat.getColor(this, R.color.clip_yellow))
+            txtVCC.setTextColor(ContextCompat.getColor(this, R.color.clip_orange))
+        } else {
+            txtVCC.text = getString(R.string.manual_mode)
+            txtVCC.setTextColor(ContextCompat.getColor(this, R.color.clip_blue))
+            txtVCC.background = null
+        }
     }
 
     private val voiceCatchReceiver = object : android.content.BroadcastReceiver() {

@@ -17,7 +17,7 @@ object GpsUtils {
         textView.setTextColor(
             ContextCompat.getColor(
                 context,
-                if (isEnabled) R.color.clip_blue else R.color.clip_red
+                if (isEnabled) R.color.clip_red else R.color.black
             )
         )
     }

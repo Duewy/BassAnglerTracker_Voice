@@ -246,7 +246,6 @@ class TournamentVoiceHandler(
             dbItem,
             measurementMode
         )
-            // only speak the full summary when this is your last or penultimate call
         val pos = stats.thisCatchPosition
         val limit = tournamentCatchLimit
         if (pos == limit || pos == limit - 1) {
@@ -254,9 +253,52 @@ class TournamentVoiceHandler(
             uiHelper.speak(summary, "TTS_FEEDBACK")
         }
 
-        uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+        // ── Culling notification OR simple Catch Saved confirmation ──
+        val todaysCullingDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val allTodaysCatches = dbHelper.getCatchesForToday(typeEntry, todaysCullingDate)
+        val sortedAll =
+            allTodaysCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
+
+        if (sortedAll.size > tournamentCatchLimit) {
+            val fishToCull = sortedAll[tournamentCatchLimit]
+            val cullMeasurement = when (measurementMode) {
+                MeasurementMode.LBS_OZ -> {
+                    val oz = fishToCull.totalWeightOz ?: 0
+                    "${oz / 16} pounds and ${oz % 16} ounces"
+                }
+
+                MeasurementMode.POUNDS -> {
+                    val h = fishToCull.totalWeightHundredthPounds ?: 0
+                    "${h / 100} point ${h % 100} pounds"
+                }
+
+                MeasurementMode.KG -> {
+                    val h = fishToCull.totalWeightHundredthKg ?: 0
+                    "${h / 100} point ${h % 100} kilograms"
+                }
+
+                MeasurementMode.INCHES -> {
+                    val q = fishToCull.totalLengthQuarters ?: 0
+                    "${q / 4} inches and ${q % 4} quarters"
+                }
+
+                MeasurementMode.CM -> {
+                    val t = fishToCull.totalLengthTenths ?: 0
+                    "${t / 10} point ${t % 10} centimeters"
+                }
+            }
+            uiHelper.speak(
+                "Catch is saved. You need to cull the ${fishToCull.species} on the ${fishToCull.clipColor} that is $cullMeasurement. Over and Out.",
+                "TTS_CULL"
+            )
+        } else {
+            uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+        }
+
         endSession("catch successfully saved")
     }
+    //=== END === Catch Saved ======
+
 
     override fun shutdown() {
         // Add cleanup logic if needed in the future

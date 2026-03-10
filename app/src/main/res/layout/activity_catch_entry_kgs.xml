@@ -22,6 +22,7 @@
         app:layout_constraintVertical_bias="0.50"
         app:srcCompat="@drawable/bass_jumping_boater_no_backing"
         android:contentDescription="@string/bass_fighting"/>
+
     <!-- Flavor Label -->
     <ImageView
         android:id="@+id/imgWordmark"
@@ -36,6 +37,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/wordmark" />
+
+
+    <!-- GPS Status Label -->
+    <TextView
+        android:id="@+id/txtGPSNotice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="GPS"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogKgs"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- VCC Status Label -->
+
+    <TextView
+        android:id="@+id/txtVCCFunDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="VC"
+        android:textAllCaps="true"
+        android:textColor="@color/clip_red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/txtTodaysLogKgs"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Page Label -->
     <TextView

@@ -9,10 +9,7 @@ object VoiceCommandList {
         //🎣 Core Catch Commands
         PracticePhrase("Add a catch", false),
         PracticePhrase("Save the catch", false),
-        PracticePhrase("Record catch", false),
-        PracticePhrase("Log catch", false),
-        PracticePhrase("Delete last catch", false),
-        PracticePhrase("Edit last catch", false),
+
 
         //🧠 Question Mode Triggers
         PracticePhrase("Question", false),
@@ -27,8 +24,6 @@ object VoiceCommandList {
         PracticePhrase("Smallest fish on the list", false),
         PracticePhrase("Largest fish on the list", false),
         PracticePhrase("Time since last catch", false),
-        PracticePhrase("Time remaining", false),
-        PracticePhrase("What is my position", false),
 
         //🐟 Species Examples (should match testable voice input)
         PracticePhrase("Largemouth", false),
