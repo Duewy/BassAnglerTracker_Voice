@@ -203,4 +203,10 @@ dependencies {
     // 📝 Google Ad Services
     implementation(libs.play.services.ads)
     implementation(libs.protolite.well.known.types)
+
+    // 🪧 Google Update Service
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
+
+    // 💸💳🪙 Google Billing
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
 }

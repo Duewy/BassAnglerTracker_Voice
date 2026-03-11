@@ -10,7 +10,8 @@ import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.positionedToast
 import com.bramestorm.bassanglertracker.voice.VoiceSetupActivity
-
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.UpdateAvailability
 import java.util.Date
 import java.util.Locale
 
@@ -26,6 +27,16 @@ class MainActivity : AppCompatActivity() {
 
         // Check if this is the First time the Catch and Call app has opened
         checkFirstLaunch()
+
+        // 🔍 Check for UPDATES from Google Play
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { updateInfo ->
+            if (updateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                //TODO  Option 1: Flexible update — shows a banner, user can update later
+                //TODO  Option 2: Immediate update — forces update before they can use the app
+                positionedToast("A new version of Catch and Call is available! Please update.")
+            }
+        }
 
         // ✅ Initialize AdMob once (daily popup uses popup_advertisement AdView)
         if (BuildConfig.FEATURE_DAILY_AD) {
