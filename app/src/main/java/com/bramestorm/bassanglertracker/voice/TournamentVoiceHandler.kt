@@ -339,7 +339,7 @@ class TournamentVoiceHandler(
             return
         }
 
-        // ── "What time is it" — no catch data needed ──
+        // ── "What time is it 🕐" — no catch data needed ──
         if (question.contains("time", true) && (question.contains("is it", true) || question.contains("now", true))) {
             val currentTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date())
             uiHelper.speak("The current time is $currentTime. $overOut", "TTS_ANSWER")

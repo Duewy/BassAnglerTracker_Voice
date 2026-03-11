@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/secondary_variant"
-    android:fillViewport="true" >
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,7 +69,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight=".4"
                 android:background="@drawable/btn_outline_green"
-                android:text="How to PFD"
+                android:text="@string/how_to_pdf"
                 android:textAllCaps="true"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -90,9 +90,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
+            android:orientation="horizontal"
             android:padding="4dp">
 
             <TextView
@@ -100,18 +100,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/default_assistant_text"
-                android:textSize="14sp"
                 android:textColor="@color/black"
-                android:textStyle="bold"/>
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <ImageView
                 android:id="@+id/infoAssist"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginStart="10dp"
-                android:src="@drawable/icon_info"
                 android:contentDescription="@string/info_assist_desc"
-                android:padding="4dp" />
+                android:padding="4dp"
+                android:src="@drawable/icon_info" />
 
         </LinearLayout>
 
@@ -148,11 +148,11 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="2dp"
             android:layout_marginTop="10dp"
+            android:background="@drawable/btn_outline_orange"
             android:text="@string/open_assistant_settings"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_outline_orange"/>
+            android:textStyle="bold" />
 
 
         <View
@@ -166,9 +166,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
+            android:orientation="horizontal"
             android:padding="4dp">
 
             <TextView
@@ -188,9 +188,9 @@
                 android:id="@+id/infoVoiceRecognizer"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/icon_info"
                 android:contentDescription="@string/info_assist_desc"
-                android:padding="4dp" />
+                android:padding="4dp"
+                android:src="@drawable/icon_info" />
 
         </LinearLayout>
 
@@ -224,11 +224,11 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="2dp"
             android:layout_marginTop="10dp"
+            android:background="@drawable/btn_outline_dk_yellow"
             android:text="@string/open_voice_input_settings"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_outline_dk_yellow"/>
+            android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
@@ -241,9 +241,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
+            android:orientation="horizontal"
             android:padding="4dp">
 
             <TextView
@@ -263,9 +263,9 @@
                 android:id="@+id/infoManufacturesRecognizer"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/icon_info"
                 android:contentDescription="@string/info_assist_desc"
-                android:padding="4dp" />
+                android:padding="4dp"
+                android:src="@drawable/icon_info" />
 
         </LinearLayout>
 
@@ -288,19 +288,19 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="2dp"
             android:layout_marginTop="10dp"
+            android:background="@drawable/btn_outline_gold"
             android:text="@string/open_manufacture_s_voice_recognizer"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_outline_gold"/>
+            android:textStyle="bold" />
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center"
+            android:orientation="horizontal"
             android:padding="4dp">
 
             <TextView
@@ -318,9 +318,9 @@
                 android:id="@+id/infoBixbySettings"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/icon_info"
                 android:contentDescription="@string/info_assist_desc"
-                android:padding="4dp" />
+                android:padding="4dp"
+                android:src="@drawable/icon_info" />
 
         </LinearLayout>
 

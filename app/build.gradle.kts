@@ -87,6 +87,8 @@ android {
     }
     // --- END ADD ---
 
+                //TODO: release APK currently uses the Google test AdMob ID, which means ads won't generate revenue.
+                     //  Same story for MAPS_API_KEY — your fallback is a real-looking key, so verify it's not restricted to debug SHA-1 only
 
     buildTypes {
         debug {

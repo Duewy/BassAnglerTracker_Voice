@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.content.Context
@@ -41,8 +40,9 @@ class VoiceSetupActivity : AppCompatActivity() {
                 context, Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED
 
-            Log.e("VCC_PERMISSION", "🚫 RECORD_AUDIO permission not granted!")
-            // request permission or show explanation
+            if (!hasMicPermission) {
+                Log.e("VCC_PERMISSION", "🚫 RECORD_AUDIO permission not granted!")
+            }
 
             val sttIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             val sttResolved = sttIntent.resolveActivity(context.packageManager) != null
@@ -52,14 +52,17 @@ class VoiceSetupActivity : AppCompatActivity() {
 
             return hasMicPermission && sttResolved && ttsInstalled
         }
+
     }
 
     private lateinit var btnMainVSU : Button
     private lateinit var btnPDF : Button
     private lateinit var txtDefaultAssist: TextView
     private lateinit var txtDefaultRecognizer: TextView
+    private lateinit var txtDefaultBixby: TextView          // the Bixby status text
     private lateinit var btnAssistantSettings: Button
     private lateinit var btnVoiceInputSettings: Button
+    private lateinit var btnBixbySettings: Button           // the Bixby settings button
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,8 +77,11 @@ class VoiceSetupActivity : AppCompatActivity() {
         // Bind UI
         txtDefaultAssist      = findViewById(R.id.txtDefaultAssist)
         txtDefaultRecognizer  = findViewById(R.id.txtDefaultRecognizer)
+        txtDefaultBixby       = findViewById(R.id.txtDefaultBixby)
         btnAssistantSettings  = findViewById(R.id.btnAssistantSettings)
         btnVoiceInputSettings = findViewById(R.id.btnVoiceInputSettings)
+        btnBixbySettings      = findViewById(R.id.btnBixbySettings)
+
 
 // Only ProVC needs the full Bluetooth/hands-free setup flow
         val isProVc = BuildConfig.FEATURE_VOICE_COMMANDS
@@ -176,6 +182,15 @@ class VoiceSetupActivity : AppCompatActivity() {
         btnVoiceInputSettings.setOnClickListener {
             openAppInfo(getDefaultVoiceRecognizerPackage())
         }
+        // NEW — opens Bixby/manufacturer voice service App Info so user can force-stop it
+        btnBixbySettings.setOnClickListener {
+            val bixbyPkg = getManufacturerVoicePkg()
+            if (bixbyPkg != null) {
+                openAppInfo(bixbyPkg)
+            } else {
+                positionedToast("No manufacturer voice service found on this device.")
+            }
+        }
     }
 
 
@@ -206,12 +221,49 @@ class VoiceSetupActivity : AppCompatActivity() {
             alpha     = if (isEnabled) 1f else 0.5f
         }
 
+
+        // Manufacturer voice service check (Bixby, etc.)
+        val bixbyPkg = getManufacturerVoicePkg()
+        if (bixbyPkg != null) {
+            txtDefaultBixby.text = "⚠️ Found: ${getAppLabel(bixbyPkg)}"
+            btnBixbySettings.apply {
+                isEnabled = true
+                alpha     = 1f
+            }
+        } else {
+            txtDefaultBixby.text = "✓ No manufacturer voice service found"
+            btnBixbySettings.apply {
+                isEnabled = false
+                alpha     = 0.5f
+            }
+        }
+
         // If both checks pass, close with success
         if (assistOk && recogOk) {
             positionedToast("👍 Voice setup OK")
             setResult(Activity.RESULT_OK)
             finish()
         }
+    }
+
+    // — checks if a known manufacturer voice service (Bixby, etc.) is installed
+    private fun getManufacturerVoicePkg(): String? {
+        val knownManufacturerPkgs = listOf(
+            "com.samsung.android.bixby.agent",         // Bixby main agent
+            "com.samsung.android.visionintelligence",   // Bixby Vision
+            "com.samsung.android.bixby.service",        // Bixby background service
+            "com.samsung.android.svoiceime",            // Samsung S-Voice (older)
+            "com.samsung.android.svoice"                // Samsung S-Voice legacy
+        )
+        for (pkg in knownManufacturerPkgs) {
+            try {
+                packageManager.getApplicationInfo(pkg, 0)
+                return pkg  // found it — it's installed
+            } catch (_: PackageManager.NameNotFoundException) {
+                // not installed, try next
+            }
+        }
+        return null  // none found
     }
 
     private fun openAppInfo(pkg: String?) {

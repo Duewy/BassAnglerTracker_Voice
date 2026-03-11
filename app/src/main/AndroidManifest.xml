@@ -39,7 +39,7 @@
 
     <!-- Required when using foregroundServiceType="microphone" -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-feature android:name="android.hardware.microphone" android:required="true"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
 
     <!-- Required when using foregroundServiceType="mediaPlayback" -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
