@@ -288,14 +288,14 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         showLengthPopup()
     }
 
-    //------------- ON DESTROY ---------------------
+    //------------- ON DESTROY --------------------
     override fun onDestroy() {
-        super.onDestroy()
         tts.stop()
         tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
         unregisterReceiver(voiceCatchReceiver)
+        super.onDestroy()
     }
 
 

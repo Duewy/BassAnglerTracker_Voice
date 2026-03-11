@@ -92,7 +92,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
     private lateinit var dbHelper: CatchDatabaseHelper
 
     // Voice Helper
-    private var tts: TextToSpeech? = null
+    private lateinit var tts: TextToSpeech
     private var toastTts: TextToSpeech? = null
     private var voiceControlEnabled = false
     private lateinit var voiceHelper: VoiceInteractionHelper
@@ -148,38 +148,38 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
             insets
         }
 
-                // 1️⃣ Read the VCC flag first
-                voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
-                Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
+            // 1️⃣ Read the VCC flag first
+            voiceControlEnabled = intent.getBooleanExtra("VCC_ENABLED", false)
+            Log.d("VCC_FLOW", "Voice control enabled: $voiceControlEnabled")
 
-                // 2️⃣ Launch your VoiceControlService *only* if VCC is on
-                if (voiceControlEnabled) {
-                                ContextCompat.startForegroundService(
-                                this,
-                                Intent(this, VoiceControlService::class.java)
-                                    )
-                    ContextCompat.registerReceiver(
-                        this,
-                        voiceCatchReceiver,
-                        IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"),
-                        ContextCompat.RECEIVER_NOT_EXPORTED
-                    )
+            // 2️⃣ Launch your VoiceControlService *only* if VCC is on
+            if (voiceControlEnabled) {
+                            ContextCompat.startForegroundService(
+                            this,
+                            Intent(this, VoiceControlService::class.java)
+                                )
+                ContextCompat.registerReceiver(
+                    this,
+                    voiceCatchReceiver,
+                    IntentFilter("com.bramestorm.VOICE_CATCH_SAVED"),
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
 
-                        // 3️⃣ And only then wire up your helper
-                        voiceHelper = VoiceInteractionHelper(
-                                activity        = this,
-                                measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
-                                isTournament    = true,
-                                onCommandAction = { transcript -> onSpeechResult(transcript) }
-                                    )
+                    // 3️⃣ And only then wire up your helper
+                    voiceHelper = VoiceInteractionHelper(
+                            activity        = this,
+                            measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
+                            isTournament    = true,
+                            onCommandAction = { transcript -> onSpeechResult(transcript) }
+                                )
 
-                    tts = TextToSpeech(this) { status ->
-                        if (status == TextToSpeech.SUCCESS) {
-                            tts?.language = Locale.getDefault()
-                        }
-                }
+                tts = TextToSpeech(this) { status ->
+                    if (status == TextToSpeech.SUCCESS) {
+                        tts?.language = Locale.getDefault()
+                    }
+            }
 
-                }
+        }
 
         dbHelper = CatchDatabaseHelper(this)
         btnTournamentCatch = findViewById(R.id.btnStartFishing)
@@ -279,14 +279,14 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
         showWeightPopup()
     }
 
-    //------------- ON DESTROY ----------------------
+    //------------- ON DESTROY --------------------
     override fun onDestroy() {
-        super.onDestroy()
-        tts?.stop()
-        tts?.shutdown()
+        tts.stop()
+        tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
         unregisterReceiver(voiceCatchReceiver)
+        super.onDestroy()
     }
 
 

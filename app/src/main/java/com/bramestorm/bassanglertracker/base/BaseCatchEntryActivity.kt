@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bramestorm.bassanglertracker.BuildConfig
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import com.bramestorm.bassanglertracker.voice.VoiceControlService
@@ -118,7 +119,7 @@ abstract class BaseCatchEntryActivity : AppCompatActivity() {
         // Only initialize the OLD SpeechRecognizer if VCC is DISABLED
         // When VCC is enabled, VoiceInteractionManager handles all STT
         val vccEnabled = SharedPreferencesManager.isVccEnabled(this)
-        if (!vccEnabled) {
+        if (!vccEnabled && BuildConfig.FEATURE_VOICE_COMMANDS) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED
             ) {
