@@ -1,3 +1,4 @@
+import java.util.Properties
 // ---------------------------------------------
 // 🧩 Plugin Configuration
 // ---------------------------------------------
@@ -87,6 +88,23 @@ android {
     }
     // --- END ADD ---
 
+    // --- SIGNING CONFIG ---
+    val localProps = Properties()
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) {
+        localProps.load(localPropsFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProps.getProperty("RELEASE_STORE_FILE", ""))
+            storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD", "")
+            keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS", "")
+            keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD", "")
+        }
+    }
+    // --- END SIGNING CONFIG ---
+
                 //TODO: release APK currently uses the Google test AdMob ID, which means ads won't generate revenue.
                      //  Same story for MAPS_API_KEY — your fallback is a real-looking key, so verify it's not restricted to debug SHA-1 only
 
@@ -95,6 +113,7 @@ android {
             manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -104,6 +123,7 @@ android {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
         }
+
     }
 
     compileOptions {
