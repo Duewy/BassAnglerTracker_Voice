@@ -449,7 +449,8 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            val loopLimit = minOf(sortedCatches.size, 6)
+            val loopLimit = minOf(sortedCatches.size, tournamentCatchLimit + 1, 6)
+
             for (i in 0 until loopLimit) {
                 if (i >= realWeightKgs.size) continue
 
@@ -614,31 +615,50 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     private fun adjustTextViewVisibility() {
         when (tournamentCatchLimit) {
             4 -> {
+                // Row 5 = culling candidate (dimmed)
                 fifthRealWeightKgs.alpha = 0.3f
                 fifthDecWeightKgs.alpha = 0.3f
                 fifthRealWeightKgs.isEnabled = false
                 fifthDecWeightKgs.isEnabled = false
+                txtTypeLetter5.alpha = 0.3f
+                txtKgsColorLetter5.alpha = 0.3f
+
+                // Row 6 = not visible at all
                 sixthRealWeightKgs.visibility = View.INVISIBLE
                 sixthDecWeightKgs.visibility = View.INVISIBLE
+                txtTypeLetter6.visibility = View.INVISIBLE
+                txtKgsColorLetter6.visibility = View.INVISIBLE
             }
             5 -> {
+                // Row 6 = culling candidate (dimmed)
                 sixthRealWeightKgs.alpha = 0.3f
                 sixthDecWeightKgs.alpha = 0.3f
                 sixthRealWeightKgs.isEnabled = false
                 sixthDecWeightKgs.isEnabled = false
-                txtTypeLetter6.isEnabled = false
+                txtTypeLetter6.alpha = 0.3f
+                txtKgsColorLetter6.alpha = 0.3f
             }
             else -> {
+                // Limit = 6, all rows fully visible
                 fifthRealWeightKgs.alpha = 1.0f
                 fifthDecWeightKgs.alpha = 1.0f
                 fifthRealWeightKgs.isEnabled = true
                 fifthDecWeightKgs.isEnabled = true
+                txtTypeLetter5.alpha = 1.0f
+                txtKgsColorLetter5.alpha = 1.0f
+                txtTypeLetter5.visibility = View.VISIBLE
+                txtKgsColorLetter5.visibility = View.VISIBLE
+
                 sixthRealWeightKgs.visibility = View.VISIBLE
                 sixthDecWeightKgs.visibility = View.VISIBLE
                 sixthRealWeightKgs.alpha = 1.0f
                 sixthDecWeightKgs.alpha = 1.0f
                 sixthRealWeightKgs.isEnabled = true
                 sixthDecWeightKgs.isEnabled = true
+                txtTypeLetter6.alpha = 1.0f
+                txtKgsColorLetter6.alpha = 1.0f
+                txtTypeLetter6.visibility = View.VISIBLE
+                txtKgsColorLetter6.visibility = View.VISIBLE
             }
         }
     } //---------------- END Adjust the Text View Visibility ----------------

@@ -449,7 +449,8 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            val loopLimit = minOf(sortedCatches.size, 6)
+            val loopLimit = minOf(sortedCatches.size, tournamentCatchLimit + 1, 6)
+
             for (i in 0 until loopLimit) {
                 if (i >= realWeightPounds.size) continue
 
@@ -614,31 +615,50 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
     private fun adjustTextViewVisibility() {
         when (tournamentCatchLimit) {
             4 -> {
+                // Row 5 = culling candidate (dimmed)
                 fifthRealWeightPounds.alpha = 0.3f
                 fifthDecWeightPounds.alpha = 0.3f
                 fifthRealWeightPounds.isEnabled = false
                 fifthDecWeightPounds.isEnabled = false
+                txtTypeLetter5.alpha = 0.3f
+                txtPoundsColorLetter5.alpha = 0.3f
+
+                // Row 6 = not visible at all
                 sixthRealWeightPounds.visibility = View.INVISIBLE
                 sixthDecWeightPounds.visibility = View.INVISIBLE
+                txtTypeLetter6.visibility = View.INVISIBLE
+                txtPoundsColorLetter6.visibility = View.INVISIBLE
             }
             5 -> {
+                // Row 6 = culling candidate (dimmed)
                 sixthRealWeightPounds.alpha = 0.3f
                 sixthDecWeightPounds.alpha = 0.3f
                 sixthRealWeightPounds.isEnabled = false
                 sixthDecWeightPounds.isEnabled = false
-                txtTypeLetter6.isEnabled = false
+                txtTypeLetter6.alpha = 0.3f
+                txtPoundsColorLetter6.alpha = 0.3f
             }
             else -> {
+                // Limit = 6, all rows fully visible
                 fifthRealWeightPounds.alpha = 1.0f
                 fifthDecWeightPounds.alpha = 1.0f
                 fifthRealWeightPounds.isEnabled = true
                 fifthDecWeightPounds.isEnabled = true
+                txtTypeLetter5.alpha = 1.0f
+                txtPoundsColorLetter5.alpha = 1.0f
+                txtTypeLetter5.visibility = View.VISIBLE
+                txtPoundsColorLetter5.visibility = View.VISIBLE
+
                 sixthRealWeightPounds.visibility = View.VISIBLE
                 sixthDecWeightPounds.visibility = View.VISIBLE
                 sixthRealWeightPounds.alpha = 1.0f
                 sixthDecWeightPounds.alpha = 1.0f
                 sixthRealWeightPounds.isEnabled = true
                 sixthDecWeightPounds.isEnabled = true
+                txtTypeLetter6.alpha = 1.0f
+                txtPoundsColorLetter6.alpha = 1.0f
+                txtTypeLetter6.visibility = View.VISIBLE
+                txtPoundsColorLetter6.visibility = View.VISIBLE
             }
         }
     } //---------------- END Adjust the Text View Visibility ----------------

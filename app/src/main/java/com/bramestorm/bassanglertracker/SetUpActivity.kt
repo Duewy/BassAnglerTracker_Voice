@@ -692,7 +692,7 @@ class SetUpActivity : AppCompatActivity() {
                     if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                         Log.d(TAG, "✅ Phone State permission granted")
                     } else {
-                        positionedToast("🚫 Phone permission denied.")
+                       // positionedToast("🚫 Phone permission denied.")
                     }
                 }
             }

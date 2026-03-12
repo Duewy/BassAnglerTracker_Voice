@@ -454,7 +454,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         clearTournamentTextViews()
 
         runOnUiThread {
-            val loopLimit = minOf(sortedCatches.size, 6) // up to 6 total slots
+            val loopLimit = minOf(sortedCatches.size, tournamentCatchLimit + 1, 6)
 
             for (i in 0 until loopLimit) {
                 if (i >= realLengthCms.size) continue
@@ -621,34 +621,54 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     private fun adjustTextViewVisibility() {
         when (tournamentCatchLimit) {
             4 -> {
+                // Row 5 = culling candidate (dimmed)
                 fifthRealLengthCms.alpha = 0.3f
                 fifthDecLengthCms.alpha = 0.3f
                 fifthRealLengthCms.isEnabled = false
                 fifthDecLengthCms.isEnabled = false
+                txtTypeLetter5.alpha = 0.3f
+                txtColorLetter5.alpha = 0.3f
+
+                // Row 6 = not visible at all
                 sixthRealLengthCms.visibility = View.INVISIBLE
                 sixthDecLengthCms.visibility = View.INVISIBLE
+                txtTypeLetter6.visibility = View.INVISIBLE
+                txtColorLetter6.visibility = View.INVISIBLE
             }
             5 -> {
+                // Row 6 = culling candidate (dimmed)
                 sixthRealLengthCms.alpha = 0.3f
                 sixthDecLengthCms.alpha = 0.3f
                 sixthRealLengthCms.isEnabled = false
                 sixthDecLengthCms.isEnabled = false
-                txtTypeLetter6.isEnabled = false
+                txtTypeLetter6.alpha = 0.3f
+                txtColorLetter6.alpha = 0.3f
             }
             else -> {
+                // Limit = 6, all rows fully visible
                 fifthRealLengthCms.alpha = 1.0f
                 fifthDecLengthCms.alpha = 1.0f
                 fifthRealLengthCms.isEnabled = true
                 fifthDecLengthCms.isEnabled = true
+                txtTypeLetter5.alpha = 1.0f
+                txtColorLetter5.alpha = 1.0f
+                txtTypeLetter5.visibility = View.VISIBLE
+                txtColorLetter5.visibility = View.VISIBLE
+
                 sixthRealLengthCms.visibility = View.VISIBLE
                 sixthDecLengthCms.visibility = View.VISIBLE
                 sixthRealLengthCms.alpha = 1.0f
                 sixthDecLengthCms.alpha = 1.0f
                 sixthRealLengthCms.isEnabled = true
                 sixthDecLengthCms.isEnabled = true
+                txtTypeLetter6.alpha = 1.0f
+                txtColorLetter6.alpha = 1.0f
+                txtTypeLetter6.visibility = View.VISIBLE
+                txtColorLetter6.visibility = View.VISIBLE
             }
         }
-    }
+    } //---------------- END Adjust the Text View Visibility ----------------
+
 
     //******************* FOR 🥸 User 📝 EDIT Logged Weights ********************************
 

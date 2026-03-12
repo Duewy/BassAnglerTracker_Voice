@@ -455,7 +455,7 @@ override val dialog: Any
         clearTournamentTextViews()
 
         runOnUiThread {
-            val loopLimit = minOf(sortedCatches.size, 6)
+            val loopLimit = minOf(sortedCatches.size, tournamentCatchLimit + 1, 6)
 
             for (i in 0 until loopLimit) {
                 if (i >= realLengthInches.size) continue
@@ -620,31 +620,50 @@ override val dialog: Any
     private fun adjustTextViewVisibility() {
         when (tournamentCatchLimit) {
             4 -> {
+                // Row 5 = culling candidate (dimmed)
                 fifthRealLengthInches.alpha = 0.3f
                 fifthDecLengthInches.alpha = 0.3f
                 fifthRealLengthInches.isEnabled = false
                 fifthDecLengthInches.isEnabled = false
+                txtTypeLetterInches5.alpha = 0.3f
+                txtInchesColorLetter5.alpha = 0.3f
+
+                // Row 6 = not visible at all
                 sixthRealLengthInches.visibility = View.INVISIBLE
                 sixthDecLengthInches.visibility = View.INVISIBLE
+                txtTypeLetterInches6.visibility = View.INVISIBLE
+                txtInchesColorLetter6.visibility = View.INVISIBLE
             }
             5 -> {
+                // Row 6 = culling candidate (dimmed)
                 sixthRealLengthInches.alpha = 0.3f
                 sixthDecLengthInches.alpha = 0.3f
                 sixthRealLengthInches.isEnabled = false
                 sixthDecLengthInches.isEnabled = false
-                txtTypeLetterInches6.isEnabled = false
+                txtTypeLetterInches6.alpha = 0.3f
+                txtInchesColorLetter6.alpha = 0.3f
             }
             else -> {
+                // Limit = 6, all rows fully visible
                 fifthRealLengthInches.alpha = 1.0f
                 fifthDecLengthInches.alpha = 1.0f
                 fifthRealLengthInches.isEnabled = true
                 fifthDecLengthInches.isEnabled = true
+                txtTypeLetterInches5.alpha = 1.0f
+                txtInchesColorLetter5.alpha = 1.0f
+                txtTypeLetterInches5.visibility = View.VISIBLE
+                txtInchesColorLetter5.visibility = View.VISIBLE
+
                 sixthRealLengthInches.visibility = View.VISIBLE
                 sixthDecLengthInches.visibility = View.VISIBLE
                 sixthRealLengthInches.alpha = 1.0f
                 sixthDecLengthInches.alpha = 1.0f
                 sixthRealLengthInches.isEnabled = true
                 sixthDecLengthInches.isEnabled = true
+                txtTypeLetterInches6.alpha = 1.0f
+                txtInchesColorLetter6.alpha = 1.0f
+                txtTypeLetterInches6.visibility = View.VISIBLE
+                txtInchesColorLetter6.visibility = View.VISIBLE
             }
         }
     } //---------------- END Adjust the Text View Visibility ----------------
