@@ -22,7 +22,7 @@ class IntroPage : AppCompatActivity() {
                 FirstTimeQuestionnaireActivity::class.java
             }
             startActivity(Intent(this, nextActivity))
-            finish() // closes the splash screen so it can't be returned to
-        }, 3000) // wait for 3 seconds then route to questionnaire or main page
+            finish()        // closes the splash screen so it can't be returned to
+        }, 3000)   // wait for 3 seconds then route to questionnaire or main page
     }
 }

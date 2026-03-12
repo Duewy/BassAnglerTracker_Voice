@@ -100,7 +100,7 @@ class VoiceInteractionManager(
             override fun onError(uttId: String?) {}
             override fun onDone(uttId: String?) {
                 when (uttId) {
-                    "TTS_PROMPT", "TTS_CONFIRM", "TTS_SAVED", "TTS_RETRY" -> {
+                    "TTS_PROMPT", "TTS_CONFIRM", "TTS_SAVED", "TTS_RETRY", "TTS_TIED_ASK" -> {
                         Log.d("VCC_TTS", "✅ TTS finished: $uttId — starting STT...")
                         handler.postDelayed({ startListening() }, 800)
                     }

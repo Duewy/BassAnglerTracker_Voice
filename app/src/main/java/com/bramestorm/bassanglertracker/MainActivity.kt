@@ -101,13 +101,16 @@ class MainActivity : AppCompatActivity() {
         if (hasTriedToShowDailyAdThisResume) return
         hasTriedToShowDailyAdThisResume = true
 
-        // ✅ Don’t show an interstitial immediately after questionnaire completion
+        // ✅ Don't show an interstitial immediately after questionnaire completion
         if (consumeSkipDailyAdFlag()) return
 
         if (shouldShowAdToday()) {
             val shown = DailyAdManager.showIfReady(this)
-            if (!shown) {
+            if (shown) {
+                markAdShownToday()       // ✅ Only mark AFTER ad actually displayed
+            } else {
                 DailyAdManager.preload(applicationContext)
+                // Date NOT written — will try again next onWindowFocusChanged
             }
         }
     }
@@ -153,13 +156,13 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
         val lastShownDate = prefs.getString("LAST_AD_DATE", "")
         val today = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        return lastShownDate != today
+    }
 
-        return if (lastShownDate != today) {
-            prefs.edit().putString("LAST_AD_DATE", today).apply()
-            true
-        } else {
-            false
-        }
+    private fun markAdShownToday() {
+        val prefs = getSharedPreferences("BassAnglerTrackerPrefs", MODE_PRIVATE)
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        prefs.edit().putString("LAST_AD_DATE", today).apply()
     }
 
 }// !!!!!!!!!!!!!!! END MainActivity !!!!!!!!!!!!!!!!!!!!!!!
