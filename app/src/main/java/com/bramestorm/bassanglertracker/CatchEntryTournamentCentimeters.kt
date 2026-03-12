@@ -294,7 +294,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
         tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
-        unregisterReceiver(voiceCatchReceiver)
+        if (voiceControlEnabled) { unregisterReceiver(voiceCatchReceiver) }
         super.onDestroy()
     }
 
@@ -762,13 +762,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
     ): List<String> {
 
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
-            .sortedByDescending {
-                it.totalWeightOz
-                    ?: it.totalWeightHundredthKg
-                    ?: it.totalLengthQuarters
-                    ?: it.totalLengthTenths
-                    ?: 0
-            }
+            .sortedByDescending { it.totalLengthTenths ?: 0 }
             .take(tournamentCatchLimit)
 
         val usedColors = allCatches

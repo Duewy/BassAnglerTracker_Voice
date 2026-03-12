@@ -286,7 +286,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
-        unregisterReceiver(voiceCatchReceiver)
+        if (voiceControlEnabled) { unregisterReceiver(voiceCatchReceiver) }
         super.onDestroy()
     }
 
@@ -373,9 +373,9 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
         totalRealWeightKgs.text = totalKgs.toString()
         totalDecWeightKgs.text = totalDec.toString().padStart(2, '0')
 
-        // !!!!!!!!!!!!!!!!!!!! MOTIVATIONAL TOASTS !!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
         val currentCount = dbHelper
-            .getCatchesForToday("kgs", getCurrentDate())
+            .getCatchesForToday("tournament_kgs", getCurrentDate())
             .sortedByDescending { it.totalWeightHundredthKg ?: 0 }
             .take(tournamentCatchLimit)
             .size
@@ -770,13 +770,7 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
     ): List<String> {
 
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
-            .sortedByDescending {
-                it.totalWeightOz
-                    ?: it.totalWeightHundredthKg
-                    ?: it.totalLengthQuarters
-                    ?: it.totalLengthTenths
-                    ?: 0
-            }
+            .sortedByDescending { it.totalWeightHundredthKg ?: 0 }
             .take(tournamentCatchLimit)
 
         val usedColors = allCatches

@@ -291,7 +291,7 @@ override val dialog: Any
         tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
         toastTts?.shutdown()
-        unregisterReceiver(voiceCatchReceiver)
+        if (voiceControlEnabled) { unregisterReceiver(voiceCatchReceiver) }
         super.onDestroy()
     }
 
@@ -379,7 +379,7 @@ override val dialog: Any
         // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
         // todo Set up Better Scenarios
         val currentCount = dbHelper
-            .getCatchesForToday("inches", getCurrentDate())
+            .getCatchesForToday("tournament_inches", getCurrentDate())
             .sortedByDescending { it.totalLengthQuarters ?: 0 }
             .take(tournamentCatchLimit)
             .size
@@ -775,13 +775,7 @@ override val dialog: Any
     ): List<String> {
 
         val allCatches = dbHelper.getCatchesForToday(catchType, date)
-            .sortedByDescending {
-                it.totalWeightOz
-                    ?: it.totalWeightHundredthKg
-                    ?: it.totalLengthQuarters
-                    ?: it.totalLengthTenths
-                    ?: 0
-            }
+            .sortedByDescending { it.totalLengthQuarters ?: 0 }
             .take(tournamentCatchLimit)
 
         val usedColors = allCatches

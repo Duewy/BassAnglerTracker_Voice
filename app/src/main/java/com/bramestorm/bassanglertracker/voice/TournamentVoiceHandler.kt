@@ -119,6 +119,7 @@ class TournamentVoiceHandler(
                     parseAndConfirm(response)
                 }
             }
+            return
         }
 
 
@@ -195,18 +196,10 @@ class TournamentVoiceHandler(
     }
 
 
-        /** Persists the parsed catch and provides feedback. */
+    /** Persists the parsed catch and provides feedback. */
     private fun saveCatch(parsed: VoiceParser.ParsedCatch) {
-        val typeEntry = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "tournament_lbs_ozs"
-            MeasurementMode.POUNDS -> "tournament_pounds"
-            MeasurementMode.KG -> "tournament_kgs"
-            MeasurementMode.INCHES -> "tournament_inches"
-            MeasurementMode.CM -> "tournament_cms"
-        }
 
         val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species)
-
         val markerType = SharedPreferencesManager.getSpeciesInitial(context, normalizedSpecies)
 
         val dbItem = CatchItem(
@@ -226,115 +219,113 @@ class TournamentVoiceHandler(
         )
         Log.d(TAG, "Checking the actual Species is: ${parsed.species}")
 
+        // ── 1. SAVE THE CATCH ──
         dbHelper.insertCatch(dbItem)
-        lastCatchItem = dbItem// remember this one for question mode
-
+        lastCatchItem = dbItem
         Log.d(TAG, "DB insert succeeded: $dbItem")
 
-        // Notify UI
-        Log.d(TAG, "Broadcasting catch saved event")
-
+        // ── 2. NOTIFY UI ──
         context.sendBroadcast(
             Intent("com.bramestorm.VOICE_CATCH_SAVED").apply {
                 setPackage(context.packageName)
             }
         )
 
-            // ── Gather STATS and today's catches AT ONCE ──
-            val stats = TournamentVoiceFeedback.analyzeTournamentStats(
-                dbHelper,
-                tournamentCatchLimit,
-                dbItem,
-                measurementMode
-            )
+        // ── 3. GATHER STATS (catch is now in the DB) ──
+        val todaysCullingDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val allTodaysCatches = dbHelper.getCatchesForToday(typeEntry, todaysCullingDate)
+        val sortedAll = allTodaysCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
+        val totalCatchCount = sortedAll.size
+        val limit = tournamentCatchLimit
 
-            val pos = stats.thisCatchPosition
-            val limit = tournamentCatchLimit
-            val todaysCullingDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            val allTodaysCatches = dbHelper.getCatchesForToday(typeEntry, todaysCullingDate)
-            val sortedAll = allTodaysCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
-            val willCull = sortedAll.size > tournamentCatchLimit
+        Log.d(TAG, "📊 Post-save: totalCatches=$totalCatchCount, limit=$limit")
 
-            // — ONE TTS call per path  ──  Culling / Tied / Too Small / Summary / Simple Save  ──
-            if (willCull) {
-                val fishToCull = sortedAll[tournamentCatchLimit]
-                val cullMeasurement = when (measurementMode) {
-                    MeasurementMode.LBS_OZ -> {
-                        val oz = fishToCull.totalWeightOz ?: 0
-                        "${oz / 16} pounds and ${oz % 16} ounces"
-                    }
+        // ── Helper: format a CatchItem's measurement for speech ──
+        fun formatMeasurement(fish: CatchItem): String = when (measurementMode) {
+            MeasurementMode.LBS_OZ -> {
+                val oz = fish.totalWeightOz ?: 0
+                "${oz / 16} pounds and ${oz % 16} ounces"
+            }
+            MeasurementMode.POUNDS -> {
+                val h = fish.totalWeightHundredthPounds ?: 0
+                "${h / 100} point ${h % 100} pounds"
+            }
+            MeasurementMode.KG -> {
+                val h = fish.totalWeightHundredthKg ?: 0
+                "${h / 100} point ${h % 100} kilograms"
+            }
+            MeasurementMode.INCHES -> {
+                val q = fish.totalLengthQuarters ?: 0
+                "${q / 4} inches and ${q % 4} quarters"
+            }
+            MeasurementMode.CM -> {
+                val t = fish.totalLengthTenths ?: 0
+                "${t / 10} point ${t % 10} centimeters"
+            }
+        }
 
-                    MeasurementMode.POUNDS -> {
-                        val h = fishToCull.totalWeightHundredthPounds ?: 0
-                        "${h / 100} point ${h % 100} pounds"
-                    }
+        // ── 4. DETERMINE SCENARIO AND RESPOND ──
 
-                    MeasurementMode.KG -> {
-                        val h = fishToCull.totalWeightHundredthKg ?: 0
-                        "${h / 100} point ${h % 100} kilograms"
-                    }
+        if (totalCatchCount <= limit) {
+            // ═══════════════════════════════════════════════════
+            // SCENARIO 1: List is NOT full yet (or just filled)
+            // ═══════════════════════════════════════════════════
 
-                    MeasurementMode.INCHES -> {
-                        val q = fishToCull.totalLengthQuarters ?: 0
-                        "${q / 4} inches and ${q % 4} quarters"
-                    }
+            if (totalCatchCount == limit) {
+                // ── Just filled the list — tell user the smallest to beat ──
+                val smallestOnList = sortedAll[limit - 1]
+                val smallestMeasurement = formatMeasurement(smallestOnList)
+                Log.d(TAG, "📋 List just filled. Smallest keeper: ${smallestOnList.species} at $smallestMeasurement")
 
-                    MeasurementMode.CM -> {
-                        val t = fishToCull.totalLengthTenths ?: 0
-                        "${t / 10} point ${t % 10} centimeters"
-                    }
-                }
+                uiHelper.speak(
+                    "Catch is saved. Your list is now full. " +
+                            "Your smallest on the list is the ${smallestOnList.species} " +
+                            "at $smallestMeasurement on the ${smallestOnList.clipColor} clip. " +
+                            "Over and Out.",
+                    "TTS_LIST_FULL"
+                )
+            } else {
+                // ──Catch is Under Culling limit, nothing special — Simple Confirmation ──
+                uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+            }
 
-                // ── Check if the fish being culled IS the one we just caught ──
-                val justCaughtIsTheCull = (fishToCull.clipColor == dbItem.clipColor
-                        && fishToCull.species == dbItem.species
-                        && fishToCull.dateTime == dbItem.dateTime)
+            endSession("catch successfully saved")
 
-                // ── Get the smallest keeper and check for a tie ──
-                val smallestKeeper = sortedAll[tournamentCatchLimit - 1]
+        } else {
+            // ═══════════════════════════════════════════════════
+            // SCENARIO 2, 3, 4: List overflowed — culling needed
+            // ═══════════════════════════════════════════════════
+
+            val fishToCull = sortedAll[limit]  // the one that fell off the list
+            val cullMeasurement = formatMeasurement(fishToCull)
+
+            val smallestKeeper = sortedAll[limit - 1]  // smallest fish still ON the list
+            val smallestKeeperMeasurement = formatMeasurement(smallestKeeper)
+
+            // ── Check if the fish being culled IS the one we just caught ──
+            val justCaughtIsTheCull = (fishToCull.clipColor == dbItem.clipColor
+                    && fishToCull.species == dbItem.species
+                    && fishToCull.dateTime == dbItem.dateTime)
+
+            val unitLabel = when (measurementMode) {
+                MeasurementMode.LBS_OZ, MeasurementMode.POUNDS, MeasurementMode.KG -> "weight"
+                MeasurementMode.INCHES, MeasurementMode.CM -> "length"
+            }
+
+            if (justCaughtIsTheCull) {
+                // ── The new catch IS the one being culled ──
+
                 val newCatchValue = dbItem.getComparisonValueByMode(measurementMode)
                 val smallestKeeperValue = smallestKeeper.getComparisonValueByMode(measurementMode)
                 val isTied = (newCatchValue == smallestKeeperValue)
 
-                val keeperMeasurement = when (measurementMode) {
-                    MeasurementMode.LBS_OZ -> {
-                        val oz = smallestKeeper.totalWeightOz ?: 0
-                        "${oz / 16} pounds and ${oz % 16} ounces"
-                    }
-
-                    MeasurementMode.POUNDS -> {
-                        val h = smallestKeeper.totalWeightHundredthPounds ?: 0
-                        "${h / 100} point ${h % 100} pounds"
-                    }
-
-                    MeasurementMode.KG -> {
-                        val h = smallestKeeper.totalWeightHundredthKg ?: 0
-                        "${h / 100} point ${h % 100} kilograms"
-                    }
-
-                    MeasurementMode.INCHES -> {
-                        val q = smallestKeeper.totalLengthQuarters ?: 0
-                        "${q / 4} inches and ${q % 4} quarters"
-                    }
-
-                    MeasurementMode.CM -> {
-                        val t = smallestKeeper.totalLengthTenths ?: 0
-                        "${t / 10} point ${t % 10} centimeters"
-                    }
-                }
-
-                val unitLabel = when (measurementMode) {
-                    MeasurementMode.LBS_OZ, MeasurementMode.POUNDS, MeasurementMode.KG -> "weight"
-                    MeasurementMode.INCHES, MeasurementMode.CM -> "length"
-                }
-
-                if (justCaughtIsTheCull && isTied) {
-                    // ── TIED: Same size as smallest keeper — ask user if they want to swap ──
+                if (isTied) {
+                    // ── SCENARIO 4: TIED — same size as smallest keeper, ask user ──
                     Log.d(TAG, "🔄 New catch ties smallest keeper — asking user if they want to swap")
                     uiHelper.speak(
-                        "The $cullMeasurement ${dbItem.species} on the ${dbItem.clipColor} clip " +
+                        "Catch is saved. The $cullMeasurement ${dbItem.species} on the ${dbItem.clipColor} clip " +
                                 "is the same $unitLabel as the ${smallestKeeper.species} " +
-                                "at $keeperMeasurement on the ${smallestKeeper.clipColor} clip. " +
+                                "at $smallestKeeperMeasurement on the ${smallestKeeper.clipColor} clip. " +
                                 "Would you like to swap them? Say yes or no. Over.",
                         "TTS_TIED_ASK"
                     )
@@ -348,14 +339,14 @@ class TournamentVoiceHandler(
                                 response.contains("yes", true) -> {
                                     uiHelper.speak(
                                         "Got it. You need to cull the ${smallestKeeper.species} on the " +
-                                                "${smallestKeeper.clipColor} clip that is $keeperMeasurement. Over and Out.",
+                                                "${smallestKeeper.clipColor} clip that is $smallestKeeperMeasurement. Over and Out.",
                                         "TTS_CULL"
                                     )
                                 }
                                 else -> {
                                     uiHelper.speak(
                                         "Okay, return the ${dbItem.species} on the ${dbItem.clipColor} clip " +
-                                                "and catch one larger than $keeperMeasurement. Over and Out.",
+                                                "and catch one larger than $smallestKeeperMeasurement. Over and Out.",
                                         "TTS_TOO_SMALL"
                                     )
                                 }
@@ -365,37 +356,34 @@ class TournamentVoiceHandler(
                     }, 4000)
                     return  // don't fall through to endSession below
 
-                } else if (justCaughtIsTheCull) {
-                    // ── TOO SMALL: New catch is smaller than everything on the list ──
+                } else {
+                    // ── SCENARIO 3: TOO SMALL — new catch is smaller than everything ──
                     Log.d(TAG, "📉 New catch is too small to keep")
                     uiHelper.speak(
-                        "The $cullMeasurement ${fishToCull.species} on the ${fishToCull.clipColor} clip " +
-                                "is too small to keep. If the $unitLabel is correct, I will log it, " +
-                                "but you need to return it and catch one larger than " +
-                                "the ${smallestKeeper.species} at $keeperMeasurement " +
+                        "Catch is saved. The $cullMeasurement ${fishToCull.species} on the ${fishToCull.clipColor} clip " +
+                                "is too small to keep. Return it and catch one larger than " +
+                                "the ${smallestKeeper.species} at $smallestKeeperMeasurement " +
                                 "on the ${smallestKeeper.clipColor} clip. Over and Out.",
                         "TTS_TOO_SMALL"
                     )
-                } else {
-                    // ── BIGGER: A different (older) fish gets culled — existing behavior ──
-                    uiHelper.speak(
-                        "Catch is saved. You need to cull the ${fishToCull.species} on the ${fishToCull.clipColor} that is $cullMeasurement. Over and Out.",
-                        "TTS_CULL"
-                    )
                 }
 
-            } else if (pos == limit || pos == limit - 1) {
-                // ── Under limit, penultimate or limit catch — summary WITH "Catch is saved" ──
-                val summary = TournamentVoiceFeedback.getCatchSummaryResponse(stats)
-                uiHelper.speak("Catch is saved. $summary Over and Out.", "TTS_FEEDBACK")
-
             } else {
-                // ── Under limit, nothing special — simple confirmation ──
-                uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
+                // ── SCENARIO 2: BIGGER — an older fish gets culled ──
+                Log.d(TAG, "✅ New catch made the list. Cull: ${fishToCull.species} on ${fishToCull.clipColor}")
+                uiHelper.speak(
+                    "Catch is saved. You need to cull the ${fishToCull.species} on the ${fishToCull.clipColor} clip " +
+                            "that is $cullMeasurement. " +
+                            "Your smallest on the list is now the ${smallestKeeper.species} " +
+                            "at $smallestKeeperMeasurement on the ${smallestKeeper.clipColor} clip. " +
+                            "Over and Out.",
+                    "TTS_CULL"
+                )
             }
 
             endSession("catch successfully saved")
         }
+    }
     //=== END === Catch Saved ======
 
 
