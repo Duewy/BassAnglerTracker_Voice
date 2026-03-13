@@ -209,14 +209,14 @@ class VoiceControlService : Service() {
             else -> FunDayVoiceHandler(this, uiHelper).onWake()
         }
 
-        wakeLock.release()
     }
         //==== END = on Wake =====================
 
 
     fun markSessionComplete() {
         sessionActive = false
-        Log.d(TAG, "✅ Voice session marked complete")
+        if (wakeLock.isHeld) wakeLock.release()
+        Log.d(TAG, "✅ Voice session marked complete — wakeLock released")
     }
 
     private fun isInCall(): Boolean =

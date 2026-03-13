@@ -1,7 +1,6 @@
 package com.bramestorm.bassanglertracker.training
 
 import android.content.Context
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -29,11 +28,9 @@ class VoiceResponseManager(context: Context) {
          }
 
     fun speak(message: String, onDone: (() -> String)? = null) {
-        val params = Bundle()
         val utteranceId = "VoiceFeedback" + System.currentTimeMillis()
 
-        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
-
+        // ✅ Set listener BEFORE speaking
         if (onDone != null) {
             tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {
@@ -51,11 +48,15 @@ class VoiceResponseManager(context: Context) {
                 override fun onError(utteranceId: String?) {
                     Log.e("Voice", "❌ TTS error")
                     Handler(Looper.getMainLooper()).post {
-                        onDone() // still trigger continuation if needed
+                        onDone()
                     }
                 }
             })
         }
+
+        // ✅ Now speak — listener is already waiting
+        tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+
     }//==== END = Speak =========================
 
 

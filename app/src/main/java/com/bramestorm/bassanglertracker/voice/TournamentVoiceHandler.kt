@@ -173,8 +173,8 @@ class TournamentVoiceHandler(
                     uiHelper
                 ) { response ->
                     when {
-                        response.contains("yes ", true)    -> saveCatch(parsed)
-                        response.contains("no ",  true)    -> startVoiceSession()
+                        response.contains("yes", true)    -> saveCatch(parsed)
+                        response.contains("no",  true)    -> startVoiceSession()
                         response.contains("cancel", true) -> {
                             uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
                             endSession("cancel from confirm prompt") // ✅ RESET SESSION HERE

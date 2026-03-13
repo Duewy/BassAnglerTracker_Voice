@@ -72,6 +72,7 @@ class VoiceInteractionManager(
         this.onFailureCallback = onFailure
         retryCount = 0
         firstListenAttempt = true
+        onTranscriptResult = onResult
 
         // ── Create recognizer ONCE per session, on the main thread ──
         handler.post {
@@ -86,6 +87,20 @@ class VoiceInteractionManager(
             if (status == TextToSpeech.SUCCESS) {
                 tts!!.language = Locale.getDefault()
 
+                // ✅ Set listener BEFORE speaking — guaranteed to catch onDone
+                tts!!.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(uttId: String?) {}
+                    override fun onError(uttId: String?) {}
+                    override fun onDone(uttId: String?) {
+                        when (uttId) {
+                            "TTS_PROMPT", "TTS_CONFIRM", "TTS_SAVED", "TTS_RETRY", "TTS_TIED_ASK" -> {
+                                Log.d("VCC_TTS", "✅ TTS finished: $uttId — starting STT...")
+                                handler.postDelayed({ startListening() }, 800)
+                            }
+                        }
+                    }
+                })
+
                 val utteranceId = if (prompt.contains("is that correct?", true)) "TTS_CONFIRM" else "TTS_PROMPT"
                 Log.d("VCC_MANAGER", "🎬 [$sessionId] startSession() called")
                 Log.d("VCC_TTS", "🗣️ Speaking with ID: $utteranceId → \"$prompt\"")
@@ -93,20 +108,6 @@ class VoiceInteractionManager(
                 tts!!.speak(prompt, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
             }
         }
-        onTranscriptResult = onResult
-
-        tts!!.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(uttId: String?) {}
-            override fun onError(uttId: String?) {}
-            override fun onDone(uttId: String?) {
-                when (uttId) {
-                    "TTS_PROMPT", "TTS_CONFIRM", "TTS_SAVED", "TTS_RETRY", "TTS_TIED_ASK" -> {
-                        Log.d("VCC_TTS", "✅ TTS finished: $uttId — starting STT...")
-                        handler.postDelayed({ startListening() }, 800)
-                    }
-                }
-            }
-        })
     }
 
     private fun startListening() {
