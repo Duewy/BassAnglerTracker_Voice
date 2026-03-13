@@ -172,8 +172,6 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
             // 3️⃣ And only then wire up your helper
             voiceHelper = VoiceInteractionHelper(
                 activity        = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.CM,
-                isTournament    = true,
                 onCommandAction = { transcript -> onSpeechResult(transcript) }
             )
         }

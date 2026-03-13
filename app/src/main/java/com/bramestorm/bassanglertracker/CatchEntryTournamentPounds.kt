@@ -171,8 +171,6 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
             // 3️⃣ And only then wire up your helper
             voiceHelper = VoiceInteractionHelper(
                 activity        = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.POUNDS,
-                isTournament    = true,
                 onCommandAction = { transcript -> onSpeechResult(transcript) }
             )
         }

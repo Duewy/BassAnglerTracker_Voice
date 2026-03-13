@@ -19,8 +19,6 @@ import java.util.Locale
 
 class VoiceInteractionHelper(
     private val activity: AppCompatActivity,
-    private val measurementUnit: MeasurementUnit,
-    private val isTournament: Boolean,
     private val onCommandAction: (String) -> Unit
 ) {
     private var speechRecognizer: SpeechRecognizer? = null
@@ -42,7 +40,7 @@ class VoiceInteractionHelper(
 
 
     enum class MeasurementUnit {
-        LBS_OZ,POUNDS, KG_G, INCHES, CM
+        LBS_OZ, POUNDS, KG_G, INCHES, CM
     }
 
     init {
@@ -60,21 +58,22 @@ class VoiceInteractionHelper(
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
-                    Log.d("VCC_HELPER", "🎙️ [$sessionId] Ready for speech...")
-
-                    speak("I'm listening. Over")
+                    // ✅ FIX: Do NOT speak here — STT is already listening,
+                    // TTS output would be captured as the user's speech.
+                    Log.d("VCC_HELPER", "🎙️ [$sessionId] Ready for speech — listening...")
                 }
 
                 override fun onResults(results: Bundle?) {
                     Log.d("VCC_HELPER", "📥 [$sessionId] onResults() fired in VoiceInteractionHelper")
+                    isListening = false
 
-                    // existing onResults logic remains unchanged
                     onCommandAction(results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         ?.firstOrNull()?.trim()?.lowercase(Locale.getDefault()) ?: "")
                 }
 
                 override fun onError(error: Int) {
-                    Log.d("VCC_HELPER", "❌ onError() — retry $retryCount in VoiceInteractionHelper")
+                    Log.d("VCC_HELPER", "❌ onError($error) — retry $retryCount in VoiceInteractionHelper")
+                    isListening = false
 
                     if (retryCount < maxRETRIES) {
                         retryCount++
@@ -85,7 +84,6 @@ class VoiceInteractionHelper(
                         activity.positionedToast("Voice disabled ⚠️ \n— manual mode 📝 active")
                         shutdown()
                     }
-                    isListening = false
                 }
 
                 override fun onBeginningOfSpeech() {}

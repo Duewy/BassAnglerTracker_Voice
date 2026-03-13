@@ -168,8 +168,6 @@ class CatchEntryTournamentInches : BaseCatchEntryActivity()  {
             // 3️⃣ And only then wire up your helper
             voiceHelper = VoiceInteractionHelper(
                 activity        = this,
-                measurementUnit = VoiceInteractionHelper.MeasurementUnit.LBS_OZ,
-                isTournament    = true,
                 onCommandAction = { transcript -> onSpeechResult(transcript) }
             )
         }

@@ -171,8 +171,6 @@ class CatchEntryTournamentKgs : BaseCatchEntryActivity() {
          // 3️⃣ And only then wire up your helper
          voiceHelper = VoiceInteractionHelper(
              activity        = this,
-             measurementUnit = VoiceInteractionHelper.MeasurementUnit.KG_G,
-             isTournament    = true,
              onCommandAction = { transcript -> onSpeechResult(transcript) }
          )
      }
