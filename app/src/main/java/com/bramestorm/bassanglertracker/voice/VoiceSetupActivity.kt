@@ -63,14 +63,11 @@ class VoiceSetupActivity : AppCompatActivity() {
     private lateinit var btnAssistantSettings: Button
     private lateinit var btnVoiceInputSettings: Button
     private lateinit var btnBixbySettings: Button           // the Bixby settings button
-
+    private var hasLeftForSettings = false                   // tracks if user left to fix settings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_voice_setup)
-
-        positionedToast("ℹ️ Tap the info icons for setup tips.")    // give users the hint for added information
-
 
         btnMainVSU            = findViewById(R.id.btnMainVSU)
         btnPDF                = findViewById(R.id.btnPDF)
@@ -177,15 +174,19 @@ class VoiceSetupActivity : AppCompatActivity() {
 
     private fun setupSettingsButtons() {
         btnAssistantSettings.setOnClickListener {
+            hasLeftForSettings = true
             openAppInfo(getDefaultAssistantPackage())
         }
         btnVoiceInputSettings.setOnClickListener {
+            hasLeftForSettings = true
             openAppInfo(getDefaultVoiceRecognizerPackage())
         }
-        // NEW — opens Bixby/manufacturer voice service App Info so user can force-stop it
+        // Opens Bixby/manufacturer voice service App Info so user can force-stop it
         btnBixbySettings.setOnClickListener {
             val bixbyPkg = getManufacturerVoicePkg()
             if (bixbyPkg != null) {
+                hasLeftForSettings = true
+                positionedToast("⚠️ Catch and Call Pro VC requires Bixby to be disabled.\nForce-stop or disable it here.")
                 openAppInfo(bixbyPkg)
             } else {
                 positionedToast("No manufacturer voice service found on this device.")
@@ -197,7 +198,7 @@ class VoiceSetupActivity : AppCompatActivity() {
     private fun updateVoiceSetupUI() {
         // Assistant check
         val assistPkg = getDefaultAssistantPackage()
-        val assistOk  = isApprovedAssistant(assistPkg)
+        val assistOk = isApprovedAssistant(assistPkg)
         txtDefaultAssist.text = if (assistOk) {
             "✓ Assistant: ${getAppLabel(assistPkg)}"
         } else {
@@ -205,12 +206,12 @@ class VoiceSetupActivity : AppCompatActivity() {
         }
         btnAssistantSettings.apply {
             isEnabled = !assistOk && !assistPkg.isNullOrBlank()
-            alpha     = if (isEnabled) 1f else 0.5f
+            alpha = if (isEnabled) 1f else 0.5f
         }
 
         // Recognizer check
         val recogPkg = getDefaultVoiceRecognizerPackage()
-        val recogOk  = isApprovedRecognizer(recogPkg)
+        val recogOk = isApprovedRecognizer(recogPkg)
         txtDefaultRecognizer.text = if (recogOk) {
             "✓ Recognizer: ${getAppLabel(recogPkg)}"
         } else {
@@ -218,7 +219,7 @@ class VoiceSetupActivity : AppCompatActivity() {
         }
         btnVoiceInputSettings.apply {
             isEnabled = !recogOk && !recogPkg.isNullOrBlank()
-            alpha     = if (isEnabled) 1f else 0.5f
+            alpha = if (isEnabled) 1f else 0.5f
         }
 
 
@@ -228,21 +229,26 @@ class VoiceSetupActivity : AppCompatActivity() {
             txtDefaultBixby.text = "⚠️ Found: ${getAppLabel(bixbyPkg)}"
             btnBixbySettings.apply {
                 isEnabled = true
-                alpha     = 1f
+                alpha = 1f
             }
         } else {
             txtDefaultBixby.text = "✓ No manufacturer voice service found"
             btnBixbySettings.apply {
                 isEnabled = false
-                alpha     = 0.5f
+                alpha = 0.5f
             }
         }
 
-        // If both checks pass, close with success
+        // If both checks pass — only auto-close if user is returning from settings
         if (assistOk && recogOk) {
-            positionedToast("👍 Voice setup OK")
-            setResult(Activity.RESULT_OK)
-            finish()
+            if (hasLeftForSettings) {
+                positionedToast("👍 Voice setup OK")
+                setResult(Activity.RESULT_OK)
+                finish()                                    // auto-close: user just fixed something
+            } else {
+                positionedToast("👍 Voice setup OK \n tap MAIN MENU button to continue.")
+                setResult(Activity.RESULT_OK)
+            }
         }
     }
 

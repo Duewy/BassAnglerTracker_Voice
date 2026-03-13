@@ -139,11 +139,14 @@ class MainActivity : AppCompatActivity() {
 
             // ✅ Only Pro VC needs the full voice setup flow
             if (BuildConfig.FEATURE_VOICE_COMMANDS) {
-                positionedToast(
-                    "One-time setup: enable your phone’s voice system for hands‑free logging.\n" +
-                            "Bluetooth headset setup is included."
-                )
-                startActivity(Intent(this, VoiceSetupActivity::class.java))
+
+                // Check if voice is already properly configured — skip setup if so
+                if (VoiceSetupActivity.isVoiceAssistantReady(this)) {
+                    positionedToast("👍 Voice is already configured — you're good to go!")
+                } else {
+                    positionedToast("Setting up voice control...")
+                    startActivity(Intent(this, VoiceSetupActivity::class.java))
+                }
             }
 
             // Prevent this from running again (all editions)

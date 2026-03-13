@@ -55,7 +55,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight=".4"
                 android:background="@drawable/btn_menu_setup"
-                android:text="@string/menu"
+                android:text="@string/main_menu"
                 android:textAllCaps="true"
                 android:textColor="@color/black"
                 android:textSize="20sp"

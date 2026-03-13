@@ -326,6 +326,7 @@
     <string name="weight_measurements">Weight Measurements</string>
     <string name="set_up_your_profile">Set Up Your Profile</string>
     <string name="how_to_pdf">How to PDF</string>
+    <string name="main_menu">Main Menu</string>
 
     //species List for start of session but Users can modify the list as they desire
     <string-array name="species_list">
