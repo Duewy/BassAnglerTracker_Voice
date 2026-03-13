@@ -60,7 +60,6 @@ class VoiceResponseManager(context: Context) {
     }//==== END = Speak =========================
 
 
-
     fun shutdown() {
         tts?.stop()
         tts?.shutdown()
