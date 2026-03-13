@@ -87,6 +87,7 @@ class TournamentVoiceHandler(
     }
 
     /** Parses numeric + text components, then confirms with the user. */
+    /** Parses numeric + text components, then confirms with the user. */
     private fun parseAndConfirm(transcript: String) {
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(transcript, speciesList, clipColors)
@@ -136,11 +137,11 @@ class TournamentVoiceHandler(
 
         if (missingInfo) {  parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
-                uiHelper.speak("Okay, let’s try again later. Over and Out.", "TTS_FAIL")
+                uiHelper.speak("Okay, let's try again later. Over and Out.", "TTS_FAIL")
                 endSession("too many parse retries")
                 return
             }
-            uiHelper.speak("Sorry, I missed some info—let’s try again.", "TTS_RETRY")
+            uiHelper.speak("Sorry, I missed some info—let's try again.", "TTS_RETRY")
             Handler(Looper.getMainLooper()).postDelayed({
                 startVoiceSession()
             }, 1500)
@@ -151,48 +152,42 @@ class TournamentVoiceHandler(
         parseRetryCount = 0     // successful parse → reset counter
 
         // Build confirmation prompt
-
         val confirmPrompt = when (measurementMode) {
-            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct?"
-            MeasurementMode.POUNDS -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} pounds on the ${parsed.clipColor} clip. Is that correct?"
-            MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct?"
-            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters on the ${parsed.clipColor} clip. Is that correct?"
-            MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct?"
+            MeasurementMode.LBS_OZ -> "To confirm, your ${parsed.species} is ${parsed.weightLbs} pounds and ${parsed.weightOz} ounces on the ${parsed.clipColor} clip. Is that correct? Yes, No, or Cancel, Over."
+            MeasurementMode.POUNDS -> "To confirm, your ${parsed.species} is ${parsed.weightPounds} point ${parsed.weightDec} pounds on the ${parsed.clipColor} clip. Is that correct? Yes, No, or Cancel, Over."
+            MeasurementMode.KG     -> "To confirm, your ${parsed.species} is ${parsed.weightKgWhole} point ${parsed.weightGrams} kilograms on the ${parsed.clipColor} clip. Is that correct? Yes, No, or Cancel, Over."
+            MeasurementMode.INCHES -> "To confirm, your ${parsed.species} is ${parsed.lengthInches} inches and ${parsed.lengthQuarters} quarters on the ${parsed.clipColor} clip. Is that correct? Yes, No, or Cancel, Over."
+            MeasurementMode.CM     -> "To confirm, your ${parsed.species} is ${parsed.lengthCm} point ${parsed.lengthTenths} centimeters on the ${parsed.clipColor} clip. Is that correct? Yes, No, or Cancel, Over."
         }
 
         Log.d(TAG, "Confirm prompt: $confirmPrompt")
         Log.d(TAG, "Confirm Species🐟: ${parsed.species}")
-        uiHelper.speak(confirmPrompt, "TTS_CONFIRM")
 
-
-        // Listen for yes/no/cancel
-        Handler(Looper.getMainLooper()).postDelayed({
-            (context as? VoiceControlService)?.let { svc ->
-                svc.startVoiceSession(
-                    "Please say yes, no, or cancel that, Over.",
-                    uiHelper
-                ) { response ->
-                    when {
-                        response.contains("yes", true)    -> saveCatch(parsed)
-                        response.contains("no",  true)    -> startVoiceSession()
-                        response.contains("cancel", true) -> {
-                            uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
-                            endSession("cancel from confirm prompt") // ✅ RESET SESSION HERE
-                        }
-                        else -> {
-                            uiHelper.speak("Sorry, please say yes, no, or cancel that. Over.","TTS_RETRY")
-                            Handler(Looper.getMainLooper()).postDelayed({ parseAndConfirm(transcript) }, 3500)
-                        }
-                    }
+        // ── Single TTS→STT flow — one engine speaks, onDone fires, STT listens ──
+        (context as? VoiceControlService)?.startVoiceSession(
+            confirmPrompt,
+            uiHelper
+        ) { response ->
+            val clean = response.trim().lowercase()
+            when {
+                clean.contains("yes") && clean.contains("over")    -> saveCatch(parsed)
+                clean.contains("no") && clean.contains("over")     -> startVoiceSession()
+                clean.contains("cancel") && clean.contains("over") -> {
+                    uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
+                    endSession("cancel from confirm prompt")
                 }
-            } ?: run {
-                // fallback to Intent
-                endSession("If fallback voice session fails")
-                val intent = Intent(context, VoiceControlService::class.java)
-                    .setAction(VoiceControlService.ACTION_START_VOICE)
-                ContextCompat.startForegroundService(context, intent)
+                // Heard yes/no/cancel but missing "over" — nudge them
+                clean.contains("yes") || clean.contains("no") || clean.contains("cancel") -> {
+                    uiHelper.speak("Please say your answer followed by Over. Over.", "TTS_RETRY")
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        parseAndConfirm(transcript)
+                    }, 1500)
+                }
+                else -> startVoiceSession()
             }
-        }, 3500)
+        } ?: run {
+            endSession("VoiceControlService not available")
+        }
     }
 
 
