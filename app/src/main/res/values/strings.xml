@@ -72,8 +72,10 @@
     <string name="set_up">Set_Up</string>
     <string name="teach_the_computer">Teach the computer. \n\ You will teach the computer to recognize the key words that are used with this Catch and Call Tracker app. The better the computer recognizes your words the easier the commands will be followed. Your time on the water is precious so lets make the best of it.</string>
     <string name="say_the_words">Say the Words</string>
-    <string name="what_computer_heard">What The Computer Heard</string>
-    <string name="press_the_btn">This is what you say when you are ready press the mic button</string>
+    <string name="what_computer_heard">What The Computer Heard 👂</string>
+    <string name="no_bluetooth_device">No Bluetooth Device</string>
+    <string name="test_with_bt">🎧 Test with %s</string>
+    <string name="press_the_btn">This is what you say when you are ready press the mic button of the cellphone 🤳</string>
     <string name="save_selection">Save Selection</string>
     <string name="voice_commands_or_manual_input">Manual Input \n\ or\n\ Hands Free\n\With the Pro_VC\n\ Voice Commands </string>
     <string name="you_can_add_your_own_species_to_the_list">You Can Add Your Own Species to the List\n\ And You Can Edit or Delete Your Added Species</string>
