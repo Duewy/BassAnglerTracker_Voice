@@ -540,6 +540,25 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catches
     } // END getFilteredCatchesWithLocationAdvanced
 
+    /**
+     * Returns the number of catches of a given type since a timestamp.
+     * Used for hot streak detection (e.g., catches in last 15 minutes).
+     */
+    fun getCatchCountSince(catchType: String, sinceMillis: Long): Int {
+        val sinceDateTime = java.text.SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()
+        ).format(java.util.Date(sinceMillis))
+
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM catches WHERE catch_type = ? AND date_time >= ?",
+            arrayOf(catchType, sinceDateTime)
+        )
+        val count = if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        cursor.close()
+        return count
+    }
+
     fun getLastNCatchesWithLocation(limit: Int): List<CatchItem> {
         val db = readableDatabase
         val list = mutableListOf<CatchItem>()

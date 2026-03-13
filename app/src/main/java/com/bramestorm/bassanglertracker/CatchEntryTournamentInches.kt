@@ -386,7 +386,7 @@ override val dialog: Any
 
         if (currentCount >= 2) {
             lastTournamentCatch?.let {
-                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "lbs")
+                val message = getMotivationalMessage(this, it.id, tournamentCatchLimit, "inches")
                 if (message != null) {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 

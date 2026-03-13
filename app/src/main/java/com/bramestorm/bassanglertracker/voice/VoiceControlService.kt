@@ -179,7 +179,7 @@ class VoiceControlService : Service() {
 
         sessionActive = true
         Log.d(TAG, "🔁 onWake() called — sessionActive=$sessionActive")
-        wakeLock.acquire(5_000L)
+        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
 
         val uiHelper = object : VoiceUiHelper {
             private val vrm = VoiceResponseManager(applicationContext)
@@ -228,9 +228,12 @@ class VoiceControlService : Service() {
             }
 
     private fun stopVoiceSessionIfActive() {
+        voiceEngine?.shutdown()
+        voiceEngine = null
         activeVoiceSession?.shutdown()
         activeVoiceSession = null
         sessionActive = false
+        if (wakeLock.isHeld) wakeLock.release()
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
     }
 
