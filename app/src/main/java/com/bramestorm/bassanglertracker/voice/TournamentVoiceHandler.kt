@@ -54,8 +54,8 @@ class TournamentVoiceHandler(
     // Initial prompt based on mode
     private fun getStartPrompt(): String = when (measurementMode) {
         MeasurementMode.LBS_OZ -> "Please say the pounds, ounces, species, and clip color of your catch. Over."
-        MeasurementMode.POUNDS -> "Please say the point pounds, species, and clip color of your catch. Over."       //todo should we have "point pounds" to tell the user to say 3 point 26 pounds ???
-        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."   //todo should we have "point kilograms" to tell the user to say 4 point 15 kilograms ???
+        MeasurementMode.POUNDS -> "Please say the point pounds, species, and clip color of your catch. Over."
+        MeasurementMode.KG     -> "Please say the kilograms, grams, species, and clip color of your catch. Over."
         MeasurementMode.INCHES -> "Please say the inches, quarters, species, and clip color of your catch. Over."
         MeasurementMode.CM     -> "Please say the centimeters, species, and clip color of your catch. Over."
     }
@@ -70,7 +70,7 @@ class TournamentVoiceHandler(
 
     /** Begins a catch or question session. */
     private fun startVoiceSession() {
-        if (inQuestionMode) return            // don’t restart the “catch” flow mid-question
+        if (inQuestionMode) return            // don't restart the "catch" flow mid-question
 
         (context as? VoiceControlService)
             ?.startVoiceSession(getStartPrompt(), uiHelper) { transcript ->
@@ -80,13 +80,12 @@ class TournamentVoiceHandler(
                     else                            -> parseAndConfirm(transcript)
                 }
             } ?: run  {                   // fallback: fire the same Intent the media button uses
-                   val intent = Intent(context, VoiceControlService::class.java)
-                       .setAction(VoiceControlService.ACTION_START_VOICE)
-                   ContextCompat.startForegroundService(context, intent)
-               }
+            val intent = Intent(context, VoiceControlService::class.java)
+                .setAction(VoiceControlService.ACTION_START_VOICE)
+            ContextCompat.startForegroundService(context, intent)
+        }
     }
 
-    /** Parses numeric + text components, then confirms with the user. */
     /** Parses numeric + text components, then confirms with the user. */
     private fun parseAndConfirm(transcript: String) {
         val parsed = when (measurementMode) {
@@ -98,11 +97,11 @@ class TournamentVoiceHandler(
         }
 
         // Simple sanity check for measurement unit overflow
-        val oz     = parsed.weightOz
-        val dec     = parsed.weightDec
-        val grams  = parsed.weightGrams
+        val oz       = parsed.weightOz
+        val dec      = parsed.weightDec
+        val grams    = parsed.weightGrams
         val quarters = parsed.lengthQuarters
-        val tenths = parsed.lengthTenths
+        val tenths   = parsed.lengthTenths
 
         if ((measurementMode == MeasurementMode.LBS_OZ && oz > 15) ||
             (measurementMode == MeasurementMode.POUNDS && dec > 99) ||
@@ -130,12 +129,12 @@ class TournamentVoiceHandler(
             MeasurementMode.KG     -> parsed.totalWeightHundredthKg == 0
             MeasurementMode.INCHES -> parsed.totalLengthQuarters == 0
             MeasurementMode.CM     -> parsed.totalLengthTenths == 0
-
         }
 
         Log.d(TAG, "Parsed result: $parsed")
 
-        if (missingInfo) {  parseRetryCount++
+        if (missingInfo) {
+            parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
                 uiHelper.speak("Okay, let's try again later. Over and Out.", "TTS_FAIL")
                 endSession("too many parse retries")
@@ -147,7 +146,6 @@ class TournamentVoiceHandler(
             }, 1500)
             return
         }
-
 
         parseRetryCount = 0     // successful parse → reset counter
 
@@ -280,7 +278,7 @@ class TournamentVoiceHandler(
                     "TTS_LIST_FULL"
                 )
             } else {
-                // ──Catch is Under Culling limit, nothing special — Simple Confirmation ──
+                // ── Catch is Under Culling limit, nothing special — Simple Confirmation ──
                 uiHelper.speak("Catch is saved. Over and Out.", "TTS_SAVED")
             }
 
@@ -316,43 +314,38 @@ class TournamentVoiceHandler(
 
                 if (isTied) {
                     // ── SCENARIO 4: TIED — same size as smallest keeper, ask user ──
+                    // ── FIX: Single TTS→STT flow — no dual uiHelper.speak() + postDelayed ──
                     Log.d(TAG, "🔄 New catch ties smallest keeper — asking user if they want to swap")
-                    uiHelper.speak(
+                    (context as? VoiceControlService)?.startVoiceSession(
                         "Catch is saved. The $cullMeasurement ${dbItem.species} on the ${dbItem.clipColor} clip " +
                                 "is the same $unitLabel as the ${smallestKeeper.species} " +
                                 "at $smallestKeeperMeasurement on the ${smallestKeeper.clipColor} clip. " +
                                 "Would you like to swap them? Say yes or no. Over.",
-                        "TTS_TIED_ASK"
-                    )
-
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        (context as? VoiceControlService)?.startVoiceSession(
-                            "Say yes to swap or no to release your catch. Over.",
-                            uiHelper
-                        ) { response ->
-                            when {
-                                response.contains("yes", true) -> {
-                                    uiHelper.speak(
-                                        "Got it. You need to cull the ${smallestKeeper.species} on the " +
-                                                "${smallestKeeper.clipColor} clip that is $smallestKeeperMeasurement. Over and Out.",
-                                        "TTS_CULL"
-                                    )
-                                }
-                                else -> {
-                                    uiHelper.speak(
-                                        "Okay, return the ${dbItem.species} on the ${dbItem.clipColor} clip " +
-                                                "and catch one larger than $smallestKeeperMeasurement. Over and Out.",
-                                        "TTS_TOO_SMALL"
-                                    )
-                                }
+                        uiHelper
+                    ) { response ->
+                        val clean = response.trim().lowercase()
+                        when {
+                            clean.contains("yes") && clean.contains("over") -> {
+                                uiHelper.speak(
+                                    "Got it. You need to cull the ${smallestKeeper.species} on the " +
+                                            "${smallestKeeper.clipColor} clip that is $smallestKeeperMeasurement. Over and Out.",
+                                    "TTS_CULL"
+                                )
                             }
-                            endSession("handled tied catch swap decision")
+                            else -> {
+                                uiHelper.speak(
+                                    "Okay, return the ${dbItem.species} on the ${dbItem.clipColor} clip " +
+                                            "and catch one larger than $smallestKeeperMeasurement. Over and Out.",
+                                    "TTS_TOO_SMALL"
+                                )
+                            }
                         }
-                    }, 4000)
+                        endSession("handled tied catch swap decision")
+                    }
                     return  // don't fall through to endSession below
 
                 } else {
-                    // ── SCENARIO 3: TOO SMALL — new catch is smaller than everything ──
+                    // ��─ SCENARIO 3: TOO SMALL — new catch is smaller than everything ──
                     Log.d(TAG, "📉 New catch is too small to keep")
                     uiHelper.speak(
                         "Catch is saved. The $cullMeasurement ${fishToCull.species} on the ${fishToCull.clipColor} clip " +
@@ -387,7 +380,7 @@ class TournamentVoiceHandler(
         Log.d("TournamentVoiceHandler", "🔻 shutdown called")
     }
 
- //??????????????????? 🤔 QUESTION MODE ❓🤔?????????????????????????????????
+    //??????????????????? 🤔 QUESTION MODE ❓🤔?????????????????????????????????
 
     /** Switch into question mode for stats queries. */
     private fun handleQuestionMode() {
@@ -402,7 +395,7 @@ class TournamentVoiceHandler(
             "Which stat would you like? Over.",
             uiHelper
         ) { followUp ->
-            Log.d(TAG, "Question received: '$followUp'")   // ── FIX: removed backslash so variable prints
+            Log.d(TAG, "Question received: '$followUp'")
             routeQuestion(followUp)
         }
     }
@@ -429,14 +422,11 @@ class TournamentVoiceHandler(
             return
         }
 
-        // ── FIX: Use getCatchesForToday() with the correct typeEntry ──
-        // getTopTournamentCatches() was querying catch_type='Tournament' which matches nothing
-        val todaysDate = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(java.util.Date())
+        // ── Use getCatchesForToday() with the correct typeEntry ──
+        val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val allCatches = dbHelper.getCatchesForToday(typeEntry, todaysDate)
 
         // ── Species filtering (tournament-aware) ──
-        // In tournament mode, speciesList comes from the tournament config.
-        // User might say "largest smallmouth over" — we match against species in today's catches.
         val speciesMentioned = allCatches.map { it.species.lowercase() }
             .distinct()
             .firstOrNull { storedSpecies ->
@@ -448,9 +438,7 @@ class TournamentVoiceHandler(
                     .replace("over", "").replace("and out", "")
                     .trim()
 
-                // Direct match: "largest smallmouth over" → question contains "smallmouth"
                 question.lowercase().contains(storedSpecies) ||
-                        // Reverse match: "largest pike over" → "northern pike".contains("pike")
                         (cleanedQuestion.isNotBlank() && storedSpecies.contains(cleanedQuestion))
             }
 
@@ -571,16 +559,16 @@ class TournamentVoiceHandler(
                 endSession("answered total length question")
             }
 
-            // ── NEW: "how many" / "count" question ──
+            // ── "how many" / "count" question ���─
             question.contains("how many", true) || question.contains("count", true) -> {
                 Log.d(TAG, "Answering how many")
-                val count = filtered.size
+                val count = validCatches.size    // ← FIX: was filtered.size
                 val speciesLabel = speciesMentioned?.replaceFirstChar { it.uppercase() } ?: "fish"
                 uiHelper.speak("You have caught $count $speciesLabel today. $overOut", "TTS_ANSWER")
                 endSession("answered how many question")
             }
 
-            // ── NEW: "average" question ──
+            // ── "average" question ──
             question.contains("average", true) -> {
                 Log.d(TAG, "Answering average")
                 val avgMsg = when (measurementMode) {
@@ -680,7 +668,7 @@ class TournamentVoiceHandler(
                 val lbs = oz / 16
                 val remOz = oz % 16
                 uiHelper.speak(
-                    "$prefix ${fish.species} at $lbs pounds and $remOz ounces.$overOut",
+                    "$prefix ${fish.species} at $lbs pounds and $remOz ounces. $overOut",
                     "TTS_ANSWER"
                 )
             }
@@ -733,4 +721,6 @@ class TournamentVoiceHandler(
 
     private fun currentTimestamp(): String =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-}
+    }
+
+//=======================================================================================================================
