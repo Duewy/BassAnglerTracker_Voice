@@ -229,6 +229,47 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtPrivacyPolicy" />
 
+    <View
+        android:id="@+id/dividerDisclaimer"
+        android:layout_width="0dp"
+        android:layout_height="5dp"
+        android:layout_marginVertical="5dp"
+        android:background="@color/black"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPrivacyPolicy" />
+
+
+    <TextView
+        android:id="@+id/txtDisclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/disclaimer"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerDisclaimer" />
+
+    <Button
+        android:id="@+id/btnDisclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:background="@drawable/btn_outline_softlock_blue"
+        android:gravity="center"
+        android:paddingHorizontal="15dp"
+        android:text="@string/disclaimer_pdf"
+        android:textColor="@color/clip_white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtDisclaimer" />
+
     <TextView
         android:id="@+id/txtCatchAndCall"
         android:layout_width="wrap_content"
@@ -236,8 +277,8 @@
         android:text="@string/catch_and_call"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnPrivacyPolicy"
-        android:layout_marginVertical="55dp"
+        app:layout_constraintTop_toBottomOf="@id/btnDisclaimer"
+        android:layout_marginVertical="5dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 
