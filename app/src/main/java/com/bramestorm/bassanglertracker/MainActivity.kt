@@ -92,6 +92,15 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        //-------------------------- Open the Disclaimer pdf 📋 --------------------
+        val btnDisclaimer = findViewById<Button>(R.id.btnDisclaimer)
+        btnDisclaimer.setOnClickListener {
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Disclaimer.pdf"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity(intent)
+        }
+
 
     }// `````````` END On Create  ``````````````````````
 

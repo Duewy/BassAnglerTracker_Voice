@@ -229,6 +229,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtPrivacyPolicy" />
 
+    <Button
+        android:id="@+id/btnDisclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
+        android:background="@drawable/btn_outline_blue"
+        android:gravity="center"
+        android:paddingHorizontal="15dp"
+        android:text="@string/disclaimer_pdf"
+        android:textColor="@color/clip_white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnPrivacyPolicy" />
+
     <TextView
         android:id="@+id/txtCatchAndCall"
         android:layout_width="wrap_content"
@@ -236,7 +252,7 @@
         android:text="@string/catch_and_call"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnPrivacyPolicy"
+        app:layout_constraintTop_toBottomOf="@id/btnDisclaimer"
         android:layout_marginVertical="55dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
