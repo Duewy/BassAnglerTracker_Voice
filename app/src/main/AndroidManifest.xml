@@ -67,6 +67,12 @@
 
         <!-- All Activities Here -->
 
+            <!-- Billing & Subscription Activity -->
+        <activity
+            android:name=".billing.SubscriptionPaywallActivity"
+            android:label="Upgrade Subscription"
+            android:exported="false" />
+
         <!-- First-Time Launch Questionnaire -->
         <activity
             android:name=".questionnaire.FirstTimeQuestionnaireActivity"

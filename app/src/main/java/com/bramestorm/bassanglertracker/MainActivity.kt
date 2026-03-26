@@ -102,6 +102,49 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // ──────────────────────────────────────────────
+        // 🔒 UPGRADE BUTTONS — gate locked features
+        // ──────────────────────────────────────────────
+        //
+        //  HOW THIS WORKS:
+        //  Your flavors (free, tracker, provc) already set BuildConfig flags.
+        //  On the FREE flavor, GPS is locked     → show "Upgrade to Tracker" button
+        //  On FREE + TRACKER, Voice is locked    → show "Upgrade to ProVC"  button
+        //
+        //  When the user taps, it opens the SubscriptionPaywallActivity
+        //  (which is the Android version of iOS SubscriptionPaywallView).
+        //
+        //  *** For now, on the FLAVOR builds (tracker/provc), these buttons
+        //      simply won't appear because the features are already unlocked
+        //      via BuildConfig. When you switch to a SINGLE APK with
+        //      runtime subscriptions, you'll gate on subscriptionManager.currentTier instead. ***
+
+        // EXAMPLE: If you add a "btnUpgradeTracker" button to activity_main.xml:
+        //
+        //    val btnUpgradeTracker = findViewById<Button?>(R.id.btnUpgradeTracker)
+        //    if (!BuildConfig.FEATURE_GPS_LOGGING) {
+        //        btnUpgradeTracker?.visibility = android.view.View.VISIBLE
+        //        btnUpgradeTracker?.setOnClickListener {
+        //            val intent = Intent(this, SubscriptionPaywallActivity::class.java)
+        //            intent.putExtra(SubscriptionPaywallActivity.EXTRA_TARGET_TIER, "tracker")
+        //            startActivity(intent)
+        //        }
+        //    } else {
+        //        btnUpgradeTracker?.visibility = android.view.View.GONE
+        //    }
+        //
+        //    val btnUpgradeProVC = findViewById<Button?>(R.id.btnUpgradeProVC)
+        //    if (!BuildConfig.FEATURE_VOICE_COMMANDS) {
+        //        btnUpgradeProVC?.visibility = android.view.View.VISIBLE
+        //        btnUpgradeProVC?.setOnClickListener {
+        //            val intent = Intent(this, SubscriptionPaywallActivity::class.java)
+        //            intent.putExtra(SubscriptionPaywallActivity.EXTRA_TARGET_TIER, "provc")
+        //            startActivity(intent)
+        //        }
+        //    } else {
+        //        btnUpgradeProVC?.visibility = android.view.View.GONE
+        //    }
+
     }// `````````` END On Create  ``````````````````````
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
