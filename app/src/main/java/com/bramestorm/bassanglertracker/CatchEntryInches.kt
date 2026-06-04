@@ -157,7 +157,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                     adView.visibility = View.GONE
                 }
             }
-            adView.adUnitId = BuildConfig.ADMOB_BANNER_AD_UNIT_ID
+
             adView.loadAd(AdRequest.Builder().build())
         }
 
