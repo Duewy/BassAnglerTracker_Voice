@@ -23,8 +23,8 @@ android {
         applicationId = "com.bramestorm.bassanglertracker"
         minSdk = 23
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.6.0"
+        versionCode = 4         // 04June2026
+        versionName = "1.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
@@ -33,7 +33,7 @@ android {
         manifestPlaceholders.putAll(
             mapOf(
                 "MAPS_API_KEY" to (project.findProperty("MAPS_API_KEY") as String? ?: "AIzaSyDk_AhWI1MnCwFWAVfowN_KlwdV592LtPc"),
-                "ADMOB_APP_ID" to (project.findProperty("ADMOB_APP_ID") as String? ?: "ca-app-pub-3940256099942544~3347511713")
+                "ADMOB_APP_ID" to (project.findProperty("ADMOB_APP_ID") as String? ?: "MISSING_ADMOB_APP_ID")
             )
         )
     }

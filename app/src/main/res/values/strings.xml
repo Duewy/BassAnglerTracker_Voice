@@ -301,6 +301,8 @@
 
     //Google Mob Ad Holder value for Testing
     <string name="test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+
+    // Questions and Answers
     <string name="weight_lbs">weight lbs</string>
     <string name="x_xx_lbs">X.XX Lbs</string>
     <string name="tournament_catch_pounds">Tournament Catch Pounds</string>
