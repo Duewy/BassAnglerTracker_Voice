@@ -8,6 +8,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 
+
 object DailyAdManager {
 
     private var interstitial: InterstitialAd? = null
@@ -27,7 +28,8 @@ object DailyAdManager {
         MobileAds.initialize(context) {}
         isLoading = true
 
-        val unitId = "ca-app-pub-3940256099942544/1033173712" // test interstitial
+        val unitId = BuildConfig.ADMOB_INTERSTITIAL_AD_UNIT_ID
+
         val request = AdRequest.Builder().build()
 
         InterstitialAd.load(

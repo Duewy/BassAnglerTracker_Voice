@@ -16,8 +16,7 @@
         android:id="@+id/adViewPopup"
         android:layout_width="320dp"
         android:layout_height="50dp"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"  >
+        ads:adSize="BANNER"  >
     </com.google.android.gms.ads.AdView>
 
         <!-- Google test ad -->
