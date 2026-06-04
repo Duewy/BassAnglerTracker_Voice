@@ -612,6 +612,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        ads:adUnitId="@string/banner_ad_unit_id"
         ads:adSize="BANNER"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

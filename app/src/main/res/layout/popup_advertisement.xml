@@ -16,6 +16,7 @@
         android:id="@+id/adViewPopup"
         android:layout_width="320dp"
         android:layout_height="50dp"
+        ads:adUnitId="@string/banner_ad_unit_id"
         ads:adSize="BANNER"  >
     </com.google.android.gms.ads.AdView>
 
