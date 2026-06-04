@@ -9,6 +9,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.billingclient.api.ProductDetails
 
 /**
  *  SubscriptionPaywallActivity.kt
@@ -112,44 +113,77 @@ class SubscriptionPaywallActivity : AppCompatActivity() {
         })
 
         // ── Connect & load products ──
-        subscriptionManager.onProductsLoaded = { products ->
+        subscriptionManager.onProductsLoaded = {
             runOnUiThread {
-                // Remove the loading text
                 layout.removeView(loadingText)
 
-                // Pick the right products for this tier
-                val relevantProducts = if (targetTier == "provc") {
-                    subscriptionManager.proVCProducts
-                } else {
-                    subscriptionManager.trackerProducts
-                }
-
-                if (relevantProducts.isEmpty()) {
+                if (targetTier != "provc") {
                     layout.addView(TextView(this).apply {
-                        text = "⚠️ No subscription products found.\n\nMake sure you've created them in Google Play Console."
+                        text = "⚠️ Tracker subscriptions are not active yet."
                         textSize = 14f
                         gravity = Gravity.CENTER
-                    }, layout.childCount - 1)  // before close button
+                    }, layout.childCount - 1)
                     return@runOnUiThread
                 }
 
-                // ── Add a button for each product ──
-                for (product in relevantProducts) {
-                    val offer = product.subscriptionOfferDetails?.firstOrNull()
-                    val price = offer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: "N/A"
-                    val period = if (product.productId.contains("yearly")) "/ year" else "/ month"
+                val product = subscriptionManager.proVCProducts.firstOrNull()
+
+                if (product == null) {
+                    layout.addView(TextView(this).apply {
+                        text = "⚠️ No ProVC subscription product found.\n\nMake sure catch_and_call_pro_vc exists in Google Play Console and is available."
+                        textSize = 14f
+                        gravity = Gravity.CENTER
+                    }, layout.childCount - 1)
+                    return@runOnUiThread
+                }
+
+                val offers = product.subscriptionOfferDetails.orEmpty()
+
+                val monthlyOffer = offers.firstOrNull { it.basePlanId == SubscriptionManager.PROVC_MONTHLY_BASE_PLAN }
+                val yearlyOffer = offers.firstOrNull { it.basePlanId == SubscriptionManager.PROVC_YEARLY_BASE_PLAN }
+
+                fun addPlanButton(
+                    title: String,
+                    offer: ProductDetails.SubscriptionOfferDetails?,
+                    basePlanId: String
+                ) {
+                    if (offer == null) return
+
+                    val price = offer.pricingPhases.pricingPhaseList.firstOrNull()?.formattedPrice ?: "N/A"
+                    val period = when (basePlanId) {
+                        SubscriptionManager.PROVC_YEARLY_BASE_PLAN -> "/ year"
+                        SubscriptionManager.PROVC_MONTHLY_BASE_PLAN -> "/ month"
+                        else -> ""
+                    }
+
+                    val buttonText = "$title\n$price $period"
 
                     val btn = Button(this).apply {
-                        text = "${product.name}\n$price $period"
+                        text = buttonText
                         textSize = 16f
                         setPadding(16, 24, 16, 24)
                         setOnClickListener {
-                            Log.d(TAG, "🛒 User tapped: ${product.productId}")
-                            subscriptionManager.launchPurchase(product, this@SubscriptionPaywallActivity)
+                            Log.d(TAG, "🛒 User tapped basePlanId=$basePlanId for ${product.productId}")
+                            subscriptionManager.launchPurchase(
+                                product,
+                                basePlanId,
+                                this@SubscriptionPaywallActivity
+                            )
                         }
                     }
-                    // Insert before the Close button
+
                     layout.addView(btn, layout.childCount - 1)
+                }
+
+                addPlanButton("Catch And Call ProVC Monthly", monthlyOffer, SubscriptionManager.PROVC_MONTHLY_BASE_PLAN)
+                addPlanButton("Catch And Call ProVC Yearly", yearlyOffer, SubscriptionManager.PROVC_YEARLY_BASE_PLAN)
+
+                if (monthlyOffer == null && yearlyOffer == null) {
+                    layout.addView(TextView(this).apply {
+                        text = "⚠️ No ProVC base plans found.\n\nMake sure monthly-provc and yearly-provc are active in Google Play Console."
+                        textSize = 14f
+                        gravity = Gravity.CENTER
+                    }, layout.childCount - 1)
                 }
             }
         }
