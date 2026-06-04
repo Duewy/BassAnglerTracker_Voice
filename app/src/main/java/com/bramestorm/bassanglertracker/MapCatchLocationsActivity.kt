@@ -326,6 +326,7 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val adViewPopup = popupView.findViewById<AdView>(R.id.adViewPopup)
+        adViewPopup.adUnitId = BuildConfig.ADMOB_BANNER_AD_UNIT_ID
         adViewPopup.loadAd(AdRequest.Builder().build())
 
         // Start time when popup is shown
