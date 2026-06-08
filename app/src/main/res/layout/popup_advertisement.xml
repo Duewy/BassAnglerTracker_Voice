@@ -20,8 +20,6 @@
         ads:adSize="BANNER"  >
     </com.google.android.gms.ads.AdView>
 
-        <!-- Google test ad -->
-
     <Button
         android:id="@+id/btnCloseAd"
         android:layout_width="wrap_content"
