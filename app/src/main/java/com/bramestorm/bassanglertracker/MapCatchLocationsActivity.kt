@@ -326,6 +326,17 @@ class MapCatchLocationsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val adViewPopup = popupView.findViewById<AdView>(R.id.adViewPopup)
+
+        adViewPopup.adListener = object : com.google.android.gms.ads.AdListener() {
+            override fun onAdLoaded() {
+                android.util.Log.d("AdMob", "Popup banner loaded in MapCatchLocationsActivity")
+            }
+
+            override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                android.util.Log.e("AdMob", "Popup banner failed in MapCatchLocationsActivity: ${error.message}")
+            }
+        }
+
         adViewPopup.loadAd(AdRequest.Builder().build())
 
         // Start time when popup is shown

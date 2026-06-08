@@ -52,6 +52,7 @@ android {
             buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"ca-app-pub-9270119843338903/7099262985\"")
             buildConfigField("String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-9270119843338903/5491657524\"")
 
+
             buildConfigField("Boolean", "FEATURE_VOICE_COMMANDS", "false")
             buildConfigField("Boolean", "FEATURE_GPS_LOGGING", "false")
             buildConfigField("Boolean", "FEATURE_DAILY_AD", "true")

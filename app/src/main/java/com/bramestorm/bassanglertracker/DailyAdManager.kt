@@ -38,12 +38,14 @@ object DailyAdManager {
             request,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
+                    android.util.Log.d("AdMob", "Interstitial loaded")
                     interstitial = ad
                     isLoading = false
                     flushLoadedCallbacks()
                 }
 
                 override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                    android.util.Log.e("AdMob", "Interstitial failed: ${error.message}")
                     interstitial = null
                     isLoading = false
                     onLoadedCallbacks.clear()
