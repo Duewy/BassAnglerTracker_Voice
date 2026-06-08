@@ -237,7 +237,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
 
         updateTournamentList()      //todo ask if we need to put this in the onResume to update the list when we wake up the app???
 
-        //------------------- AdMob for FREE Edition Only --------------------------
+        //------------------- AdMob for base Edition Only --------------------------
         val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
 
         if (!BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS || adView == null) {
@@ -392,7 +392,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                                 toastTts?.language = Locale.getDefault()
                                 toastTts?.speak(message, TextToSpeech.QUEUE_FLUSH, null, "TTS_MOTIVATION")
 
-                                // Optional: shut down after 4 seconds to free memory
+                                // Optional: shut down after 4 seconds to base memory
                                 Handler(Looper.getMainLooper()).postDelayed({
                                     toastTts?.shutdown()
                                     toastTts = null

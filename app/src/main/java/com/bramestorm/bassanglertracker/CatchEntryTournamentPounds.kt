@@ -238,7 +238,7 @@ class CatchEntryTournamentPounds : BaseCatchEntryActivity() {
 
         updateTournamentList()
 
-            //------------------- AdMob for FREE Edition Only --------------------------
+            //------------------- AdMob for base Edition Only --------------------------
         val adView = findViewById<com.google.android.gms.ads.AdView?>(R.id.adViewCatchEntry)
 
         if (!BuildConfig.FEATURE_CATCHENTRY_BANNER_ADS || adView == null) {

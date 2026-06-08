@@ -16,6 +16,7 @@ import java.util.Date
 import java.util.Locale
 
 
+
 class MainActivity : AppCompatActivity() {
 
     //private var dailyInterstitial: InterstitialAd? = null
@@ -32,8 +33,6 @@ class MainActivity : AppCompatActivity() {
         val appUpdateManager = AppUpdateManagerFactory.create(this)
         appUpdateManager.appUpdateInfo.addOnSuccessListener { updateInfo ->
             if (updateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                //TODO  Option 1: Flexible update — shows a banner, user can update later
-                //TODO  Option 2: Immediate update — forces update before they can use the app
                 positionedToast("A new version of Catch and Call is available! Please update.")
             }
         }
@@ -64,8 +63,8 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, UserTrainingVoiceCommands::class.java))
             } else {
                 positionedToast(
-                    "Voice Controls are available in the Pro VC edition only.\n" +
-                            "Upgrade to enable hands‑free catch logging."
+                    "Voice Controls are available in the Pro_VC edition only.\n" +
+                            "Upgrade to enable hands‑free 🎤 catch logging."
                 )
             }
         }
@@ -77,8 +76,8 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, LookUpShareDataActivity::class.java))
             } else {
                 positionedToast(
-                    "See & Share is available in the Tracker or Pro VC editions.\n" +
-                            "Upgrade to unlock catch mapping and sharing."
+                    "See & Share is available in the Tracker or Pro_VC editions.\n" +
+                            "Upgrade to unlock catch mapping 🗺️ and sharing."
                 )
             }
         }
@@ -103,13 +102,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ──────────────────────────────────────────────
-        // TODO 🔒 UPGRADE BUTTONS — gate locked features
+        //  🔒 UPGRADE BUTTONS — gate locked features
         // ──────────────────────────────────────────────
         //
         //  HOW THIS WORKS:
-        //  Your flavors (free, tracker, provc) already set BuildConfig flags.
-        //  On the FREE flavor, GPS is locked     → show "Upgrade to Tracker" button
-        //  On FREE + TRACKER, Voice is locked    → show "Upgrade to ProVC"  button
+        //  Your flavors (base, tracker, provc) already set BuildConfig flags.
+        //  On the base flavor, GPS is locked     → show "Upgrade to Tracker" button
+        //  On base + TRACKER, Voice is locked    → show "Upgrade to ProVC"  button
         //
         //  When the user taps, it opens the SubscriptionPaywallActivity
         //  (which is the Android version of iOS SubscriptionPaywallView).

@@ -40,13 +40,13 @@ android {
     flavorDimensions += "edition"
 
     productFlavors {
-        create("free") {
+        create("base") {
             dimension = "edition"
 
-            applicationIdSuffix = ".free"
-            versionNameSuffix = "-free"
+            applicationIdSuffix = ".base"
+            versionNameSuffix = "-base"
 
-            resValue("string", "app_name", "Catch and Call Free")
+            resValue("string", "app_name", "Catch and Call base")
 
             manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-9270119843338903~9981566873"
             buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"ca-app-pub-9270119843338903/7099262985\"")
