@@ -261,6 +261,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    android.util.Log.e("AdMob", "Banner failed in ${this@CatchEntryTournamentCentimeters::class.java.simpleName}: ${error.message}")
                     adView.visibility = View.GONE
                 }
             }

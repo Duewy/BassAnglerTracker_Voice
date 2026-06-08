@@ -252,6 +252,7 @@ class CatchEntryTournament : BaseCatchEntryActivity() {
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    android.util.Log.e("AdMob", "Banner failed in ${this@CatchEntryTournament::class.java.simpleName}: ${error.message}")
                     adView.visibility = View.GONE
                 }
             }

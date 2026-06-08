@@ -154,6 +154,7 @@ class CatchEntryInches : BaseCatchEntryActivity() {
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    android.util.Log.e("AdMob", "Banner failed in ${this@CatchEntryInches::class.java.simpleName}: ${error.message}")
                     adView.visibility = View.GONE
                 }
             }
