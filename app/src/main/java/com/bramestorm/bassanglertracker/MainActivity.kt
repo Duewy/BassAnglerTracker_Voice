@@ -83,11 +83,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //-------------------------- Open the Privacy Policy pdf 📝 --------------------
+        //-------------------------- Open the Privacy Policy webpage 📝 --------------------
         val btnPrivacyPolicy = findViewById<Button>(R.id.btnPrivacyPolicy)
         btnPrivacyPolicy.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Privacy_Policy.pdf"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            val privacyUrl = "https://duewy.github.io/Catch_and_Call_Help_Files/Privacy_Policy_Google.html"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
@@ -96,14 +96,14 @@ class MainActivity : AppCompatActivity() {
         //-------------------------- Open the Disclaimer pdf 📋 --------------------
         val btnDisclaimer = findViewById<Button>(R.id.btnDisclaimer)
         btnDisclaimer.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Disclaimer.pdf"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
+            val disclaimerUrl = "https://duewy.github.io/Catch_and_Call_Help_Files/Disclaimer_Google.html"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(disclaimerUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         // ──────────────────────────────────────────────
-        // 🔒 UPGRADE BUTTONS — gate locked features
+        // TODO 🔒 UPGRADE BUTTONS — gate locked features
         // ──────────────────────────────────────────────
         //
         //  HOW THIS WORKS:
