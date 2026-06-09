@@ -117,20 +117,23 @@ class SubscriptionPaywallActivity : AppCompatActivity() {
             runOnUiThread {
                 layout.removeView(loadingText)
 
-                if (targetTier != "provc") {
-                    layout.addView(TextView(this).apply {
-                        text = "⚠️ Tracker subscriptions are not active yet."
-                        textSize = 14f
-                        gravity = Gravity.CENTER
-                    }, layout.childCount - 1)
-                    return@runOnUiThread
+                val product = if (targetTier == "provc") {
+                    subscriptionManager.proVCProducts.firstOrNull()
+                } else {
+                    subscriptionManager.trackerProducts.firstOrNull()
                 }
 
-                val product = subscriptionManager.proVCProducts.firstOrNull()
+                val tierLabel = if (targetTier == "provc") "ProVC" else "Tracker"
 
                 if (product == null) {
+                    val missingProductId = if (targetTier == "provc") {
+                        SubscriptionManager.PROVC_SUBSCRIPTION
+                    } else {
+                        SubscriptionManager.TRACKER_SUBSCRIPTION
+                    }
+
                     layout.addView(TextView(this).apply {
-                        text = "⚠️ No ProVC subscription product found.\n\nMake sure catch_and_call_pro_vc exists in Google Play Console and is available."
+                        text = "⚠️ No $tierLabel subscription product found.\n\nMake sure $missingProductId exists in Google Play Console and is available."
                         textSize = 14f
                         gravity = Gravity.CENTER
                     }, layout.childCount - 1)
@@ -139,8 +142,20 @@ class SubscriptionPaywallActivity : AppCompatActivity() {
 
                 val offers = product.subscriptionOfferDetails.orEmpty()
 
-                val monthlyOffer = offers.firstOrNull { it.basePlanId == SubscriptionManager.PROVC_MONTHLY_BASE_PLAN }
-                val yearlyOffer = offers.firstOrNull { it.basePlanId == SubscriptionManager.PROVC_YEARLY_BASE_PLAN }
+                val monthlyBasePlanId = if (targetTier == "provc") {
+                    SubscriptionManager.PROVC_MONTHLY_BASE_PLAN
+                } else {
+                    SubscriptionManager.TRACKER_MONTHLY_BASE_PLAN
+                }
+
+                val yearlyBasePlanId = if (targetTier == "provc") {
+                    SubscriptionManager.PROVC_YEARLY_BASE_PLAN
+                } else {
+                    SubscriptionManager.TRACKER_YEARLY_BASE_PLAN
+                }
+
+                val monthlyOffer = offers.firstOrNull { it.basePlanId == monthlyBasePlanId }
+                val yearlyOffer = offers.firstOrNull { it.basePlanId == yearlyBasePlanId }
 
                 fun addPlanButton(
                     title: String,
@@ -151,8 +166,12 @@ class SubscriptionPaywallActivity : AppCompatActivity() {
 
                     val price = offer.pricingPhases.pricingPhaseList.firstOrNull()?.formattedPrice ?: "N/A"
                     val period = when (basePlanId) {
-                        SubscriptionManager.PROVC_YEARLY_BASE_PLAN -> "/ year"
-                        SubscriptionManager.PROVC_MONTHLY_BASE_PLAN -> "/ month"
+                        SubscriptionManager.PROVC_YEARLY_BASE_PLAN,
+                        SubscriptionManager.TRACKER_YEARLY_BASE_PLAN -> "/ year"
+
+                        SubscriptionManager.PROVC_MONTHLY_BASE_PLAN,
+                        SubscriptionManager.TRACKER_MONTHLY_BASE_PLAN -> "/ month"
+
                         else -> ""
                     }
 
@@ -175,12 +194,24 @@ class SubscriptionPaywallActivity : AppCompatActivity() {
                     layout.addView(btn, layout.childCount - 1)
                 }
 
-                addPlanButton("Catch And Call ProVC Monthly", monthlyOffer, SubscriptionManager.PROVC_MONTHLY_BASE_PLAN)
-                addPlanButton("Catch And Call ProVC Yearly", yearlyOffer, SubscriptionManager.PROVC_YEARLY_BASE_PLAN)
+                val monthlyTitle = if (targetTier == "provc") {
+                    "Catch And Call ProVC Monthly"
+                } else {
+                    "Catch And Call Tracker Monthly"
+                }
+
+                val yearlyTitle = if (targetTier == "provc") {
+                    "Catch And Call ProVC Yearly"
+                } else {
+                    "Catch And Call Tracker Yearly"
+                }
+
+                addPlanButton(monthlyTitle, monthlyOffer, monthlyBasePlanId)
+                addPlanButton(yearlyTitle, yearlyOffer, yearlyBasePlanId)
 
                 if (monthlyOffer == null && yearlyOffer == null) {
                     layout.addView(TextView(this).apply {
-                        text = "⚠️ No ProVC base plans found.\n\nMake sure monthly-provc and yearly-provc are active in Google Play Console."
+                        text = "⚠️ No $tierLabel base plans found.\n\nMake sure $monthlyBasePlanId and $yearlyBasePlanId are active in Google Play Console."
                         textSize = 14f
                         gravity = Gravity.CENTER
                     }, layout.childCount - 1)

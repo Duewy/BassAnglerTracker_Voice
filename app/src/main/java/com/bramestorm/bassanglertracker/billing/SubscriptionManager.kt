@@ -16,15 +16,16 @@ import com.android.billingclient.api.QueryPurchasesParams
 
 /**
  * SubscriptionManager.kt
+ * the Base or Basic build variant is free to use with advertisements
  *
  * Google Play Billing manager for subscription handling.
  *
- * Current Google Play setup for ProVC:
- * - Subscription product ID: catch_and_call_pro_vc
- * - Base plan IDs: monthly-provc, yearly-provc
- *
- * For now, Tracker billing is not queried until it is ready in Play Console.
+ * Current Google Play setup for Tracker, and ProVC:
+ * - Subscription product ID: catch_and_call_pro_vc, catch_and_call_tracker
+ * - Base plan IDs: monthly-provc, yearly-provc > monthly-tracker, yearly-tracker
  */
+
+
 class SubscriptionManager(private val context: Context) : PurchasesUpdatedListener {
 
     companion object {
