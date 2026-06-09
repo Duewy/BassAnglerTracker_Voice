@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.bramestorm.bassanglertracker.billing.SubscriptionPaywallActivity
 import com.bramestorm.bassanglertracker.training.UserManualModeTrainingIndex
 import com.bramestorm.bassanglertracker.training.UserTrainingVoiceCommands
 import com.bramestorm.bassanglertracker.utils.positionedToast
@@ -64,8 +65,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 positionedToast(
                     "Voice Controls are available in the Pro_VC edition only.\n" +
-                            "Upgrade to enable hands‑free 🎤 catch logging."
+                            "Opening upgrade options now..."
                 )
+                val intent = Intent(this, SubscriptionPaywallActivity::class.java)
+                intent.putExtra(SubscriptionPaywallActivity.EXTRA_TARGET_TIER, "provc")
+                startActivity(intent)
             }
         }
 
@@ -77,8 +81,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 positionedToast(
                     "See & Share is available in the Tracker or Pro_VC editions.\n" +
-                            "Upgrade to unlock catch mapping 🗺️ and sharing."
+                            "Opening upgrade options now..."
                 )
+                val intent = Intent(this, SubscriptionPaywallActivity::class.java)
+                intent.putExtra(SubscriptionPaywallActivity.EXTRA_TARGET_TIER, "tracker")
+                startActivity(intent)
             }
         }
 

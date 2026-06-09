@@ -32,12 +32,17 @@ class SubscriptionManager(private val context: Context) : PurchasesUpdatedListen
 
         // Google Play subscription product IDs
         const val PROVC_SUBSCRIPTION = "catch_and_call_pro_vc"
+        const val TRACKER_SUBSCRIPTION = "catch_and_call_tracker"
 
         // Base plan IDs / offer IDs for the ProVC subscription
         const val PROVC_MONTHLY_BASE_PLAN = "monthly-provc"
         const val PROVC_YEARLY_BASE_PLAN = "yearly-provc"
 
+        const val TRACKER_MONTHLY_BASE_PLAN = "monthly-tracker"
+        const val TRACKER_YEARLY_BASE_PLAN = "yearly-tracker"
+
         val ALL_PRODUCT_IDS = listOf(
+            TRACKER_SUBSCRIPTION,
             PROVC_SUBSCRIPTION
         )
     }
@@ -231,6 +236,7 @@ class SubscriptionManager(private val context: Context) : PurchasesUpdatedListen
     private fun tierFromProducts(productIds: List<String>): SubscriptionTier {
         return when {
             productIds.any { it == PROVC_SUBSCRIPTION } -> SubscriptionTier.PROVC
+            productIds.any { it == TRACKER_SUBSCRIPTION } -> SubscriptionTier.TRACKER
             else -> SubscriptionTier.BASE
         }
     }
@@ -259,7 +265,9 @@ class SubscriptionManager(private val context: Context) : PurchasesUpdatedListen
         }
 
     val trackerProducts: List<ProductDetails>
-        get() = emptyList()
+        get() = availableProducts.filter {
+            it.productId == TRACKER_SUBSCRIPTION
+        }
 
     fun endConnection() {
         billingClient.endConnection()
