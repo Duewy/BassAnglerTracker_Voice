@@ -23,8 +23,8 @@ android {
         applicationId = "com.bramestorm.bassanglertracker"
         minSdk = 23
         targetSdk = 35
-        versionCode = 4         // 04June2026
-        versionName = "1.6.1"
+        versionCode = 5         // 09June2026
+        versionName = "1.6.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
