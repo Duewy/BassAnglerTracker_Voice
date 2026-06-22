@@ -23,8 +23,8 @@ android {
         applicationId = "com.bramestorm.bassanglertracker"
         minSdk = 23
         targetSdk = 35
-        versionCode = 5         // 09June2026
-        versionName = "1.6.2"
+        versionCode = 6         // 22June2026  Ensure the VC stops when the tournament pages are closed
+        versionName = "1.6.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {

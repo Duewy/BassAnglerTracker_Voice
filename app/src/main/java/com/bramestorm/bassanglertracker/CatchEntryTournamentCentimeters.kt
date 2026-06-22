@@ -289,6 +289,7 @@ class CatchEntryTournamentCentimeters :  BaseCatchEntryActivity() {
 
     //------------- ON DESTROY --------------------
     override fun onDestroy() {
+        stopService(Intent(this, VoiceControlService::class.java))
         tts.stop()
         tts.shutdown()
         if (::voiceHelper.isInitialized) voiceHelper.shutdown()
