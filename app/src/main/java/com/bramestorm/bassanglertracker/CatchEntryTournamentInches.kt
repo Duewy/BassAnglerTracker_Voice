@@ -376,7 +376,7 @@ override val dialog: Any
         totalDecLengthInches.text = totalDec.toString()
 
         // !!!!!!!!!!!!!!!!!!!! 👍 MOTIVATIONAL TOASTS 👍 !!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // todo Set up Better Scenarios
+        // todo Set up Better Scenarios during Winter UpGrades
         val currentCount = dbHelper
             .getCatchesForToday("tournament_inches", getCurrentDate())
             .sortedByDescending { it.totalLengthQuarters ?: 0 }

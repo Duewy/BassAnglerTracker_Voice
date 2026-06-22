@@ -868,7 +868,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
     }
 
 
-    // todo NOT Sure what this is excluding??? Tournament from Fun Days????
     fun getAllCatchesExcludingPractice(): List<CatchItem> {
         val db = readableDatabase
         val list = mutableListOf<CatchItem>()

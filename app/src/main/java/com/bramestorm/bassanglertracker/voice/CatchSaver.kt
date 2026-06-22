@@ -26,7 +26,7 @@ object CatchSaver {
         // Convert Pounds + decimal to hundredth-Pounds integer
         val totalHundredthPounds = ((parsed.weightPounds ?: 0) * 100) + ((parsed.weightDec ?: 0) / 10)
 
-        // Convert kg + grams to hundredth-kg integer //todo why are we dividing all by 10????
+        // Convert kg + grams to hundredth-kg integer
         val totalHundredthKg = ((parsed.weightKgWhole ?: 0) * 100) + ((parsed.weightGrams ?: 0) / 10)
 
         // Convert inches + quarters to total quarters

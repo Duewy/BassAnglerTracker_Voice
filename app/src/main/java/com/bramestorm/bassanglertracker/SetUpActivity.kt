@@ -517,7 +517,7 @@ class SetUpActivity : AppCompatActivity() {
             } else {
                 // setup failed or was canceled → roll back the toggle
                 prefs.edit().putBoolean("voice_enabled", false).apply()
-                tglVoice.isChecked = false      //todo Should we add tglVoice.text = "Disabled" and tglVoice.background = orange ?????
+                tglVoice.isChecked = false
             }
         }
         if (requestCode == REQUEST_DEEP_DOZE_AGREEMENT) {

@@ -197,9 +197,10 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
     }
     //=================================================================================
     override fun onSpeechResult(transcript: String) {
-        Log.d("VCC_TRANSCRIPT", "Received: $transcript")
-        // TODO: implement actual parser or use broadcast response
+        // Voice catches are handled upstream by VoiceControlService
+        // and delivered via VOICE_CATCH_SAVED broadcast — no direct parsing needed here
     }
+
     //============================================================================
     private fun openWeightPopupPounds() {
         val popupIntent = Intent(this, PopupWeightEntryPounds::class.java)
@@ -237,7 +238,7 @@ class CatchEntryPounds : BaseCatchEntryActivity() {
     //============================================================================
     private fun updateListViewPounds() {
         val todaysDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val todaysCatches = dbHelper.getCatchesForToday("fun_pounds", todaysDate).sortedByDescending { it.dateTime } //todo check the correct catchType
+        val todaysCatches = dbHelper.getCatchesForToday("fun_pounds", todaysDate).sortedByDescending { it.dateTime }
 
         catchList.clear()
         catchList.addAll(todaysCatches)

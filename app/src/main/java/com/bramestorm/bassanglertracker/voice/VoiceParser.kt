@@ -83,7 +83,7 @@ object VoiceParser {
     }
 
     //-------------------------------------------------------------------------------------------
-    fun parsePoundsCatchWithClips(      //todo check this over there are likely errors...
+    fun parsePoundsCatchWithClips(
         transcript: String,
         speciesList: List<String>,
         clipColors: List<String>

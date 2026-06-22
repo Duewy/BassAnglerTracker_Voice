@@ -195,8 +195,8 @@ class CatchEntryKgs : BaseCatchEntryActivity() {
     }
 
     override fun onSpeechResult(transcript: String) {
-        Log.d("VCC_TRANSCRIPT", "Received: $transcript")
-        // TODO: implement actual parser
+        // Voice catches are handled upstream by VoiceControlService
+        // and delivered via VOICE_CATCH_SAVED broadcast — no direct parsing needed here
     }
 
     private fun openWeightPopupKgs() {
