@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.location.LocationManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -20,7 +21,7 @@ import java.util.Date
 import java.util.Locale
 
 // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!! +++++++ Added POUNDS to list +++++++
-class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 9) {
+class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 10) {
 
     private val prefs by lazy { context.getSharedPreferences("BassAnglerTrackerPrefs", Context.MODE_PRIVATE) }
 
@@ -30,6 +31,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         private const val COLUMN_DATE_TIME = "date_time"
         private const val COLUMN_LATITUDE = "latitude"
         private const val COLUMN_LONGITUDE = "longitude"
+        private const val COLUMN_GPS_STATUS = "gps_status"      // PENDING, FOUND, MISSING
+        private const val COLUMN_GPS_ATTEMPTS = "gps_attempts"  // integer retry count
         private const val COLUMN_SPECIES = "species"
         private const val COLUMN_TOTAL_WEIGHT_OZ = "total_weight_oz"                                // Stored in pounds ounces: 34 = 2 lbs and 2 oz
         private const val COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS = "total_weight_hundredth_pounds"    // Stored in hundredths of pounds: 225 = 2.25 lbs
@@ -48,6 +51,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             $COLUMN_DATE_TIME TEXT NOT NULL,
             $COLUMN_LATITUDE REAL,
             $COLUMN_LONGITUDE REAL,
+            $COLUMN_GPS_STATUS TEXT DEFAULT 'PENDING',
+            $COLUMN_GPS_ATTEMPTS INTEGER DEFAULT 0,
             $COLUMN_SPECIES TEXT NOT NULL,
             $COLUMN_TOTAL_WEIGHT_OZ INTEGER DEFAULT 0,
             $COLUMN_TOTAL_WEIGHT_HUNDREDTH_POUNDS INTEGER DEFAULT 0,
@@ -190,9 +195,14 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             Log.d("DB_UPGRADE", "🔧 Upgraded to version 9 — no schema changes.") // Just to track changes
         }
 
-        if (oldVersion > 9 ){
-            Log.d("DB_UPGRADE", "🔧 Upgraded to version 10 — no schema changes.")
-            // When Updated Add Information to this line...
+        if (oldVersion < 10) {
+            if (!columnExists(db, COLUMN_GPS_STATUS)) {
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_GPS_STATUS TEXT DEFAULT 'PENDING';")
+            }
+            if (!columnExists(db, COLUMN_GPS_ATTEMPTS)) {
+                db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_GPS_ATTEMPTS INTEGER DEFAULT 0;")
+            }
+            Log.d("DB_UPGRADE", "🔧 Upgraded to version 10 — added GPS tracking columns.")
         }
 
     }
@@ -214,6 +224,8 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 put(COLUMN_CATCH_TYPE, catch.catchType)
                 put(COLUMN_MARKER_TYPE, catch.markerType)
                 put(COLUMN_CLIP_COLOR, catch.clipColor)
+                put(COLUMN_GPS_STATUS, "PENDING")
+                put(COLUMN_GPS_ATTEMPTS, 0)
             }
 
             val rowId = db.insert(TABLE_NAME, null, values)
@@ -231,28 +243,10 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             Log.d("GPS_DEBUG", "GPS_ENABLED at insertCatch time = $gpsEnabled")
 
             if (gpsEnabled) {
-                // Try to get GPS after short delay (let sensors/wifi settle)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    getLastKnownLocation { location ->
-                        if (location != null) {
-                            updateCatchGPS(rowId.toInt(), location.latitude, location.longitude)
-                            Toast.makeText(
-                                context,
-                                "📍 GPS Saved: ${"%.5f".format(location.latitude)}, ${"%.5f".format(location.longitude)}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "⚠️ No GPS Location for that Catch.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            Log.w("GPS_DEBUG", "⚠️ No location found to save for catch ID=$rowId")
-                        }
-                    }
-                }, 3000L)
+                resolveGpsForCatchWithRetry(rowId.toInt(), maxAttempts = 4)
             } else {
                 Log.d("GPS_DEBUG", "GPS disabled by user; not requesting location for catch ID=$rowId")
+                updateCatchGpsStatus(rowId.toInt(), "MISSING", 0)
             }
 
             return true
@@ -302,14 +296,70 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return catchList
     }
 
-    private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double) {
+    private fun isLocationServiceEnabled(): Boolean {
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun updateCatchGpsStatus(catchId: Int, status: String, attempts: Int) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_GPS_STATUS, status)
+            put(COLUMN_GPS_ATTEMPTS, attempts)
+        }
+        db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
+        db.close()
+    }
+
+    private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double, attempts: Int = 1) {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, lat)
             put(COLUMN_LONGITUDE, lon)
+            put(COLUMN_GPS_STATUS, "FOUND")
+            put(COLUMN_GPS_ATTEMPTS, attempts)
         }
         db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
         db.close()
+    }
+
+    private fun resolveGpsForCatchWithRetry(catchId: Int, maxAttempts: Int) {
+        // ✅ Check phone Location setting first
+        if (!isLocationServiceEnabled()) {
+            updateCatchGpsStatus(catchId, "MISSING", 0)
+            Toast.makeText(context, "⚠️ Location is OFF on device.", Toast.LENGTH_SHORT).show()
+            Log.w("GPS_DEBUG", "Location services OFF for catch ID=$catchId")
+            return
+        }
+
+            fun attempt(n: Int) {
+                getLastKnownLocation { location ->
+                    if (location != null) {
+                        updateCatchGPS(catchId, location.latitude, location.longitude, n)
+                        Toast.makeText(
+                            context,
+                            "📍 GPS Saved: ${"%.5f".format(location.latitude)}, ${"%.5f".format(location.longitude)}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (n < maxAttempts) {
+                        updateCatchGpsStatus(catchId, "PENDING", n)
+                        val delayMs = when (n) {
+                            1 -> 3000L
+                            2 -> 7000L
+                            3 -> 12000L
+                            else -> 15000L
+                        }
+                        Handler(Looper.getMainLooper()).postDelayed({ attempt(n + 1) }, delayMs)
+                    } else {
+                        updateCatchGpsStatus(catchId, "MISSING", n)
+                        Toast.makeText(context, "⚠️ No GPS Location for that Catch.", Toast.LENGTH_SHORT).show()
+                        Log.w("GPS_DEBUG", "⚠️ GPS unresolved after $n attempts for catch ID=$catchId")
+                    }
+                }
+            }
+
+        attempt(1)
     }
 
     fun updateCatch(
@@ -363,8 +413,12 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             catchType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATCH_TYPE)),
             markerType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MARKER_TYPE)),
             clipColor = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLIP_COLOR)),
-            latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUDE)),
-            longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUDE))
+            latitude = cursor.getColumnIndex(COLUMN_LATITUDE).let { idx ->
+                if (idx >= 0 && !cursor.isNull(idx)) cursor.getDouble(idx) else null
+            },
+            longitude = cursor.getColumnIndex(COLUMN_LONGITUDE).let { idx ->
+                if (idx >= 0 && !cursor.isNull(idx)) cursor.getDouble(idx) else null
+            }
         )
     }
 

@@ -259,12 +259,12 @@ class ShareFishingLogsActivity : AppCompatActivity() {
 
                 // ----- HEADER -----
                 val headers = mutableListOf<String>()
-                if (chkIncludeDate.isChecked)      headers.add("DateTime")
+                if (chkIncludeDate.isChecked)      headers.add("Date/Time")
                 if (chkIncludeSpecies.isChecked)   headers.add("Species")
                 if (chkIncludeWeight.isChecked)    headers.add("Weight")
                 if (chkIncludeLength.isChecked)    headers.add("Length")
-                if (chkIncludeGPS.isChecked)       headers.add("GPS")
                 if (chkIncludeCatchType.isChecked) headers.add("CatchType")
+                if (chkIncludeGPS.isChecked)       headers.add("GPS")
 
                 writer.println(headers.joinToString(","))
 
@@ -321,20 +321,23 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                         row.add(lengthStr)
                     }
 
-                    // GPS
-                    if (chkIncludeGPS.isChecked) {
-                        val gps = if ((catch.latitude != 0.0) || (catch.longitude != 0.0))
-                            "${catch.latitude},${catch.longitude}"
-                        else ""
-                        row.add(gps)
-                    }
-
                     // Catch type
                     if (chkIncludeCatchType.isChecked)
                         row.add(catch.catchType ?: "")
 
-                    // WRITE CSV SAFELY
-                    writer.println(row.joinToString(",") { toCsvField(it) })
+                    // GPS
+                    if (chkIncludeGPS.isChecked) {
+                        val gps = if (catch.latitude != null && catch.longitude != null) {
+                            "${catch.latitude},${catch.longitude}"
+                        } else {
+                            ""
+                        }
+                        row.add(gps)
+                    }
+
+                    // WRITE CSV SAFELY (must be after all row fields are added)
+                writer.println(row.joinToString(",") { toCsvField(it) })
+
                 }
             }
 
