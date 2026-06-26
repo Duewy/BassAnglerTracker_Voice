@@ -519,6 +519,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
         // Only include catches with GPS
         whereClauses.add("latitude IS NOT NULL AND longitude IS NOT NULL")
+        whereClauses.add("$COLUMN_GPS_STATUS = 'FOUND'")
 
         // Optional species filter
         if (species.isNotBlank() && species.lowercase() != "all") {
@@ -537,7 +538,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         val from = fromDate.ifBlank { today }
         val to = toDate.ifBlank { today }
 
-        whereClauses.add("$COLUMN_DATE_TIME BETWEEN ? AND ?")
+        whereClauses.add("strftime('%Y-%m-%d', $COLUMN_DATE_TIME) BETWEEN ? AND ?")
         args.add(from)
         args.add(to)
 

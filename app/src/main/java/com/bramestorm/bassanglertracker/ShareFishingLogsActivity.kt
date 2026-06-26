@@ -407,7 +407,7 @@ class ShareFishingLogsActivity : AppCompatActivity() {
                 for (catch in catches) {
 
                     // ignore empty GPS
-                    if (catch.latitude == 0.0 || catch.longitude == 0.0) continue
+                    if (catch.latitude == null || catch.longitude == null) continue
 
                     val iconUrl = getKmlIconForCatch(catch.catchType, catch.clipColor)
 
