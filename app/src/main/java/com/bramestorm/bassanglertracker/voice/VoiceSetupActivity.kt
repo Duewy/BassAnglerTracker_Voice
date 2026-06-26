@@ -110,7 +110,7 @@ class VoiceSetupActivity : AppCompatActivity() {
 
         btnPDF.setOnClickListener {
             // Assuming PDF is in assets or served via GitHub
-            val url = "https://raw.githubusercontent.com/Duewy/Catch_and_Cull_Help_Files/main/Voice_Assistant_Setup_Guide_CatchAndCall.pdf"
+            val url = "https://raw.githubusercontent.com/Duewy/Catch_and_Call_Help_Files/main/Voice_Assistant_Setup_Guide_CatchAndCall.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
         }

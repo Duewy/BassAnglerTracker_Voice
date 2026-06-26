@@ -48,8 +48,8 @@ object CatchSaver {
             catchType = catchType,
             markerType = parsed.clipColor ?: "",
             clipColor = parsed.clipColor ?: "",
-            latitude = 0.0,
-            longitude = 0.0
+            latitude = null,
+            longitude = null
         )
 
         // Insert into the database

@@ -49,35 +49,35 @@ class UserManualModeTrainingIndex : AppCompatActivity() {
         // GitHub Repository has all saved files on...
 
         btnFunDayFishing.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Fun_Day.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Android_iOS_Fun_Day.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnTournamentFishing.setOnClickListener{
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Tournament.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Android_iOS_Tournament.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnShareTop5.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_Find_Top_5_Catches.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Android_Find_Top_5_Catches.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnWhatIsGPS.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_iOS_Setup_GPS.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Android_iOS_Setup_GPS.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)
         }
 
         btnMappingGPS.setOnClickListener {
-            val pdfUrl = "https://github.com/Duewy/Catch_and_Cull_Help_Files/raw/main/Android_Save_CSV_or_KML_Files.pdf"
+            val pdfUrl = "https://github.com/Duewy/Catch_and_Call_Help_Files/raw/main/Android_Save_CSV_or_KML_Files.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivity(intent)

@@ -89,7 +89,9 @@ class VoiceControlService : Service() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+        // TODO look into the UPSIDE DOWN CAKE stuff THIS Winter.
+ @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+
     override fun onCreate() {
             super.onCreate()
 

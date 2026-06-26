@@ -67,7 +67,7 @@ class UserTrainingVoiceCommands : AppCompatActivity() {
         // GitHub has saved files on...
 
         btnWhatIsVCC.setOnClickListener {
-            val pdfUrl = "https://raw.githubusercontent.com/Duewy/Catch_and_Cull_Help_Files/main/Voice_Control_Guide.pdf"
+            val pdfUrl = "https://raw.githubusercontent.com/Duewy/Catch_and_Call_Help_Files/main/Voice_Control_Guide.pdf"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl)).apply {
                 flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             }
