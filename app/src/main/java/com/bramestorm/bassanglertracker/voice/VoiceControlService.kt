@@ -49,7 +49,7 @@ class VoiceControlService : Service() {
     private var sessionActive = false
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
-
+    private var lastWakeAt = 0L
 
     /** 1️⃣ Only one callback, wired to call onWake() on ACTION_DOWN */
     private val mediaButtonCallback = object : MediaSessionCompat.Callback() {
@@ -174,13 +174,20 @@ class VoiceControlService : Service() {
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */
     private fun onWake() {
+        val now = System.currentTimeMillis()
+        if (now - lastWakeAt < 1200L) {
+            Log.d(TAG, "⏱️ onWake throttled")
+            return
+        }
+        lastWakeAt = now
+
         if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) {
             Log.d(TAG, "⛔ onWake() blocked — sessionActive=$sessionActive")
             return
         }
 
         sessionActive = true
-        Log.d(TAG, "🔁 onWake() called — sessionActive=$sessionActive")
+        Log.d(TAG, "🔁 onWake() called — sessionActive")
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
 
         val uiHelper = object : VoiceUiHelper {

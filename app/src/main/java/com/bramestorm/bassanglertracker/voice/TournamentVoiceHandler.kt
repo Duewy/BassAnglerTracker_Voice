@@ -63,8 +63,9 @@ class TournamentVoiceHandler(
     /** Entry point for service wake or media-button tap. */
     override fun onWake() {
         Log.d(TAG, "onWake() called")
-        // Clear any stuck session flags that block restart
-        endSession("Forced reset via Bluetooth button")
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
         startVoiceSession()
     }
 
@@ -176,12 +177,52 @@ class TournamentVoiceHandler(
                 }
                 // Heard yes/no/cancel but missing "over" — nudge them
                 clean.contains("yes") || clean.contains("no") || clean.contains("cancel") -> {
-                    uiHelper.speak("Please say your answer followed by Over. Over.", "TTS_RETRY")
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        parseAndConfirm(transcript)
-                    }, 1500)
+                    uiHelper.speak("Please answer yes, no, or cancel, and end with Over.", "TTS_RETRY")
+                    (context as? VoiceControlService)?.startVoiceSession(
+                        "Please answer yes, no, or cancel, and end with Over.",
+                        uiHelper
+                    ) { retryResponse ->
+                        val r = retryResponse.trim().lowercase()
+                        when {
+                            r.contains("yes") && r.contains("over") -> saveCatch(parsed)
+                            r.contains("no") && r.contains("over") -> startVoiceSession()
+                            r.contains("cancel") && r.contains("over") -> {
+                                uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
+                                endSession("cancel from confirm retry")
+                            }
+                            else -> {
+                                uiHelper.speak("No problem. Ending voice entry. Over and Out.", "TTS_FAIL")
+                                endSession("invalid confirm retry response")
+                            }
+                        }
+                    } ?: endSession("VoiceControlService unavailable during confirm retry")
                 }
-                else -> startVoiceSession()
+                else -> {
+                    parseRetryCount++
+                    if (parseRetryCount > maxParseRetries) {
+                        uiHelper.speak("I couldn't confirm that. Ending voice entry. Over and Out.", "TTS_FAIL")
+                        endSession("confirm fallback exceeded")
+                    } else {
+                        (context as? VoiceControlService)?.startVoiceSession(
+                            "Please answer yes, no, or cancel, and end with Over.",
+                            uiHelper
+                        ) { retryResponse ->
+                            val r = retryResponse.trim().lowercase()
+                            when {
+                                r.contains("yes") && r.contains("over") -> saveCatch(parsed)
+                                r.contains("no") && r.contains("over") -> startVoiceSession()
+                                r.contains("cancel") && r.contains("over") -> {
+                                    uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
+                                    endSession("cancel from confirm retry")
+                                }
+                                else -> {
+                                    uiHelper.speak("No problem. Ending voice entry. Over and Out.", "TTS_FAIL")
+                                    endSession("invalid confirm response")
+                                }
+                            }
+                        } ?: endSession("VoiceControlService unavailable during confirm fallback")
+                    }
+                }
             }
         } ?: run {
             endSession("VoiceControlService not available")

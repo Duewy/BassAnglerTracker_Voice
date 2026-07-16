@@ -42,6 +42,8 @@ class FunDayVoiceHandler(
 
     private val maxParseRetries = 3
     private var parseRetryCount = 0
+    private var confirmRetryCount = 0
+    private val maxConfirmRetries = 2
 
     private var inQuestionMode = false
     private val maxQuestionRetries = 3
@@ -98,6 +100,9 @@ class FunDayVoiceHandler(
 
     private fun onCatchConfirmed(transcript: String) {
         Log.d(TAG, "onCatchConfirmed('$transcript')")
+        parseRetryCount = 0
+        confirmRetryCount = 0
+
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseImperialCatchSimple(transcript)
             MeasurementMode.POUNDS -> VoiceParser.parsePoundsCatchSimple(transcript)
@@ -135,7 +140,7 @@ class FunDayVoiceHandler(
                 "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths"
             )
             uiHelper.speak(
-                "You said an inaccurate value. Let's try that again.",
+                "You said an inaccurate value. Lets try that again.",
                 "TTS_INVALID_UNIT"
             )
             Handler(Looper.getMainLooper()).postDelayed({ startSession() }, 1500)
@@ -147,7 +152,7 @@ class FunDayVoiceHandler(
             parseRetryCount++
             if (parseRetryCount > maxParseRetries) {
                 uiHelper.speak(
-                    "Sorry, I still can't understand—let's try again later. Over.",
+                    "Sorry, I still can not understand—let's try again later. Over.",
                     "TTS_FAIL"
                 )
                 endSession("too many parse retries")
@@ -262,20 +267,43 @@ class FunDayVoiceHandler(
             onResult = { response ->
                 val clean = response.trim().lowercase(Locale.getDefault())
                 when {
-                    clean.contains("yes") && clean.contains("over")    -> saveCatch(parsed)
-                    clean.contains("no") && clean.contains("over")     -> startSession()
+                    clean.contains("yes") && clean.contains("over") -> saveCatch(parsed)
+
+                    clean.contains("no") && clean.contains("over") -> {
+                        confirmRetryCount = 0
+                        startSession()
+                    }
+
                     clean.contains("cancel") && clean.contains("over") -> {
                         uiHelper.speak("Okay, canceling. Over and Out.", "TTS_CANCEL")
                         endSession("cancel from confirm prompt")
                     }
-                    // Heard yes/no/cancel but missing "over" — nudge them
+
+                    // Heard intent but missed protocol word
                     clean.contains("yes") || clean.contains("no") || clean.contains("cancel") -> {
-                        uiHelper.speak("Please say your answer followed by Over. Over.", "TTS_RETRY")
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            askConfirmation(parsed, confirmPrompt)
-                        }, 1500)
+                        confirmRetryCount++
+                        if (confirmRetryCount > maxConfirmRetries) {
+                            uiHelper.speak("I could not confirm that. Ending voice entry. Over and Out.", "TTS_FAIL")
+                            endSession("confirm retries exceeded")
+                        } else {
+                            uiHelper.speak("Please answer yes, no, or cancel, and end with Over.", "TTS_RETRY")
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                askConfirmation(parsed, "Please answer yes, no, or cancel, and end with Over.")
+                            }, 1200)
+                        }
                     }
-                    else -> startSession()
+
+                    else -> {
+                        confirmRetryCount++
+                        if (confirmRetryCount > maxConfirmRetries) {
+                            uiHelper.speak("No problem. Ending voice entry. Over and Out.", "TTS_FAIL")
+                            endSession("unrecognized confirm response")
+                        } else {
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                askConfirmation(parsed, "Please answer yes, no, or cancel, and end with Over.")
+                            }, 1200)
+                        }
+                    }
                 }
             },
             onFailure = {
@@ -405,8 +433,8 @@ class FunDayVoiceHandler(
                         val grams = totalHundredths % 100
                         "Your total weight today is $kgs point $grams kilograms. $overOut"
                     }
-                    MeasurementMode.INCHES -> "Weight stats aren't available in inches mode. $overOut"
-                    MeasurementMode.CM -> "Weight stats aren't available in centimeter mode. $overOut"
+                    MeasurementMode.INCHES -> "Weight stats are not available in inches mode. $overOut"
+                    MeasurementMode.CM -> "Weight stats are not available in centimeter mode. $overOut"
                 }
                 uiHelper.speak(msg, "TTS_ANSWER")
                 endSession("answered total weight question")
@@ -415,9 +443,9 @@ class FunDayVoiceHandler(
             question.contains("total length", true) -> {
                 // ── FIX: Only answer in length modes, format properly ──
                 val msg = when (measurementMode) {
-                    MeasurementMode.LBS_OZ -> "Length stats aren't available in pounds and ounces mode. $overOut"
-                    MeasurementMode.POUNDS -> "Length stats aren't available in pounds mode. $overOut"
-                    MeasurementMode.KG -> "Length stats aren't available in kilograms mode. $overOut"
+                    MeasurementMode.LBS_OZ -> "Length stats are not available in pounds and ounces mode. $overOut"
+                    MeasurementMode.POUNDS -> "Length stats are not available in pounds mode. $overOut"
+                    MeasurementMode.KG -> "Length stats are not available in kilograms mode. $overOut"
                     MeasurementMode.INCHES -> {
                         val totalQuarters = validCatches.sumOf { it.totalLengthQuarters ?: 0 }
                         val inches = totalQuarters / 4
@@ -487,7 +515,7 @@ class FunDayVoiceHandler(
                     endSession("too many question retries")
                 } else {
                     uiHelper.speak(
-                        "Sorry, I didn't catch that. Say largest, smallest, total weight, total length, how many, average, or what time is it. $overOut",
+                        "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, or what time is it. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
                     Handler(Looper.getMainLooper()).postDelayed({ handleQuestionMode() }, 1500)
@@ -532,11 +560,12 @@ class FunDayVoiceHandler(
         }
     }
 
-    // ─── endSession() — matches TournamentVoiceHandler ───
+    // ─── END Session() — matches TournamentVoiceHandler ───
     private fun endSession(reason: String = "User cancel") {
         Log.d(TAG, "Session ended: $reason")
         (context as? VoiceControlService)?.markSessionComplete()
         inQuestionMode = false
+        confirmRetryCount = 0
         parseRetryCount = 0
         questionRetryCount = 0
     }

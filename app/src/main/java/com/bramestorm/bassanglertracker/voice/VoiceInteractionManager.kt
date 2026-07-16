@@ -27,6 +27,8 @@ class VoiceInteractionManager(
     private val sessionId = System.currentTimeMillis()
     private var onFailureCallback: (() -> Unit)? = null
     private var firstListenAttempt = true
+    private var isListening = false
+    private var isShuttingDown = false
 
     // ── Reusable recognizer intent ──
     private val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -48,10 +50,35 @@ class VoiceInteractionManager(
         override fun onBufferReceived(buffer: ByteArray?) {}
         override fun onEndOfSpeech() {}
         override fun onError(error: Int) {
+            isListening = false
             Log.d("VCC_STT", "❌ STT error code: $error")
-            retryOrFail()
+
+            when (error) {
+                SpeechRecognizer.ERROR_NO_MATCH,
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
+                    retryOrFail()
+                }
+
+                SpeechRecognizer.ERROR_NETWORK,
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> {
+                    Log.w("VCC_STT", "🌐 Network STT error — one delayed retry path")
+                    handler.postDelayed({ retryOrFail() }, 1800)
+                }
+
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY,
+                SpeechRecognizer.ERROR_CLIENT,
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
+                    Log.w("VCC_STT", "⛔ Non-retryable STT error: $error")
+                    onFailureCallback?.invoke()
+                }
+
+                else -> {
+                    retryOrFail()
+                }
+            }
         }
         override fun onResults(results: Bundle?) {
+            isListening = false
             val transcript = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
             if (transcript != null) {
                 Log.d("VCC_STT", "✅ STT result: '$transcript'")
@@ -67,28 +94,31 @@ class VoiceInteractionManager(
     fun startSession(
         prompt: String,
         onResult: (String) -> Unit,
-        onFailure: (() -> Unit)? = null )
-    {
+        onFailure: (() -> Unit)? = null
+    ) {
         this.onFailureCallback = onFailure
         retryCount = 0
         firstListenAttempt = true
         onTranscriptResult = onResult
 
-        // ── Create recognizer ONCE per session, on the main thread ──
-        handler.post {
-            recognizer?.destroy()
-            recognizer = SpeechRecognizer.createSpeechRecognizer(context)
-            recognizer?.setRecognitionListener(recognitionListener)
+        // ✅ Reset per new session
+        isShuttingDown = false
+        isListening = false
+        handler.removeCallbacksAndMessages(null)
+
+        // ✅ Ensure recognizer is ready BEFORE TTS can trigger onDone -> startListening()
+        recognizer?.destroy()
+        recognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+            setRecognitionListener(recognitionListener)
         }
 
         tts?.stop()
         tts?.shutdown()
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts!!.language = Locale.getDefault()
+                tts?.language = Locale.getDefault()
 
-                // ✅ Set listener BEFORE speaking — guaranteed to catch onDone
-                tts!!.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(uttId: String?) {}
                     override fun onError(uttId: String?) {}
                     override fun onDone(uttId: String?) {
@@ -101,19 +131,26 @@ class VoiceInteractionManager(
                     }
                 })
 
-                val utteranceId = if (prompt.contains("is that correct?", true)) "TTS_CONFIRM" else "TTS_PROMPT"
+                val utteranceId =
+                    if (prompt.contains("is that correct?", true)) "TTS_CONFIRM" else "TTS_PROMPT"
+
                 Log.d("VCC_MANAGER", "🎬 [$sessionId] startSession() called")
                 Log.d("VCC_TTS", "🗣️ Speaking with ID: $utteranceId → \"$prompt\"")
 
-                tts!!.speak(prompt, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+                tts?.speak(prompt, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+            } else {
+                Log.w("VCC_TTS", "❌ TTS init failed: status=$status")
+                onFailureCallback?.invoke()
             }
         }
     }
 
     private fun startListening() {
         // ── Just start listening — recognizer already created ──
-        Log.d("VCC_STT", "🎤 startListening() called")
+        if (isShuttingDown || isListening) return
+        isListening = true
         recognizer?.startListening(recognizerIntent)
+        Log.d("VCC_STT", "🎤 startListening() called")
     }
 
     private fun retryOrFail() {
@@ -136,6 +173,8 @@ class VoiceInteractionManager(
     }
 
     fun shutdown() {
+        isShuttingDown = true
+        handler.removeCallbacksAndMessages(null)
         recognizer?.destroy()
         recognizer = null
         tts?.stop()

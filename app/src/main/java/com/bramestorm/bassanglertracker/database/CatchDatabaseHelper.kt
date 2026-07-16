@@ -1,5 +1,9 @@
 package com.bramestorm.bassanglertracker.database
 
+// THis is where ALL the Data is Gathered and Stored
+// The GPS is set
+// The Tournament Color is sorted out
+
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
@@ -19,6 +23,7 @@ import com.google.android.gms.location.LocationServices
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 // !!!!!!!!!!!!! Set the Version of Upgrades so the DataBase follows.  !!!!!!!!!!!! +++++++ Added POUNDS to list +++++++
 class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "catch_database.db", null, 10) {
@@ -309,7 +314,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             put(COLUMN_GPS_ATTEMPTS, attempts)
         }
         db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
-        db.close()
     }
 
     private fun updateCatchGPS(catchId: Int, lat: Double, lon: Double, attempts: Int = 1) {
@@ -321,7 +325,6 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             put(COLUMN_GPS_ATTEMPTS, attempts)
         }
         db.update(TABLE_NAME, values, "$COLUMN_ID=?", arrayOf(catchId.toString()))
-        db.close()
     }
 
     private fun resolveGpsForCatchWithRetry(catchId: Int, maxAttempts: Int) {
@@ -334,6 +337,13 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         }
 
             fun attempt(n: Int) {
+                val gpsEnabled = prefs.getBoolean("GPS_ENABLED", false)
+                if (!gpsEnabled || !isLocationServiceEnabled()) {
+                    updateCatchGpsStatus(catchId, "MISSING", n - 1)
+                    Log.w("GPS_DEBUG", "GPS disabled during retry; stopping for catch ID=$catchId")
+                    return
+                }
+
                 getLastKnownLocation { location ->
                     if (location != null) {
                         updateCatchGPS(catchId, location.latitude, location.longitude, n)
@@ -453,46 +463,59 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
             return
         }
 
-        fused.lastLocation
-            .addOnSuccessListener { last ->
-                if (last != null && isLocationFreshAndAccurate(last)) {
-                    Log.d("GPS_DEBUG", "✅ Using lastLocation: ${last.latitude}, ${last.longitude}, acc=${last.accuracy}")
-                    callback(last)
-                } else {
-                    Log.d("GPS_DEBUG", "ℹ️ lastLocation is null or not good enough, requesting fresh update...")
+        fused.lastLocation.addOnSuccessListener { last ->
+            if (last != null && isLocationFreshAndAccurate(last)) {
+                callback(last)
+                return@addOnSuccessListener
+            }
 
-                    val req = com.google.android.gms.location.LocationRequest.Builder(
-                        com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-                        1_000L
-                    ).apply {
-                        setMinUpdateIntervalMillis(500L)
-                        setMaxUpdates(1)
-                    }.build()
+            val req = com.google.android.gms.location.LocationRequest.Builder(
+                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                1_000L
+            ).apply {
+                setMinUpdateIntervalMillis(500L)
+                setMaxUpdates(1)
+                setWaitForAccurateLocation(true)
+            }.build()
 
+            var delivered = false
+            lateinit var cb: com.google.android.gms.location.LocationCallback
 
-                    fused.requestLocationUpdates(
-                        req,
-                        object : com.google.android.gms.location.LocationCallback() {
-                            override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
-                                val fresh = result.lastLocation
-                                if (fresh != null && isLocationFreshAndAccurate(fresh)) {
-                                    Log.d("GPS_DEBUG", "📡 Fresh GPS: ${fresh.latitude}, ${fresh.longitude}, acc=${fresh.accuracy}")
-                                    callback(fresh)
-                                } else {
-                                    Log.w("GPS_DEBUG", "⚠️ Fresh GPS not accurate enough or null.")
-                                    callback(null)
-                                }
-                                fused.removeLocationUpdates(this)
-                            }
-                        },
-                        Looper.getMainLooper()
-                    )
+            fun finishOnce(loc: android.location.Location?) {
+                if (delivered) return
+                delivered = true
+                try { fused.removeLocationUpdates(cb) } catch (_: Exception) {}
+                callback(loc)
+            }
+
+            val timeoutRunnable = Runnable {
+                Log.w("GPS_DEBUG", "⏱️ GPS timeout waiting for fresh location")
+                finishOnce(null)
+            }
+
+            Handler(Looper.getMainLooper()).postDelayed(timeoutRunnable, 10_000L)
+
+            cb = object : com.google.android.gms.location.LocationCallback() {
+                override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
+                    Handler(Looper.getMainLooper()).removeCallbacks(timeoutRunnable)
+                    val fresh = result.lastLocation
+                    if (fresh != null && isLocationFreshAndAccurate(fresh)) {
+                        finishOnce(fresh)
+                    } else {
+                        finishOnce(null)
+                    }
                 }
             }
-            .addOnFailureListener { e ->
-                Log.e("GPS_DEBUG", "❌ Failed to get location: ${e.message}")
-                callback(null)
-            }
+
+            fused.requestLocationUpdates(req, cb, Looper.getMainLooper())
+                .addOnFailureListener { e ->
+                    Handler(Looper.getMainLooper()).removeCallbacks(timeoutRunnable)
+                    Log.e("GPS_DEBUG", "❌ requestLocationUpdates failed: ${e.message}")
+                    finishOnce(null)
+                }
+        }.addOnFailureListener {
+            callback(null)
+        }
     }
 
     private fun getCurrentDateTime(): String {
