@@ -50,6 +50,7 @@ class VoiceControlService : Service() {
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
     private var activeResponseManager: VoiceResponseManager? = null
+    private var isCleaningUpSession = false
     private var lastWakeAt = 0L
 
     /** 1️⃣ Only one callback, wired to call onWake() on ACTION_DOWN */
@@ -276,19 +277,34 @@ class VoiceControlService : Service() {
         reason: String,
         shutdownHandler: Boolean
     ) {
-        if (shutdownHandler) {
-            activeVoiceSession?.shutdown()
+        if (isCleaningUpSession) {
+            Log.d(TAG, "🧹 Active voice session cleanup already in progress: $reason")
+            return
         }
+
+        isCleaningUpSession = true
+        val voiceSession = activeVoiceSession
+        val engine = voiceEngine
+        val responseManager = activeResponseManager
+
         activeVoiceSession = null
-        voiceEngine?.shutdown()
         voiceEngine = null
-        activeResponseManager?.shutdown()
         activeResponseManager = null
         sessionActive = false
-        if (::wakeLock.isInitialized && wakeLock.isHeld) {
-            wakeLock.release()
+
+        try {
+            if (::wakeLock.isInitialized && wakeLock.isHeld) {
+                wakeLock.release()
+            }
+            if (shutdownHandler) {
+                voiceSession?.shutdown()
+            }
+            engine?.shutdown()
+            responseManager?.shutdown()
+            Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
+        } finally {
+            isCleaningUpSession = false
         }
-        Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
     }
 
     private fun createChannel() {
