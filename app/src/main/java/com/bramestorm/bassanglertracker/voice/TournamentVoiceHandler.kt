@@ -422,7 +422,7 @@ class TournamentVoiceHandler(
 
 
     override fun shutdown() {
-        clearLocalSessionState()
+        resetLocalSessionState(markShuttingDown = true)
         Log.d("TournamentVoiceHandler", "🔻 shutdown called")
     }
 
@@ -786,14 +786,17 @@ class TournamentVoiceHandler(
     }
 
     private fun clearLocalSessionState() {
-        isShuttingDown = true
-        mainHandler.removeCallbacksAndMessages(null)
-        inQuestionMode = false
-        parseRetryCount = 0
-        questionRetryCount = 0
+        resetLocalSessionState(markShuttingDown = true)
     }
 
     private fun prepareForServiceCompletion() {
+        resetLocalSessionState(markShuttingDown = false)
+    }
+
+    private fun resetLocalSessionState(markShuttingDown: Boolean) {
+        if (markShuttingDown) {
+            isShuttingDown = true
+        }
         mainHandler.removeCallbacksAndMessages(null)
         inQuestionMode = false
         parseRetryCount = 0
