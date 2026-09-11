@@ -295,6 +295,11 @@ class VoiceControlService : Service() {
         message: String,
         reason: String
     ) {
+        val timeoutHandler = Handler(Looper.getMainLooper())
+        val cleanupFallback = Runnable {
+            Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
+            cleanupActiveSession(reason)
+        }
         val responseManager = synchronized(cleanupLock) {
             if (!sessionActive || isCleaningUpSession) {
                 null
@@ -308,7 +313,9 @@ class VoiceControlService : Service() {
             return
         }
 
+        timeoutHandler.postDelayed(cleanupFallback, 8_000L)
         responseManager.speak(message) {
+            timeoutHandler.removeCallbacks(cleanupFallback)
             cleanupActiveSession(reason)
             reason
         }

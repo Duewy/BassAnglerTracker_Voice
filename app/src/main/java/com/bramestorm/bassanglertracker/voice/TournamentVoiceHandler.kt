@@ -304,9 +304,9 @@ class TournamentVoiceHandler(
         // ── 3. GATHER STATS (catch is now in the DB) ──
         val todaysCullingDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val allTodaysCatches = dbHelper.getCatchesForToday(typeEntry, todaysCullingDate)
-        lastCatchItem = allTodaysCatches.firstOrNull { catch ->
-            catch.id == insertedCatchId
-        } ?: dbItem.copy(id = insertedCatchId)
+        lastCatchItem = dbHelper.getCatchByRowId(insertedCatchId)
+            ?: allTodaysCatches.firstOrNull { catch -> catch.id.toLong() == insertedCatchId }
+            ?: dbItem
         val sortedAll = allTodaysCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
         val totalCatchCount = sortedAll.size
         val limit = tournamentCatchLimit

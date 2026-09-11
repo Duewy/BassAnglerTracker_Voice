@@ -218,7 +218,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
         return insertCatchAndReturnId(catch) != null
     }
 
-    fun insertCatchAndReturnId(catch: CatchItem): Int? {
+    fun insertCatchAndReturnId(catch: CatchItem): Long? {
         val db = this.writableDatabase
 
         try {
@@ -258,7 +258,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 updateCatchGpsStatus(rowId.toInt(), "MISSING", 0)
             }
 
-            return rowId.toInt()
+            return rowId
 
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
@@ -875,6 +875,10 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
     //----------------------- GET MOTIVATIONAL MESSAGE INFORMATION ---------------------------------
     fun getCatchById(catchId: Int): CatchItem? {
+        return getCatchByRowId(catchId.toLong())
+    }
+
+    fun getCatchByRowId(catchId: Long): CatchItem? {
         val db = readableDatabase
         val cursor = db.query(
             "catches",
