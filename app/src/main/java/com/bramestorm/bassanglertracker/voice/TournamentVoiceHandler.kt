@@ -95,8 +95,10 @@ class TournamentVoiceHandler(
             val clean = transcript.trim().lowercase()
             when {
                 clean.contains("cancel") -> {
-                    uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
-                    endSession("cancel from initial prompt")
+                    endSessionWithMessage(
+                        message = "Catch cancelled. Over and Out.",
+                        reason = "cancel from initial prompt"
+                    )
                 }
                 clean.contains("question") && clean.contains("over") -> handleQuestionMode(resetRetries = true)
                 else -> parseAndConfirm(transcript)

@@ -341,7 +341,6 @@ class VoiceControlService : Service() {
         timeoutHandler.postDelayed(cleanupFallback, 8_000L)
         responseManager.speak(message) {
             completeCleanup(fromTimeout = false)
-            reason
         }
     }
 
