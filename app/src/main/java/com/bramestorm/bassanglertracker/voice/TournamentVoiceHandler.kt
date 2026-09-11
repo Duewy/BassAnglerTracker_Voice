@@ -802,7 +802,7 @@ class TournamentVoiceHandler(
                     endSession("declined tied catch swap")
                 }
                 clean.contains("cancel") && clean.contains("over") -> {
-                    uiHelper.speak("Catch cancelled. Over and Out.", "TTS_CANCEL")
+                    uiHelper.speak("Okay, keeping your current culling order. Over and Out.", "TTS_CANCEL")
                     endSession("cancelled tied catch swap")
                 }
                 else -> {
