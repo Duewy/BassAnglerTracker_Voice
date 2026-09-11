@@ -223,7 +223,10 @@ class VoiceControlService : Service() {
                 ).also { it.onWake() }
             }
 
-            else -> FunDayVoiceHandler(this, uiHelper).onWake()
+            else -> {
+                activeVoiceSession = FunDayVoiceHandler(this, uiHelper)
+                    .also { it.onWake() }
+            }
         }
 
     }
