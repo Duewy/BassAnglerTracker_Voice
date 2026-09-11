@@ -765,13 +765,18 @@ class TournamentVoiceHandler(
 
     private fun endSession(reason: String = "User cancel") {
         if (isShuttingDown) return
-        isShuttingDown = true
-        mainHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Session ended: $reason")
-        service()?.markSessionComplete()
-        inQuestionMode = false
-        parseRetryCount = 0
-        questionRetryCount = 0
+        service()?.let { voiceService ->
+            isShuttingDown = true
+            mainHandler.removeCallbacksAndMessages(null)
+            inQuestionMode = false
+            parseRetryCount = 0
+            questionRetryCount = 0
+            voiceService.markSessionComplete()
+        } ?: run {
+            Log.w(TAG, "VoiceControlService unavailable while ending session; doing local shutdown only")
+            shutdown()
+        }
     }
 
     private fun service(): VoiceControlService? = context as? VoiceControlService
