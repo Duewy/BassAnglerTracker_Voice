@@ -160,30 +160,32 @@ class VoiceControlService : Service() {
         uiHelper: VoiceUiHelper,
         onResult: (String) -> Unit
     ): Boolean {
+        val previousEngine: VoiceInteractionManager?
+        val newEngine = VoiceInteractionManager(
+            context = applicationContext,
+            uiHelper = uiHelper,
+            parser = VoiceParser
+        )
+
         synchronized(cleanupLock) {
             if (!sessionActive || isCleaningUpSession || activeVoiceSession == null) {
                 Log.d(TAG, "⛔ startVoiceSession() rejected — no active Tournament VC session")
                 return false
             }
+            previousEngine = voiceEngine
+            voiceEngine = newEngine
         }
 
-        // cancel in‐flight engine session (TTS/STT engine)
-        voiceEngine?.shutdown()
+        previousEngine?.shutdown()
 
-        voiceEngine = VoiceInteractionManager(
-            context = applicationContext,
-            uiHelper = uiHelper,
-            parser = VoiceParser
-        ).also {
-            it.startSession(
-                prompt,
-                onResult = { result -> onResult(result) },
-                onFailure = {
-                    Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
-                    cleanupActiveSession("voice engine failure")
-                }
-            )
-        }
+        newEngine.startSession(
+            prompt,
+            onResult = { result -> onResult(result) },
+            onFailure = {
+                Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
+                cleanupActiveSession("voice engine failure")
+            }
+        )
         return true
     }
 

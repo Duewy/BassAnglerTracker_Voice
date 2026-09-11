@@ -286,12 +286,13 @@ class TournamentVoiceHandler(
         Log.d(TAG, "Checking the actual Species is: ${parsed.species}")
 
         // ── 1. SAVE THE CATCH ──
-        if (!dbHelper.insertCatch(dbItem)) {
+        val insertedCatchId = dbHelper.insertCatchAndReturnId(dbItem)
+        if (insertedCatchId == null) {
             uiHelper.speak("I couldn't save that catch. Ending voice entry. Over and Out.", "TTS_FAIL")
             endSession("database insert failed")
             return
         }
-        Log.d(TAG, "DB insert succeeded: $dbItem")
+        Log.d(TAG, "DB insert succeeded: id=$insertedCatchId, catch=$dbItem")
 
         // ── 2. NOTIFY UI ──
         context.sendBroadcast(
@@ -304,11 +305,8 @@ class TournamentVoiceHandler(
         val todaysCullingDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val allTodaysCatches = dbHelper.getCatchesForToday(typeEntry, todaysCullingDate)
         lastCatchItem = allTodaysCatches.firstOrNull { catch ->
-            catch.dateTime == dbItem.dateTime &&
-                    catch.species.equals(dbItem.species, ignoreCase = true) &&
-                    catch.clipColor.equals(dbItem.clipColor, ignoreCase = true) &&
-                    catch.getComparisonValueByMode(measurementMode) == dbItem.getComparisonValueByMode(measurementMode)
-        } ?: dbItem
+            catch.id == insertedCatchId
+        } ?: dbItem.copy(id = insertedCatchId)
         val sortedAll = allTodaysCatches.sortedByDescending { it.getComparisonValueByMode(measurementMode) }
         val totalCatchCount = sortedAll.size
         val limit = tournamentCatchLimit

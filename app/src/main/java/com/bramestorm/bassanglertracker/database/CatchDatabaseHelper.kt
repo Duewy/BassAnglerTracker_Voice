@@ -215,6 +215,10 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
 
     fun insertCatch(catch: CatchItem): Boolean {
+        return insertCatchAndReturnId(catch) != null
+    }
+
+    fun insertCatchAndReturnId(catch: CatchItem): Int? {
         val db = this.writableDatabase
 
         try {
@@ -237,7 +241,7 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
 
             if (rowId == -1L) {
                 Log.e("DB_ERROR", "❌ Failed to insert catch.")
-                return false
+                return null
             }
 
             Log.d("DB_DEBUG", "✅ Catch inserted with ID: $rowId")
@@ -254,11 +258,11 @@ class CatchDatabaseHelper(private val context: Context) : SQLiteOpenHelper(conte
                 updateCatchGpsStatus(rowId.toInt(), "MISSING", 0)
             }
 
-            return true
+            return rowId.toInt()
 
         } catch (e: Exception) {
             Log.e("DB_ERROR", "❌ insertCatch error: ${e.message}")
-            return false
+            return null
         }
         // ✅ REMOVED db.close() from finally block — GPS callback fires 3 seconds later
         //    and needs the DB connection alive. SQLiteOpenHelper manages the lifecycle.
