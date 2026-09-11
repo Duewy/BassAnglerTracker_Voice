@@ -203,12 +203,7 @@ class VoiceControlService : Service() {
             return
         }
 
-        if (isCleaningUpSession) {
-            Log.d(TAG, "⛔ onWake() blocked — cleanup still in progress")
-            return
-        }
-
-        if (activeVoiceSession != null || voiceEngine != null || activeResponseManager != null) {
+        if (hasActiveOrReleasingVoiceState()) {
             Log.d(TAG, "⛔ onWake() blocked — previous voice state has not fully released yet")
             return
         }
@@ -336,6 +331,14 @@ class VoiceControlService : Service() {
             Log.w(TAG, "⚠️ Cleanup step failed: $label", t)
         }
     }
+
+    private fun hasActiveOrReleasingVoiceState(): Boolean =
+        synchronized(cleanupLock) {
+            isCleaningUpSession ||
+                    activeVoiceSession != null ||
+                    voiceEngine != null ||
+                    activeResponseManager != null
+        }
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
