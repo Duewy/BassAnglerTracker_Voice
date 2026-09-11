@@ -787,24 +787,24 @@ class TournamentVoiceHandler(
             val clean = response.trim().lowercase()
             when {
                 clean.contains("yes") && clean.contains("over") -> {
-                    uiHelper.speak(
-                        "Got it. You need to cull the ${smallestKeeper.species} on the " +
+                    endSessionWithMessage(
+                        message = "Got it. You need to cull the ${smallestKeeper.species} on the " +
                                 "${smallestKeeper.clipColor} clip that is $smallestKeeperMeasurement. Over and Out.",
-                        "TTS_CULL"
+                        reason = "accepted tied catch swap"
                     )
-                    endSession("accepted tied catch swap")
                 }
                 clean.contains("no") && clean.contains("over") -> {
-                    uiHelper.speak(
-                        "Okay, return the ${dbItem.species} on the ${dbItem.clipColor} clip " +
+                    endSessionWithMessage(
+                        message = "Okay, return the ${dbItem.species} on the ${dbItem.clipColor} clip " +
                                 "and catch one larger than $smallestKeeperMeasurement. Over and Out.",
-                        "TTS_TOO_SMALL"
+                        reason = "declined tied catch swap"
                     )
-                    endSession("declined tied catch swap")
                 }
                 clean.contains("cancel") && clean.contains("over") -> {
-                    uiHelper.speak("Okay, keeping your current culling order. Over and Out.", "TTS_CANCEL")
-                    endSession("cancelled tied catch swap")
+                    endSessionWithMessage(
+                        message = "Okay, keeping your current culling order. Over and Out.",
+                        reason = "cancelled tied catch swap"
+                    )
                 }
                 else -> {
                     swapRetryCount++

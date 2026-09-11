@@ -306,7 +306,9 @@ class VoiceControlService : Service() {
         val timeoutHandler = Handler(Looper.getMainLooper())
         val cleanupTriggered = AtomicBoolean(false)
         var temporaryResponseManager: VoiceResponseManager? = null
+        val sessionTokenAtStart: Long
         val responseManager = synchronized(cleanupLock) {
+            sessionTokenAtStart = activeSessionToken
             activeResponseManager ?: VoiceResponseManager(applicationContext).also {
                 temporaryResponseManager = it
             }
@@ -322,7 +324,14 @@ class VoiceControlService : Service() {
             if (fromTimeout) {
                 Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
             }
-            cleanupActiveSession(reason)
+            val shouldCleanup = synchronized(cleanupLock) {
+                activeSessionToken == sessionTokenAtStart || activeSessionToken == 0L
+            }
+            if (shouldCleanup) {
+                cleanupActiveSession(reason)
+            } else {
+                Log.d(TAG, "Skipping cleanup for superseded spoken shutdown: $reason")
+            }
         }
 
         cleanupFallback = Runnable {
