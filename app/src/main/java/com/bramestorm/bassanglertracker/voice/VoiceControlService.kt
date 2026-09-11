@@ -201,6 +201,11 @@ class VoiceControlService : Service() {
             return
         }
 
+        if (isCleaningUpSession) {
+            Log.d(TAG, "⛔ onWake() blocked — cleanup still in progress")
+            return
+        }
+
         if (activeVoiceSession != null || voiceEngine != null || activeResponseManager != null) {
             cleanupActiveSession(
                 reason = "preparing new wake",
