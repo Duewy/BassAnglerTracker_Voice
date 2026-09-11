@@ -42,7 +42,7 @@ class TournamentVoiceHandler(
     private var lastCatchItem: CatchItem? = null // keep track of the last catch we inserted
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
     private val measurementMode = SharedPreferencesManager.getTournamentUnit(context)
-    private val speciesList = SharedPreferencesManager.getTournamentSpecies(context)?.split(",")?.map { it.trim() } ?: FishSpecies.allSpeciesList
+    private val speciesList = SharedPreferencesManager.getAllowedTournamentSpecies(context)
     private val normalizedSpeciesSet = speciesList
         .map { SharedPreferencesManager.normalizeSpeciesName(it).trim().uppercase(Locale.US) }
         .toSet()
@@ -150,6 +150,10 @@ class TournamentVoiceHandler(
             normalizedSpecies.isNotBlank() &&
                     !normalizedSpecies.equals("unknown", ignoreCase = true) &&
                     normalizedSpeciesSet.contains(normalizedSpecies)
+        val invalidTournamentSpecies =
+            normalizedSpecies.isNotBlank() &&
+                    !normalizedSpecies.equals("unknown", ignoreCase = true) &&
+                    !speciesRecognized
         val clipRecognized = parsed.clipColor.isNotBlank()
 
         val missingInfo = !speciesRecognized || !clipRecognized || when (measurementMode) {
@@ -170,7 +174,7 @@ class TournamentVoiceHandler(
                 return
             }
             requestVoiceInput(
-                prompt = buildParseRetryPrompt(parsed, speciesRecognized, clipRecognized),
+                prompt = buildParseRetryPrompt(parsed, speciesRecognized, invalidTournamentSpecies, clipRecognized),
                 failureReason = "VoiceControlService unavailable during parse retry"
             ) { retryTranscript ->
                 if (retryTranscript.contains("cancel", true)) {
@@ -234,6 +238,7 @@ class TournamentVoiceHandler(
     private fun buildParseRetryPrompt(
         parsed: VoiceParser.ParsedCatch,
         speciesRecognized: Boolean,
+        invalidTournamentSpecies: Boolean,
         clipRecognized: Boolean
     ): String {
         val measurementHeard = when (measurementMode) {
@@ -252,6 +257,8 @@ class TournamentVoiceHandler(
         }
 
         return when {
+            invalidTournamentSpecies && !measurementMissing && clipRecognized ->
+                "I heard the species ${parsed.species}, but that species is not allowed for this tournament setup. Please say the full catch again. Over."
             !speciesRecognized && !measurementMissing && clipRecognized ->
                 "I got the measurement $measurementHeard on the ${parsed.clipColor} clip, but I missed the species. Please say the full catch again. Over."
             speciesRecognized && measurementMissing && clipRecognized ->
