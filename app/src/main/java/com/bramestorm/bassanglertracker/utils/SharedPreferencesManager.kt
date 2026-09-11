@@ -124,6 +124,27 @@ object SharedPreferencesManager {
             .getString(KEY_TOURNAMENT_SPECIES, null)
     }
 
+    fun getAllowedTournamentSpecies(context: Context): List<String> {
+        return getAllowedTournamentSpecies(getTournamentSpecies(context))
+    }
+
+    fun getAllowedTournamentSpecies(tournamentSpecies: String?): List<String> {
+        if (tournamentSpecies.isNullOrBlank()) {
+            return FishSpecies.allSpeciesList.map { normalizeSpeciesName(it) }
+        }
+
+        return when (normalizeSpeciesName(tournamentSpecies)) {
+            "large mouth" -> listOf("large mouth", "small mouth")
+            "small mouth" -> listOf("small mouth", "large mouth")
+            "spotted bass" -> listOf("spotted bass", "small mouth", "large mouth")
+            else -> tournamentSpecies
+                .split(",")
+                .map { normalizeSpeciesName(it) }
+                .filter { it.isNotBlank() }
+                .ifEmpty { listOf(normalizeSpeciesName(tournamentSpecies)) }
+        }
+    }
+
     fun setCullingEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .edit().putBoolean(KEY_CULLING_ENABLED, enabled).apply()
