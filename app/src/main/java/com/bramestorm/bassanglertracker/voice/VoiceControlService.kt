@@ -170,10 +170,7 @@ class VoiceControlService : Service() {
                 onResult = { result -> onResult(result) },
                 onFailure = {
                     Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
-                    cleanupActiveSession(
-                        reason = "voice engine failure",
-                        shutdownHandler = true
-                    )
+                    cleanupActiveSession("voice engine failure")
                 }
             )
         }
@@ -251,10 +248,7 @@ class VoiceControlService : Service() {
 
 
     fun markSessionComplete() {
-        cleanupActiveSession(
-            reason = "session marked complete",
-            shutdownHandler = true
-        )
+        cleanupActiveSession("session marked complete")
     }
 
     private fun isInCall(): Boolean =
@@ -266,16 +260,12 @@ class VoiceControlService : Service() {
             }
 
     private fun stopVoiceSessionIfActive() {
-        cleanupActiveSession(
-            reason = "call started",
-            shutdownHandler = true
-        )
+        cleanupActiveSession("call started")
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
     }
 
     private fun cleanupActiveSession(
-        reason: String,
-        shutdownHandler: Boolean
+        reason: String
     ) {
         val voiceSession: VoiceSessionHandler?
         val engine: VoiceInteractionManager?
@@ -302,10 +292,8 @@ class VoiceControlService : Service() {
             if (::wakeLock.isInitialized && wakeLock.isHeld) {
                 wakeLock.release()
             }
-            if (shutdownHandler) {
-                runCleanupStep("voice session shutdown") {
-                    voiceSession?.shutdown()
-                }
+            runCleanupStep("voice session shutdown") {
+                voiceSession?.shutdown()
             }
             runCleanupStep("voice engine shutdown") {
                 engine?.shutdown()
@@ -363,10 +351,7 @@ class VoiceControlService : Service() {
         mediaSession?.release()
 
         // 🔐 Important cleanup
-        cleanupActiveSession(
-            reason = "service destroyed",
-            shutdownHandler = true
-        )
+        cleanupActiveSession("service destroyed")
 
         super.onDestroy()
     }
