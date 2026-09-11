@@ -809,7 +809,7 @@ class TournamentVoiceHandler(
 
     private fun canContinueSession(): Boolean {
         if (isShuttingDown) return false
-        val voiceService = service() ?: return true
+        val voiceService = service() ?: return false
         return voiceService.isCurrentSession(sessionToken)
     }
 
