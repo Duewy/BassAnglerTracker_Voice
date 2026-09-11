@@ -32,6 +32,12 @@ import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
 import java.util.concurrent.atomic.AtomicBoolean
 
 class VoiceControlService : Service() {
+    enum class VoiceSessionStartResult {
+        STARTED,
+        CLEANING_UP,
+        STALE_SESSION
+    }
+
     companion object {
         const val CHANNEL_ID       = "vc_channel"
         const val NOTIFY_ID        = 1
@@ -160,8 +166,10 @@ class VoiceControlService : Service() {
     fun startVoiceSession(
         prompt: String,
         uiHelper: VoiceUiHelper,
+        ownerToken: Long,
+        ownerHandler: VoiceSessionHandler,
         onResult: (String) -> Unit
-    ): Boolean {
+    ): VoiceSessionStartResult {
         val previousEngine: VoiceInteractionManager?
         val newEngine = VoiceInteractionManager(
             context = applicationContext,
@@ -170,9 +178,15 @@ class VoiceControlService : Service() {
         )
 
         synchronized(cleanupLock) {
-            if (!sessionActive || isCleaningUpSession || activeVoiceSession == null) {
-                Log.d(TAG, "⛔ startVoiceSession() rejected — no active Tournament VC session")
-                return false
+            if (isCleaningUpSession) {
+                Log.d(TAG, "⛔ startVoiceSession() rejected — active session is cleaning up")
+                return VoiceSessionStartResult.CLEANING_UP
+            }
+            if (!sessionActive || activeVoiceSession == null ||
+                activeSessionToken != ownerToken || activeVoiceSession !== ownerHandler
+            ) {
+                Log.d(TAG, "⛔ startVoiceSession() rejected — stale Tournament VC session")
+                return VoiceSessionStartResult.STALE_SESSION
             }
             previousEngine = voiceEngine
             voiceEngine = newEngine
@@ -195,7 +209,7 @@ class VoiceControlService : Service() {
                 cleanupActiveSession("voice engine failure")
             }
         )
-        return true
+        return VoiceSessionStartResult.STARTED
     }
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */

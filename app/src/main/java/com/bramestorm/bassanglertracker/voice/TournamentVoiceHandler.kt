@@ -864,31 +864,33 @@ class TournamentVoiceHandler(
         failureReason: String,
         onResponse: (String) -> Unit
     ) {
-        val didStart = service()?.startVoiceSession(prompt, uiHelper) { transcript ->
+        val startResult = service()?.startVoiceSession(prompt, uiHelper, sessionToken, this) { transcript ->
             if (!canContinueSession()) {
                 Log.w(TAG, "Ignoring stale Tournament voice callback after service ownership ended")
                 shutdown()
                 return@startVoiceSession
             }
             onResponse(transcript)
-        } ?: false
+        } ?: VoiceControlService.VoiceSessionStartResult.STALE_SESSION
 
-        if (!didStart) {
-            if (!canContinueSession()) {
+        when (startResult) {
+            VoiceControlService.VoiceSessionStartResult.STARTED -> Unit
+            VoiceControlService.VoiceSessionStartResult.STALE_SESSION -> {
                 Log.w(TAG, "Voice input request rejected after Tournament session ownership moved or ended")
                 shutdown()
-                return
             }
-            if (sessionEnding || isShuttingDown) {
-                Log.w(TAG, "Voice input request rejected while Tournament session is already ending")
-                uiHelper.speak("I couldn't continue voice entry. Ending session. Over and Out.", "TTS_FAIL")
-                shutdown()
-                return
+            VoiceControlService.VoiceSessionStartResult.CLEANING_UP -> {
+                if (sessionEnding || isShuttingDown) {
+                    Log.w(TAG, "Voice input request rejected while Tournament session is already ending")
+                    uiHelper.speak("I couldn't continue voice entry. Ending session. Over and Out.", "TTS_FAIL")
+                    shutdown()
+                } else {
+                    endSessionWithMessage(
+                        message = "I couldn't continue voice entry. Ending session. Over and Out.",
+                        reason = failureReason
+                    )
+                }
             }
-            endSessionWithMessage(
-                message = "I couldn't continue voice entry. Ending session. Over and Out.",
-                reason = failureReason
-            )
         }
     }
 
