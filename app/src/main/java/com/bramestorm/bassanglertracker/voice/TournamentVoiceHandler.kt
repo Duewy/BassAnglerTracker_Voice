@@ -2,11 +2,9 @@ package com.bramestorm.bassanglertracker.voice
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.CatchItem
 import com.bramestorm.bassanglertracker.MeasurementMode
 import com.bramestorm.bassanglertracker.database.CatchDatabaseHelper
@@ -35,12 +33,14 @@ class TournamentVoiceHandler(
     private var parseRetryCount    = 0
     private var questionRetryCount = 0
 
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var lastCatchItem: CatchItem? = null // keep track of the last catch we inserted
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
     private val measurementMode = SharedPreferencesManager.getTournamentUnit(context)
     private val speciesList = SharedPreferencesManager.getTournamentSpecies(context)?.split(",")?.map { it.trim() } ?: FishSpecies.allSpeciesList
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
+    private var isShuttingDown = false
 
     // ── Build the catch_type string for DB queries ──
     private val typeEntry = when (measurementMode) {
@@ -63,6 +63,7 @@ class TournamentVoiceHandler(
     /** Entry point for service wake or media-button tap. */
     override fun onWake() {
         Log.d(TAG, "onWake() called")
+        isShuttingDown = false
         inQuestionMode = false
         parseRetryCount = 0
         questionRetryCount = 0
@@ -71,24 +72,23 @@ class TournamentVoiceHandler(
 
     /** Begins a catch or question session. */
     private fun startVoiceSession() {
+        if (isShuttingDown) return
         if (inQuestionMode) return            // don't restart the "catch" flow mid-question
 
-        (context as? VoiceControlService)
+        service()
             ?.startVoiceSession(getStartPrompt(), uiHelper) { transcript ->
+                if (isShuttingDown) return@startVoiceSession
                 val clean = transcript.trim().lowercase()
                 when {
                     clean.contains("question") && clean.contains("over") -> handleQuestionMode()
                     else                            -> parseAndConfirm(transcript)
                 }
-            } ?: run  {                   // fallback: fire the same Intent the media button uses
-            val intent = Intent(context, VoiceControlService::class.java)
-                .setAction(VoiceControlService.ACTION_START_VOICE)
-            ContextCompat.startForegroundService(context, intent)
-        }
+            } ?: endSession("VoiceControlService unavailable at session start")
     }
 
     /** Parses numeric + text components, then confirms with the user. */
     private fun parseAndConfirm(transcript: String) {
+        if (isShuttingDown) return
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(transcript, speciesList, clipColors)
             MeasurementMode.POUNDS -> VoiceParser.parsePoundsCatchWithClips(transcript, speciesList, clipColors)
@@ -112,14 +112,15 @@ class TournamentVoiceHandler(
 
             Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
             uiHelper.speak("That value was out of range. Say it again or say cancel that. Over.", "TTS_INVALID_UNIT")
-            (context as? VoiceControlService)?.startVoiceSession(getStartPrompt(), uiHelper) { response ->
+            service()?.startVoiceSession(getStartPrompt(), uiHelper) { response ->
+                if (isShuttingDown) return@startVoiceSession
                 if (response.contains("cancel", true)) {
                     uiHelper.speak("Cancelled. Over and Out.", "TTS_CANCEL")
                     endSession("cancel from confirm prompt")
                 } else {
                     parseAndConfirm(response)
                 }
-            }
+            } ?: endSession("VoiceControlService unavailable during invalid-unit retry")
             return
         }
 
@@ -142,9 +143,9 @@ class TournamentVoiceHandler(
                 return
             }
             uiHelper.speak("Sorry, I missed some info—let's try again.", "TTS_RETRY")
-            Handler(Looper.getMainLooper()).postDelayed({
+            postDelayed {
                 startVoiceSession()
-            }, 1500)
+            }
             return
         }
 
@@ -163,10 +164,11 @@ class TournamentVoiceHandler(
         Log.d(TAG, "Confirm Species🐟: ${parsed.species}")
 
         // ── Single TTS→STT flow — one engine speaks, onDone fires, STT listens ──
-        (context as? VoiceControlService)?.startVoiceSession(
+        service()?.startVoiceSession(
             confirmPrompt,
             uiHelper
         ) { response ->
+            if (isShuttingDown) return@startVoiceSession
             val clean = response.trim().lowercase()
             when {
                 clean.contains("yes") && clean.contains("over")    -> saveCatch(parsed)
@@ -178,10 +180,11 @@ class TournamentVoiceHandler(
                 // Heard yes/no/cancel but missing "over" — nudge them
                 clean.contains("yes") || clean.contains("no") || clean.contains("cancel") -> {
                     uiHelper.speak("Please answer yes, no, or cancel, and end with Over.", "TTS_RETRY")
-                    (context as? VoiceControlService)?.startVoiceSession(
+                    service()?.startVoiceSession(
                         "Please answer yes, no, or cancel, and end with Over.",
                         uiHelper
                     ) { retryResponse ->
+                        if (isShuttingDown) return@startVoiceSession
                         val r = retryResponse.trim().lowercase()
                         when {
                             r.contains("yes") && r.contains("over") -> saveCatch(parsed)
@@ -203,10 +206,11 @@ class TournamentVoiceHandler(
                         uiHelper.speak("I couldn't confirm that. Ending voice entry. Over and Out.", "TTS_FAIL")
                         endSession("confirm fallback exceeded")
                     } else {
-                        (context as? VoiceControlService)?.startVoiceSession(
+                        service()?.startVoiceSession(
                             "Please answer yes, no, or cancel, and end with Over.",
                             uiHelper
                         ) { retryResponse ->
+                            if (isShuttingDown) return@startVoiceSession
                             val r = retryResponse.trim().lowercase()
                             when {
                                 r.contains("yes") && r.contains("over") -> saveCatch(parsed)
@@ -417,7 +421,11 @@ class TournamentVoiceHandler(
 
 
     override fun shutdown() {
-        // Add cleanup logic if needed in the future
+        isShuttingDown = true
+        mainHandler.removeCallbacksAndMessages(null)
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
         Log.d("TournamentVoiceHandler", "🔻 shutdown called")
     }
 
@@ -425,6 +433,7 @@ class TournamentVoiceHandler(
 
     /** Switch into question mode for stats queries. */
     private fun handleQuestionMode() {
+        if (isShuttingDown) return
         questionRetryCount = 0
         inQuestionMode = true
         Log.d(TAG, "Question mode activated")
@@ -432,18 +441,20 @@ class TournamentVoiceHandler(
             "Question mode activated. You can ask largest, smallest, total weight, total length, how many, average, position, time since last catch, or what time is it, Over.",
             "TTS_QUESTION_INTRO"
         )
-        (context as? VoiceControlService)?.startVoiceSession(
+        service()?.startVoiceSession(
             "Which stat would you like? Over.",
             uiHelper
         ) { followUp ->
+            if (isShuttingDown) return@startVoiceSession
             Log.d(TAG, "Question received: '$followUp'")
             routeQuestion(followUp)
-        }
+        } ?: endSession("VoiceControlService unavailable in question mode")
     }
 
 
     /** Routes a user question to the appropriate response. */
     private fun routeQuestion(question: String) {
+        if (isShuttingDown) return
 
         val overOut = "Over and Out."
         Log.d(TAG, "routeQuestion('$question')")
@@ -692,9 +703,9 @@ class TournamentVoiceHandler(
                         "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, time since last catch, or what time is it. $overOut",
                         "TTS_RETRY_QUESTION"
                     )
-                    Handler(Looper.getMainLooper()).postDelayed({
+                    postDelayed {
                         handleQuestionMode()
-                    }, 1500)
+                    }
                 }
             }
         }
@@ -753,11 +764,27 @@ class TournamentVoiceHandler(
     }
 
     private fun endSession(reason: String = "User cancel") {
+        if (isShuttingDown) return
+        isShuttingDown = true
+        mainHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Session ended: $reason")
-        (context as? VoiceControlService)?.markSessionComplete()
+        service()?.markSessionComplete()
         inQuestionMode = false
         parseRetryCount = 0
         questionRetryCount = 0
+    }
+
+    private fun service(): VoiceControlService? = context as? VoiceControlService
+
+    private fun postDelayed(
+        delayMillis: Long = 1500L,
+        action: () -> Unit
+    ) {
+        mainHandler.postDelayed({
+            if (!isShuttingDown) {
+                action()
+            }
+        }, delayMillis)
     }
 
     private fun currentTimestamp(): String =

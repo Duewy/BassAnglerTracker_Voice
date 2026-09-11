@@ -49,6 +49,7 @@ class VoiceControlService : Service() {
     private var sessionActive = false
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
+    private var activeResponseManager: VoiceResponseManager? = null
     private var lastWakeAt = 0L
 
     /** 1️⃣ Only one callback, wired to call onWake() on ACTION_DOWN */
@@ -165,8 +166,11 @@ class VoiceControlService : Service() {
                 prompt,
                 onResult = { result -> onResult(result) },
                 onFailure = {
-                    sessionActive = false
-                    Log.w(TAG, "Voice session failed or cancelled — resetting sessionActive")
+                    Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
+                    cleanupActiveSession(
+                        reason = "voice engine failure",
+                        shutdownHandler = true
+                    )
                 }
             )
         }
@@ -190,16 +194,17 @@ class VoiceControlService : Service() {
         Log.d(TAG, "🔁 onWake() called — sessionActive")
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
 
+        val responseManager = VoiceResponseManager(applicationContext)
+        activeResponseManager = responseManager
         val uiHelper = object : VoiceUiHelper {
-            private val vrm = VoiceResponseManager(applicationContext)
             private val mainH = Handler(Looper.getMainLooper())
 
             override fun speak(text: String) {
-                vrm.speak(text)
+                responseManager.speak(text)
             }
 
             override fun speak(text: String, utteranceId: String) {
-                vrm.speak(text) { utteranceId }
+                responseManager.speak(text, utteranceId)
             }
 
             override fun showToast(message: String) {
@@ -210,10 +215,12 @@ class VoiceControlService : Service() {
         }
 
         when (SharedPreferencesManager.getCatchEntryType(this)) {
-            in 5..8 -> TournamentVoiceHandler(
-                context     = this,
-                uiHelper    = uiHelper,
-            ).onWake()
+            in 5..8 -> {
+                activeVoiceSession = TournamentVoiceHandler(
+                    context = this,
+                    uiHelper = uiHelper,
+                ).also { it.onWake() }
+            }
 
             else -> FunDayVoiceHandler(this, uiHelper).onWake()
         }
@@ -223,9 +230,10 @@ class VoiceControlService : Service() {
 
 
     fun markSessionComplete() {
-        sessionActive = false
-        if (wakeLock.isHeld) wakeLock.release()
-        Log.d(TAG, "✅ Voice session marked complete — wakeLock released")
+        cleanupActiveSession(
+            reason = "session marked complete",
+            shutdownHandler = false
+        )
     }
 
     private fun isInCall(): Boolean =
@@ -237,13 +245,30 @@ class VoiceControlService : Service() {
             }
 
     private fun stopVoiceSessionIfActive() {
+        cleanupActiveSession(
+            reason = "call started",
+            shutdownHandler = true
+        )
+        Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun cleanupActiveSession(
+        reason: String,
+        shutdownHandler: Boolean
+    ) {
+        if (shutdownHandler) {
+            activeVoiceSession?.shutdown()
+        }
+        activeVoiceSession = null
         voiceEngine?.shutdown()
         voiceEngine = null
-        activeVoiceSession?.shutdown()
-        activeVoiceSession = null
+        activeResponseManager?.shutdown()
+        activeResponseManager = null
         sessionActive = false
-        if (wakeLock.isHeld) wakeLock.release()
-        Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
+        if (::wakeLock.isInitialized && wakeLock.isHeld) {
+            wakeLock.release()
+        }
+        Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
     }
 
     private fun createChannel() {
@@ -269,8 +294,10 @@ class VoiceControlService : Service() {
         mediaSession?.release()
 
         // 🔐 Important cleanup
-        voiceEngine?.shutdown()
-        if (wakeLock.isHeld) wakeLock.release()
+        cleanupActiveSession(
+            reason = "service destroyed",
+            shutdownHandler = true
+        )
 
         super.onDestroy()
     }
