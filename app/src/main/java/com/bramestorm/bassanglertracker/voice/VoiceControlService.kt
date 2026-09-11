@@ -287,6 +287,29 @@ class VoiceControlService : Service() {
         cleanupActiveSession("session marked complete")
     }
 
+    fun speakAndEndSession(
+        message: String,
+        reason: String
+    ) {
+        val responseManager = synchronized(cleanupLock) {
+            if (!sessionActive || isCleaningUpSession) {
+                null
+            } else {
+                activeResponseManager
+            }
+        }
+
+        if (responseManager == null) {
+            cleanupActiveSession(reason)
+            return
+        }
+
+        responseManager.speak(message) {
+            cleanupActiveSession(reason)
+            reason
+        }
+    }
+
     private fun isInCall(): Boolean =
         ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE)
             .let { perm ->

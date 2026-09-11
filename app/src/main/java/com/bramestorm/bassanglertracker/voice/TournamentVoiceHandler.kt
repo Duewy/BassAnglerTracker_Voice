@@ -838,6 +838,23 @@ class TournamentVoiceHandler(
         }
     }
 
+    private fun endSessionWithMessage(
+        message: String,
+        reason: String
+    ) {
+        if (isShuttingDown || sessionEnding) return
+        sessionEnding = true
+        Log.d(TAG, "Session ended with message: $reason")
+        service()?.let { voiceService ->
+            prepareForServiceCompletion()
+            voiceService.speakAndEndSession(message, reason)
+        } ?: run {
+            Log.w(TAG, "VoiceControlService unavailable while ending session with message; doing local shutdown only")
+            uiHelper.speak(message, "TTS_FAIL")
+            shutdown()
+        }
+    }
+
     private fun service(): VoiceControlService? = context as? VoiceControlService
 
     private fun requestVoiceInput(
@@ -851,7 +868,10 @@ class TournamentVoiceHandler(
         } ?: false
 
         if (!didStart) {
-            endSession(failureReason)
+            endSessionWithMessage(
+                message = "I couldn't continue voice entry. Ending session. Over and Out.",
+                reason = failureReason
+            )
         }
     }
 
