@@ -880,7 +880,7 @@ class TournamentVoiceHandler(
     private fun canContinueSession(): Boolean {
         if (isShuttingDown) return false
         val voiceService = service() ?: return false
-        return voiceService.isCurrentSession(sessionToken)
+        return voiceService.isCurrentSession(sessionToken, this)
     }
 
     private fun currentTimestamp(): String =
