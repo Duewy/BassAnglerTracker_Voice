@@ -190,27 +190,12 @@ class VoiceControlService : Service() {
             return
         }
 
-        if (sessionActive) {
-            Log.d(TAG, "⛔ onWake() blocked — session already active")
-            return
-        }
-
         if (isInCall()) {
             Log.d(TAG, "⛔ onWake() blocked — in call")
             return
         }
 
-        if (hasActiveOrReleasingVoiceState()) {
-            Log.d(TAG, "⛔ onWake() blocked — previous voice state has not fully released yet")
-            return
-        }
-
-        sessionActive = true
-        Log.d(TAG, "🔁 onWake() called — sessionActive")
-        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
-
         val responseManager = VoiceResponseManager(applicationContext)
-        activeResponseManager = responseManager
         val uiHelper = object : VoiceUiHelper {
             private val mainH = Handler(Looper.getMainLooper())
 
@@ -229,20 +214,31 @@ class VoiceControlService : Service() {
             }
         }
 
-        when (SharedPreferencesManager.getCatchEntryType(this)) {
-            in 5..8 -> {
-                activeVoiceSession = TournamentVoiceHandler(
-                    context = this,
-                    uiHelper = uiHelper,
-                ).also { it.onWake() }
-            }
-
-            else -> {
-                activeVoiceSession = FunDayVoiceHandler(this, uiHelper)
-                    .also { it.onWake() }
-            }
+        val voiceSession: VoiceSessionHandler = when (SharedPreferencesManager.getCatchEntryType(this)) {
+            in 5..8 -> TournamentVoiceHandler(
+                context = this,
+                uiHelper = uiHelper,
+            )
+            else -> FunDayVoiceHandler(this, uiHelper)
         }
 
+        synchronized(cleanupLock) {
+            if (sessionActive || isCleaningUpSession ||
+                activeVoiceSession != null || voiceEngine != null || activeResponseManager != null
+            ) {
+                responseManager.shutdown()
+                Log.d(TAG, "⛔ onWake() blocked — previous voice state has not fully released yet")
+                return
+            }
+
+            sessionActive = true
+            activeResponseManager = responseManager
+            activeVoiceSession = voiceSession
+        }
+
+        Log.d(TAG, "🔁 onWake() called — sessionActive")
+        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+        voiceSession.onWake()
     }
         //==== END = on Wake =====================
 
@@ -335,14 +331,6 @@ class VoiceControlService : Service() {
             Log.w(TAG, "⚠️ Cleanup step failed: $label", t)
         }
     }
-
-    private fun hasActiveOrReleasingVoiceState(): Boolean =
-        synchronized(cleanupLock) {
-            isCleaningUpSession ||
-                    activeVoiceSession != null ||
-                    voiceEngine != null ||
-                    activeResponseManager != null
-        }
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
