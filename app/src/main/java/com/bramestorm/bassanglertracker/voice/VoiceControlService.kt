@@ -50,6 +50,8 @@ class VoiceControlService : Service() {
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
     private var activeResponseManager: VoiceResponseManager? = null
+    private val cleanupLock = Any()
+    @Volatile
     private var isCleaningUpSession = false
     private var lastWakeAt = 0L
 
@@ -276,25 +278,30 @@ class VoiceControlService : Service() {
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
     }
 
-    @Synchronized
     private fun cleanupActiveSession(
         reason: String,
         shutdownHandler: Boolean
     ) {
-        if (isCleaningUpSession) {
-            Log.d(TAG, "🧹 Active voice session cleanup already in progress: $reason")
-            return
+        val voiceSession: VoiceSessionHandler?
+        val engine: VoiceInteractionManager?
+        val responseManager: VoiceResponseManager?
+
+        synchronized(cleanupLock) {
+            if (isCleaningUpSession) {
+                Log.d(TAG, "🧹 Active voice session cleanup already in progress: $reason")
+                return
+            }
+
+            isCleaningUpSession = true
+            voiceSession = activeVoiceSession
+            engine = voiceEngine
+            responseManager = activeResponseManager
+
+            activeVoiceSession = null
+            voiceEngine = null
+            activeResponseManager = null
+            sessionActive = false
         }
-
-        isCleaningUpSession = true
-        val voiceSession = activeVoiceSession
-        val engine = voiceEngine
-        val responseManager = activeResponseManager
-
-        activeVoiceSession = null
-        voiceEngine = null
-        activeResponseManager = null
-        sessionActive = false
 
         try {
             if (::wakeLock.isInitialized && wakeLock.isHeld) {
@@ -313,7 +320,9 @@ class VoiceControlService : Service() {
             }
             Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
         } finally {
-            isCleaningUpSession = false
+            synchronized(cleanupLock) {
+                isCleaningUpSession = false
+            }
         }
     }
 
