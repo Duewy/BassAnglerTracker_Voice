@@ -301,13 +301,30 @@ class VoiceControlService : Service() {
                 wakeLock.release()
             }
             if (shutdownHandler) {
-                voiceSession?.shutdown()
+                runCleanupStep("voice session shutdown") {
+                    voiceSession?.shutdown()
+                }
             }
-            engine?.shutdown()
-            responseManager?.shutdown()
+            runCleanupStep("voice engine shutdown") {
+                engine?.shutdown()
+            }
+            runCleanupStep("voice response manager shutdown") {
+                responseManager?.shutdown()
+            }
             Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
         } finally {
             isCleaningUpSession = false
+        }
+    }
+
+    private fun runCleanupStep(
+        label: String,
+        action: () -> Unit
+    ) {
+        try {
+            action()
+        } catch (t: Throwable) {
+            Log.w(TAG, "⚠️ Cleanup step failed: $label", t)
         }
     }
 
