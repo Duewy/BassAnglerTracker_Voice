@@ -190,11 +190,17 @@ class VoiceControlService : Service() {
             return
         }
 
+        if (activeVoiceSession != null || voiceEngine != null || activeResponseManager != null) {
+            cleanupActiveSession(
+                reason = "preparing new wake",
+                shutdownHandler = true
+            )
+        }
+
         sessionActive = true
         Log.d(TAG, "🔁 onWake() called — sessionActive")
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
 
-        activeResponseManager?.shutdown()
         val responseManager = VoiceResponseManager(applicationContext)
         activeResponseManager = responseManager
         val uiHelper = object : VoiceUiHelper {
