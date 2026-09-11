@@ -238,6 +238,20 @@ class VoiceControlService : Service() {
 
         Log.d(TAG, "🔁 onWake() called — sessionActive")
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+        synchronized(cleanupLock) {
+            if (isCleaningUpSession || !sessionActive || activeVoiceSession !== voiceSession) {
+                runCleanupStep("abandoned startup response manager shutdown") {
+                    responseManager.shutdown()
+                }
+                runCleanupStep("abandoned startup wake lock release") {
+                    if (::wakeLock.isInitialized && wakeLock.isHeld) {
+                        wakeLock.release()
+                    }
+                }
+                Log.d(TAG, "⛔ onWake() aborted — session was cleaned up before handler start")
+                return
+            }
+        }
         voiceSession.onWake()
     }
         //==== END = on Wake =====================
