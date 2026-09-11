@@ -870,6 +870,7 @@ class TournamentVoiceHandler(
         if (!didStart) {
             if (!canContinueSession()) {
                 Log.w(TAG, "Voice input request rejected because Tournament session is already shutting down")
+                shutdown()
                 return
             }
             endSessionWithMessage(
