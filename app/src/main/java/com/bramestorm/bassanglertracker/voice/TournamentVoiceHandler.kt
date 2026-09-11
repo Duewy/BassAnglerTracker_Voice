@@ -874,6 +874,11 @@ class TournamentVoiceHandler(
         } ?: false
 
         if (!didStart) {
+            if (!canContinueSession()) {
+                Log.w(TAG, "Voice input request rejected after Tournament session ownership moved or ended")
+                shutdown()
+                return
+            }
             if (sessionEnding || isShuttingDown) {
                 Log.w(TAG, "Voice input request rejected while Tournament session is already ending")
                 uiHelper.speak("I couldn't continue voice entry. Ending session. Over and Out.", "TTS_FAIL")
