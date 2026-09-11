@@ -51,6 +51,8 @@ class VoiceControlService : Service() {
     private var voiceEngine: VoiceInteractionManager? = null
     private var activeResponseManager: VoiceResponseManager? = null
     private var activeSessionToken = 0L
+    private var sessionStartupInProgress = false
+    private var pendingCleanupReason: String? = null
     private val cleanupLock = Any()
     @Volatile
     private var isCleaningUpSession = false
@@ -235,6 +237,7 @@ class VoiceControlService : Service() {
         }
 
         var startupFailure: Throwable? = null
+        var deferredCleanupReason: String? = null
         synchronized(cleanupLock) {
             if (sessionActive || isCleaningUpSession ||
                 activeVoiceSession != null || voiceEngine != null || activeResponseManager != null
@@ -248,18 +251,31 @@ class VoiceControlService : Service() {
             activeSessionToken = sessionToken
             activeResponseManager = responseManager
             activeVoiceSession = voiceSession
-            Log.d(TAG, "🔁 onWake() called — sessionActive")
-            wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
-            try {
-                voiceSession.onWake()
-            } catch (t: Throwable) {
-                startupFailure = t
+            sessionStartupInProgress = true
+        }
+
+        Log.d(TAG, "🔁 onWake() called — sessionActive")
+        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+        try {
+            voiceSession.onWake()
+        } catch (t: Throwable) {
+            startupFailure = t
+        } finally {
+            synchronized(cleanupLock) {
+                sessionStartupInProgress = false
+                deferredCleanupReason = pendingCleanupReason
+                pendingCleanupReason = null
             }
         }
 
         startupFailure?.let { failure ->
             Log.w(TAG, "❌ Voice session startup failed", failure)
             cleanupActiveSession("voice session startup failure")
+            return
+        }
+
+        deferredCleanupReason?.let { pendingReason ->
+            cleanupActiveSession(pendingReason)
         }
     }
         //==== END = on Wake =====================
@@ -293,6 +309,13 @@ class VoiceControlService : Service() {
             val responseManager: VoiceResponseManager?
 
             synchronized(cleanupLock) {
+                if (sessionStartupInProgress) {
+                    if (pendingCleanupReason == null) {
+                        pendingCleanupReason = cleanupReason
+                    }
+                    Log.d(TAG, "🧹 Delaying active voice session cleanup until startup completes: $cleanupReason")
+                    return
+                }
                 if (isCleaningUpSession) {
                     Log.d(TAG, "🧹 Active voice session cleanup already in progress: $cleanupReason")
                     return
