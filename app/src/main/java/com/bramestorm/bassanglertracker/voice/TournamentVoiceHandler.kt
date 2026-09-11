@@ -44,7 +44,7 @@ class TournamentVoiceHandler(
     private val measurementMode = SharedPreferencesManager.getTournamentUnit(context)
     private val speciesList = SharedPreferencesManager.getTournamentSpecies(context)?.split(",")?.map { it.trim() } ?: FishSpecies.allSpeciesList
     private val normalizedSpeciesSet = speciesList
-        .map { SharedPreferencesManager.normalizeSpeciesName(it).trim() }
+        .map { SharedPreferencesManager.normalizeSpeciesName(it).trim().uppercase(Locale.US) }
         .toSet()
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
@@ -143,7 +143,7 @@ class TournamentVoiceHandler(
             return
         }
 
-        val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species)
+        val normalizedSpecies = SharedPreferencesManager.normalizeSpeciesName(parsed.species).trim().uppercase(Locale.US)
         val speciesRecognized =
             normalizedSpecies.isNotBlank() &&
                     !normalizedSpecies.equals("unknown", ignoreCase = true) &&

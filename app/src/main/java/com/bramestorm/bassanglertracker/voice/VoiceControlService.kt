@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.training.VoiceResponseManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import java.util.concurrent.atomic.AtomicBoolean
 
 class VoiceControlService : Service() {
     companion object {
@@ -296,7 +297,11 @@ class VoiceControlService : Service() {
         reason: String
     ) {
         val timeoutHandler = Handler(Looper.getMainLooper())
+        val cleanupTriggered = AtomicBoolean(false)
         val cleanupFallback = Runnable {
+            if (!cleanupTriggered.compareAndSet(false, true)) {
+                return@Runnable
+            }
             Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
             cleanupActiveSession(reason)
         }
@@ -315,6 +320,9 @@ class VoiceControlService : Service() {
 
         timeoutHandler.postDelayed(cleanupFallback, 8_000L)
         responseManager.speak(message) {
+            if (!cleanupTriggered.compareAndSet(false, true)) {
+                return@speak reason
+            }
             timeoutHandler.removeCallbacks(cleanupFallback)
             cleanupActiveSession(reason)
             reason
