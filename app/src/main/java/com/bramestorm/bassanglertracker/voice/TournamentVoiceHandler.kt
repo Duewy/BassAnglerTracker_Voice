@@ -777,9 +777,10 @@ class TournamentVoiceHandler(
                 "Catch is saved. The $cullMeasurement ${dbItem.species} on the ${dbItem.clipColor} clip " +
                         "is the same $unitLabel as the ${smallestKeeper.species} " +
                         "at $smallestKeeperMeasurement on the ${smallestKeeper.clipColor} clip. " +
-                        "Would you like to swap them? Say yes, no, or cancel, and end with Over."
+                        "Would you like to swap them? Say yes to swap, no to keep the current clips, " +
+                        "or cancel to keep the current clips and end voice entry. Over."
             } else {
-                "Please answer yes, no, or cancel, and end with Over."
+                "Please say yes to swap, no to keep the current clips, or cancel to keep the current clips and end voice entry. Over."
             },
             failureReason = "VoiceControlService unavailable during tied-catch decision"
         ) { response ->
