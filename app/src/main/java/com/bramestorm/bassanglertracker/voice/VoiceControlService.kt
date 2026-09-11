@@ -184,6 +184,13 @@ class VoiceControlService : Service() {
             prompt,
             onResult = { result -> onResult(result) },
             onFailure = {
+                val shouldCleanup = synchronized(cleanupLock) {
+                    voiceEngine === newEngine && sessionActive
+                }
+                if (!shouldCleanup) {
+                    Log.d(TAG, "Ignoring voice engine failure from superseded session")
+                    return@startSession
+                }
                 Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
                 cleanupActiveSession("voice engine failure")
             }

@@ -863,7 +863,11 @@ class TournamentVoiceHandler(
         onResponse: (String) -> Unit
     ) {
         val didStart = service()?.startVoiceSession(prompt, uiHelper) { transcript ->
-            if (!canContinueSession()) return@startVoiceSession
+            if (!canContinueSession()) {
+                Log.w(TAG, "Ignoring stale Tournament voice callback after service ownership ended")
+                shutdown()
+                return@startVoiceSession
+            }
             onResponse(transcript)
         } ?: false
 
