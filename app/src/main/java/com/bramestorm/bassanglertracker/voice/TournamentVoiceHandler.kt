@@ -847,10 +847,14 @@ class TournamentVoiceHandler(
         failureReason: String,
         onResponse: (String) -> Unit
     ) {
-        service()?.startVoiceSession(prompt, uiHelper) { transcript ->
+        val didStart = service()?.startVoiceSession(prompt, uiHelper) { transcript ->
             if (!canContinueSession()) return@startVoiceSession
             onResponse(transcript)
-        } ?: endSession(failureReason)
+        } ?: false
+
+        if (!didStart) {
+            endSession(failureReason)
+        }
     }
 
     private fun prepareForServiceCompletion() {

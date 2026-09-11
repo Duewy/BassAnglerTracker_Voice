@@ -157,7 +157,14 @@ class VoiceControlService : Service() {
         prompt: String,
         uiHelper: VoiceUiHelper,
         onResult: (String) -> Unit
-    ) {
+    ): Boolean {
+        synchronized(cleanupLock) {
+            if (!sessionActive || isCleaningUpSession || activeVoiceSession == null) {
+                Log.d(TAG, "⛔ startVoiceSession() rejected — no active Tournament VC session")
+                return false
+            }
+        }
+
         // cancel in‐flight engine session (TTS/STT engine)
         voiceEngine?.shutdown()
 
@@ -175,6 +182,7 @@ class VoiceControlService : Service() {
                 }
             )
         }
+        return true
     }
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */
