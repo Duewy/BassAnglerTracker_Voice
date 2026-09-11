@@ -185,8 +185,18 @@ class VoiceControlService : Service() {
         }
         lastWakeAt = now
 
-        if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) {
-            Log.d(TAG, "⛔ onWake() blocked — sessionActive=$sessionActive")
+        if (!SharedPreferencesManager.isVccEnabled(this)) {
+            Log.d(TAG, "⛔ onWake() blocked — VCC disabled")
+            return
+        }
+
+        if (sessionActive) {
+            Log.d(TAG, "⛔ onWake() blocked — session already active")
+            return
+        }
+
+        if (isInCall()) {
+            Log.d(TAG, "⛔ onWake() blocked — in call")
             return
         }
 

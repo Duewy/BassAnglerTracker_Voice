@@ -421,11 +421,7 @@ class TournamentVoiceHandler(
 
 
     override fun shutdown() {
-        isShuttingDown = true
-        mainHandler.removeCallbacksAndMessages(null)
-        inQuestionMode = false
-        parseRetryCount = 0
-        questionRetryCount = 0
+        clearLocalSessionState()
         Log.d("TournamentVoiceHandler", "🔻 shutdown called")
     }
 
@@ -767,11 +763,7 @@ class TournamentVoiceHandler(
         if (isShuttingDown) return
         Log.d(TAG, "Session ended: $reason")
         service()?.let { voiceService ->
-            isShuttingDown = true
-            mainHandler.removeCallbacksAndMessages(null)
-            inQuestionMode = false
-            parseRetryCount = 0
-            questionRetryCount = 0
+            clearLocalSessionState()
             voiceService.markSessionComplete()
         } ?: run {
             Log.w(TAG, "VoiceControlService unavailable while ending session; doing local shutdown only")
@@ -790,6 +782,14 @@ class TournamentVoiceHandler(
                 action()
             }
         }, delayMillis)
+    }
+
+    private fun clearLocalSessionState() {
+        isShuttingDown = true
+        mainHandler.removeCallbacksAndMessages(null)
+        inQuestionMode = false
+        parseRetryCount = 0
+        questionRetryCount = 0
     }
 
     private fun currentTimestamp(): String =
