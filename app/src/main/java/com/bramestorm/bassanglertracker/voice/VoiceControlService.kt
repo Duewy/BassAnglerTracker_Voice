@@ -29,8 +29,15 @@ import androidx.core.content.ContextCompat
 import com.bramestorm.bassanglertracker.R
 import com.bramestorm.bassanglertracker.training.VoiceResponseManager
 import com.bramestorm.bassanglertracker.utils.SharedPreferencesManager
+import java.util.concurrent.atomic.AtomicBoolean
 
 class VoiceControlService : Service() {
+    enum class VoiceSessionStartResult {
+        STARTED,
+        CLEANING_UP,
+        STALE_SESSION
+    }
+
     companion object {
         const val CHANNEL_ID       = "vc_channel"
         const val NOTIFY_ID        = 1
@@ -49,6 +56,14 @@ class VoiceControlService : Service() {
     private var sessionActive = false
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
+    private var activeResponseManager: VoiceResponseManager? = null
+    private var activeSessionToken = 0L
+    private var nextSessionToken = 0L
+    private var sessionStartupInProgress = false
+    private var pendingCleanupReason: String? = null
+    private val cleanupLock = Any()
+    @Volatile
+    private var isCleaningUpSession = false
     private var lastWakeAt = 0L
 
     /** 1️⃣ Only one callback, wired to call onWake() on ACTION_DOWN */
@@ -151,25 +166,50 @@ class VoiceControlService : Service() {
     fun startVoiceSession(
         prompt: String,
         uiHelper: VoiceUiHelper,
+        ownerToken: Long,
+        ownerHandler: VoiceSessionHandler,
         onResult: (String) -> Unit
-    ) {
-        // cancel in‐flight engine session (TTS/STT engine)
-        voiceEngine?.shutdown()
-
-        voiceEngine = VoiceInteractionManager(
+    ): VoiceSessionStartResult {
+        val previousEngine: VoiceInteractionManager?
+        val newEngine = VoiceInteractionManager(
             context = applicationContext,
             uiHelper = uiHelper,
             parser = VoiceParser
-        ).also {
-            it.startSession(
-                prompt,
-                onResult = { result -> onResult(result) },
-                onFailure = {
-                    sessionActive = false
-                    Log.w(TAG, "Voice session failed or cancelled — resetting sessionActive")
-                }
-            )
+        )
+
+        synchronized(cleanupLock) {
+            if (isCleaningUpSession) {
+                Log.d(TAG, "⛔ startVoiceSession() rejected — active session is cleaning up")
+                return VoiceSessionStartResult.CLEANING_UP
+            }
+            if (!sessionActive || activeVoiceSession == null ||
+                activeSessionToken != ownerToken || activeVoiceSession !== ownerHandler
+            ) {
+                Log.d(TAG, "⛔ startVoiceSession() rejected — stale Tournament VC session")
+                return VoiceSessionStartResult.STALE_SESSION
+            }
+            previousEngine = voiceEngine
+            voiceEngine = newEngine
         }
+
+        previousEngine?.shutdown()
+
+        newEngine.startSession(
+            prompt,
+            onResult = { result -> onResult(result) },
+            onFailure = {
+                val shouldCleanup = synchronized(cleanupLock) {
+                    voiceEngine === newEngine && sessionActive
+                }
+                if (!shouldCleanup) {
+                    Log.d(TAG, "Ignoring voice engine failure from superseded session")
+                    return@startSession
+                }
+                Log.w(TAG, "Voice session failed or cancelled — cleaning up active session")
+                cleanupActiveSession("voice engine failure")
+            }
+        )
+        return VoiceSessionStartResult.STARTED
     }
 
     /** 4️⃣ Exactly your old handleVoiceStart(), nothing auto-firing */
@@ -181,25 +221,26 @@ class VoiceControlService : Service() {
         }
         lastWakeAt = now
 
-        if (!SharedPreferencesManager.isVccEnabled(this) || sessionActive || isInCall()) {
-            Log.d(TAG, "⛔ onWake() blocked — sessionActive=$sessionActive")
+        if (!SharedPreferencesManager.isVccEnabled(this)) {
+            Log.d(TAG, "⛔ onWake() blocked — VCC disabled")
             return
         }
 
-        sessionActive = true
-        Log.d(TAG, "🔁 onWake() called — sessionActive")
-        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+        if (isInCall()) {
+            Log.d(TAG, "⛔ onWake() blocked — in call")
+            return
+        }
 
+        val responseManager = VoiceResponseManager(applicationContext)
         val uiHelper = object : VoiceUiHelper {
-            private val vrm = VoiceResponseManager(applicationContext)
             private val mainH = Handler(Looper.getMainLooper())
 
             override fun speak(text: String) {
-                vrm.speak(text)
+                responseManager.speak(text)
             }
 
             override fun speak(text: String, utteranceId: String) {
-                vrm.speak(text) { utteranceId }
+                responseManager.speak(text, utteranceId)
             }
 
             override fun showToast(message: String) {
@@ -209,23 +250,112 @@ class VoiceControlService : Service() {
             }
         }
 
-        when (SharedPreferencesManager.getCatchEntryType(this)) {
-            in 5..8 -> TournamentVoiceHandler(
-                context     = this,
-                uiHelper    = uiHelper,
-            ).onWake()
-
-            else -> FunDayVoiceHandler(this, uiHelper).onWake()
+        val sessionToken = synchronized(cleanupLock) {
+            nextSessionToken += 1L
+            nextSessionToken
+        }
+        val voiceSession: VoiceSessionHandler = if (SharedPreferencesManager.isTournamentCatchEntryType(this)) {
+            TournamentVoiceHandler(
+                context = this,
+                uiHelper = uiHelper,
+                sessionToken = sessionToken,
+            )
+        } else {
+            FunDayVoiceHandler(this, uiHelper)
         }
 
+        var startupFailure: Throwable? = null
+        var deferredCleanupReason: String? = null
+        synchronized(cleanupLock) {
+            if (sessionActive || isCleaningUpSession ||
+                activeVoiceSession != null || voiceEngine != null || activeResponseManager != null
+            ) {
+                responseManager.shutdown()
+                Log.d(TAG, "⛔ onWake() blocked — previous voice state has not fully released yet")
+                return
+            }
+
+            sessionActive = true
+            activeSessionToken = sessionToken
+            activeResponseManager = responseManager
+            activeVoiceSession = voiceSession
+            sessionStartupInProgress = true
+        }
+
+        Log.d(TAG, "🔁 onWake() called — sessionActive")
+        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+        try {
+            voiceSession.onWake()
+        } catch (t: Throwable) {
+            startupFailure = t
+        } finally {
+            synchronized(cleanupLock) {
+                sessionStartupInProgress = false
+                deferredCleanupReason = pendingCleanupReason
+                pendingCleanupReason = null
+            }
+        }
+
+        startupFailure?.let { failure ->
+            Log.w(TAG, "❌ Voice session startup failed", failure)
+            cleanupActiveSession("voice session startup failure")
+            return
+        }
+
+        deferredCleanupReason?.let { pendingReason ->
+            cleanupActiveSession(pendingReason)
+        }
     }
         //==== END = on Wake =====================
 
 
     fun markSessionComplete() {
-        sessionActive = false
-        if (wakeLock.isHeld) wakeLock.release()
-        Log.d(TAG, "✅ Voice session marked complete — wakeLock released")
+        cleanupActiveSession("session marked complete")
+    }
+
+    fun speakAndEndSession(
+        message: String,
+        reason: String
+    ) {
+        val timeoutHandler = Handler(Looper.getMainLooper())
+        val cleanupTriggered = AtomicBoolean(false)
+        var temporaryResponseManager: VoiceResponseManager? = null
+        val sessionTokenAtStart: Long
+        val responseManager = synchronized(cleanupLock) {
+            sessionTokenAtStart = activeSessionToken
+            activeResponseManager ?: VoiceResponseManager(applicationContext).also {
+                temporaryResponseManager = it
+            }
+        }
+        lateinit var cleanupFallback: Runnable
+
+        fun completeCleanup(fromTimeout: Boolean) {
+            if (!cleanupTriggered.compareAndSet(false, true)) {
+                return
+            }
+            timeoutHandler.removeCallbacks(cleanupFallback)
+            temporaryResponseManager?.shutdown()
+            if (fromTimeout) {
+                Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
+            }
+            val shouldCleanup = synchronized(cleanupLock) {
+                activeSessionToken == sessionTokenAtStart || activeSessionToken == 0L
+            }
+            if (shouldCleanup) {
+                cleanupActiveSession(reason)
+            } else {
+                Log.d(TAG, "Skipping cleanup for superseded spoken shutdown: $reason")
+            }
+        }
+
+        cleanupFallback = Runnable {
+            completeCleanup(fromTimeout = true)
+        }
+
+        timeoutHandler.postDelayed(cleanupFallback, 8_000L)
+        responseManager.speak(message) {
+            completeCleanup(fromTimeout = false)
+        }
     }
 
     private fun isInCall(): Boolean =
@@ -237,13 +367,105 @@ class VoiceControlService : Service() {
             }
 
     private fun stopVoiceSessionIfActive() {
-        voiceEngine?.shutdown()
-        voiceEngine = null
-        activeVoiceSession?.shutdown()
-        activeVoiceSession = null
-        sessionActive = false
-        if (wakeLock.isHeld) wakeLock.release()
+        cleanupActiveSession("call started")
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun cleanupActiveSession(
+        reason: String
+    ) {
+        var cleanupReason = reason
+
+        while (true) {
+            val voiceSession: VoiceSessionHandler?
+            val engine: VoiceInteractionManager?
+            val responseManager: VoiceResponseManager?
+
+            synchronized(cleanupLock) {
+                if (sessionStartupInProgress) {
+                    if (pendingCleanupReason == null) {
+                        pendingCleanupReason = cleanupReason
+                    }
+                    Log.d(TAG, "🧹 Delaying active voice session cleanup until startup completes: $cleanupReason")
+                    return
+                }
+                if (isCleaningUpSession) {
+                    Log.d(TAG, "🧹 Active voice session cleanup already in progress: $cleanupReason")
+                    return
+                }
+
+                isCleaningUpSession = true
+                voiceSession = activeVoiceSession
+                engine = voiceEngine
+                responseManager = activeResponseManager
+
+                activeVoiceSession = null
+                voiceEngine = null
+                activeResponseManager = null
+                activeSessionToken = 0L
+                sessionActive = false
+            }
+
+            try {
+                runCleanupStep("voice engine shutdown") {
+                    engine?.shutdown()
+                }
+                runCleanupStep("voice session shutdown") {
+                    voiceSession?.shutdown()
+                }
+                runCleanupStep("voice response manager shutdown") {
+                    responseManager?.shutdown()
+                }
+                runCleanupStep("wake lock release") {
+                    if (::wakeLock.isInitialized && wakeLock.isHeld) {
+                        wakeLock.release()
+                    }
+                }
+                Log.d(TAG, "🧹 Active voice session cleaned up: $cleanupReason")
+            } finally {
+                val hasMoreState = synchronized(cleanupLock) {
+                    val hasMore =
+                        activeVoiceSession != null ||
+                                voiceEngine != null ||
+                                activeResponseManager != null
+                    isCleaningUpSession = false
+                    hasMore
+                }
+                if (!hasMoreState) {
+                    return
+                }
+            }
+
+            cleanupReason = "$reason (continuing cleanup)"
+        }
+    }
+
+    private fun runCleanupStep(
+        label: String,
+        action: () -> Unit
+    ) {
+        try {
+            action()
+        } catch (t: Throwable) {
+            Log.w(TAG, "⚠️ Cleanup step failed: $label", t)
+        }
+    }
+
+    fun isCurrentSession(
+        sessionToken: Long,
+        handler: VoiceSessionHandler? = null
+    ): Boolean = synchronized(cleanupLock) {
+        isCurrentSessionLocked(sessionToken, handler)
+    }
+
+    private fun isCurrentSessionLocked(
+        sessionToken: Long,
+        handler: VoiceSessionHandler? = null
+    ): Boolean {
+        return !isCleaningUpSession &&
+                sessionActive &&
+                activeSessionToken == sessionToken &&
+                (handler == null || activeVoiceSession === handler)
     }
 
     private fun createChannel() {
@@ -269,8 +491,7 @@ class VoiceControlService : Service() {
         mediaSession?.release()
 
         // 🔐 Important cleanup
-        voiceEngine?.shutdown()
-        if (wakeLock.isHeld) wakeLock.release()
+        cleanupActiveSession("service destroyed")
 
         super.onDestroy()
     }

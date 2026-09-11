@@ -27,7 +27,7 @@ class VoiceResponseManager(context: Context) {
            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
          }
 
-    fun speak(message: String, onDone: (() -> String)? = null) {
+    fun speak(message: String, onDone: (() -> Unit)? = null) {
         val utteranceId = "VoiceFeedback" + System.currentTimeMillis()
 
         // ✅ Set listener BEFORE speaking

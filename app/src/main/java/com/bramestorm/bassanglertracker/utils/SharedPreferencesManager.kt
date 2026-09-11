@@ -2,6 +2,7 @@ package com.bramestorm.bassanglertracker.utils
 
 import android.content.Context
 import android.util.Log
+import com.bramestorm.bassanglertracker.SetUpActivity
 import com.bramestorm.bassanglertracker.MeasurementMode
 import org.json.JSONArray
 import org.json.JSONObject
@@ -62,6 +63,17 @@ object SharedPreferencesManager {
     fun getCatchEntryType(context: Context): Int {
         return context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
             .getInt(KEY_CATCH_TYPE, -1)
+    }
+
+    fun isTournamentCatchEntryType(context: Context): Boolean {
+        return when (getCatchEntryType(context)) {
+            SetUpActivity.TYPE_TOURN_LBS,
+            SetUpActivity.TYPE_TOURN_POUNDS,
+            SetUpActivity.TYPE_TOURN_KGS,
+            SetUpActivity.TYPE_TOURN_CM,
+            SetUpActivity.TYPE_TOURN_INCH -> true
+            else -> false
+        }
     }
 
   //=============== MEASUREMENT MODE #'s ===========================

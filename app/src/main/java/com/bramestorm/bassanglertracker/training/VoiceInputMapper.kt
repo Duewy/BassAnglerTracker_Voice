@@ -187,7 +187,7 @@ object VoiceInputMapper {
         return baseSpeciesVoiceMap[raw.trim().lowercase()] ?: raw.trim().lowercase()
     }
 
-    fun getClipColorFromVoice(text: String, clipColors: List<String>): String {
+    fun findClipColorFromVoice(text: String, clipColors: List<String>): String? {
         val cleaned = text.lowercase()
             .replace("clip", "")
             .replace(Regex("""[^a-z\s]"""), "")
@@ -197,7 +197,11 @@ object VoiceInputMapper {
                 return canonical
             }
         }
-        return "RED" // default fallback
+        return null
+    }
+
+    fun getClipColorFromVoice(text: String, clipColors: List<String>): String {
+        return findClipColorFromVoice(text, clipColors) ?: "RED"
     }
 
 
