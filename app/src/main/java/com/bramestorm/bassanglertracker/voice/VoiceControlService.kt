@@ -298,8 +298,10 @@ class VoiceControlService : Service() {
             runCleanupStep("voice response manager shutdown") {
                 responseManager?.shutdown()
             }
-            if (::wakeLock.isInitialized && wakeLock.isHeld) {
-                wakeLock.release()
+            runCleanupStep("wake lock release") {
+                if (::wakeLock.isInitialized && wakeLock.isHeld) {
+                    wakeLock.release()
+                }
             }
             Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
         } finally {
