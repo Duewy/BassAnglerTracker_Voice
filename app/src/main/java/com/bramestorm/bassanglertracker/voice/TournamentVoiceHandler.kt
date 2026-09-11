@@ -23,6 +23,7 @@ import java.util.Locale
 class TournamentVoiceHandler(
     private val context: Context,
     private val uiHelper: VoiceUiHelper,
+    private val sessionToken: Long,
 
     private val dbHelper: CatchDatabaseHelper = CatchDatabaseHelper(context)
 ) : VoiceSessionHandler {
@@ -62,8 +63,8 @@ class TournamentVoiceHandler(
 
     /** Entry point for service wake or media-button tap. */
     override fun onWake() {
+        if (!canContinueSession()) return
         Log.d(TAG, "onWake() called")
-        isShuttingDown = false
         inQuestionMode = false
         parseRetryCount = 0
         questionRetryCount = 0
@@ -72,12 +73,12 @@ class TournamentVoiceHandler(
 
     /** Begins a catch or question session. */
     private fun startVoiceSession() {
-        if (isShuttingDown) return
+        if (!canContinueSession()) return
         if (inQuestionMode) return            // don't restart the "catch" flow mid-question
 
         service()
             ?.startVoiceSession(getStartPrompt(), uiHelper) { transcript ->
-                if (isShuttingDown) return@startVoiceSession
+                if (!canContinueSession()) return@startVoiceSession
                 val clean = transcript.trim().lowercase()
                 when {
                     clean.contains("question") && clean.contains("over") -> handleQuestionMode()
@@ -88,7 +89,7 @@ class TournamentVoiceHandler(
 
     /** Parses numeric + text components, then confirms with the user. */
     private fun parseAndConfirm(transcript: String) {
-        if (isShuttingDown) return
+        if (!canContinueSession()) return
         val parsed = when (measurementMode) {
             MeasurementMode.LBS_OZ -> VoiceParser.parseLbsOzsCatchWithClips(transcript, speciesList, clipColors)
             MeasurementMode.POUNDS -> VoiceParser.parsePoundsCatchWithClips(transcript, speciesList, clipColors)
@@ -113,7 +114,7 @@ class TournamentVoiceHandler(
             Log.w(TAG, "❌ Invalid unit detected → oz=$oz, grams=$grams, quarters=$quarters, tenths=$tenths")
             uiHelper.speak("That value was out of range. Say it again or say cancel that. Over.", "TTS_INVALID_UNIT")
             service()?.startVoiceSession(getStartPrompt(), uiHelper) { response ->
-                if (isShuttingDown) return@startVoiceSession
+                if (!canContinueSession()) return@startVoiceSession
                 if (response.contains("cancel", true)) {
                     uiHelper.speak("Cancelled. Over and Out.", "TTS_CANCEL")
                     endSession("cancel from confirm prompt")
@@ -168,7 +169,7 @@ class TournamentVoiceHandler(
             confirmPrompt,
             uiHelper
         ) { response ->
-            if (isShuttingDown) return@startVoiceSession
+            if (!canContinueSession()) return@startVoiceSession
             val clean = response.trim().lowercase()
             when {
                 clean.contains("yes") && clean.contains("over")    -> saveCatch(parsed)
@@ -184,7 +185,7 @@ class TournamentVoiceHandler(
                         "Please answer yes, no, or cancel, and end with Over.",
                         uiHelper
                     ) { retryResponse ->
-                        if (isShuttingDown) return@startVoiceSession
+                        if (!canContinueSession()) return@startVoiceSession
                         val r = retryResponse.trim().lowercase()
                         when {
                             r.contains("yes") && r.contains("over") -> saveCatch(parsed)
@@ -210,7 +211,7 @@ class TournamentVoiceHandler(
                             "Please answer yes, no, or cancel, and end with Over.",
                             uiHelper
                         ) { retryResponse ->
-                            if (isShuttingDown) return@startVoiceSession
+                            if (!canContinueSession()) return@startVoiceSession
                             val r = retryResponse.trim().lowercase()
                             when {
                                 r.contains("yes") && r.contains("over") -> saveCatch(parsed)
@@ -429,7 +430,7 @@ class TournamentVoiceHandler(
 
     /** Switch into question mode for stats queries. */
     private fun handleQuestionMode() {
-        if (isShuttingDown) return
+        if (!canContinueSession()) return
         questionRetryCount = 0
         inQuestionMode = true
         Log.d(TAG, "Question mode activated")
@@ -441,7 +442,7 @@ class TournamentVoiceHandler(
             "Which stat would you like? Over.",
             uiHelper
         ) { followUp ->
-            if (isShuttingDown) return@startVoiceSession
+            if (!canContinueSession()) return@startVoiceSession
             Log.d(TAG, "Question received: '$followUp'")
             routeQuestion(followUp)
         } ?: endSession("VoiceControlService unavailable in question mode")
@@ -450,7 +451,7 @@ class TournamentVoiceHandler(
 
     /** Routes a user question to the appropriate response. */
     private fun routeQuestion(question: String) {
-        if (isShuttingDown) return
+        if (!canContinueSession()) return
 
         val overOut = "Over and Out."
         Log.d(TAG, "routeQuestion('$question')")
@@ -778,7 +779,7 @@ class TournamentVoiceHandler(
         action: () -> Unit
     ) {
         mainHandler.postDelayed({
-            if (!isShuttingDown) {
+            if (canContinueSession()) {
                 action()
             }
         }, delayMillis)
@@ -797,6 +798,12 @@ class TournamentVoiceHandler(
         inQuestionMode = false
         parseRetryCount = 0
         questionRetryCount = 0
+    }
+
+    private fun canContinueSession(): Boolean {
+        if (isShuttingDown) return false
+        val voiceService = service() ?: return true
+        return voiceService.isCurrentSession(sessionToken)
     }
 
     private fun currentTimestamp(): String =

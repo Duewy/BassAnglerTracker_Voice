@@ -50,6 +50,7 @@ class VoiceControlService : Service() {
     private var activeVoiceSession: VoiceSessionHandler? = null
     private var voiceEngine: VoiceInteractionManager? = null
     private var activeResponseManager: VoiceResponseManager? = null
+    private var activeSessionToken = 0L
     private val cleanupLock = Any()
     @Volatile
     private var isCleaningUpSession = false
@@ -214,10 +215,12 @@ class VoiceControlService : Service() {
             }
         }
 
+        val sessionToken = System.nanoTime()
         val voiceSession: VoiceSessionHandler = when (SharedPreferencesManager.getCatchEntryType(this)) {
             in 5..8 -> TournamentVoiceHandler(
                 context = this,
                 uiHelper = uiHelper,
+                sessionToken = sessionToken,
             )
             else -> FunDayVoiceHandler(this, uiHelper)
         }
@@ -232,6 +235,7 @@ class VoiceControlService : Service() {
             }
 
             sessionActive = true
+            activeSessionToken = sessionToken
             activeResponseManager = responseManager
             activeVoiceSession = voiceSession
         }
@@ -239,7 +243,7 @@ class VoiceControlService : Service() {
         Log.d(TAG, "🔁 onWake() called — sessionActive")
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
         synchronized(cleanupLock) {
-            if (isCleaningUpSession || !sessionActive || activeVoiceSession !== voiceSession) {
+            if (!isCurrentSessionLocked(sessionToken, voiceSession)) {
                 runCleanupStep("abandoned startup response manager shutdown") {
                     responseManager.shutdown()
                 }
@@ -298,6 +302,7 @@ class VoiceControlService : Service() {
                 activeVoiceSession = null
                 voiceEngine = null
                 activeResponseManager = null
+                activeSessionToken = 0L
                 sessionActive = false
             }
 
@@ -344,6 +349,23 @@ class VoiceControlService : Service() {
         } catch (t: Throwable) {
             Log.w(TAG, "⚠️ Cleanup step failed: $label", t)
         }
+    }
+
+    fun isCurrentSession(
+        sessionToken: Long,
+        handler: VoiceSessionHandler? = null
+    ): Boolean = synchronized(cleanupLock) {
+        isCurrentSessionLocked(sessionToken, handler)
+    }
+
+    private fun isCurrentSessionLocked(
+        sessionToken: Long,
+        handler: VoiceSessionHandler? = null
+    ): Boolean {
+        return !isCleaningUpSession &&
+                sessionActive &&
+                activeSessionToken == sessionToken &&
+                (handler == null || activeVoiceSession === handler)
     }
 
     private fun createChannel() {
