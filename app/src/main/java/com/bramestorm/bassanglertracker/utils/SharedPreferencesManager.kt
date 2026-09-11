@@ -64,6 +64,13 @@ object SharedPreferencesManager {
             .getInt(KEY_CATCH_TYPE, -1)
     }
 
+    fun isTournamentCatchEntryType(context: Context): Boolean {
+        return when (getCatchEntryType(context)) {
+            6, 7, 8, 9, 10 -> true
+            else -> false
+        }
+    }
+
   //=============== MEASUREMENT MODE #'s ===========================
     fun getFunDayUnit(context: Context): MeasurementMode {
         val type = getCatchEntryType(context)

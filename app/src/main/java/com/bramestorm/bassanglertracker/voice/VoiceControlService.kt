@@ -216,15 +216,17 @@ class VoiceControlService : Service() {
         }
 
         val sessionToken = System.nanoTime()
-        val voiceSession: VoiceSessionHandler = when (SharedPreferencesManager.getCatchEntryType(this)) {
-            in 5..8 -> TournamentVoiceHandler(
+        val voiceSession: VoiceSessionHandler = if (SharedPreferencesManager.isTournamentCatchEntryType(this)) {
+            TournamentVoiceHandler(
                 context = this,
                 uiHelper = uiHelper,
                 sessionToken = sessionToken,
             )
-            else -> FunDayVoiceHandler(this, uiHelper)
+        } else {
+            FunDayVoiceHandler(this, uiHelper)
         }
 
+        var startupFailure: Throwable? = null
         synchronized(cleanupLock) {
             if (sessionActive || isCleaningUpSession ||
                 activeVoiceSession != null || voiceEngine != null || activeResponseManager != null
@@ -238,23 +240,17 @@ class VoiceControlService : Service() {
             activeSessionToken = sessionToken
             activeResponseManager = responseManager
             activeVoiceSession = voiceSession
-        }
-
-        Log.d(TAG, "🔁 onWake() called — sessionActive")
-        synchronized(cleanupLock) {
-            if (!isCurrentSessionLocked(sessionToken, voiceSession)) {
-                runCleanupStep("abandoned startup response manager shutdown") {
-                    responseManager.shutdown()
-                }
-                Log.d(TAG, "⛔ onWake() aborted — session was cleaned up before handler start")
-                return
+            Log.d(TAG, "🔁 onWake() called — sessionActive")
+            wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
+            try {
+                voiceSession.onWake()
+            } catch (t: Throwable) {
+                startupFailure = t
             }
         }
-        wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
-        try {
-            voiceSession.onWake()
-        } catch (t: Throwable) {
-            Log.w(TAG, "❌ Voice session startup failed", t)
+
+        startupFailure?.let { failure ->
+            Log.w(TAG, "❌ Voice session startup failed", failure)
             cleanupActiveSession("voice session startup failure")
         }
     }

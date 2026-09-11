@@ -2,8 +2,8 @@ package com.bramestorm.bassanglertracker.voice
 
 
 import android.util.Log
+import com.bramestorm.bassanglertracker.training.VoiceInputMapper.findClipColorFromVoice
 import com.bramestorm.bassanglertracker.training.VoiceInputMapper
-import com.bramestorm.bassanglertracker.training.VoiceInputMapper.getClipColorFromVoice
 
 
 object VoiceParser {
@@ -56,7 +56,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = findClipColorFromVoice(cleanText, clipColors).orEmpty()
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -89,7 +89,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = findClipColorFromVoice(cleanText, clipColors).orEmpty()
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -123,7 +123,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = findClipColorFromVoice(cleanText, clipColors).orEmpty()
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -154,7 +154,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = findClipColorFromVoice(cleanText, clipColors).orEmpty()
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
@@ -195,7 +195,7 @@ object VoiceParser {
         clipColors: List<String>
     ): ParsedCatch {
         val cleanText = correctMisheardWords(transcript.lowercase())
-        val detectedClipColor = getClipColorFromVoice(cleanText, clipColors)
+        val detectedClipColor = findClipColorFromVoice(cleanText, clipColors).orEmpty()
         val inputWithoutClip = removeClipColor(cleanText, detectedClipColor)
 
         val species = VoiceInputMapper.getSpeciesFromVoice(
