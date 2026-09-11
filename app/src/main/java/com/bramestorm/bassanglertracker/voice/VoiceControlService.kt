@@ -251,7 +251,12 @@ class VoiceControlService : Service() {
             }
         }
         wakeLock.acquire(60_000L)       // give the full 60 seconds to account for extended interactions or questions ....
-        voiceSession.onWake()
+        try {
+            voiceSession.onWake()
+        } catch (t: Throwable) {
+            Log.w(TAG, "❌ Voice session startup failed", t)
+            cleanupActiveSession("voice session startup failure")
+        }
     }
         //==== END = on Wake =====================
 

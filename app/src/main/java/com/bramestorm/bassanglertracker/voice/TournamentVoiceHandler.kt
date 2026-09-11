@@ -42,6 +42,7 @@ class TournamentVoiceHandler(
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
     private var isShuttingDown = false
+    private var sessionEnding = false
 
     // ── Build the catch_type string for DB queries ──
     private val typeEntry = when (measurementMode) {
@@ -65,6 +66,7 @@ class TournamentVoiceHandler(
     override fun onWake() {
         if (!canContinueSession()) return
         Log.d(TAG, "onWake() called")
+        sessionEnding = false
         inQuestionMode = false
         parseRetryCount = 0
         questionRetryCount = 0
@@ -761,7 +763,8 @@ class TournamentVoiceHandler(
     }
 
     private fun endSession(reason: String = "User cancel") {
-        if (isShuttingDown) return
+        if (isShuttingDown || sessionEnding) return
+        sessionEnding = true
         Log.d(TAG, "Session ended: $reason")
         service()?.let { voiceService ->
             prepareForServiceCompletion()
@@ -797,6 +800,7 @@ class TournamentVoiceHandler(
         if (markShuttingDown) {
             isShuttingDown = true
         }
+        sessionEnding = true
         mainHandler.removeCallbacksAndMessages(null)
         inQuestionMode = false
         parseRetryCount = 0
