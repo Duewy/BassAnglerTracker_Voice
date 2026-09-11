@@ -43,7 +43,9 @@ class TournamentVoiceHandler(
     private val tournamentCatchLimit = SharedPreferencesManager.getNumberOfCatches(context)
     private val measurementMode = SharedPreferencesManager.getTournamentUnit(context)
     private val speciesList = SharedPreferencesManager.getTournamentSpecies(context)?.split(",")?.map { it.trim() } ?: FishSpecies.allSpeciesList
-    private val normalizedSpeciesSet = speciesList.map { SharedPreferencesManager.normalizeSpeciesName(it) }.toSet()
+    private val normalizedSpeciesSet = speciesList
+        .map { SharedPreferencesManager.normalizeSpeciesName(it).trim() }
+        .toSet()
     private val clipColors = listOf( "BLUE","YELLOW", "GREEN",  "ORANGE", "WHITE", "RED")
     private var inQuestionMode = false
     private var isShuttingDown = false
@@ -85,6 +87,7 @@ class TournamentVoiceHandler(
         if (!canContinueSession()) return
         if (inQuestionMode) return            // don't restart the "catch" flow mid-question
 
+        sessionEnding = false
         requestVoiceInput(
             prompt = getStartPrompt(),
             failureReason = "VoiceControlService unavailable at session start"
