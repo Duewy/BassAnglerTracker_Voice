@@ -267,47 +267,61 @@ class VoiceControlService : Service() {
     private fun cleanupActiveSession(
         reason: String
     ) {
-        val voiceSession: VoiceSessionHandler?
-        val engine: VoiceInteractionManager?
-        val responseManager: VoiceResponseManager?
+        var cleanupReason = reason
 
-        synchronized(cleanupLock) {
-            if (isCleaningUpSession) {
-                Log.d(TAG, "🧹 Active voice session cleanup already in progress: $reason")
-                return
+        while (true) {
+            val voiceSession: VoiceSessionHandler?
+            val engine: VoiceInteractionManager?
+            val responseManager: VoiceResponseManager?
+
+            synchronized(cleanupLock) {
+                if (isCleaningUpSession) {
+                    Log.d(TAG, "🧹 Active voice session cleanup already in progress: $cleanupReason")
+                    return
+                }
+
+                isCleaningUpSession = true
+                voiceSession = activeVoiceSession
+                engine = voiceEngine
+                responseManager = activeResponseManager
+
+                activeVoiceSession = null
+                voiceEngine = null
+                activeResponseManager = null
+                sessionActive = false
             }
 
-            isCleaningUpSession = true
-            voiceSession = activeVoiceSession
-            engine = voiceEngine
-            responseManager = activeResponseManager
-
-            activeVoiceSession = null
-            voiceEngine = null
-            activeResponseManager = null
-            sessionActive = false
-        }
-
-        try {
-            runCleanupStep("voice session shutdown") {
-                voiceSession?.shutdown()
-            }
-            runCleanupStep("voice engine shutdown") {
-                engine?.shutdown()
-            }
-            runCleanupStep("voice response manager shutdown") {
-                responseManager?.shutdown()
-            }
-            runCleanupStep("wake lock release") {
-                if (::wakeLock.isInitialized && wakeLock.isHeld) {
-                    wakeLock.release()
+            try {
+                runCleanupStep("voice session shutdown") {
+                    voiceSession?.shutdown()
+                }
+                runCleanupStep("voice engine shutdown") {
+                    engine?.shutdown()
+                }
+                runCleanupStep("voice response manager shutdown") {
+                    responseManager?.shutdown()
+                }
+                runCleanupStep("wake lock release") {
+                    if (::wakeLock.isInitialized && wakeLock.isHeld) {
+                        wakeLock.release()
+                    }
+                }
+                Log.d(TAG, "🧹 Active voice session cleaned up: $cleanupReason")
+            } finally {
+                val hasMoreState = synchronized(cleanupLock) {
+                    val hasMore =
+                        activeVoiceSession != null ||
+                                voiceEngine != null ||
+                                activeResponseManager != null
+                    isCleaningUpSession = false
+                    hasMore
+                }
+                if (!hasMoreState) {
+                    return
                 }
             }
-            Log.d(TAG, "🧹 Active voice session cleaned up: $reason")
-        } finally {
-            synchronized(cleanupLock) {
-                isCleaningUpSession = false
-            }
+
+            cleanupReason = "$reason (continuing cleanup)"
         }
     }
 
