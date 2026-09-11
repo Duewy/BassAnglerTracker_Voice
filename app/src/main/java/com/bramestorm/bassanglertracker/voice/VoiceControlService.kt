@@ -207,10 +207,8 @@ class VoiceControlService : Service() {
         }
 
         if (activeVoiceSession != null || voiceEngine != null || activeResponseManager != null) {
-            cleanupActiveSession(
-                reason = "preparing new wake",
-                shutdownHandler = true
-            )
+            Log.d(TAG, "⛔ onWake() blocked — previous voice state has not fully released yet")
+            return
         }
 
         sessionActive = true
