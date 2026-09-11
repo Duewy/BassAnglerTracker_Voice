@@ -276,6 +276,7 @@ class VoiceControlService : Service() {
         Toast.makeText(this, "Call started — voice session canceled.", Toast.LENGTH_SHORT).show()
     }
 
+    @Synchronized
     private fun cleanupActiveSession(
         reason: String,
         shutdownHandler: Boolean
