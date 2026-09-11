@@ -868,6 +868,10 @@ class TournamentVoiceHandler(
         } ?: false
 
         if (!didStart) {
+            if (!canContinueSession()) {
+                Log.w(TAG, "Voice input request rejected because Tournament session is already shutting down")
+                return
+            }
             endSessionWithMessage(
                 message = "I couldn't continue voice entry. Ending session. Over and Out.",
                 reason = failureReason

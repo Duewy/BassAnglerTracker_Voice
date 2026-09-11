@@ -51,6 +51,7 @@ class VoiceControlService : Service() {
     private var voiceEngine: VoiceInteractionManager? = null
     private var activeResponseManager: VoiceResponseManager? = null
     private var activeSessionToken = 0L
+    private var nextSessionToken = 0L
     private var sessionStartupInProgress = false
     private var pendingCleanupReason: String? = null
     private val cleanupLock = Any()
@@ -227,7 +228,10 @@ class VoiceControlService : Service() {
             }
         }
 
-        val sessionToken = System.nanoTime()
+        val sessionToken = synchronized(cleanupLock) {
+            nextSessionToken += 1L
+            nextSessionToken
+        }
         val voiceSession: VoiceSessionHandler = if (SharedPreferencesManager.isTournamentCatchEntryType(this)) {
             TournamentVoiceHandler(
                 context = this,
