@@ -210,7 +210,7 @@ class VoiceControlService : Service() {
         }
 
         when (SharedPreferencesManager.getCatchEntryType(this)) {
-            in 5..8 -> TournamentVoiceHandler(
+            in 6..10 -> TournamentVoiceHandler(
                 context     = this,
                 uiHelper    = uiHelper,
             ).onWake()
