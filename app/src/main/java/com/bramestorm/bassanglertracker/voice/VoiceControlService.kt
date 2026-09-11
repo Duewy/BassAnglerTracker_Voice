@@ -288,11 +288,11 @@ class VoiceControlService : Service() {
             }
 
             try {
-                runCleanupStep("voice session shutdown") {
-                    voiceSession?.shutdown()
-                }
                 runCleanupStep("voice engine shutdown") {
                     engine?.shutdown()
+                }
+                runCleanupStep("voice session shutdown") {
+                    voiceSession?.shutdown()
                 }
                 runCleanupStep("voice response manager shutdown") {
                     responseManager?.shutdown()
