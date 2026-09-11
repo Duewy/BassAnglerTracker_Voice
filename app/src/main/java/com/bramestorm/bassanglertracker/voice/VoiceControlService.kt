@@ -298,33 +298,33 @@ class VoiceControlService : Service() {
     ) {
         val timeoutHandler = Handler(Looper.getMainLooper())
         val cleanupTriggered = AtomicBoolean(false)
-        val cleanupFallback = Runnable {
-            if (!cleanupTriggered.compareAndSet(false, true)) {
-                return@Runnable
-            }
-            Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
-            cleanupActiveSession(reason)
-        }
+        var temporaryResponseManager: VoiceResponseManager? = null
         val responseManager = synchronized(cleanupLock) {
-            if (!sessionActive || isCleaningUpSession) {
-                null
-            } else {
-                activeResponseManager
+            activeResponseManager ?: VoiceResponseManager(applicationContext).also {
+                temporaryResponseManager = it
             }
+        }
+        lateinit var cleanupFallback: Runnable
+
+        fun completeCleanup(fromTimeout: Boolean) {
+            if (!cleanupTriggered.compareAndSet(false, true)) {
+                return
+            }
+            timeoutHandler.removeCallbacks(cleanupFallback)
+            temporaryResponseManager?.shutdown()
+            if (fromTimeout) {
+                Log.w(TAG, "Voice completion callback did not arrive; forcing cleanup for: $reason")
+            }
+            cleanupActiveSession(reason)
         }
 
-        if (responseManager == null) {
-            cleanupActiveSession(reason)
-            return
+        cleanupFallback = Runnable {
+            completeCleanup(fromTimeout = true)
         }
 
         timeoutHandler.postDelayed(cleanupFallback, 8_000L)
         responseManager.speak(message) {
-            if (!cleanupTriggered.compareAndSet(false, true)) {
-                return@speak reason
-            }
-            timeoutHandler.removeCallbacks(cleanupFallback)
-            cleanupActiveSession(reason)
+            completeCleanup(fromTimeout = false)
             reason
         }
     }
