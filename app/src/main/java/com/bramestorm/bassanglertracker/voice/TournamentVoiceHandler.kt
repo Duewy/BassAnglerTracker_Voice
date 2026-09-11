@@ -703,12 +703,11 @@ class TournamentVoiceHandler(
 
 
             else -> {
-                questionRetryCount++
-                if (questionRetryCount > maxQuestionRetries) {
+                if (questionRetryCount + 1 > maxQuestionRetries) {
                     uiHelper.speak("Okay, exiting question mode. $overOut", "TTS_FAIL")
                     endSession("too many question retries")
                 } else {
-                    handleQuestionMode()
+                    handleQuestionRetry()
                 }
             }
         }
@@ -898,6 +897,11 @@ class TournamentVoiceHandler(
         } else {
             "Sorry, I did not catch that. Say largest, smallest, total weight, total length, how many, average, position, time since last catch, or what time is it. Over."
         }
+
+    private fun handleQuestionRetry() {
+        questionRetryCount++
+        handleQuestionMode()
+    }
 
     private fun canContinueSession(): Boolean {
         if (isShuttingDown) return false
