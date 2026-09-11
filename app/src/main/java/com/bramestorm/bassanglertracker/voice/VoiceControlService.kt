@@ -236,7 +236,7 @@ class VoiceControlService : Service() {
     fun markSessionComplete() {
         cleanupActiveSession(
             reason = "session marked complete",
-            shutdownHandler = false
+            shutdownHandler = true
         )
     }
 
